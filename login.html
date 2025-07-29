@@ -77,24 +77,31 @@
                 });
                 
                 const data = await response.json();
+                console.log('📥 Resposta do login:', data);
                 
-                if (data.precisaCriarSenha) {
-                    // Salvar email temporariamente e redirecionar
-                    localStorage.setItem('tempEmail', email);
-                    window.location.href = '/senha?email=' + encodeURIComponent(email);
-                } else if (data.sucesso) {
+                if (data.success) {
+                    // Login bem-sucedido
+                    message.innerHTML = '<div class="success">Login realizado com sucesso!</div>';
+                    
                     // Salvar informações do usuário no localStorage
                     localStorage.setItem('userInfo', JSON.stringify({
-                        full_name: data.full_name,
-                        role: data.role,
-                        email: email,
+                        id: data.user.id,
+                        nome: data.user.nome,
+                        email: data.user.email,
+                        tipo: data.user.tipo,
                         loginTime: new Date().toISOString()
                     }));
                     
-                    // Redirecionar para dashboard
-                    window.location.href = '/dashboard';
+                    // Redirecionar baseado no tipo de usuário
+                    setTimeout(() => {
+                        if (data.user.tipo === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    }, 1000);
                 } else {
-                    message.innerHTML = '<div class="error">' + data.erro + '</div>';
+                    message.innerHTML = '<div class="error">' + data.message + '</div>';
                 }
             } catch (error) {
                 message.innerHTML = '<div class="error">Erro ao fazer login. Tente novamente.</div>';
