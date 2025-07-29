@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,10 @@ const PORT = process.env.PORT || 3000;
 // Middleware básico
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Servir arquivos estáticos (HTML, CSS, JS)
+app.use(express.static(__dirname));
 
 // Health check endpoint (OBRIGATÓRIO para Railway)
 app.get('/api/health', (req, res) => {
@@ -23,14 +28,127 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Página inicial simples
+// Página inicial - redireciona para login
 app.get('/', (req, res) => {
     res.send(`
-        <h1>🏥 Portal Dr. Marcio - FUNCIONANDO!</h1>
-        <p>✅ Servidor online na porta ${PORT}</p>
-        <p>✅ Health check: <a href="/api/health">/api/health</a></p>
-        <p>📧 SendGrid: ${process.env.SENDGRID_API_KEY ? '✅ Configurado' : '❌ Faltando'}</p>
-        <p>📱 Twilio: ${process.env.TWILIO_ACCOUNT_SID ? '✅ Configurado' : '❌ Faltando'}</p>
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Portal Dr. Marcio Scartozzoni</title>
+            <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+            <div class="container">
+                <header>
+                    <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
+                    <p>Sistema de Gestão Médica</p>
+                </header>
+                
+                <div class="status-card">
+                    <h2>✅ Sistema Online</h2>
+                    <div class="status-grid">
+                        <div class="status-item">
+                            <span class="icon">🌐</span>
+                            <span>Servidor: Ativo</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="icon">📧</span>
+                            <span>Email: ${process.env.SENDGRID_API_KEY ? 'Configurado' : 'Pendente'}</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="icon">📱</span>
+                            <span>SMS: ${process.env.TWILIO_ACCOUNT_SID ? 'Configurado' : 'Pendente'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a href="/login.html" class="btn btn-primary">🔐 Acessar Sistema</a>
+                    <a href="/cadastro.html" class="btn btn-secondary">📝 Novo Cadastro</a>
+                </div>
+
+                <div class="info">
+                    <p><strong>Ambiente:</strong> ${process.env.NODE_ENV || 'development'}</p>
+                    <p><strong>Versão:</strong> 1.0.0</p>
+                    <p><strong>Status:</strong> <a href="/api/health">Health Check</a></p>
+                </div>
+            </div>
+        </body>
+        </html>
+    `);
+});
+
+// Rota para painel (depois do login)
+app.get('/painel', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Painel - Portal Dr. Marcio</title>
+            <link rel="stylesheet" href="/style.css">
+        </head>
+        <body>
+            <div class="container">
+                <header>
+                    <h1>🏥 Painel Dr. Marcio Scartozzoni</h1>
+                    <div class="user-info">
+                        <span>Bem-vindo(a)!</span>
+                        <a href="/" class="btn btn-sm">Sair</a>
+                    </div>
+                </header>
+                
+                <div class="dashboard">
+                    <div class="card">
+                        <h3>📅 Consultas Hoje</h3>
+                        <p class="number">12</p>
+                    </div>
+                    <div class="card">
+                        <h3>👥 Pacientes</h3>
+                        <p class="number">248</p>
+                    </div>
+                    <div class="card">
+                        <h3>📧 Emails Enviados</h3>
+                        <p class="number">45</p>
+                    </div>
+                    <div class="card">
+                        <h3>💰 Receita Mensal</h3>
+                        <p class="number">R$ 15.750</p>
+                    </div>
+                </div>
+
+                <div class="menu-grid">
+                    <a href="/consultas" class="menu-item">
+                        <span class="icon">📅</span>
+                        <span>Consultas</span>
+                    </a>
+                    <a href="/pacientes" class="menu-item">
+                        <span class="icon">👥</span>
+                        <span>Pacientes</span>
+                    </a>
+                    <a href="/agenda" class="menu-item">
+                        <span class="icon">🗓️</span>
+                        <span>Agenda</span>
+                    </a>
+                    <a href="/financeiro" class="menu-item">
+                        <span class="icon">💰</span>
+                        <span>Financeiro</span>
+                    </a>
+                    <a href="/relatorios" class="menu-item">
+                        <span class="icon">📊</span>
+                        <span>Relatórios</span>
+                    </a>
+                    <a href="/configuracoes" class="menu-item">
+                        <span class="icon">⚙️</span>
+                        <span>Configurações</span>
+                    </a>
+                </div>
+            </div>
+        </body>
+        </html>
     `);
 });
 
