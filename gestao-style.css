@@ -37,12 +37,24 @@ body {
     gap: 10px;
 }
 
-.btn-refresh, .btn-export {
+.btn-refresh, .btn-export, .btn-back {
     padding: 10px 15px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-back {
+    background: #95a5a6;
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-back:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
 }
 
 .btn-refresh {
@@ -50,9 +62,17 @@ body {
     color: white;
 }
 
+.btn-refresh:hover {
+    background: #2980b9;
+}
+
 .btn-export {
     background: #27ae60;
     color: white;
+}
+
+.btn-export:hover {
+    background: #219a52;
 }
 
 .filters-section {

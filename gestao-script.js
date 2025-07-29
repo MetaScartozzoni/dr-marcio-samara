@@ -1,5 +1,25 @@
-   let dadosOriginais = [];
+let dadosOriginais = [];
 let dadosFiltrados = [];
+
+// Função para voltar ao dashboard
+function voltarDashboard() {
+    // Verificar se existe informação do usuário
+    const userInfo = localStorage.getItem('userInfo');
+    
+    if (userInfo) {
+        const user = JSON.parse(userInfo);
+        
+        // Redirecionar baseado no tipo de usuário
+        if (user.tipo === 'admin') {
+            window.location.href = '/dashboard.html';
+        } else {
+            window.location.href = '/dashboard.html';
+        }
+    } else {
+        // Se não há info do usuário, voltar para login
+        window.location.href = '/login.html';
+    }
+}
 
 // Inicializar página
 document.addEventListener('DOMContentLoaded', function() {
