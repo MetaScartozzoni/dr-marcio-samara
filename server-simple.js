@@ -340,6 +340,14 @@ app.post('/api/login', async (req, res) => {
         const senhaValida = await bcrypt.compare(senha, user.senha);
         
         if (senhaValida) {
+            // Definir redirecionamento baseado no tipo de usuário
+            let redirectUrl = '/dashboard.html';
+            
+            // Se não for admin, redirecionar para página de pendência
+            if (user.email !== 'admin@clinica.com') {
+                redirectUrl = '/pending.html';
+            }
+            
             res.json({
                 success: true,
                 message: 'Login realizado com sucesso',
@@ -348,9 +356,10 @@ app.post('/api/login', async (req, res) => {
                     nome: user.nome,
                     email: user.email,
                     tipo: user.tipo,
+                    status: user.email === 'admin@clinica.com' ? 'ativo' : 'pending',
                     autorizado: user.autorizado
                 },
-                redirect: '/painel'
+                redirect: redirectUrl
             });
         } else {
             res.json({
@@ -669,6 +678,59 @@ app.get('/api/listar-usuarios', async (req, res) => {
         res.json({
             sucesso: false,
             erro: 'Erro ao listar usuários: ' + error.message
+        });
+    }
+});
+
+// API simples para usuários pendentes (simulação)
+app.get('/api/usuarios-pendentes', async (req, res) => {
+    try {
+        // Por enquanto, retorna lista vazia pois não temos coluna status ainda
+        res.json({
+            success: true,
+            usuarios: []
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// API simples para aprovar usuário (simulação)
+app.post('/api/aprovar-usuario', async (req, res) => {
+    try {
+        const { userId, tipo } = req.body;
+        
+        res.json({
+            success: true,
+            message: 'Funcionalidade em desenvolvimento'
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// API para verificar status
+app.post('/api/check-status', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        // Admin sempre ativo, outros pending
+        const status = email === 'admin@clinica.com' ? 'ativo' : 'pending';
+        
+        res.json({
+            success: true,
+            status: status
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro interno do servidor'
         });
     }
 });

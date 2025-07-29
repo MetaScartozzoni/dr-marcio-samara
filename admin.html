@@ -161,6 +161,84 @@
         .badge-admin { background: #dc3545; }
         .badge-funcionario { background: #ffc107; color: #333; }
         .badge-paciente { background: #28a745; }
+        .badge-pending { background: #fd7e14; }
+        
+        .pending-card {
+            background: #fff8e1;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .pending-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .pending-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .pending-info h4 {
+            color: #e65100;
+            margin: 0 0 5px 0;
+            font-size: 18px;
+        }
+        
+        .pending-info p {
+            color: #666;
+            margin: 0;
+            font-size: 14px;
+        }
+        
+        .pending-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-approve:hover {
+            background: #45a049;
+        }
+        
+        .approval-form {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .approval-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        
+        .no-pending {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 16px;
+        }
         
         .message-area {
             margin: 25px 0;
@@ -206,6 +284,14 @@
         
         <!-- Seções lado a lado: Perfil e Status -->
         <div class="admin-grid">
+            <!-- Seção: Usuários Pendentes -->
+            <div class="admin-section" style="grid-column: 1 / -1;">
+                <h2>⏳ Usuários Aguardando Aprovação</h2>
+                <div id="pending-users-area">
+                    <div class="loading">Carregando usuários pendentes...</div>
+                </div>
+            </div>
+            
             <!-- Seção: Atualizar Role -->
             <div class="admin-section">
                 <h2>🔧 Atualizar Tipo de Usuário</h2>
@@ -368,6 +454,137 @@
             }
         }
         
+        // Função para carregar usuários pendentes
+        async function carregarUsuariosPendentes() {
+            const container = document.getElementById('pending-users-area');
+            
+            try {
+                const response = await fetch('/api/usuarios-pendentes');
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.usuarios.length === 0) {
+                        container.innerHTML = `
+                            <div class="no-pending">
+                                ✅ Não há usuários aguardando aprovação
+                            </div>
+                        `;
+                    } else {
+                        let html = '';
+                        result.usuarios.forEach(user => {
+                            html += `
+                                <div class="pending-card" id="pending-${user.id}">
+                                    <div class="pending-header">
+                                        <div class="pending-info">
+                                            <h4>👤 ${user.nome}</h4>
+                                            <p>📧 ${user.email} ${user.telefone ? '📱 ' + user.telefone : ''}</p>
+                                            <p>📅 Cadastrado em: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
+                                        </div>
+                                        <div class="pending-actions">
+                                            <button class="btn-approve" onclick="mostrarFormAprovacao(${user.id})">
+                                                ✅ Aprovar
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="approval-form-${user.id}" style="display: none;" class="approval-form">
+                                        <label for="tipo-${user.id}">Tipo de usuário:</label>
+                                        <select id="tipo-${user.id}">
+                                            <option value="paciente">👤 Paciente</option>
+                                            <option value="funcionario">👨‍⚕️ Funcionário</option>
+                                        </select>
+                                        <div style="display: flex; gap: 10px;">
+                                            <button class="btn-approve" onclick="aprovarUsuario(${user.id}, '${user.nome}', '${user.email}')">
+                                                ✅ Confirmar Aprovação
+                                            </button>
+                                            <button class="btn btn-secondary" onclick="cancelarAprovacao(${user.id})">
+                                                ❌ Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = html;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="error">
+                            ❌ Erro ao carregar usuários pendentes: ${result.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar usuários pendentes:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        ❌ Erro de conexão. Tente novamente.
+                    </div>
+                `;
+            }
+        }
+        
+        // Mostrar formulário de aprovação
+        function mostrarFormAprovacao(userId) {
+            const form = document.getElementById(`approval-form-${userId}`);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Cancelar aprovação
+        function cancelarAprovacao(userId) {
+            document.getElementById(`approval-form-${userId}`).style.display = 'none';
+        }
+        
+        // Aprovar usuário
+        async function aprovarUsuario(userId, nome, email) {
+            const tipo = document.getElementById(`tipo-${userId}`).value;
+            
+            if (!confirm(`Confirmar aprovação de "${nome}" como ${tipo}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/aprovar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: userId,
+                        tipo: tipo
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remover card da lista
+                    document.getElementById(`pending-${userId}`).remove();
+                    
+                    // Mostrar mensagem de sucesso
+                    const message = document.getElementById('message');
+                    message.innerHTML = `
+                        <div class="success">
+                            ✅ Usuário aprovado com sucesso!<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Email:</strong> ${email}<br>
+                            <strong>Tipo:</strong> ${tipo}
+                        </div>
+                    `;
+                    
+                    // Recarregar listas
+                    setTimeout(() => {
+                        carregarUsuarios();
+                        carregarUsuariosPendentes();
+                    }, 2000);
+                } else {
+                    alert('❌ Erro ao aprovar usuário: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao aprovar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
+        
         // Função para carregar lista de usuários
         async function carregarUsuarios() {
             const loading = document.getElementById('loading');
@@ -456,6 +673,12 @@
                 loading.style.display = 'none';
             }
         }
+        
+        // Inicializar página
+        window.onload = function() {
+            carregarUsuariosPendentes();
+            carregarUsuarios();
+        };
     </script>
 </body>
 </html>
