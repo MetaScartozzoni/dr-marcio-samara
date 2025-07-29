@@ -38,9 +38,9 @@
                     <div class="input-group">
                         <label for="novoRole">Novo Tipo de Usuário:</label>
                         <select id="novoRole" name="novoRole" required>
-                            <option value="">Selecione o novo role</option>
-                            <option value="patient">Paciente</option>
-                            <option value="staff">Funcionário</option>
+                            <option value="">Selecione o novo tipo</option>
+                            <option value="paciente">Paciente</option>
+                            <option value="funcionario">Funcionário</option>
                             <option value="admin">Administrador</option>
                         </select>
                     </div>
@@ -69,6 +69,18 @@
                     
                     <button type="submit" class="btn-primary">Atualizar Autorização</button>
                 </form>
+            </div>
+            
+            <!-- Seção: Listar Usuários -->
+            <div class="section" style="margin-top: 40px;">
+                <h2>👥 Lista de Usuários</h2>
+                <button onclick="carregarUsuarios()" class="btn-primary" style="margin-bottom: 20px;">
+                    Atualizar Lista
+                </button>
+                
+                <div id="listaUsuarios" style="max-height: 400px; overflow-y: auto;">
+                    <p>Clique em "Atualizar Lista" para ver os usuários cadastrados</p>
+                </div>
             </div>
             
             <div id="loading" class="loading" style="display: none;">
@@ -131,12 +143,13 @@
                 });
                 
                 const result = await response.json();
+                console.log('📥 Resposta:', result);
                 
                 if (result.sucesso) {
                     if (tipo === 'Role') {
                         message.innerHTML = `
                             <div class="success">
-                                ✅ Role atualizado com sucesso!<br>
+                                ✅ Tipo de usuário atualizado com sucesso!<br>
                                 <strong>Email:</strong> ${result.email}<br>
                                 <strong>De:</strong> ${result.roleAnterior} → <strong>Para:</strong> ${result.novoRole}
                             </div>
@@ -152,11 +165,89 @@
                         `;
                         document.getElementById('updateAuthForm').reset();
                     }
+                    
+                    // Atualizar lista automaticamente
+                    setTimeout(() => {
+                        carregarUsuarios();
+                    }, 1000);
                 } else {
                     message.innerHTML = '<div class="error">' + result.erro + '</div>';
                 }
             } catch (error) {
+                console.error('❌ Erro:', error);
                 message.innerHTML = '<div class="error">Erro ao atualizar ' + tipo.toLowerCase() + '. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Função para carregar lista de usuários
+        async function carregarUsuarios() {
+            const loading = document.getElementById('loading');
+            const listaUsuarios = document.getElementById('listaUsuarios');
+            
+            loading.style.display = 'block';
+            
+            try {
+                const response = await fetch('/api/listar-usuarios');
+                const result = await response.json();
+                console.log('👥 Usuários:', result);
+                
+                if (result.sucesso) {
+                    let html = `
+                        <div style="margin-bottom: 15px;">
+                            <strong>Total de usuários: ${result.total}</strong>
+                        </div>
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background: #f8f9fa;">
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Nome</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Email</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Tipo</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Autorizado</th>
+                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Cadastro</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    result.usuarios.forEach(user => {
+                        const tipoColor = user.tipo === 'admin' ? '#dc3545' : user.tipo === 'funcionario' ? '#ffc107' : '#28a745';
+                        const autorizadoIcon = user.autorizado ? '✅' : '❌';
+                        const autorizadoColor = user.autorizado ? '#28a745' : '#dc3545';
+                        const dataCadastro = new Date(user.created_at).toLocaleDateString('pt-BR');
+                        
+                        html += `
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${user.nome}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px;">${user.email}</td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                                    <span style="background: ${tipoColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
+                                        ${user.tipo}
+                                    </span>
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: ${autorizadoColor};">
+                                    ${autorizadoIcon}
+                                </td>
+                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                                    ${dataCadastro}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    listaUsuarios.innerHTML = html;
+                } else {
+                    listaUsuarios.innerHTML = '<div class="error">Erro ao carregar usuários: ' + result.erro + '</div>';
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                listaUsuarios.innerHTML = '<div class="error">Erro ao carregar usuários. Tente novamente.</div>';
             } finally {
                 loading.style.display = 'none';
             }

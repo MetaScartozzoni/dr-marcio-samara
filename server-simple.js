@@ -43,10 +43,18 @@ async function initializeDatabase() {
                 telefone VARCHAR(20),
                 cpf VARCHAR(14),
                 tipo VARCHAR(50) DEFAULT 'paciente',
+                autorizado BOOLEAN DEFAULT true,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        
+        // Adicionar coluna autorizado se não existir (para bancos existentes)
+        try {
+            await pool.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS autorizado BOOLEAN DEFAULT true`);
+        } catch (error) {
+            // Coluna já existe, ignorar erro
+        }
 
         // Criar tabela de consultas
         await pool.query(`
@@ -320,6 +328,15 @@ app.post('/api/login', async (req, res) => {
         }
         
         const user = result.rows[0];
+        
+        // Verificar se usuário está autorizado
+        if (!user.autorizado) {
+            return res.json({
+                success: false,
+                message: 'Usuário não autorizado. Entre em contato com o administrador.'
+            });
+        }
+        
         const senhaValida = await bcrypt.compare(senha, user.senha);
         
         if (senhaValida) {
@@ -330,7 +347,8 @@ app.post('/api/login', async (req, res) => {
                     id: user.id,
                     nome: user.nome,
                     email: user.email,
-                    tipo: user.tipo
+                    tipo: user.tipo,
+                    autorizado: user.autorizado
                 },
                 redirect: '/painel'
             });
@@ -540,6 +558,117 @@ app.get('/api/email/test', async (req, res) => {
         res.json({
             status: 'SendGrid Error',
             error: error.message
+        });
+    }
+});
+
+// Endpoint para atualizar role do usuário
+app.post('/api/atualizar-role', async (req, res) => {
+    try {
+        const { email, novoRole } = req.body;
+        console.log('🔄 Atualizando role:', email, '->', novoRole);
+        
+        // Verificar se usuário existe
+        const userResult = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (userResult.rows.length === 0) {
+            return res.json({
+                sucesso: false,
+                erro: 'Usuário não encontrado'
+            });
+        }
+        
+        const user = userResult.rows[0];
+        const roleAnterior = user.tipo;
+        
+        // Atualizar role
+        await pool.query(
+            'UPDATE usuarios SET tipo = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+            [novoRole, email]
+        );
+        
+        console.log('✅ Role atualizado:', email, roleAnterior, '->', novoRole);
+        
+        res.json({
+            sucesso: true,
+            email: email,
+            roleAnterior: roleAnterior,
+            novoRole: novoRole,
+            message: 'Role atualizado com sucesso'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar role:', error);
+        res.json({
+            sucesso: false,
+            erro: 'Erro ao atualizar role: ' + error.message
+        });
+    }
+});
+
+// Endpoint para atualizar autorização do usuário
+app.post('/api/atualizar-autorizacao', async (req, res) => {
+    try {
+        const { email, autorizado } = req.body;
+        const autorizadoBool = autorizado === 'sim';
+        
+        console.log('🔄 Atualizando autorização:', email, '->', autorizadoBool);
+        
+        // Verificar se usuário existe
+        const userResult = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (userResult.rows.length === 0) {
+            return res.json({
+                sucesso: false,
+                erro: 'Usuário não encontrado'
+            });
+        }
+        
+        const user = userResult.rows[0];
+        const autorizacaoAnterior = user.autorizado ? 'Autorizado' : 'Não Autorizado';
+        
+        // Atualizar autorização
+        await pool.query(
+            'UPDATE usuarios SET autorizado = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
+            [autorizadoBool, email]
+        );
+        
+        console.log('✅ Autorização atualizada:', email, user.autorizado, '->', autorizadoBool);
+        
+        res.json({
+            sucesso: true,
+            email: email,
+            autorizacaoAnterior: autorizacaoAnterior,
+            novaAutorizacao: autorizadoBool ? 'Autorizado' : 'Não Autorizado',
+            message: 'Autorização atualizada com sucesso'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar autorização:', error);
+        res.json({
+            sucesso: false,
+            erro: 'Erro ao atualizar autorização: ' + error.message
+        });
+    }
+});
+
+// Endpoint para listar usuários (para administradores)
+app.get('/api/listar-usuarios', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT id, nome, email, tipo, autorizado, created_at 
+            FROM usuarios 
+            ORDER BY created_at DESC
+        `);
+        
+        res.json({
+            sucesso: true,
+            usuarios: result.rows,
+            total: result.rows.length
+        });
+    } catch (error) {
+        console.error('❌ Erro ao listar usuários:', error);
+        res.json({
+            sucesso: false,
+            erro: 'Erro ao listar usuários: ' + error.message
         });
     }
 });
