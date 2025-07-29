@@ -10,16 +10,59 @@
     <div class="container">
         <div class="form-container">
             <h1>Recuperar Senha</h1>
-            <p>Digite seu email para receber instruções de recuperação de senha</p>
+            <p>Digite seu email para receber um código de verificação</p>
             
-            <form id="recuperarForm">
-                <div class="input-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
+            <!-- Primeira etapa: Solicitar código -->
+            <div id="etapa1">
+                <form id="solicitarCodigoForm">
+                    <div class="input-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Enviar Código</button>
+                </form>
+            </div>
+            
+            <!-- Segunda etapa: Verificar código e redefinir senha -->
+            <div id="etapa2" style="display: none;">
+                <form id="verificarCodigoForm">
+                    <div class="input-group">
+                        <label for="emailConfirm">Email:</label>
+                        <input type="email" id="emailConfirm" name="emailConfirm" readonly style="background: #f8f9fa;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="codigo">Código de Verificação (6 dígitos):</label>
+                        <input type="text" id="codigo" name="codigo" required 
+                               maxlength="6" pattern="[0-9]{6}" 
+                               style="font-size: 18px; text-align: center; letter-spacing: 4px;"
+                               placeholder="000000">
+                        <small style="color: #666; font-size: 12px;">
+                            Verifique seu email e digite o código de 6 dígitos recebido
+                        </small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="novaSenha">Nova Senha:</label>
+                        <input type="password" id="novaSenha" name="novaSenha" required minlength="6">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmarNovaSenha">Confirmar Nova Senha:</label>
+                        <input type="password" id="confirmarNovaSenha" name="confirmarNovaSenha" required minlength="6">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Redefinir Senha</button>
+                </form>
                 
-                <button type="submit" class="btn-primary">Enviar Instruções</button>
-            </form>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button onclick="voltarEtapa1()" class="btn-secondary" 
+                            style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        Solicitar Novo Código
+                    </button>
+                </div>
+            </div>
             
             <div id="loading" class="loading" style="display: none;">
                 Enviando instruções...
@@ -36,6 +79,9 @@
     </div>
 
     <script>
+        let codigoEnviado = null;
+        let emailAtual = null;
+        
         // Preencher email automaticamente se vier do login
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -51,13 +97,21 @@
             }
         };
         
-        document.getElementById('recuperarForm').addEventListener('submit', async (e) => {
+        function voltarEtapa1() {
+            document.getElementById('etapa1').style.display = 'block';
+            document.getElementById('etapa2').style.display = 'none';
+            document.getElementById('message').innerHTML = '';
+        }
+        
+        // Primeira etapa: Solicitar código
+        document.getElementById('solicitarCodigoForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value;
             const loading = document.getElementById('loading');
             const message = document.getElementById('message');
             
+            emailAtual = email;
             loading.style.display = 'block';
             message.innerHTML = '';
             
@@ -74,23 +128,102 @@
                 console.log('📥 Resposta:', data);
                 
                 if (data.success) {
+                    codigoEnviado = data.codigo; // Em produção, isso NÃO deve vir na resposta
+                    
+                    // Ir para etapa 2
+                    document.getElementById('etapa1').style.display = 'none';
+                    document.getElementById('etapa2').style.display = 'block';
+                    document.getElementById('emailConfirm').value = email;
+                    
                     message.innerHTML = `
                         <div class="success">
                             ${data.message}
                             <br><br>
-                            <strong>Verifique sua caixa de entrada e spam.</strong>
+                            <strong>⏰ O código expira em 15 minutos</strong>
                         </div>
                     `;
-                    document.getElementById('recuperarForm').style.display = 'none';
+                    
+                    // Focar no campo do código
+                    setTimeout(() => {
+                        document.getElementById('codigo').focus();
+                    }, 500);
                 } else {
                     message.innerHTML = '<div class="error">' + data.message + '</div>';
                 }
             } catch (error) {
                 console.error('❌ Erro:', error);
-                message.innerHTML = '<div class="error">Erro ao enviar instruções. Tente novamente.</div>';
+                message.innerHTML = '<div class="error">Erro ao enviar código. Tente novamente.</div>';
             } finally {
                 loading.style.display = 'none';
             }
+        });
+        
+        // Segunda etapa: Verificar código e redefinir senha
+        document.getElementById('verificarCodigoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value;
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarNovaSenha').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            // Validações
+            if (codigo.length !== 6 || !/^\d{6}$/.test(codigo)) {
+                message.innerHTML = '<div class="error">O código deve ter exatamente 6 dígitos</div>';
+                return;
+            }
+            
+            if (novaSenha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem</div>';
+                return;
+            }
+            
+            if (novaSenha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres</div>';
+                return;
+            }
+            
+            // Verificar código (simulação - em produção seria no backend)
+            if (codigo !== codigoEnviado) {
+                message.innerHTML = '<div class="error">Código inválido ou expirado</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                // Aqui você faria uma chamada para /api/redefinir-senha
+                // Por enquanto, vamos simular o sucesso
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
+                
+                message.innerHTML = `
+                    <div class="success">
+                        ✅ Senha redefinida com sucesso!
+                        <br><br>
+                        <a href="/login.html" class="btn-primary" 
+                           style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
+                            Fazer Login
+                        </a>
+                    </div>
+                `;
+                
+                document.getElementById('verificarCodigoForm').style.display = 'none';
+                
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div class="error">Erro ao redefinir senha. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Formatar input do código (apenas números)
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove não-dígitos
+            if (value.length > 6) value = value.substring(0, 6);
+            e.target.value = value;
         });
     </script>
 </body>

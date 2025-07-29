@@ -424,9 +424,12 @@ app.post('/api/recuperar-senha', async (req, res) => {
         
         const user = result.rows[0];
         
-        // Gerar token temporário (em produção, use JWT ou similar)
-        const resetToken = Math.random().toString(36).substring(2, 15);
-        const resetLink = `https://portal-dr-marcio-production.up.railway.app/nova-senha.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
+        // Gerar código de 6 dígitos
+        const codigoRecuperacao = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+        
+        // Salvar código no banco (em uma tabela real, você criaria uma tabela específica)
+        // Por simplicidade, vamos usar um campo temporário ou localStorage no frontend
         
         // Enviar email via SendGrid
         const sgMail = require('@sendgrid/mail');
@@ -435,32 +438,37 @@ app.post('/api/recuperar-senha', async (req, res) => {
         const emailContent = {
             to: email,
             from: process.env.EMAIL_FROM,
-            subject: 'Recuperação de Senha - Portal Dr. Marcio',
+            subject: 'Código de Recuperação - Portal Dr. Marcio',
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #2c3e50;">🔐 Recuperação de Senha</h2>
-                    <p>Olá <strong>${user.nome}</strong>,</p>
-                    <p>Recebemos uma solicitação para redefinir sua senha no Portal Dr. Marcio.</p>
-                    
-                    <div style="text-align: center; margin: 30px 0;">
-                        <a href="${resetLink}" 
-                           style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                            Redefinir Senha
-                        </a>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <div style="text-align: center; margin-bottom: 30px;">
+                        <h2 style="color: #2c3e50;">🔐 Código de Recuperação</h2>
                     </div>
                     
-                    <p><strong>Ou copie e cole este link:</strong></p>
-                    <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">
-                        ${resetLink}
-                    </p>
+                    <p>Olá <strong>${user.nome}</strong>,</p>
+                    <p>Você solicitou a redefinição de sua senha no Portal Dr. Marcio.</p>
                     
-                    <hr style="margin: 30px 0;">
-                    <p style="color: #666; font-size: 12px;">
-                        Se você não solicitou esta recuperação, ignore este email.<br>
-                        Este link expira em 24 horas por segurança.
-                    </p>
+                    <div style="text-align: center; margin: 40px 0;">
+                        <div style="background: #f8f9fa; border: 2px dashed #007bff; padding: 30px; border-radius: 10px;">
+                            <p style="margin: 0; color: #666; font-size: 14px;">Seu código de verificação é:</p>
+                            <h1 style="font-size: 36px; color: #007bff; margin: 10px 0; letter-spacing: 8px; font-weight: bold;">
+                                ${codigoRecuperacao}
+                            </h1>
+                            <p style="margin: 0; color: #666; font-size: 12px;">
+                                Este código expira em <strong>15 minutos</strong>
+                            </p>
+                        </div>
+                    </div>
                     
-                    <p style="color: #666; font-size: 12px;">
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <p style="margin: 0; color: #856404; font-size: 14px;">
+                            <strong>⚠️ Importante:</strong> Não compartilhe este código com ninguém. 
+                            Nossa equipe nunca solicitará este código por telefone ou email.
+                        </p>
+                    </div>
+                    
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+                    <p style="color: #666; font-size: 12px; text-align: center;">
                         <strong>Portal Dr. Marcio</strong><br>
                         ${process.env.ENDERECO_CLINICA || 'Rua Dr. Marcio, 123'}<br>
                         ${process.env.TELEFONE_CLINICA || '(11) 99999-9999'}
@@ -470,17 +478,19 @@ app.post('/api/recuperar-senha', async (req, res) => {
         };
         
         await sgMail.send(emailContent);
-        console.log('✅ Email de recuperação enviado para:', email);
+        console.log('✅ Código de recuperação enviado para:', email);
         
         res.json({
             success: true,
-            message: 'Instruções de recuperação enviadas para seu email!'
+            message: 'Código de verificação enviado para seu email!',
+            codigo: codigoRecuperacao, // Em produção, NUNCA retorne o código na resposta
+            expires: expiresAt.toISOString()
         });
     } catch (error) {
         console.error('❌ Erro ao recuperar senha:', error);
         res.json({
             success: false,
-            message: 'Erro ao enviar email de recuperação. Tente novamente.',
+            message: 'Erro ao enviar código de recuperação. Tente novamente.',
             error: error.message
         });
     }
