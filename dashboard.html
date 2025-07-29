@@ -289,78 +289,49 @@
 
         <!-- Seção para Funcionários -->
         <div id="staff-section" class="hidden">
-            <!-- Estatísticas para Funcionários -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="staff-today-appointments">-</div>
-                    <div class="stat-label">Consultas Hoje</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="staff-pending-tasks">-</div>
-                    <div class="stat-label">Tarefas Pendentes</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="staff-total-patients">-</div>
-                    <div class="stat-label">Pacientes Ativos</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="staff-today-revenue">-</div>
-                    <div class="stat-label">Receita Hoje</div>
-                </div>
-            </div>
-            
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon">�</span>Quadro Evolutivo</h3>
-                    <p>Acompanhe a evolução diária dos pacientes em tratamento.</p>
+                    <h3><span class="icon">📊</span>Quadro Evolutivo</h3>
+                    <p>Acompanhamento diário dos pacientes e evolução médica.</p>
                     <div class="quick-actions">
                         <a href="/quadro-evolutivo.html" class="action-btn">📊 Ver Quadro</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Adicionar Evolução')">📝 Nova Evolução</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')">📋 Relatório</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon">�📅</span>Agenda do Dia</h3>
-                    <p>Consulte a agenda de consultas e gerencia horários.</p>
+                    <h3><span class="icon">📚</span>Caderno Digital</h3>
+                    <p>Documentação médica com anotações e fotos evolutivas.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Agenda do Dia')">📋 Ver Agenda</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Marcar Consulta')">➕ Marcar Consulta</a>
+                        <a href="/caderno-digital.html" class="action-btn">📝 Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')">📋 Documentos</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon">👥</span>Gestão de Pacientes</h3>
+                    <h3><span class="icon">📅</span>Agenda do Dia</h3>
+                    <p>Consulte a agenda de consultas do dia.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn">Ver Agenda</a>
+                        <a href="#" class="action-btn">Marcar Consulta</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon">👥</span>Pacientes</h3>
                     <p>Gerencie cadastro e informações dos pacientes.</p>
                     <div class="quick-actions">
                         <a href="/gestao.html" class="action-btn">📊 Gestão Completa</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Novo Paciente')">👤 Novo Paciente</a>
+                        <a href="#" class="action-btn">Novo Paciente</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon">💰</span>Financeiro</h3>
-                    <p>Controle financeiro e pagamentos do consultório.</p>
+                    <h3><span class="icon">📊</span>Relatórios</h3>
+                    <p>Acesse relatórios e estatísticas do consultório.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Pagamentos Pendentes')">💳 Pagamentos</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Financeiro')">📈 Relatórios</a>
-                    </div>
-                </div>
-                
-                <div class="dashboard-card">
-                    <h3><span class="icon">�</span>Exames e Resultados</h3>
-                    <p>Gerencie exames, resultados e laudos médicos.</p>
-                    <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Agendar Exame')">🧪 Agendar Exame</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Resultados Pendentes')">📄 Resultados</a>
-                    </div>
-                </div>
-                
-                <div class="dashboard-card">
-                    <h3><span class="icon">📞</span>Comunicação</h3>
-                    <p>Contato com pacientes e agendamentos.</p>
-                    <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Enviar WhatsApp')">📱 WhatsApp</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Enviar Email')">📧 Email</a>
+                        <a href="#" class="action-btn">Relatórios</a>
+                        <a href="#" class="action-btn">Financeiro</a>
                     </div>
                 </div>
                 
@@ -368,8 +339,8 @@
                     <h3><span class="icon">⚙️</span>Configurações</h3>
                     <p>Configurações do sistema e preferências.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="editarPerfil()">👤 Meu Perfil</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Configurar Sistema')">⚙️ Sistema</a>
+                        <a href="#" class="action-btn">Configurar</a>
+                        <a href="#" class="action-btn">Backup</a>
                     </div>
                 </div>
             </div>
@@ -398,7 +369,7 @@
             
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon">�</span>Quadro Evolutivo</h3>
+                    <h3><span class="icon">📊</span>Quadro Evolutivo</h3>
                     <p>Acompanhamento diário dos pacientes e evolução médica.</p>
                     <div class="quick-actions">
                         <a href="/quadro-evolutivo.html" class="action-btn">📊 Ver Quadro</a>
@@ -407,7 +378,16 @@
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon">�👨‍⚕️</span>Área Médica</h3>
+                    <h3><span class="icon">📚</span>Caderno Digital</h3>
+                    <p>Documentação médica com anotações e fotos evolutivas.</p>
+                    <div class="quick-actions">
+                        <a href="/caderno-digital.html" class="action-btn">📝 Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')">📋 Documentos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon">👨‍⚕️</span>Área Médica</h3>
                     <p>Ferramentas médicas e prontuários eletrônicos.</p>
                     <div class="quick-actions">
                         <a href="#" class="action-btn">Prontuários</a>
@@ -503,7 +483,6 @@
             } else if (userInfo.tipo === 'funcionario') {
                 console.log('Mostrando seção de funcionário'); // Debug
                 document.getElementById('staff-section').classList.remove('hidden');
-                loadStaffStats();
             } else if (userInfo.tipo === 'admin') {
                 console.log('Mostrando seção de admin'); // Debug
                 document.getElementById('admin-section').classList.remove('hidden');
@@ -532,26 +511,6 @@
                     document.getElementById('today-appointments').textContent = '-';
                     document.getElementById('pending-results').textContent = '-';
                     document.getElementById('month-revenue').textContent = '-';
-                });
-        }
-        
-        function loadStaffStats() {
-            // Carregar estatísticas específicas para funcionários
-            fetch('/api/gestao/estatisticas')
-                .then(response => response.json())
-                .then(stats => {
-                    document.getElementById('staff-today-appointments').textContent = stats.agendamentosHoje || '8';
-                    document.getElementById('staff-pending-tasks').textContent = stats.tarefasPendentes || '5';
-                    document.getElementById('staff-total-patients').textContent = stats.totalPacientes || '156';
-                    document.getElementById('staff-today-revenue').textContent = stats.receitaHoje || 'R$ 2.4k';
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar estatísticas do funcionário:', error);
-                    // Fallback para valores padrão específicos do funcionário
-                    document.getElementById('staff-today-appointments').textContent = '8';
-                    document.getElementById('staff-pending-tasks').textContent = '5';
-                    document.getElementById('staff-total-patients').textContent = '156';
-                    document.getElementById('staff-today-revenue').textContent = 'R$ 2.4k';
                 });
         }
         

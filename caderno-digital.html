@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderno Digital do Paciente - Dr. Marcio Scartozzoni</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .btn-voltar {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar select, .toolbar input {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .toolbar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 70vh;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 2px solid #e9ecef;
+            padding: 20px;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .document-list {
+            list-style: none;
+        }
+
+        .document-item {
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .document-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .document-item.active {
+            border-left: 5px solid #667eea;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+        }
+
+        .document-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .document-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .document-icon.orcamento { background: #3498db; }
+        .document-icon.cadastro { background: #2ecc71; }
+        .document-icon.jornada { background: #e74c3c; }
+        .document-icon.acompanhamento { background: #f39c12; }
+        .document-icon.receita { background: #9b59b6; }
+        .document-icon.exames { background: #1abc9c; }
+
+        .document-info h4 {
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .document-info p {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        .canvas-area {
+            padding: 30px;
+            background: white;
+            position: relative;
+            overflow: auto;
+        }
+
+        .canvas-container {
+            background: #fafafa;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            min-height: 600px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .canvas-placeholder {
+            text-align: center;
+            padding: 100px 20px;
+            color: #7f8c8d;
+        }
+
+        .canvas-placeholder i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .document-form {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .document-form.active {
+            display: block;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .photo-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .photo-upload i {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        .photo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .photo-actions button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-actions button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .annotation-tools {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background: white;
+            border: 2px solid #dee2e6;
+            color: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-btn:hover,
+        .tool-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .evolution-timeline {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 60px;
+            bottom: -25px;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .timeline-date {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid #e9ecef;
+            }
+            
+            .btn-voltar {
+                position: relative;
+                left: 0;
+                top: 0;
+                transform: none;
+                margin-bottom: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="btn-voltar" onclick="voltarDashboard()">
+                <i class="fas fa-arrow-left"></i> Voltar
+            </button>
+            <h1><i class="fas fa-book-medical"></i> Caderno Digital do Paciente</h1>
+            <p>Sistema integrado de documentação médica com funcionalidades do GoodNotes</p>
+        </div>
+
+        <div class="toolbar">
+            <select id="pacienteSelect">
+                <option value="">Selecionar Paciente</option>
+            </select>
+            
+            <input type="date" id="dataFiltro" placeholder="Filtrar por data">
+            
+            <button onclick="novoDocumento()">
+                <i class="fas fa-plus"></i> Novo Documento
+            </button>
+            
+            <button onclick="capturarFoto()">
+                <i class="fas fa-camera"></i> Capturar Foto
+            </button>
+            
+            <button onclick="exportarPDF()">
+                <i class="fas fa-file-pdf"></i> Exportar PDF
+            </button>
+            
+            <button onclick="sincronizar()">
+                <i class="fas fa-sync"></i> Sincronizar
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h3><i class="fas fa-folder"></i> Documentos</h3>
+                <ul class="document-list">
+                    <li class="document-item active" onclick="abrirDocumento('orcamento')">
+                        <div class="document-header">
+                            <div class="document-icon orcamento">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Orçamento Cirúrgico</h4>
+                                <p>Valores e formas de pagamento</p>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="document-item" onclick="abrirDocumento('cadastro')">
+                        <div class="document-header">
+                            <div class="document-icon cadastro">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Dados do Paciente</h4>
+                                <p>Cadastro completo</p>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="document-item" onclick="abrirDocumento('jornada')">
+                        <div class="document-header">
+                            <div class="document-icon jornada">
+                                <i class="fas fa-route"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Caderno de Jornada</h4>
+                                <p>Acompanhamento evolutivo</p>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="document-item" onclick="abrirDocumento('acompanhamento')">
+                        <div class="document-header">
+                            <div class="document-icon acompanhamento">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Acompanhamento</h4>
+                                <p>Follow-up pós-operatório</p>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="document-item" onclick="abrirDocumento('receita')">
+                        <div class="document-header">
+                            <div class="document-icon receita">
+                                <i class="fas fa-prescription-bottle-alt"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Receitas</h4>
+                                <p>Prescrições médicas</p>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="document-item" onclick="abrirDocumento('exames')">
+                        <div class="document-header">
+                            <div class="document-icon exames">
+                                <i class="fas fa-vials"></i>
+                            </div>
+                            <div class="document-info">
+                                <h4>Pedido de Exames</h4>
+                                <p>Solicitações laboratoriais</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="canvas-area">
+                <!-- Placeholder inicial -->
+                <div class="canvas-placeholder" id="placeholder">
+                    <i class="fas fa-book-open"></i>
+                    <h3>Selecione um documento para começar</h3>
+                    <p>Escolha um tipo de documento no menu lateral</p>
+                </div>
+
+                <!-- Formulário de Orçamento -->
+                <div class="document-form" id="orcamento-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-calculator"></i> Orçamento Cirúrgico</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nome Completo</label>
+                                <input type="text" id="orcamento-nome" placeholder="Nome do paciente">
+                            </div>
+                            <div class="form-group">
+                                <label>Cirurgia</label>
+                                <input type="text" id="orcamento-cirurgia" placeholder="Tipo de cirurgia">
+                            </div>
+                            <div class="form-group">
+                                <label>Valor Clínica</label>
+                                <input type="number" id="orcamento-valor-clinica" placeholder="0,00">
+                            </div>
+                            <div class="form-group">
+                                <label>Valor Hospital</label>
+                                <input type="number" id="orcamento-valor-hospital" placeholder="0,00">
+                            </div>
+                        </div>
+                        
+                        <h4>Forma de Pagamento</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="pagamento" value="vista"> 
+                                    Pagamento à vista (3% desconto)
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="pagamento" value="3x"> 
+                                    Em até 3x (5% acréscimo)
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="pagamento" value="10x"> 
+                                    Em até 10x (10% acréscimo)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Hospital</label>
+                            <input type="text" id="orcamento-hospital" placeholder="Hospital onde será realizada">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea id="orcamento-obs" rows="4" placeholder="Informações adicionais"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulário de Cadastro -->
+                <div class="document-form" id="cadastro-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-user-plus"></i> Dados do Paciente</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nome Completo</label>
+                                <input type="text" id="cadastro-nome" placeholder="Nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label>CPF</label>
+                                <input type="text" id="cadastro-cpf" placeholder="000.000.000-00">
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Nascimento</label>
+                                <input type="date" id="cadastro-nascimento">
+                            </div>
+                            <div class="form-group">
+                                <label>E-mail</label>
+                                <input type="email" id="cadastro-email" placeholder="email@exemplo.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Celular</label>
+                                <input type="tel" id="cadastro-celular" placeholder="(11) 99999-9999">
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="tel" id="cadastro-telefone" placeholder="(11) 3333-3333">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Endereço Completo</label>
+                            <textarea id="cadastro-endereco" rows="3" placeholder="Rua, número, complemento, bairro, cidade, CEP"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caderno de Jornada -->
+                <div class="document-form" id="jornada-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-route"></i> Caderno de Jornada - Acompanhamento Evolutivo</h3>
+                        
+                        <div class="annotation-tools">
+                            <button class="tool-btn active" onclick="selecionarFerramenta('texto')">
+                                <i class="fas fa-font"></i> Texto
+                            </button>
+                            <button class="tool-btn" onclick="selecionarFerramenta('desenho')">
+                                <i class="fas fa-pencil-alt"></i> Desenho
+                            </button>
+                            <button class="tool-btn" onclick="selecionarFerramenta('regua')">
+                                <i class="fas fa-ruler"></i> Régua
+                            </button>
+                            <button class="tool-btn" onclick="selecionarFerramenta('marca')">
+                                <i class="fas fa-highlighter"></i> Marcador
+                            </button>
+                            <button class="tool-btn" onclick="selecionarFerramenta('foto')">
+                                <i class="fas fa-camera"></i> Foto
+                            </button>
+                        </div>
+                        
+                        <div class="evolution-timeline">
+                            <h4>Timeline de Evolução</h4>
+                            <div class="timeline-item">
+                                <div class="timeline-marker">
+                                    <i class="fas fa-plus"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">29/07/2025 - 10:30</div>
+                                    <div class="timeline-title">Consulta Inicial</div>
+                                    <p>Avaliação inicial do paciente. Estado geral bom, sem comorbidades significativas.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-marker">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">02/08/2025 - 14:00</div>
+                                    <div class="timeline-title">Pré-operatório</div>
+                                    <p>Exames pré-operatórios realizados. Paciente apto para cirurgia.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nova Evolução</label>
+                            <textarea id="nova-evolucao" rows="4" placeholder="Descreva a evolução do paciente..."></textarea>
+                            <button type="button" onclick="adicionarEvolucao()" style="margin-top: 10px; background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
+                                <i class="fas fa-plus"></i> Adicionar Evolução
+                            </button>
+                        </div>
+                        
+                        <div class="photo-upload" onclick="document.getElementById('foto-input').click()">
+                            <i class="fas fa-camera"></i>
+                            <h4>Capturar ou Adicionar Foto</h4>
+                            <p>Clique para capturar uma foto ou selecionar da galeria</p>
+                            <input type="file" id="foto-input" accept="image/*" style="display: none;" onchange="adicionarFoto(this)">
+                        </div>
+                        
+                        <div class="photo-gallery" id="galeria-fotos">
+                            <!-- Fotos serão adicionadas aqui dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Outros formulários similares para acompanhamento, receita, exames -->
+                <div class="document-form" id="acompanhamento-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-heartbeat"></i> Formulário de Acompanhamento</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Data da Consulta</label>
+                                <input type="date" id="acomp-data">
+                            </div>
+                            <div class="form-group">
+                                <label>Peso Atual</label>
+                                <input type="number" id="acomp-peso" placeholder="kg">
+                            </div>
+                            <div class="form-group">
+                                <label>Pressão Arterial</label>
+                                <input type="text" id="acomp-pressao" placeholder="120/80">
+                            </div>
+                            <div class="form-group">
+                                <label>Sintomas</label>
+                                <textarea id="acomp-sintomas" rows="3" placeholder="Descreva sintomas ou queixas"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="document-form" id="receita-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-prescription-bottle-alt"></i> Receita Médica</h3>
+                        <div class="form-group">
+                            <label>Medicamentos Prescritos</label>
+                            <textarea id="receita-medicamentos" rows="6" placeholder="1. Medicamento - Posologia - Duração&#10;2. Medicamento - Posologia - Duração"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Orientações Gerais</label>
+                            <textarea id="receita-orientacoes" rows="4" placeholder="Orientações adicionais para o paciente"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="document-form" id="exames-form">
+                    <div class="form-section">
+                        <h3><i class="fas fa-vials"></i> Pedido de Exames</h3>
+                        <div class="form-group">
+                            <label>Exames Solicitados</label>
+                            <textarea id="exames-lista" rows="6" placeholder="Liste os exames solicitados:&#10;- Hemograma completo&#10;- Glicemia de jejum&#10;- etc."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Justificativa</label>
+                            <textarea id="exames-justificativa" rows="3" placeholder="Justificativa clínica para os exames"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button class="save-btn" onclick="salvarDocumento()">
+            <i class="fas fa-save"></i> Salvar Documento
+        </button>
+    </div>
+
+    <script src="caderno-digital-functions.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let documentoAtivo = 'orcamento';
+        let ferramentaAtiva = 'texto';
+        let fotos = [];
+
+        function voltarDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function abrirDocumento(tipo) {
+            // Remove classe active de todos os itens
+            document.querySelectorAll('.document-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Adiciona active ao item clicado
+            event.currentTarget.classList.add('active');
+
+            // Oculta todos os formulários
+            document.querySelectorAll('.document-form').forEach(form => {
+                form.classList.remove('active');
+            });
+
+            // Oculta placeholder
+            document.getElementById('placeholder').style.display = 'none';
+
+            // Mostra formulário específico
+            document.getElementById(tipo + '-form').classList.add('active');
+            documentoAtivo = tipo;
+        }
+
+        function selecionarFerramenta(ferramenta) {
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            ferramentaAtiva = ferramenta;
+
+            // Implementar lógica específica de cada ferramenta
+            console.log('Ferramenta selecionada:', ferramenta);
+        }
+
+        function adicionarFoto(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fotoData = {
+                        id: Date.now(),
+                        src: e.target.result,
+                        nome: file.name,
+                        data: new Date().toLocaleString('pt-BR')
+                    };
+                    
+                    fotos.push(fotoData);
+                    renderizarGaleria();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderizarGaleria() {
+            const galeria = document.getElementById('galeria-fotos');
+            galeria.innerHTML = '';
+
+            fotos.forEach(foto => {
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                item.innerHTML = `
+                    <img src="${foto.src}" alt="${foto.nome}">
+                    <div class="photo-overlay">
+                        <div class="photo-actions">
+                            <button onclick="editarFoto(${foto.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="adicionarAnotacao(${foto.id})" title="Anotar">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button onclick="removerFoto(${foto.id})" title="Remover">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                galeria.appendChild(item);
+            });
+        }
+
+        function capturarFoto() {
+            cadernoDigital.capturarFoto();
+        }
+
+        function selecionarFerramenta(ferramenta) {
+            document.querySelectorAll('.tool-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            cadernoDigital.ativarFerramenta(ferramenta);
+        }
+
+        function exportarPDF() {
+            cadernoDigital.exportarPDF();
+        }
+
+        function sincronizar() {
+            cadernoDigital.sincronizarDados();
+        }
+
+        function adicionarFoto(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fotoData = {
+                        id: Date.now(),
+                        src: e.target.result,
+                        nome: file.name,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    cadernoDigital.fotos.push(fotoData);
+                    cadernoDigital.renderizarGaleria();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function adicionarEvolucao() {
+            const textoEvolucao = document.getElementById('nova-evolucao').value;
+            if (textoEvolucao.trim()) {
+                const timeline = document.querySelector('.evolution-timeline');
+                const novaEvolucao = document.createElement('div');
+                novaEvolucao.className = 'timeline-item';
+                novaEvolucao.innerHTML = `
+                    <div class="timeline-marker">
+                        <i class="fas fa-notes-medical"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <div class="timeline-date">${new Date().toLocaleString('pt-BR')}</div>
+                        <div class="timeline-title">Nova Evolução</div>
+                        <p>${textoEvolucao}</p>
+                    </div>
+                `;
+                timeline.appendChild(novaEvolucao);
+                document.getElementById('nova-evolucao').value = '';
+            }
+        }
+
+        function editarFoto(id) {
+            console.log('Editando foto:', id);
+            // Implementar editor de imagem
+        }
+
+        function adicionarAnotacao(id) {
+            console.log('Adicionando anotação à foto:', id);
+            // Implementar sistema de anotações
+        }
+
+        function removerFoto(id) {
+            fotos = fotos.filter(foto => foto.id !== id);
+            renderizarGaleria();
+        }
+
+        function novoDocumento() {
+            if (confirm('Criar novo documento? Os dados não salvos serão perdidos.')) {
+                document.querySelectorAll('input, textarea').forEach(field => {
+                    field.value = '';
+                });
+                fotos = [];
+                renderizarGaleria();
+            }
+        }
+
+        function salvarDocumento() {
+            const dadosDocumento = {
+                tipo: documentoAtivo,
+                data: new Date().toISOString(),
+                dados: {},
+                fotos: fotos
+            };
+
+            // Coletar dados específicos do documento ativo
+            const formulario = document.getElementById(documentoAtivo + '-form');
+            const campos = formulario.querySelectorAll('input, textarea, select');
+            
+            campos.forEach(campo => {
+                if (campo.type === 'radio') {
+                    if (campo.checked) {
+                        dadosDocumento.dados[campo.name] = campo.value;
+                    }
+                } else {
+                    dadosDocumento.dados[campo.id] = campo.value;
+                }
+            });
+
+            // Salvar no localStorage (em produção, enviar para servidor)
+            const documentosSalvos = JSON.parse(localStorage.getItem('cadernoDigital') || '[]');
+            documentosSalvos.push(dadosDocumento);
+            localStorage.setItem('cadernoDigital', JSON.stringify(documentosSalvos));
+
+            alert('Documento salvo com sucesso!');
+        }
+
+        function exportarPDF() {
+            alert('Exportando para PDF... (Funcionalidade em desenvolvimento)');
+        }
+
+        function sincronizar() {
+            alert('Sincronizando com o servidor... (Funcionalidade em desenvolvimento)');
+        }
+
+        // Carregar pacientes ao inicializar
+        window.onload = function() {
+            // Inicializar caderno digital
+            cadernoDigital.inicializar();
+            
+            // Simular carregamento de pacientes
+            const pacientes = [
+                'João Silva',
+                'Maria Santos', 
+                'Pedro Oliveira',
+                'Ana Costa'
+            ];
+
+            const select = document.getElementById('pacienteSelect');
+            pacientes.forEach(paciente => {
+                const option = document.createElement('option');
+                option.value = paciente;
+                option.textContent = paciente;
+                select.appendChild(option);
+            });
+        };
+    </script>
+</body>
+</html>
