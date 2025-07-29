@@ -362,6 +362,70 @@ app.post('/api/aprovar-usuario', async (req, res) => {
     }
 });
 
+// Listar usuários pendentes
+app.get('/api/usuarios-pendentes', async (req, res) => {
+    try {
+        const pendingSheet = doc.sheetsByTitle['Pending'];
+        const rows = await pendingSheet.getRows();
+        
+        const usuariosPendentes = rows.map((row, index) => ({
+            id: row.email || index, // Usar email como ID único
+            nome: row.nome || '',
+            email: row.email || '',
+            telefone: row.telefone || '',
+            tipo: row.role || 'usuario',
+            status: 'pending',
+            autorizado: 'nao',
+            created_at: row.dataRegistro || new Date().toISOString()
+        }));
+        
+        res.json({
+            success: true,
+            usuarios: usuariosPendentes
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar usuários pendentes:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno do servidor',
+            usuarios: []
+        });
+    }
+});
+
+// Listar usuários cadastrados
+app.get('/api/listar-usuarios', async (req, res) => {
+    try {
+        const usuarioSheet = doc.sheetsByTitle['Usuario'];
+        const rows = await usuarioSheet.getRows();
+        
+        const usuarios = rows.map(row => ({
+            email: row.email || '',
+            nome: row.nome || '',
+            role: row.role || 'usuario',
+            autorizado: row.autorizado || 'nao',
+            status: row.status || 'ativo',
+            dataRegistro: row.dataRegistro || ''
+        }));
+        
+        res.json({
+            sucesso: true,
+            total: usuarios.length,
+            usuarios: usuarios
+        });
+        
+    } catch (error) {
+        console.error('Erro ao listar usuários:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            message: 'Erro interno do servidor',
+            total: 0,
+            usuarios: []
+        });
+    }
+});
+
 // Servir páginas HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

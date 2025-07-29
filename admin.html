@@ -595,11 +595,8 @@
                         </div>
                     `;
                     
-                    // Recarregar listas
-                    setTimeout(() => {
-                        carregarUsuarios();
-                        carregarUsuariosPendentes();
-                    }, 2000);
+                    // Recarregar apenas lista de usuários cadastrados (não a de pendentes)
+                    carregarUsuarios();
                 } else {
                     alert('❌ Erro ao aprovar usuário: ' + result.message);
                 }
