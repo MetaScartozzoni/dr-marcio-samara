@@ -411,25 +411,76 @@ app.post('/api/cadastro', async (req, res) => {
 app.post('/api/recuperar-senha', async (req, res) => {
     try {
         const { email } = req.body;
+        console.log('🔄 Solicitação de recuperação para:', email);
         
         const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
         
         if (result.rows.length === 0) {
             return res.json({
                 success: false,
-                message: 'Email não encontrado'
+                message: 'Email não encontrado em nossa base de dados'
             });
         }
         
-        // Aqui você enviaria um email real
+        const user = result.rows[0];
+        
+        // Gerar token temporário (em produção, use JWT ou similar)
+        const resetToken = Math.random().toString(36).substring(2, 15);
+        const resetLink = `https://portal-dr-marcio-production.up.railway.app/nova-senha.html?token=${resetToken}&email=${encodeURIComponent(email)}`;
+        
+        // Enviar email via SendGrid
+        const sgMail = require('@sendgrid/mail');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const emailContent = {
+            to: email,
+            from: process.env.EMAIL_FROM,
+            subject: 'Recuperação de Senha - Portal Dr. Marcio',
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2 style="color: #2c3e50;">🔐 Recuperação de Senha</h2>
+                    <p>Olá <strong>${user.nome}</strong>,</p>
+                    <p>Recebemos uma solicitação para redefinir sua senha no Portal Dr. Marcio.</p>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetLink}" 
+                           style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                            Redefinir Senha
+                        </a>
+                    </div>
+                    
+                    <p><strong>Ou copie e cole este link:</strong></p>
+                    <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px;">
+                        ${resetLink}
+                    </p>
+                    
+                    <hr style="margin: 30px 0;">
+                    <p style="color: #666; font-size: 12px;">
+                        Se você não solicitou esta recuperação, ignore este email.<br>
+                        Este link expira em 24 horas por segurança.
+                    </p>
+                    
+                    <p style="color: #666; font-size: 12px;">
+                        <strong>Portal Dr. Marcio</strong><br>
+                        ${process.env.ENDERECO_CLINICA || 'Rua Dr. Marcio, 123'}<br>
+                        ${process.env.TELEFONE_CLINICA || '(11) 99999-9999'}
+                    </p>
+                </div>
+            `
+        };
+        
+        await sgMail.send(emailContent);
+        console.log('✅ Email de recuperação enviado para:', email);
+        
         res.json({
             success: true,
-            message: 'Link de recuperação enviado para seu email'
+            message: 'Instruções de recuperação enviadas para seu email!'
         });
     } catch (error) {
+        console.error('❌ Erro ao recuperar senha:', error);
         res.json({
             success: false,
-            message: 'Erro ao recuperar senha',
+            message: 'Erro ao enviar email de recuperação. Tente novamente.',
             error: error.message
         });
     }
