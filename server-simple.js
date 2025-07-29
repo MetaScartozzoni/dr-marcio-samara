@@ -1,10 +1,70 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configuração do PostgreSQL
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// Função para inicializar o banco de dados
+async function initializeDatabase() {
+    try {
+        // Criar tabela de usuários
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id SERIAL PRIMARY KEY,
+                nome VARCHAR(255) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                senha VARCHAR(255) NOT NULL,
+                telefone VARCHAR(20),
+                cpf VARCHAR(14),
+                tipo VARCHAR(50) DEFAULT 'paciente',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Criar tabela de consultas
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS consultas (
+                id SERIAL PRIMARY KEY,
+                paciente_id INTEGER REFERENCES usuarios(id),
+                data_consulta TIMESTAMP NOT NULL,
+                tipo_consulta VARCHAR(100),
+                observacoes TEXT,
+                status VARCHAR(50) DEFAULT 'agendada',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Criar usuário admin se não existir
+        const adminExists = await pool.query('SELECT * FROM usuarios WHERE email = $1', ['admin@mscartozzoni.com.br']);
+        
+        if (adminExists.rows.length === 0) {
+            const hashedPassword = await bcrypt.hash('123456', 10);
+            await pool.query(
+                'INSERT INTO usuarios (nome, email, senha, tipo) VALUES ($1, $2, $3, $4)',
+                ['Dr. Marcio Scartozzoni', 'admin@mscartozzoni.com.br', hashedPassword, 'admin']
+            );
+            console.log('✅ Usuário admin criado');
+        }
+
+        console.log('✅ Banco de dados inicializado');
+    } catch (error) {
+        console.error('❌ Erro ao inicializar banco:', error);
+    }
+}
+
+// Inicializar banco na inicialização
+initializeDatabase();
 
 // Middleware básico
 app.use(cors());
@@ -192,77 +252,142 @@ app.get('/lgpd', (req, res) => {
 // === ROTAS DE API PARA FUNCIONALIDADES ===
 
 // Verificar se email já existe
-app.post('/api/verificar-email', (req, res) => {
-    const { email } = req.body;
-    
-    // Simulação - em produção seria consulta no banco
-    const emailsExistentes = [
-        'admin@mscartozzoni.com.br',
-        'teste@exemplo.com'
-    ];
-    
-    const existe = emailsExistentes.includes(email);
-    
-    res.json({
-        success: true,
-        existe: existe,
-        message: existe ? 'Email já cadastrado' : 'Email disponível'
-    });
+app.post('/api/verificar-email', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        const existe = result.rows.length > 0;
+        
+        res.json({
+            success: true,
+            existe: existe,
+            message: existe ? 'Email já cadastrado' : 'Email disponível'
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro ao verificar email',
+            error: error.message
+        });
+    }
 });
 
 // Login de usuário
-app.post('/api/login', (req, res) => {
-    const { email, senha } = req.body;
-    
-    // Simulação - em produção seria consulta no banco com hash
-    if (email === 'admin@mscartozzoni.com.br' && senha === '123456') {
-        res.json({
-            success: true,
-            message: 'Login realizado com sucesso',
-            user: {
-                id: 1,
-                nome: 'Dr. Marcio Scartozzoni',
-                email: email,
-                tipo: 'admin'
-            },
-            redirect: '/painel'
-        });
-    } else {
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, senha } = req.body;
+        
+        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (result.rows.length === 0) {
+            return res.json({
+                success: false,
+                message: 'Email não encontrado'
+            });
+        }
+        
+        const user = result.rows[0];
+        const senhaValida = await bcrypt.compare(senha, user.senha);
+        
+        if (senhaValida) {
+            res.json({
+                success: true,
+                message: 'Login realizado com sucesso',
+                user: {
+                    id: user.id,
+                    nome: user.nome,
+                    email: user.email,
+                    tipo: user.tipo
+                },
+                redirect: '/painel'
+            });
+        } else {
+            res.json({
+                success: false,
+                message: 'Senha incorreta'
+            });
+        }
+    } catch (error) {
         res.json({
             success: false,
-            message: 'Email ou senha incorretos'
+            message: 'Erro ao fazer login',
+            error: error.message
         });
     }
 });
 
 // Cadastro de paciente
-app.post('/api/cadastro', (req, res) => {
-    const { nome, email, telefone, cpf, senha } = req.body;
-    
-    // Simulação de salvamento
-    console.log('Novo cadastro:', { nome, email, telefone, cpf });
-    
-    res.json({
-        success: true,
-        message: 'Cadastro realizado com sucesso!',
-        user: {
-            id: Date.now(), // ID temporário
-            nome,
-            email,
-            telefone,
-            cpf
+app.post('/api/cadastro', async (req, res) => {
+    try {
+        const { nome, email, telefone, cpf, senha } = req.body;
+        
+        // Verificar se email já existe
+        const emailExists = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        if (emailExists.rows.length > 0) {
+            return res.json({
+                success: false,
+                message: 'Email já cadastrado'
+            });
         }
-    });
+        
+        // Hash da senha
+        const hashedPassword = await bcrypt.hash(senha, 10);
+        
+        // Inserir usuário
+        const result = await pool.query(
+            'INSERT INTO usuarios (nome, email, telefone, cpf, senha, tipo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+            [nome, email, telefone, cpf, hashedPassword, 'paciente']
+        );
+        
+        const user = result.rows[0];
+        
+        res.json({
+            success: true,
+            message: 'Cadastro realizado com sucesso!',
+            user: {
+                id: user.id,
+                nome: user.nome,
+                email: user.email,
+                telefone: user.telefone,
+                cpf: user.cpf
+            }
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro ao cadastrar usuário',
+            error: error.message
+        });
+    }
 });
 
 // Recuperar senha
-app.post('/api/recuperar-senha', (req, res) => {
-    const { email } = req.body;
-    
-    res.json({
-        success: true,
-        message: 'Link de recuperação enviado para seu email'
-    });
+app.post('/api/recuperar-senha', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (result.rows.length === 0) {
+            return res.json({
+                success: false,
+                message: 'Email não encontrado'
+            });
+        }
+        
+        // Aqui você enviaria um email real
+        res.json({
+            success: true,
+            message: 'Link de recuperação enviado para seu email'
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro ao recuperar senha',
+            error: error.message
+        });
+    }
 });
 
 // Enviar email real via SendGrid
