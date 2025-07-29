@@ -152,6 +152,112 @@ app.get('/painel', (req, res) => {
     `);
 });
 
+// === ROTAS DE API PARA FUNCIONALIDADES ===
+
+// Verificar se email já existe
+app.post('/api/verificar-email', (req, res) => {
+    const { email } = req.body;
+    
+    // Simulação - em produção seria consulta no banco
+    const emailsExistentes = [
+        'admin@mscartozzoni.com.br',
+        'teste@exemplo.com'
+    ];
+    
+    const existe = emailsExistentes.includes(email);
+    
+    res.json({
+        success: true,
+        existe: existe,
+        message: existe ? 'Email já cadastrado' : 'Email disponível'
+    });
+});
+
+// Login de usuário
+app.post('/api/login', (req, res) => {
+    const { email, senha } = req.body;
+    
+    // Simulação - em produção seria consulta no banco com hash
+    if (email === 'admin@mscartozzoni.com.br' && senha === '123456') {
+        res.json({
+            success: true,
+            message: 'Login realizado com sucesso',
+            user: {
+                id: 1,
+                nome: 'Dr. Marcio Scartozzoni',
+                email: email,
+                tipo: 'admin'
+            },
+            redirect: '/painel'
+        });
+    } else {
+        res.json({
+            success: false,
+            message: 'Email ou senha incorretos'
+        });
+    }
+});
+
+// Cadastro de paciente
+app.post('/api/cadastro', (req, res) => {
+    const { nome, email, telefone, cpf, senha } = req.body;
+    
+    // Simulação de salvamento
+    console.log('Novo cadastro:', { nome, email, telefone, cpf });
+    
+    res.json({
+        success: true,
+        message: 'Cadastro realizado com sucesso!',
+        user: {
+            id: Date.now(), // ID temporário
+            nome,
+            email,
+            telefone,
+            cpf
+        }
+    });
+});
+
+// Recuperar senha
+app.post('/api/recuperar-senha', (req, res) => {
+    const { email } = req.body;
+    
+    res.json({
+        success: true,
+        message: 'Link de recuperação enviado para seu email'
+    });
+});
+
+// Enviar email real via SendGrid
+app.post('/api/enviar-email', async (req, res) => {
+    try {
+        const sgMail = require('@sendgrid/mail');
+        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        const { to, subject, html } = req.body;
+        
+        const msg = {
+            to: to || process.env.EMAIL_FROM,
+            from: process.env.EMAIL_FROM,
+            subject: subject || 'Teste do Portal Dr. Marcio',
+            html: html || '<h1>Email de teste do Portal Dr. Marcio</h1><p>Sistema funcionando perfeitamente!</p>'
+        };
+        
+        await sgMail.send(msg);
+        
+        res.json({
+            success: true,
+            message: 'Email enviado com sucesso!'
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: 'Erro ao enviar email',
+            error: error.message
+        });
+    }
+});
+
 // Teste SendGrid
 app.get('/api/email/test', async (req, res) => {
     try {
