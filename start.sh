@@ -13,5 +13,5 @@ if [ -z "$SENDGRID_API_KEY" ]; then
   echo "⚠️  SENDGRID_API_KEY não configurado"
 fi
 
-# Iniciar aplicação
-exec node server.js
+# Iniciar aplicação SIMPLIFICADA
+exec node server-simple.js
