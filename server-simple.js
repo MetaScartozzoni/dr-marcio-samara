@@ -152,6 +152,43 @@ app.get('/painel', (req, res) => {
     `);
 });
 
+// === ROTAS PARA REDIRECIONAMENTOS (sem .html) ===
+
+// Redirecionar /senha para /senha.html
+app.get('/senha', (req, res) => {
+    res.redirect('/senha.html');
+});
+
+// Redirecionar /login para /login.html
+app.get('/login', (req, res) => {
+    res.redirect('/login.html');
+});
+
+// Redirecionar /cadastro para /cadastro.html
+app.get('/cadastro', (req, res) => {
+    res.redirect('/cadastro.html');
+});
+
+// Redirecionar /dashboard para /dashboard.html
+app.get('/dashboard', (req, res) => {
+    res.redirect('/dashboard.html');
+});
+
+// Redirecionar /admin para /admin.html
+app.get('/admin', (req, res) => {
+    res.redirect('/admin.html');
+});
+
+// Redirecionar /gestao para /gestao.html
+app.get('/gestao', (req, res) => {
+    res.redirect('/gestao.html');
+});
+
+// Redirecionar /lgpd para /lgpd-compliance.html
+app.get('/lgpd', (req, res) => {
+    res.redirect('/lgpd-compliance.html');
+});
+
 // === ROTAS DE API PARA FUNCIONALIDADES ===
 
 // Verificar se email já existe
