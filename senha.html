@@ -146,7 +146,20 @@
                         window.location.href = '/login.html';
                     }, 3000);
                 } else {
-                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                    // Se email já cadastrado, mostrar link para login
+                    if (data.message && data.message.toLowerCase().includes('já cadastrado')) {
+                        message.innerHTML = `
+                            <div class="error">
+                                ${data.message}
+                                <br><br>
+                                <a href="/login.html" class="btn-secondary" style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                    Fazer Login
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        message.innerHTML = '<div class="error">' + data.message + '</div>';
+                    }
                 }
             } catch (error) {
                 console.error('❌ Erro:', error);

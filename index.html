@@ -51,21 +51,18 @@
                 
                 const data = await response.json();
                 
-                if (data.existe) {
-                    // Email cadastrado - verificar se tem senha
-                    localStorage.setItem('tempEmail', email);
-                    
-                    if (data.temSenha) {
-                        // Tem senha - ir para login
-                        window.location.href = '/login?email=' + encodeURIComponent(email);
+                if (data.success) {
+                    if (data.existe) {
+                        // Email já cadastrado - redirecionar para login
+                        localStorage.setItem('tempEmail', email);
+                        window.location.href = '/login.html?email=' + encodeURIComponent(email);
                     } else {
-                        // Não tem senha - ir direto para criar senha
-                        window.location.href = '/senha?email=' + encodeURIComponent(email);
+                        // Email não cadastrado - redirecionar para cadastro
+                        localStorage.setItem('tempEmail', email);
+                        window.location.href = '/senha.html?email=' + encodeURIComponent(email);
                     }
                 } else {
-                    // Email não cadastrado - salvar email e redirecionar para cadastro
-                    localStorage.setItem('tempEmail', email);
-                    window.location.href = '/cadastro?email=' + encodeURIComponent(email);
+                    message.innerHTML = '<div class="error">' + data.message + '</div>';
                 }
             } catch (error) {
                 message.innerHTML = '<div class="error">Erro ao verificar email. Tente novamente.</div>';
