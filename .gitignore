@@ -11,6 +11,24 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Credenciais e chaves privadas - NUNCA COMMITAR!
+credentials.json
+*-credentials.json
+client_secret_*.json
+awesome-aurora-*.json
+service-account-*.json
+
+# Chaves de API e tokens
+*.key
+*.pem
+*.p12
+
+# Arquivos seguros (PODEM ser commitados):
+# package.json
+# package-lock.json  
+# railway.json
+# cors-config.json
+
 # Logs
 logs
 *.log
