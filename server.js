@@ -285,6 +285,83 @@ app.post('/api/atualizar-autorizacao', async (req, res) => {
     }
 });
 
+// Aprovar usuário pendente
+app.post('/api/aprovar-usuario', async (req, res) => {
+    try {
+        const { userId, tipo } = req.body;
+        
+        // Validar dados de entrada
+        if (!userId || !tipo) {
+            return res.status(400).json({ success: false, message: 'UserId e tipo são obrigatórios' });
+        }
+        
+        // Validar tipo (role)
+        const tiposPermitidos = ['admin', 'funcionario', 'usuario'];
+        if (!tiposPermitidos.includes(tipo)) {
+            return res.status(400).json({ success: false, message: 'Tipo deve ser admin, funcionario ou usuario' });
+        }
+        
+        const pendingSheet = doc.sheetsByTitle['Pending'];
+        const usuarioSheet = doc.sheetsByTitle['Usuario'];
+        
+        // Buscar usuário na tabela Pending pelo userId
+        const pendingRows = await pendingSheet.getRows();
+        const usuarioPendente = pendingRows.find(row => row.userId === userId || row.email === userId);
+        
+        if (!usuarioPendente) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado na lista de pendentes' });
+        }
+        
+        const email = usuarioPendente.email;
+        const nome = usuarioPendente.nome;
+        
+        // Verificar se já existe na tabela Usuario
+        const usuarioRows = await usuarioSheet.getRows();
+        const usuarioExistente = usuarioRows.find(row => row.email === email);
+        
+        if (usuarioExistente) {
+            // Se já existe, apenas atualizar
+            usuarioExistente.nome = nome;
+            usuarioExistente.role = tipo;
+            usuarioExistente.autorizado = 'sim';
+            usuarioExistente.status = 'ativo';
+            await usuarioExistente.save();
+        } else {
+            // Criar novo usuário na tabela Usuario
+            await usuarioSheet.addRow({
+                email: email,
+                nome: nome,
+                role: tipo,
+                autorizado: 'sim',
+                status: 'ativo',
+                senha: usuarioPendente.senha || '', // Manter senha se existir
+                dataRegistro: usuarioPendente.dataRegistro || new Date().toISOString()
+            });
+        }
+        
+        // Remover da tabela Pending
+        await usuarioPendente.delete();
+        
+        console.log(`Usuário aprovado e movido: ${email} -> Role: ${tipo}`);
+        
+        res.json({ 
+            success: true, 
+            message: `Usuário ${nome} aprovado com sucesso como ${tipo}`,
+            email: email,
+            nome: nome,
+            tipo: tipo
+        });
+        
+    } catch (error) {
+        console.error('Erro ao aprovar usuário:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno do servidor', 
+            detalhes: error.message 
+        });
+    }
+});
+
 // Servir páginas HTML
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
