@@ -121,8 +121,15 @@
                 
                 if (data.success) {
                     message.innerHTML = '<div class="success">' + data.message + '</div>';
+                    
+                    // Se houver dados do usuário, salvá-los para auto-login
+                    if (data.user) {
+                        localStorage.setItem('userInfo', JSON.stringify(data.user));
+                    }
+                    
                     setTimeout(() => {
-                        window.location.href = '/login.html';
+                        // Usar o redirect definido pelo servidor
+                        window.location.href = data.redirect || '/login.html';
                     }, 2000);
                 } else {
                     message.innerHTML = '<div class="error">' + data.message + '</div>';

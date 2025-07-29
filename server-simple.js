@@ -341,9 +341,9 @@ app.post('/api/login', async (req, res) => {
         
         if (senhaValida) {
             // Definir redirecionamento baseado no tipo de usuário
-            let redirectUrl = '/dashboard.html';
+            let redirectUrl = '/dashboard.html'; // Dashboard universal que detecta o tipo
             
-            // Se não for admin, redirecionar para página de pendência
+            // Admin vai direto para dashboard, outros vão para pending
             if (user.email !== 'admin@clinica.com') {
                 redirectUrl = '/pending.html';
             }
@@ -355,7 +355,7 @@ app.post('/api/login', async (req, res) => {
                     id: user.id,
                     nome: user.nome,
                     email: user.email,
-                    tipo: user.tipo,
+                    tipo: user.email === 'admin@clinica.com' ? 'admin' : 'paciente',
                     status: user.email === 'admin@clinica.com' ? 'ativo' : 'pending',
                     autorizado: user.autorizado
                 },
@@ -372,6 +372,45 @@ app.post('/api/login', async (req, res) => {
             success: false,
             message: 'Erro ao fazer login',
             error: error.message
+        });
+    }
+});
+
+// Endpoint para inicializar/atualizar estrutura do banco
+app.post('/api/init-db', async (req, res) => {
+    try {
+        console.log('🔧 Iniciando atualização do banco...');
+        
+        // Adicionar coluna status se não existir
+        await pool.query(`
+            ALTER TABLE usuarios 
+            ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'ativo'
+        `);
+        
+        // Definir admin padrão como ativo
+        await pool.query(`
+            UPDATE usuarios 
+            SET status = 'ativo', tipo = 'admin', autorizado = true
+            WHERE email = 'admin@clinica.com'
+        `);
+        
+        // Definir outros usuários como pending se não tiverem status
+        await pool.query(`
+            UPDATE usuarios 
+            SET status = 'pending'
+            WHERE status IS NULL AND email != 'admin@clinica.com'
+        `);
+        
+        console.log('✅ Estrutura do banco atualizada');
+        res.json({
+            success: true,
+            message: 'Banco de dados atualizado com sucesso!'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao atualizar banco:', error);
+        res.json({
+            success: false,
+            message: 'Erro ao atualizar banco: ' + error.message
         });
     }
 });
@@ -403,26 +442,39 @@ app.post('/api/cadastro', async (req, res) => {
         // Hash da senha
         const hashedPassword = await bcrypt.hash(senha, 10);
         
-        // Inserir usuário
+        // Definir tipo e status baseado no email
+        const isAdmin = email === 'admin@clinica.com';
+        const tipo = isAdmin ? 'admin' : 'paciente';
+        const status = isAdmin ? 'ativo' : 'pending';
+        
+        // Inserir usuário com status
         const result = await pool.query(
-            'INSERT INTO usuarios (nome, email, telefone, cpf, senha, tipo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [nome, email, telefone || null, cpf || null, hashedPassword, 'paciente']
+            'INSERT INTO usuarios (nome, email, telefone, cpf, senha, tipo, status, autorizado) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [nome, email, telefone || null, cpf || null, hashedPassword, tipo, status, isAdmin]
         );
         
         const user = result.rows[0];
-        console.log('✅ Usuário criado:', user.id);
+        console.log('✅ Usuário criado:', user.id, 'Status:', status);
+        
+        // Definir redirecionamento baseado no status
+        let redirectUrl = isAdmin ? '/dashboard.html' : '/pending.html';
+        let message = isAdmin ? 
+            'Cadastro realizado! Bem-vindo, administrador!' : 
+            'Cadastro realizado! Aguarde aprovação do administrador.';
         
         res.json({
             success: true,
-            message: 'Cadastro realizado com sucesso!',
+            message: message,
             user: {
                 id: user.id,
                 nome: user.nome,
                 email: user.email,
                 telefone: user.telefone,
-                cpf: user.cpf
+                cpf: user.cpf,
+                tipo: tipo,
+                status: status
             },
-            redirect: '/login.html'
+            redirect: redirectUrl
         });
     } catch (error) {
         console.error('❌ Erro no cadastro:', error);
