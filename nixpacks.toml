@@ -1,15 +1,11 @@
 [phases.setup]
-nixPkgs = ['nodejs-18_x', 'npm-9_x', 'dumb-init']
+nixPkgs = ['nodejs-18_x']
 
 [phases.install]
 cmds = ['npm ci --only=production']
 
-[phases.build]
-cmds = ['npm run build']
-
 [start]
-cmd = 'dumb-init npm start'
+cmd = 'node server.js'
 
 [variables]
 NODE_ENV = 'production'
-NPM_CONFIG_PRODUCTION = 'true'
