@@ -1,0 +1,36 @@
+3.1 Estrutura do Projeto
+backend/
+├── src/
+│   ├── controllers/
+│   │   ├── auth.controller.js
+│   │   ├── agendamento.controller.js
+│   │   ├── atendimento.controller.js
+│   │   ├── orcamento.controller.js
+│   │   └── dashboard.controller.js
+│   ├── middleware/
+│   │   ├── auth.middleware.js
+│   │   ├── validation.middleware.js
+│   │   └── error.middleware.js
+│   ├── models/
+│   │   ├── Usuario.js
+│   │   ├── Agendamento.js
+│   │   ├── Atendimento.js
+│   │   └── Orcamento.js
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── agendamento.routes.js
+│   │   ├── atendimento.routes.js
+│   │   └── orcamento.routes.js
+│   ├── services/
+│   │   ├── email.service.js
+│   │   ├── sms.service.js
+│   │   ├── pdf.service.js
+│   │   └── payment.service.js
+│   ├── utils/
+│   │   ├── database.js
+│   │   ├── cache.js
+│   │   └── logger.js
+│   └── app.js
+├── tests/
+├── docs/
+└── package.json

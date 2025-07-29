@@ -1,0 +1,45 @@
+4.1 Estrutura React
+frontend/
+├── public/
+├── src/
+│   ├── components/
+│   │   ├── common/
+│   │   │   ├── Header.jsx
+│   │   │   ├── Sidebar.jsx
+│   │   │   └── Loading.jsx
+│   │   ├── agendamento/
+│   │   │   ├── CalendarioAgendamento.jsx
+│   │   │   ├── FormularioAgendamento.jsx
+│   │   │   └── ListaAgendamentos.jsx
+│   │   ├── atendimento/
+│   │   │   ├── FichaAtendimento.jsx
+│   │   │   ├── HistoricoPaciente.jsx
+│   │   │   └── UploadFotos.jsx
+│   │   ├── orcamento/
+│   │   │   ├── FormularioOrcamento.jsx
+│   │   │   ├── VisualizadorOrcamento.jsx
+│   │   │   └── ListaOrcamentos.jsx
+│   │   └── dashboard/
+│   │       ├── DashboardCards.jsx
+│   │       ├── GraficoAgendamentos.jsx
+│   │       └── TabelaResumo.jsx
+│   ├── pages/
+│   │   ├── Login.jsx
+│   │   ├── Dashboard.jsx
+│   │   ├── Agendamentos.jsx
+│   │   ├── Atendimentos.jsx
+│   │   └── Orcamentos.jsx
+│   ├── store/
+│   │   ├── index.js
+│   │   ├── authSlice.js
+│   │   ├── agendamentoSlice.js
+│   │   └── orcamentoSlice.js
+│   ├── services/
+│   │   ├── api.js
+│   │   ├── auth.service.js
+│   │   └── agendamento.service.js
+│   └── utils/
+│       ├── formatters.js
+│       ├── validators.js
+│       └── constants.js
+└── package.json

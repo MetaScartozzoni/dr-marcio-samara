@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="gestao-style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <h1>Gestão - Portal Dr. Marcio</h1>
+            <div class="header-actions">
+                <button onclick="atualizarDados()" class="btn-refresh">🔄 Atualizar</button>
+                <button onclick="exportarDados()" class="btn-export">📊 Exportar</button>
+            </div>
+        </header>
+
+        <div class="filters-section">
+            <h2>Filtros</h2>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filtroId">ID Paciente:</label>
+                    <input type="text" id="filtroId" placeholder="Digite o ID">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroNome">Nome do Paciente:</label>
+                    <input type="text" id="filtroNome" placeholder="Digite o nome">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroDataInicio">Data Criação (Início):</label>
+                    <input type="date" id="filtroDataInicio">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroDataFim">Data Criação (Fim):</label>
+                    <input type="date" id="filtroDataFim">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroStatus">Status Geral:</label>
+                    <select id="filtroStatus">
+                        <option value="">Todos</option>
+                        <option value="Novo">Novo</option>
+                        <option value="Em Atendimento">Em Atendimento</option>
+                        <option value="Aguardando Pagamento">Aguardando Pagamento</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Concluído">Concluído</option>
+                        <option value="Cancelado">Cancelado</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button onclick="aplicarFiltros()" class="btn-primary">Aplicar Filtros</button>
+                    <button onclick="limparFiltros()" class="btn-secondary">Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <h3>Total de Pacientes</h3>
+                <div class="stat-number" id="totalPacientes">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Agendamentos Hoje</h3>
+                <div class="stat-number" id="agendamentosHoje">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Orçamentos Pendentes</h3>
+                <div class="stat-number" id="orcamentosPendentes">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3>Pagamentos Pendentes</h3>
+                <div class="stat-number" id="pagamentosPendentes">0</div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h2>Gestão de Pacientes</h2>
+                <button onclick="adicionarPaciente()" class="btn-add">+ Adicionar Paciente</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="tabelaGestao">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Data Criação</th>
+                            <th>Última Update</th>
+                            <th>Agendamento</th>
+                            <th>Status Agend.</th>
+                            <th>Consulta</th>
+                            <th>Orçamento</th>
+                            <th>Status Aceite</th>
+                            <th>Pagamento</th>
+                            <th>Status Geral</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela">
+                        <!-- Dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Carregando dados...
+        </div>
+    </div>
+
+    <!-- Modal para edição -->
+    <div id="modalEdicao" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Paciente</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formEdicao">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="editNome">Nome:</label>
+                            <input type="text" id="editNome" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoData">Data Agendamento:</label>
+                            <input type="date" id="editAgendamentoData">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoHora">Hora Agendamento:</label>
+                            <input type="time" id="editAgendamentoHora">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoStatus">Status Agendamento:</label>
+                            <select id="editAgendamentoStatus">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="Reagendado">Reagendado</option>
+                                <option value="Cancelado">Cancelado</option>
+                                <option value="Realizado">Realizado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editConsultaStatus">Status Consulta:</label>
+                            <select id="editConsultaStatus">
+                                <option value="Não Realizada">Não Realizada</option>
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Concluída">Concluída</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoStatus">Status Orçamento:</label>
+                            <select id="editOrcamentoStatus">
+                                <option value="Não Enviado">Não Enviado</option>
+                                <option value="Em Elaboração">Em Elaboração</option>
+                                <option value="Enviado">Enviado</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                                <option value="Expirado">Expirado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoPdf">Link PDF Orçamento:</label>
+                            <input type="url" id="editOrcamentoPdf" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoAceite">Link Aceite:</label>
+                            <input type="url" id="editOrcamentoAceite" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editStatusAceite">Status Aceite:</label>
+                            <select id="editStatusAceite">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                                <option value="Expirado">Expirado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editValorEntrada">Valor Entrada:</label>
+                            <input type="number" id="editValorEntrada" step="0.01" placeholder="0.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editComprovante">Comprovante Pagamento:</label>
+                            <input type="url" id="editComprovante" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editStatusGeral">Status Geral:</label>
+                            <select id="editStatusGeral">
+                                <option value="Novo">Novo</option>
+                                <option value="Em Atendimento">Em Atendimento</option>
+                                <option value="Aguardando Pagamento">Aguardando Pagamento</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Concluído">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="editObservacao">Observações:</label>
+                            <textarea id="editObservacao" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Salvar</button>
+                        <button type="button" onclick="fecharModal()" class="btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="gestao-script.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Usuários - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .section {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Gerenciar Usuários</h1>
+            <p>Atualize roles e autorizações dos usuários</p>
+            
+            <!-- Seção: Atualizar Role -->
+            <div class="section">
+                <h2>🔧 Atualizar Tipo de Usuário (Role)</h2>
+                <form id="updateRoleForm">
+                    <div class="input-group">
+                        <label for="email">Email do Usuário:</label>
+                        <input type="email" id="email" name="email" required placeholder="Digite o email do usuário">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="novoRole">Novo Tipo de Usuário:</label>
+                        <select id="novoRole" name="novoRole" required>
+                            <option value="">Selecione o novo role</option>
+                            <option value="patient">Paciente</option>
+                            <option value="staff">Funcionário</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Atualizar Role</button>
+                </form>
+            </div>
+
+            <!-- Seção: Atualizar Autorização -->
+            <div class="section" style="margin-top: 40px;">
+                <h2>✅ Autorizar/Desautorizar Usuário</h2>
+                <form id="updateAuthForm">
+                    <div class="input-group">
+                        <label for="emailAuth">Email do Usuário:</label>
+                        <input type="email" id="emailAuth" name="emailAuth" required placeholder="Digite o email do usuário">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="autorizado">Status de Autorização:</label>
+                        <select id="autorizado" name="autorizado" required>
+                            <option value="">Selecione o status</option>
+                            <option value="sim">✅ Autorizado</option>
+                            <option value="nao">❌ Não Autorizado</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Atualizar Autorização</button>
+                </form>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Processando...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="info-section" style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+                <h3>Exemplos de uso:</h3>
+                <ul>
+                    <li><strong>Roles:</strong> administracao@mscartozzoni.com.br → Administrador</li>
+                    <li><strong>Autorização:</strong> Novos usuários começam como "Não Autorizado"</li>
+                    <li><strong>Fluxo:</strong> Cadastro → Autorizar → Login permitido</li>
+                </ul>
+            </div>
+            
+            <p class="text-center" style="margin-top: 20px;">
+                <a href="/" class="link">Voltar ao Portal</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Atualizar Role
+        document.getElementById('updateRoleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const novoRole = document.getElementById('novoRole').value;
+            
+            await processarRequest('/api/atualizar-role', { email, novoRole }, 'Role');
+        });
+
+        // Atualizar Autorização
+        document.getElementById('updateAuthForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('emailAuth').value;
+            const autorizado = document.getElementById('autorizado').value;
+            
+            await processarRequest('/api/atualizar-autorizacao', { email, autorizado }, 'Autorização');
+        });
+
+        // Função comum para processar requests
+        async function processarRequest(url, data, tipo) {
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.sucesso) {
+                    if (tipo === 'Role') {
+                        message.innerHTML = `
+                            <div class="success">
+                                ✅ Role atualizado com sucesso!<br>
+                                <strong>Email:</strong> ${result.email}<br>
+                                <strong>De:</strong> ${result.roleAnterior} → <strong>Para:</strong> ${result.novoRole}
+                            </div>
+                        `;
+                        document.getElementById('updateRoleForm').reset();
+                    } else if (tipo === 'Autorização') {
+                        message.innerHTML = `
+                            <div class="success">
+                                ✅ Autorização atualizada com sucesso!<br>
+                                <strong>Email:</strong> ${result.email}<br>
+                                <strong>De:</strong> ${result.autorizacaoAnterior} → <strong>Para:</strong> ${result.novaAutorizacao}
+                            </div>
+                        `;
+                        document.getElementById('updateAuthForm').reset();
+                    }
+                } else {
+                    message.innerHTML = '<div class="error">' + result.erro + '</div>';
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao atualizar ' + tipo.toLowerCase() + '. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

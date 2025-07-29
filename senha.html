@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Senha - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Criar Senha</h1>
+            <p>Crie uma senha para acessar o sistema</p>
+            
+            <form id="senhaForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required readonly>
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Nova Senha:</label>
+                    <input type="password" id="senha" name="senha" required minlength="6">
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirmarSenha">Confirmar Senha:</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn-primary">Criar Senha</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Criando senha...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div id="sucesso" style="display: none;" class="success-container">
+                <div class="success">Senha criada com sucesso!</div>
+                <button onclick="window.location.href='/login'" class="btn-primary">
+                    Ir para Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Capturar email da URL ou localStorage
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+            const emailFromStorage = localStorage.getItem('tempEmail');
+            
+            const emailInput = document.getElementById('email');
+            
+            if (emailFromUrl) {
+                emailInput.value = emailFromUrl;
+                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            } else if (emailFromStorage) {
+                emailInput.value = emailFromStorage;
+                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            }
+            
+            // Se ainda não tem email, redirecionar para login
+            if (!emailInput.value) {
+                alert('Sessão expirada. Faça login novamente.');
+                window.location.href = '/login';
+            }
+        };
+        
+        document.getElementById('senhaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            const sucesso = document.getElementById('sucesso');
+            
+            // Validar senhas
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem</div>';
+                return;
+            }
+            
+            if (senha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/criar-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    document.getElementById('senhaForm').style.display = 'none';
+                    sucesso.style.display = 'block';
+                    
+                    // Redirecionar para login após 3 segundos
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 3000);
+                } else {
+                    message.innerHTML = '<div class="error">' + data.erro + '</div>';
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao criar senha. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Dr. Marcio - Verificação</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Portal Dr. Marcio</h1>
+            <p>Digite seu email para acessar o sistema</p>
+            
+            <form id="verificarForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Verificar Email</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Verificando...
+            </div>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('verificarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/verificar-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.existe) {
+                    // Email cadastrado - verificar se tem senha
+                    localStorage.setItem('tempEmail', email);
+                    
+                    if (data.temSenha) {
+                        // Tem senha - ir para login
+                        window.location.href = '/login?email=' + encodeURIComponent(email);
+                    } else {
+                        // Não tem senha - ir direto para criar senha
+                        window.location.href = '/senha?email=' + encodeURIComponent(email);
+                    }
+                } else {
+                    // Email não cadastrado - salvar email e redirecionar para cadastro
+                    localStorage.setItem('tempEmail', email);
+                    window.location.href = '/cadastro?email=' + encodeURIComponent(email);
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao verificar email. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

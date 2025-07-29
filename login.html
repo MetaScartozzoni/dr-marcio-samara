@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Login</h1>
+            <p>Faça login para acessar o portal</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Fazendo login...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="text-center">
+                <a href="/" class="link">Voltar à verificação de email</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+       // Preencher email automaticamente se vier da verificação
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+            const emailFromStorage = localStorage.getItem('tempEmail');
+            
+            const emailInput = document.getElementById('email');
+            
+            if (emailFromUrl) {
+                emailInput.value = emailFromUrl;
+                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            } else if (emailFromStorage) {
+                emailInput.value = emailFromStorage;
+                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            }
+        };
+        
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                
+                if (data.precisaCriarSenha) {
+                    // Salvar email temporariamente e redirecionar
+                    localStorage.setItem('tempEmail', email);
+                    window.location.href = '/senha?email=' + encodeURIComponent(email);
+                } else if (data.sucesso) {
+                    // Salvar informações do usuário no localStorage
+                    localStorage.setItem('userInfo', JSON.stringify({
+                        full_name: data.full_name,
+                        role: data.role,
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    }));
+                    
+                    // Redirecionar para dashboard
+                    window.location.href = '/dashboard';
+                } else {
+                    message.innerHTML = '<div class="error">' + data.erro + '</div>';
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao fazer login. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
