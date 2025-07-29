@@ -734,15 +734,24 @@ app.get('/api/listar-usuarios', async (req, res) => {
     }
 });
 
-// API simples para usuários pendentes (simulação)
+// API para usuários pendentes - busca usuarios não autorizados ou com status pending/bloqueado
 app.get('/api/usuarios-pendentes', async (req, res) => {
     try {
-        // Por enquanto, retorna lista vazia pois não temos coluna status ainda
+        // Buscar usuários que precisam de aprovação
+        const result = await pool.query(`
+            SELECT id, nome, email, telefone, cpf, tipo, status, autorizado, created_at 
+            FROM usuarios 
+            WHERE (autorizado = false OR autorizado IS NULL OR status = 'pending' OR status = 'bloqueado')
+            AND email != 'admin@clinica.com'
+            ORDER BY created_at DESC
+        `);
+        
         res.json({
             success: true,
-            usuarios: []
+            usuarios: result.rows
         });
     } catch (error) {
+        console.error('❌ Erro ao buscar usuários pendentes:', error);
         res.json({
             success: false,
             message: 'Erro interno do servidor'

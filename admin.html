@@ -472,27 +472,51 @@
                     } else {
                         let html = '';
                         result.usuarios.forEach(user => {
+                            const statusInfo = user.autorizado ? 
+                                (user.status || 'ativo') : 
+                                (user.status || 'bloqueado');
+                            
+                            const statusClass = statusInfo === 'pending' ? 'badge-pending' : 
+                                               statusInfo === 'bloqueado' ? 'badge-admin' : 'badge-funcionario';
+                            
                             html += `
                                 <div class="pending-card" id="pending-${user.id}">
                                     <div class="pending-header">
                                         <div class="pending-info">
                                             <h4>👤 ${user.nome}</h4>
                                             <p>📧 ${user.email} ${user.telefone ? '📱 ' + user.telefone : ''}</p>
-                                            <p>📅 Cadastrado em: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
+                                            <p>📅 Cadastrado: ${new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
+                                            <p><strong>Tipo atual:</strong> <span class="status-badge ${user.tipo === 'admin' ? 'badge-admin' : user.tipo === 'funcionario' ? 'badge-funcionario' : 'badge-paciente'}">${user.tipo}</span></p>
+                                            <p><strong>Status:</strong> <span class="status-badge ${statusClass}">${statusInfo}</span></p>
+                                            <p><strong>Autorizado:</strong> ${user.autorizado ? '✅ Sim' : '❌ Não'}</p>
                                         </div>
                                         <div class="pending-actions">
                                             <button class="btn-approve" onclick="mostrarFormAprovacao(${user.id})">
-                                                ✅ Aprovar
+                                                ✅ Aprovar Rápido
                                             </button>
                                         </div>
                                     </div>
+                                    
+                                    <!-- Botões de Ação Rápida -->
+                                    <div style="margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <button class="btn btn-secondary" onclick="copiarEmailParaTipo('${user.email}')" style="font-size: 12px; padding: 6px 12px;">
+                                            📋 Copiar p/ Tipo
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="copiarEmailParaAuth('${user.email}')" style="font-size: 12px; padding: 6px 12px;">
+                                            🔓 Copiar p/ Autorização
+                                        </button>
+                                        <button class="btn btn-secondary" onclick="aprovarRapido('${user.id}', '${user.email}', '${user.nome}')" style="font-size: 12px; padding: 6px 12px; background: #28a745;">
+                                            ⚡ Ativar Rápido
+                                        </button>
+                                    </div>
+                                    
                                     <div id="approval-form-${user.id}" style="display: none;" class="approval-form">
                                         <label for="tipo-${user.id}">Tipo de usuário:</label>
                                         <select id="tipo-${user.id}">
-                                            <option value="paciente">👤 Paciente</option>
-                                            <option value="funcionario">👨‍⚕️ Funcionário</option>
+                                            <option value="paciente" ${user.tipo === 'paciente' ? 'selected' : ''}>👤 Paciente</option>
+                                            <option value="funcionario" ${user.tipo === 'funcionario' ? 'selected' : ''}>👨‍⚕️ Funcionário</option>
                                         </select>
-                                        <div style="display: flex; gap: 10px;">
+                                        <div style="display: flex; gap: 10px; margin-top: 10px;">
                                             <button class="btn-approve" onclick="aprovarUsuario(${user.id}, '${user.nome}', '${user.email}')">
                                                 ✅ Confirmar Aprovação
                                             </button>
@@ -581,6 +605,92 @@
                 }
             } catch (error) {
                 console.error('❌ Erro ao aprovar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
+        
+        // Função para copiar email para o campo de tipo
+        function copiarEmailParaTipo(email) {
+            document.getElementById('email').value = email;
+            document.getElementById('email').focus();
+            
+            // Mostrar feedback visual
+            const message = document.getElementById('message');
+            message.innerHTML = `
+                <div class="success">
+                    📋 Email copiado para "Atualizar Tipo de Usuário"!<br>
+                    <strong>Email:</strong> ${email}
+                </div>
+            `;
+            
+            // Scroll para a seção
+            document.getElementById('email').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Função para copiar email para o campo de autorização
+        function copiarEmailParaAuth(email) {
+            document.getElementById('emailAuth').value = email;
+            document.getElementById('emailAuth').focus();
+            
+            // Mostrar feedback visual
+            const message = document.getElementById('message');
+            message.innerHTML = `
+                <div class="success">
+                    🔓 Email copiado para "Gerenciar Autorização"!<br>
+                    <strong>Email:</strong> ${email}
+                </div>
+            `;
+            
+            // Scroll para a seção
+            document.getElementById('emailAuth').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Função para aprovação rápida (autorizar + tornar paciente se não for funcionário)
+        async function aprovarRapido(userId, email, nome) {
+            if (!confirm(`⚡ Ativação Rápida de "${nome}"?\n\nIsso vai:\n✅ Autorizar o usuário\n✅ Manter como paciente (se já for)\n✅ Ativar acesso imediatamente`)) {
+                return;
+            }
+            
+            try {
+                // Primeiro autorizar
+                const authResponse = await fetch('/api/atualizar-autorizacao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        autorizado: true
+                    })
+                });
+                
+                const authResult = await authResponse.json();
+                
+                if (authResult.sucesso) {
+                    // Remover da lista de pendentes
+                    document.getElementById(`pending-${userId}`)?.remove();
+                    
+                    // Mostrar feedback
+                    const message = document.getElementById('message');
+                    message.innerHTML = `
+                        <div class="success">
+                            ⚡ Usuário ativado com sucesso!<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Email:</strong> ${email}<br>
+                            <strong>Status:</strong> Autorizado e Ativo
+                        </div>
+                    `;
+                    
+                    // Recarregar listas
+                    setTimeout(() => {
+                        carregarUsuarios();
+                        carregarUsuariosPendentes();
+                    }, 2000);
+                } else {
+                    alert('❌ Erro na ativação rápida: ' + authResult.erro);
+                }
+            } catch (error) {
+                console.error('❌ Erro na ativação rápida:', error);
                 alert('❌ Erro de conexão. Tente novamente.');
             }
         }
