@@ -61,7 +61,7 @@ router.post('/cookies', [
 // ========================================
 
 // Middleware de autenticação para rotas protegidas
-router.use(authMiddleware);
+router.use(authMiddleware.verificarToken);
 
 // Registrar consentimento
 router.post('/consentimento', [

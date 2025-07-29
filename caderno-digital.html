@@ -168,6 +168,47 @@
         .document-icon.receita { background: #9b59b6; }
         .document-icon.exames { background: #1abc9c; }
 
+        .document-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-modelo, .btn-download {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-modelo {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-modelo:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
         .document-info h4 {
             color: #2c3e50;
             margin-bottom: 4px;
@@ -644,6 +685,18 @@
                             <label>Observações</label>
                             <textarea id="orcamento-obs" rows="4" placeholder="Informações adicionais"></textarea>
                         </div>
+                        
+                        <div class="form-group">
+                            <label>Modelo de Orçamento</label>
+                            <div class="document-actions">
+                                <button type="button" onclick="visualizarOrcamentoModelo()" class="btn-modelo">
+                                    <i class="fas fa-file-pdf"></i> Ver Modelo PDF
+                                </button>
+                                <button type="button" onclick="baixarOrcamentoModelo()" class="btn-download">
+                                    <i class="fas fa-download"></i> Baixar Modelo
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1025,6 +1078,22 @@
 
         function sincronizar() {
             alert('Sincronizando com o servidor... (Funcionalidade em desenvolvimento)');
+        }
+
+        // Funções para o modelo de orçamento
+        function visualizarOrcamentoModelo() {
+            // Abrir o PDF em uma nova aba
+            window.open('/public/docs/Orcamento.pdf', '_blank');
+        }
+
+        function baixarOrcamentoModelo() {
+            // Criar link de download
+            const link = document.createElement('a');
+            link.href = '/public/docs/Orcamento.pdf';
+            link.download = 'Modelo_Orcamento_Dr_Marcio.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         // Carregar pacientes ao inicializar
