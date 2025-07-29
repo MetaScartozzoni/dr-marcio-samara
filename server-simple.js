@@ -10,13 +10,29 @@ const PORT = process.env.PORT || 3000;
 
 // Configuração do PostgreSQL
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:ydKZVqeDdnQVSPOsAkcKJhoTHLsOEqxu@maglev.proxy.rlwy.net:39156/railway',
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// Teste de conexão
+pool.on('connect', () => {
+    console.log('✅ Conectado ao PostgreSQL');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ Erro no PostgreSQL:', err);
 });
 
 // Função para inicializar o banco de dados
 async function initializeDatabase() {
     try {
+        console.log('🔄 Inicializando banco de dados...');
+        console.log('🔗 URL de conexão:', process.env.DATABASE_URL ? 'Configurada' : 'Usando fallback');
+        
+        // Testar conexão
+        await pool.query('SELECT NOW()');
+        console.log('✅ Conexão com banco estabelecida');
+        
         // Criar tabela de usuários
         await pool.query(`
             CREATE TABLE IF NOT EXISTS usuarios (
@@ -75,12 +91,28 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 // Health check endpoint (OBRIGATÓRIO para Railway)
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+    let dbStatus = 'unknown';
+    let dbError = null;
+    
+    try {
+        await pool.query('SELECT 1');
+        dbStatus = 'connected';
+    } catch (error) {
+        dbStatus = 'disconnected';
+        dbError = error.message;
+    }
+    
     res.json({
         status: 'OK',
         timestamp: new Date().toISOString(),
         port: PORT,
         env: process.env.NODE_ENV || 'development',
+        database: {
+            status: dbStatus,
+            url_configured: !!process.env.DATABASE_URL,
+            error: dbError
+        },
         services: {
             sendgrid: process.env.SENDGRID_API_KEY ? 'configured' : 'missing',
             twilio: process.env.TWILIO_ACCOUNT_SID ? 'configured' : 'missing'
