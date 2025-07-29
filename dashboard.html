@@ -253,8 +253,8 @@
                     <h3><span class="icon">📅</span>Meus Agendamentos</h3>
                     <p>Visualize e gerencie seus agendamentos médicos.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn">Ver Agendamentos</a>
-                        <a href="#" class="action-btn">Agendar Consulta</a>
+                        <a href="#" class="action-btn" onclick="verAgendamentos()">📅 Ver Agendamentos</a>
+                        <a href="#" class="action-btn" onclick="agendarConsulta()">📝 Agendar Consulta</a>
                     </div>
                 </div>
                 
@@ -262,8 +262,8 @@
                     <h3><span class="icon">📋</span>Meus Exames</h3>
                     <p>Acesse resultados de exames e relatórios médicos.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn">Ver Resultados</a>
-                        <a href="#" class="action-btn">Histórico</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Resultados')">🧪 Ver Resultados</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Histórico Médico')">📋 Histórico</a>
                     </div>
                 </div>
                 
@@ -271,8 +271,8 @@
                     <h3><span class="icon">💊</span>Receitas</h3>
                     <p>Consulte suas receitas médicas ativas.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn">Ver Receitas</a>
-                        <a href="#" class="action-btn">Renovar Receita</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Receitas')">💊 Ver Receitas</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Renovar Receita')">🔄 Renovar Receita</a>
                     </div>
                 </div>
                 
@@ -280,8 +280,8 @@
                     <h3><span class="icon">👤</span>Meu Perfil</h3>
                     <p>Atualize suas informações pessoais e contato.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn">Editar Perfil</a>
-                        <a href="#" class="action-btn">Alterar Senha</a>
+                        <a href="#" class="action-btn" onclick="editarPerfil()">✏️ Editar Perfil</a>
+                        <a href="#" class="action-btn" onclick="alterarSenha()">🔐 Alterar Senha</a>
                     </div>
                 </div>
             </div>
@@ -403,23 +403,35 @@
             
             const userInfo = JSON.parse(user);
             console.log('Dados do usuário:', userInfo); // Debug
-            console.log('Role do usuário:', userInfo.role); // Debug
+            console.log('Tipo do usuário:', userInfo.tipo); // Debug
             
-            document.getElementById('welcome-message').textContent = `Bem-vindo, ${userInfo.full_name}!`;
-            document.getElementById('user-info').textContent = `Role: ${userInfo.role} | Último acesso: ${new Date().toLocaleDateString('pt-BR')}`;
+            // Melhorar o título com cores
+            const welcomeMessage = document.getElementById('welcome-message');
+            welcomeMessage.innerHTML = `
+                <span style="color: #FFD700; font-weight: 700;">Bem-vindo, </span>
+                <span style="color: white; font-weight: 800;">${userInfo.nome || 'Usuário'}!</span>
+            `;
             
-            // Adicionar links de navegação baseados no role
+            const userInfoDiv = document.getElementById('user-info');
+            userInfoDiv.innerHTML = `
+                <span style="color: #E6F3FF; font-size: 18px;">
+                    <strong>Tipo:</strong> ${userInfo.tipo || 'paciente'} | 
+                    <strong>Último acesso:</strong> ${new Date().toLocaleDateString('pt-BR')}
+                </span>
+            `;
+            
+            // Adicionar links de navegação baseados no tipo
             const navLinks = document.getElementById('nav-links');
             
-            if (userInfo.role === 'admin' || userInfo.role === 'doctor') {
+            if (userInfo.tipo === 'admin') {
                 navLinks.innerHTML = `
-                    <a href="/gestao" class="nav-link">📊 Gestão</a>
-                    <a href="/admin" class="nav-link">👥 Usuários</a>
+                    <a href="/gestao.html" class="nav-link">📊 Gestão</a>
+                    <a href="/admin.html" class="nav-link">👥 Usuários</a>
                     <a href="/" class="nav-link">🏠 Portal</a>
                 `;
-            } else if (userInfo.role === 'staff') {
+            } else if (userInfo.tipo === 'funcionario') {
                 navLinks.innerHTML = `
-                    <a href="/gestao" class="nav-link">📊 Gestão</a>
+                    <a href="/gestao.html" class="nav-link">📊 Gestão</a>
                     <a href="/" class="nav-link">🏠 Portal</a>
                 `;
             } else {
@@ -427,14 +439,15 @@
                     <a href="/" class="nav-link">🏠 Portal</a>
                 `;
             }
-            // Mostrar seção baseada no role
-            if (userInfo.role === 'patient') {
+            
+            // Mostrar seção baseada no tipo
+            if (userInfo.tipo === 'paciente') {
                 console.log('Mostrando seção de paciente'); // Debug
                 document.getElementById('patient-section').classList.remove('hidden');
-            } else if (userInfo.role === 'staff') {
+            } else if (userInfo.tipo === 'funcionario') {
                 console.log('Mostrando seção de funcionário'); // Debug
                 document.getElementById('staff-section').classList.remove('hidden');
-            } else if (userInfo.role === 'admin' || userInfo.role === 'doctor') {
+            } else if (userInfo.tipo === 'admin') {
                 console.log('Mostrando seção de admin'); // Debug
                 document.getElementById('admin-section').classList.remove('hidden');
                 loadAdminStats();
@@ -467,8 +480,66 @@
         
         function logout() {
             localStorage.removeItem('userInfo');
-            window.location.href = '/login';
+            window.location.href = '/login.html';
         }
+        
+        // Funções para os botões do dashboard
+        function abrirFuncionalidade(nome) {
+            alert(`🚧 Funcionalidade "${nome}" em desenvolvimento.
+
+Em breve estará disponível!`);
+        }
+        
+        function agendarConsulta() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            alert(`📅 Agendar Consulta
+
+Olá ${userInfo.nome}!
+
+Esta funcionalidade será implementada em breve.
+Você poderá:
+• Escolher data e horário
+• Selecionar tipo de consulta
+• Receber confirmação por email`);
+        }
+        
+        function verAgendamentos() {
+            alert(`📋 Seus Agendamentos
+
+Em breve você poderá:
+• Ver consultas marcadas
+• Cancelar agendamentos
+• Reagendar consultas
+• Receber lembretes`);
+        }
+        
+        function editarPerfil() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            alert(`👤 Editar Perfil
+
+Olá ${userInfo.nome}!
+
+Em breve você poderá atualizar:
+• Dados pessoais
+• Telefone e endereço
+• Preferências
+• Foto do perfil`);
+        }
+        
+        function alterarSenha() {
+            if(confirm('🔐 Alterar Senha\\n\\nDeseja ir para a página de recuperação de senha?')) {
+                window.location.href = '/recuperar-senha.html';
+            }
+        }
+        
+        function abrirGestao() {
+            window.location.href = '/gestao.html';
+        }
+        
+        function abrirAdmin() {
+            window.location.href = '/admin.html';
+        }
+    </script>
         
         // Executar verificação quando a página carregar
         window.onload = checkAuth;
