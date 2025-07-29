@@ -8,7 +8,7 @@
     "numReplicas": 1,
     "sleepApplication": false,
     "restartPolicyType": "ON_FAILURE",
-    "startCommand": "npm start",
+    "startCommand": "./start.sh",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300
   }
