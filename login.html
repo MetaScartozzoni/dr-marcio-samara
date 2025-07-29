@@ -87,7 +87,7 @@
                 
                 if (data.success) {
                     // Login bem-sucedido
-                    message.innerHTML = '<div class="success">Login realizado com sucesso!</div>';
+                    message.innerHTML = '<div class="success">✅ Login realizado com sucesso!</div>';
                     
                     // Salvar informações do usuário no localStorage
                     localStorage.setItem('userInfo', JSON.stringify({
@@ -95,19 +95,28 @@
                         nome: data.user.nome,
                         email: data.user.email,
                         tipo: data.user.tipo,
+                        autorizado: data.user.autorizado,
                         loginTime: new Date().toISOString()
                     }));
                     
+                    // Determinar redirecionamento
+                    const redirectUrl = data.user.tipo === 'admin' ? '/admin.html' : '/dashboard.html';
+                    console.log('🔄 Redirecionando para:', redirectUrl);
+                    
+                    // Mostrar onde vai redirecionar
+                    message.innerHTML = `
+                        <div class="success">
+                            ✅ Login realizado com sucesso!<br>
+                            🔄 Redirecionando para ${data.user.tipo === 'admin' ? 'Painel Administrativo' : 'Dashboard'}...
+                        </div>
+                    `;
+                    
                     // Redirecionar baseado no tipo de usuário
                     setTimeout(() => {
-                        if (data.user.tipo === 'admin') {
-                            window.location.href = '/admin.html';
-                        } else {
-                            window.location.href = '/dashboard.html';
-                        }
-                    }, 1000);
+                        window.location.href = redirectUrl;
+                    }, 1500);
                 } else {
-                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                    message.innerHTML = '<div class="error">❌ ' + data.message + '</div>';
                 }
             } catch (error) {
                 message.innerHTML = '<div class="error">Erro ao fazer login. Tente novamente.</div>';

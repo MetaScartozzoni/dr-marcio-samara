@@ -6,101 +6,260 @@
     <title>Gerenciar Usuários - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <style>
-        .section {
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background: #fafafa;
         }
-        .section h2 {
+        
+        .admin-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .admin-section h2 {
             margin-top: 0;
+            margin-bottom: 20px;
             color: #333;
+            font-size: 18px;
             border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-col {
+            flex: 1;
+        }
+        
+        .form-col label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-col input,
+        .form-col select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .btn-admin {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-admin:hover {
+            background: #5a67d8;
+        }
+        
+        .users-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        
+        .users-table th {
+            background: #f8f9fa;
+            padding: 12px 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .users-table td {
+            padding: 10px 8px;
+            border: 1px solid #ddd;
+            vertical-align: middle;
+        }
+        
+        .users-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            display: inline-block;
+        }
+        
+        .badge-admin { background: #dc3545; }
+        .badge-funcionario { background: #ffc107; color: #333; }
+        .badge-paciente { background: #28a745; }
+        
+        .message-area {
+            margin: 20px 0;
+            min-height: 50px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        /* Responsivo para mobile */
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .users-table {
+                font-size: 12px;
+            }
+            
+            .users-table th,
+            .users-table td {
+                padding: 8px 4px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-container">
-            <h1>Gerenciar Usuários</h1>
-            <p>Atualize roles e autorizações dos usuários</p>
-            
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🏥 Portal Administrativo - Dr. Marcio</h1>
+            <p>Sistema de gerenciamento de usuários e autorizações</p>
+        </div>
+        
+        <!-- Seções lado a lado: Perfil e Status -->
+        <div class="admin-grid">
             <!-- Seção: Atualizar Role -->
-            <div class="section">
-                <h2>🔧 Atualizar Tipo de Usuário (Role)</h2>
+            <div class="admin-section">
+                <h2>🔧 Atualizar Tipo de Usuário</h2>
                 <form id="updateRoleForm">
-                    <div class="input-group">
-                        <label for="email">Email do Usuário:</label>
-                        <input type="email" id="email" name="email" required placeholder="Digite o email do usuário">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="email">Email do Usuário:</label>
+                            <input type="email" id="email" name="email" required placeholder="Digite o email">
+                        </div>
                     </div>
                     
-                    <div class="input-group">
-                        <label for="novoRole">Novo Tipo de Usuário:</label>
-                        <select id="novoRole" name="novoRole" required>
-                            <option value="">Selecione o novo tipo</option>
-                            <option value="paciente">Paciente</option>
-                            <option value="funcionario">Funcionário</option>
-                            <option value="admin">Administrador</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="novoRole">Novo Tipo:</label>
+                            <select id="novoRole" name="novoRole" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="paciente">👤 Paciente</option>
+                                <option value="funcionario">👨‍⚕️ Funcionário</option>
+                                <option value="admin">👑 Administrador</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <button type="submit" class="btn-primary">Atualizar Role</button>
+                    <button type="submit" class="btn-admin">Atualizar Tipo</button>
                 </form>
             </div>
 
             <!-- Seção: Atualizar Autorização -->
-            <div class="section" style="margin-top: 40px;">
-                <h2>✅ Autorizar/Desautorizar Usuário</h2>
+            <div class="admin-section">
+                <h2>✅ Gerenciar Autorização</h2>
                 <form id="updateAuthForm">
-                    <div class="input-group">
-                        <label for="emailAuth">Email do Usuário:</label>
-                        <input type="email" id="emailAuth" name="emailAuth" required placeholder="Digite o email do usuário">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="emailAuth">Email do Usuário:</label>
+                            <input type="email" id="emailAuth" name="emailAuth" required placeholder="Digite o email">
+                        </div>
                     </div>
                     
-                    <div class="input-group">
-                        <label for="autorizado">Status de Autorização:</label>
-                        <select id="autorizado" name="autorizado" required>
-                            <option value="">Selecione o status</option>
-                            <option value="sim">✅ Autorizado</option>
-                            <option value="nao">❌ Não Autorizado</option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="autorizado">Status:</label>
+                            <select id="autorizado" name="autorizado" required>
+                                <option value="">Selecione o status</option>
+                                <option value="sim">✅ Autorizado</option>
+                                <option value="nao">❌ Bloqueado</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <button type="submit" class="btn-primary">Atualizar Autorização</button>
+                    <button type="submit" class="btn-admin">Atualizar Status</button>
                 </form>
             </div>
-            
-            <!-- Seção: Listar Usuários -->
-            <div class="section" style="margin-top: 40px;">
-                <h2>👥 Lista de Usuários</h2>
-                <button onclick="carregarUsuarios()" class="btn-primary" style="margin-bottom: 20px;">
-                    Atualizar Lista
-                </button>
-                
-                <div id="listaUsuarios" style="max-height: 400px; overflow-y: auto;">
-                    <p>Clique em "Atualizar Lista" para ver os usuários cadastrados</p>
-                </div>
-            </div>
-            
+        </div>
+        
+        <!-- Área de mensagens -->
+        <div class="message-area">
             <div id="loading" class="loading" style="display: none;">
-                Processando...
+                ⏳ Processando...
+            </div>
+            <div id="message"></div>
+        </div>
+        
+        <!-- Seção: Lista de Usuários (embaixo, largura total) -->
+        <div class="users-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; border: none; padding: 0;">👥 Usuários Cadastrados</h2>
+                <button onclick="carregarUsuarios()" class="btn-admin" style="width: auto; padding: 8px 16px;">
+                    🔄 Atualizar Lista
+                </button>
             </div>
             
-            <div id="message" class="message"></div>
-            
-            <div class="info-section" style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-                <h3>Exemplos de uso:</h3>
-                <ul>
-                    <li><strong>Roles:</strong> administracao@mscartozzoni.com.br → Administrador</li>
-                    <li><strong>Autorização:</strong> Novos usuários começam como "Não Autorizado"</li>
-                    <li><strong>Fluxo:</strong> Cadastro → Autorizar → Login permitido</li>
-                </ul>
+            <div id="listaUsuarios">
+                <p style="text-align: center; color: #666; padding: 40px;">
+                    📋 Clique em "Atualizar Lista" para carregar os usuários
+                </p>
             </div>
-            
-            <p class="text-center" style="margin-top: 20px;">
-                <a href="/" class="link">Voltar ao Portal</a>
-            </p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding: 20px;">
+            <a href="/dashboard.html" class="btn-admin" style="width: auto; padding: 10px 20px; text-decoration: none; display: inline-block;">
+                🏠 Voltar ao Dashboard
+            </a>
         </div>
     </div>
 
@@ -195,41 +354,49 @@
                 
                 if (result.sucesso) {
                     let html = `
-                        <div style="margin-bottom: 15px;">
-                            <strong>Total de usuários: ${result.total}</strong>
+                        <div style="margin-bottom: 15px; text-align: center;">
+                            <span style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; font-weight: 600;">
+                                📊 Total: ${result.total} usuários
+                            </span>
                         </div>
-                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                            <thead>
-                                <tr style="background: #f8f9fa;">
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Nome</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Email</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Tipo</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Autorizado</th>
-                                    <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Cadastro</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                        <div style="overflow-x: auto;">
+                            <table class="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>👤 Nome</th>
+                                        <th>📧 Email</th>
+                                        <th style="text-align: center;">🏷️ Tipo</th>
+                                        <th style="text-align: center;">✅ Status</th>
+                                        <th style="text-align: center;">📅 Cadastro</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                     `;
                     
                     result.usuarios.forEach(user => {
-                        const tipoColor = user.tipo === 'admin' ? '#dc3545' : user.tipo === 'funcionario' ? '#ffc107' : '#28a745';
-                        const autorizadoIcon = user.autorizado ? '✅' : '❌';
+                        const tipoClass = user.tipo === 'admin' ? 'badge-admin' : 
+                                         user.tipo === 'funcionario' ? 'badge-funcionario' : 'badge-paciente';
+                        const autorizadoIcon = user.autorizado ? '✅ Ativo' : '❌ Bloqueado';
                         const autorizadoColor = user.autorizado ? '#28a745' : '#dc3545';
-                        const dataCadastro = new Date(user.created_at).toLocaleDateString('pt-BR');
+                        const dataCadastro = new Date(user.created_at).toLocaleDateString('pt-BR', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
                         
                         html += `
                             <tr>
-                                <td style="border: 1px solid #ddd; padding: 8px;">${user.nome}</td>
-                                <td style="border: 1px solid #ddd; padding: 8px;">${user.email}</td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                                    <span style="background: ${tipoColor}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">
-                                        ${user.tipo}
+                                <td style="font-weight: 500;">${user.nome}</td>
+                                <td style="color: #666;">${user.email}</td>
+                                <td style="text-align: center;">
+                                    <span class="status-badge ${tipoClass}">
+                                        ${user.tipo.toUpperCase()}
                                     </span>
                                 </td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: ${autorizadoColor};">
+                                <td style="text-align: center; color: ${autorizadoColor}; font-weight: 600;">
                                     ${autorizadoIcon}
                                 </td>
-                                <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
+                                <td style="text-align: center; color: #666;">
                                     ${dataCadastro}
                                 </td>
                             </tr>
@@ -237,17 +404,26 @@
                     });
                     
                     html += `
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     `;
                     
                     listaUsuarios.innerHTML = html;
                 } else {
-                    listaUsuarios.innerHTML = '<div class="error">Erro ao carregar usuários: ' + result.erro + '</div>';
+                    listaUsuarios.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #dc3545;">
+                            ❌ Erro ao carregar usuários: ${result.erro}
+                        </div>
+                    `;
                 }
             } catch (error) {
                 console.error('❌ Erro:', error);
-                listaUsuarios.innerHTML = '<div class="error">Erro ao carregar usuários. Tente novamente.</div>';
+                listaUsuarios.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        ❌ Erro de conexão. Tente novamente.
+                    </div>
+                `;
             } finally {
                 loading.style.display = 'none';
             }
