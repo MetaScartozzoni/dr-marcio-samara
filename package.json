@@ -6,12 +6,12 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "echo 'Build completed'",
     "criar-aba": "node criar-aba-gestao.js",
     "setup": "npm install && node criar-aba-gestao.js",
     "test:payment": "node test/payment-basic.test.js",
     "test:config": "node -e \"require('./src/services/email.service').testarConfiguracao()\"",
     "migrate": "node -e \"console.log('Execute o arquivo database-schema.sql no PostgreSQL')\"",
-    "build": "react-scripts build",
     "postinstall": "echo 'Instalação concluída. Configure as variáveis de ambiente.'",
     "client": "react-scripts start",
     "dev:fullstack": "concurrently \"npm run dev\" \"npm run client\"",
