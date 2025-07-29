@@ -320,7 +320,17 @@ app.post('/api/login', async (req, res) => {
 // Cadastro de paciente
 app.post('/api/cadastro', async (req, res) => {
     try {
+        console.log('📝 Dados recebidos:', req.body);
+        
         const { nome, email, telefone, cpf, senha } = req.body;
+        
+        // Validações básicas
+        if (!nome || !email || !senha) {
+            return res.json({
+                success: false,
+                message: 'Nome, email e senha são obrigatórios'
+            });
+        }
         
         // Verificar se email já existe
         const emailExists = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
@@ -337,10 +347,11 @@ app.post('/api/cadastro', async (req, res) => {
         // Inserir usuário
         const result = await pool.query(
             'INSERT INTO usuarios (nome, email, telefone, cpf, senha, tipo) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-            [nome, email, telefone, cpf, hashedPassword, 'paciente']
+            [nome, email, telefone || null, cpf || null, hashedPassword, 'paciente']
         );
         
         const user = result.rows[0];
+        console.log('✅ Usuário criado:', user.id);
         
         res.json({
             success: true,
@@ -351,12 +362,14 @@ app.post('/api/cadastro', async (req, res) => {
                 email: user.email,
                 telefone: user.telefone,
                 cpf: user.cpf
-            }
+            },
+            redirect: '/login.html'
         });
     } catch (error) {
+        console.error('❌ Erro no cadastro:', error);
         res.json({
             success: false,
-            message: 'Erro ao cadastrar usuário',
+            message: 'Erro ao cadastrar usuário: ' + error.message,
             error: error.message
         });
     }
