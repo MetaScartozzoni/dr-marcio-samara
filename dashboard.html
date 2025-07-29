@@ -277,7 +277,16 @@
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon">👤</span>Meu Perfil</h3>
+                    <h3><span class="icon">�</span>Teleconsulta</h3>
+                    <p>Consultas virtuais com Dr. Marcio via videochamada.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="entrarVideochamada()">📹 Entrar na Consulta</a>
+                        <a href="#" class="action-btn" onclick="agendarTeleconsulta()">📅 Agendar Video</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon">�👤</span>Meu Perfil</h3>
                     <p>Atualize suas informações pessoais e contato.</p>
                     <div class="quick-actions">
                         <a href="#" class="action-btn" onclick="editarPerfil()">✏️ Editar Perfil</a>
@@ -332,6 +341,15 @@
                     <div class="quick-actions">
                         <a href="#" class="action-btn">Relatórios</a>
                         <a href="#" class="action-btn">Financeiro</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon">📹</span>Videochamadas</h3>
+                    <p>Consultas virtuais com pacientes via Whereby.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="abrirVideochamada()">📹 Iniciar Consulta</a>
+                        <a href="#" class="action-btn" onclick="agendarVideochamada()">📅 Agendar Video</a>
                     </div>
                 </div>
                 
@@ -574,6 +592,244 @@ Em breve você poderá atualizar:
         
         function abrirAdmin() {
             window.location.href = '/admin.html';
+        }
+        
+        // Funções do Whereby - Videochamadas
+        function abrirVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // URL da sua sala Whereby (você precisa configurar sua sala)
+            const salaWhereby = 'https://whereby.com/dr-marcio-consulta';
+            
+            // Modal para confirmar videochamada
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center;">
+                        <h3>📹 Iniciar Videochamada</h3>
+                        <p>Você está prestes a entrar na sala de videochamada com os pacientes.</p>
+                        <p><strong>Sala:</strong> Dr. Marcio - Consulta Virtual</p>
+                        <div style="margin-top: 20px;">
+                            <button onclick="entrarSalaWhereby('${salaWhereby}')" style="background: #2ecc71; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                🎥 Entrar na Sala
+                            </button>
+                            <button onclick="fecharModal()" style="background: #e74c3c; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+                            💡 Dica: Teste seu microfone e câmera antes de iniciar
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function agendarVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px;">
+                        <h3>📅 Agendar Videochamada</h3>
+                        <form onsubmit="salvarAgendamentoVideo(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Paciente:</label>
+                                <input type="text" id="paciente-video" placeholder="Nome do paciente" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email do Paciente:</label>
+                                <input type="email" id="email-video" placeholder="email@exemplo.com" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Data:</label>
+                                <input type="date" id="data-video" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horário:</label>
+                                <select id="hora-video" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                                    <option value="">Selecione um horário</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Observações:</label>
+                                <textarea id="obs-video" placeholder="Motivo da consulta, preparação necessária..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; height: 80px;"></textarea>
+                            </div>
+                            <div style="text-align: center;">
+                                <button type="submit" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    📅 Agendar
+                                </button>
+                                <button type="button" onclick="fecharModal()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function entrarVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // URL da sua sala Whereby para pacientes
+            const salaWhereby = 'https://whereby.com/dr-marcio-consulta';
+            
+            // Modal para pacientes
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center;">
+                        <h3>📹 Teleconsulta com Dr. Marcio</h3>
+                        <p>Você está prestes a entrar na videochamada.</p>
+                        <p><strong>Paciente:</strong> ${userInfo.nome}</p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left;">
+                            <h4 style="margin: 0 0 10px 0; color: #667eea;">📋 Preparação:</h4>
+                            <p style="margin: 5px 0; font-size: 14px;">• Certifique-se que câmera e microfone estão funcionando</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Tenha seus documentos e exames em mãos</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Esteja em local bem iluminado e silencioso</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Teste sua conexão de internet</p>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button onclick="entrarSalaWhereby('${salaWhereby}')" style="background: #2ecc71; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                🎥 Entrar na Consulta
+                            </button>
+                            <button onclick="fecharModal()" style="background: #e74c3c; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function agendarTeleconsulta() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px;">
+                        <h3>📅 Solicitar Teleconsulta</h3>
+                        <p style="color: #666; margin-bottom: 20px;">Preencha os dados abaixo para solicitar uma consulta por videochamada.</p>
+                        <form onsubmit="solicitarTeleconsulta(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Seu Nome:</label>
+                                <input type="text" value="${userInfo.nome}" disabled style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; background: #f5f5f5;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Data Preferida:</label>
+                                <input type="date" id="data-teleconsulta" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required min="${new Date().toISOString().split('T')[0]}">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horário Preferido:</label>
+                                <select id="hora-teleconsulta" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                                    <option value="">Selecione um horário</option>
+                                    <option value="08:00">08:00 - Manhã</option>
+                                    <option value="09:00">09:00 - Manhã</option>
+                                    <option value="10:00">10:00 - Manhã</option>
+                                    <option value="11:00">11:00 - Manhã</option>
+                                    <option value="14:00">14:00 - Tarde</option>
+                                    <option value="15:00">15:00 - Tarde</option>
+                                    <option value="16:00">16:00 - Tarde</option>
+                                    <option value="17:00">17:00 - Tarde</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Motivo da Consulta:</label>
+                                <textarea id="motivo-teleconsulta" placeholder="Descreva brevemente o motivo da consulta..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; height: 80px;" required></textarea>
+                            </div>
+                            <div style="text-align: center;">
+                                <button type="submit" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    📞 Solicitar
+                                </button>
+                                <button type="button" onclick="fecharModal()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function entrarSalaWhereby(url) {
+            // Abrir Whereby em nova aba
+            window.open(url, '_blank');
+            fecharModal();
+            
+            // Mostrar instruções
+            setTimeout(() => {
+                alert('🎥 Videochamada iniciada!\\n\\nA sala do Whereby foi aberta em uma nova aba.\\n\\nSe não abriu automaticamente, verifique se o bloqueador de pop-ups está desabilitado.');
+            }, 1000);
+        }
+        
+        function salvarAgendamentoVideo(event) {
+            event.preventDefault();
+            
+            const agendamento = {
+                id: Date.now(),
+                paciente: document.getElementById('paciente-video').value,
+                email: document.getElementById('email-video').value,
+                data: document.getElementById('data-video').value,
+                hora: document.getElementById('hora-video').value,
+                observacoes: document.getElementById('obs-video').value,
+                tipo: 'videochamada',
+                status: 'agendado',
+                dataAgendamento: new Date().toISOString(),
+                linkSala: 'https://whereby.com/dr-marcio-consulta'
+            };
+            
+            // Salvar no localStorage (em produção, enviar para servidor)
+            const agendamentos = JSON.parse(localStorage.getItem('agendamentosVideo') || '[]');
+            agendamentos.push(agendamento);
+            localStorage.setItem('agendamentosVideo', JSON.stringify(agendamentos));
+            
+            alert(`✅ Videochamada agendada!\\n\\nPaciente: ${agendamento.paciente}\\nData: ${agendamento.data}\\nHora: ${agendamento.hora}\\n\\n📧 Um email será enviado para o paciente com o link da videochamada.`);
+            fecharModal();
+        }
+        
+        function solicitarTeleconsulta(event) {
+            event.preventDefault();
+            
+            const solicitacao = {
+                id: Date.now(),
+                paciente: JSON.parse(localStorage.getItem('userInfo')).nome,
+                email: JSON.parse(localStorage.getItem('userInfo')).email,
+                data: document.getElementById('data-teleconsulta').value,
+                hora: document.getElementById('hora-teleconsulta').value,
+                motivo: document.getElementById('motivo-teleconsulta').value,
+                status: 'pendente',
+                dataSolicitacao: new Date().toISOString()
+            };
+            
+            // Salvar no localStorage (em produção, enviar para servidor)
+            const solicitacoes = JSON.parse(localStorage.getItem('solicitacoesVideo') || '[]');
+            solicitacoes.push(solicitacao);
+            localStorage.setItem('solicitacoesVideo', JSON.stringify(solicitacoes));
+            
+            alert(`📞 Solicitação enviada com sucesso!\\n\\nSua solicitação de teleconsulta foi enviada para análise.\\nVocê receberá confirmação por email em até 24 horas.\\n\\nData solicitada: ${solicitacao.data}\\nHorário: ${solicitacao.hora}\\nMotivo: ${solicitacao.motivo}`);
+            fecharModal();
+        }
+        
+        function fecharModal() {
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                modal.remove();
+            }
         }
         
         // Executar verificação quando a página carregar

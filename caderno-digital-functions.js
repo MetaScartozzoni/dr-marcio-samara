@@ -14,7 +14,7 @@ class CadernoDigital {
     }
 
     inicializar() {
-        this.setupCamera();
+        // Não inicializar câmera automaticamente
         this.setupCanvas();
         this.setupEventListeners();
     }
