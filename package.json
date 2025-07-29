@@ -1,120 +1,40 @@
 {
   "name": "portal-dr-marcio",
   "version": "1.0.0",
-  "description": "Sistema de autenticação e gestão integrado com Google Sheets",
+  "description": "Portal médico completo com SendGrid e Twilio",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "echo 'Build completed'",
-    "criar-aba": "node criar-aba-gestao.js",
-    "setup": "npm install && node criar-aba-gestao.js",
-    "test:payment": "node test/payment-basic.test.js",
-    "test:config": "node -e \"require('./src/services/email.service').testarConfiguracao()\"",
-    "migrate": "node -e \"console.log('Execute o arquivo database-schema.sql no PostgreSQL')\"",
-    "postinstall": "echo 'Instalação concluída. Configure as variáveis de ambiente.'",
-    "client": "react-scripts start",
-    "dev:fullstack": "concurrently \"npm run dev\" \"npm run client\"",
-    "lgpd:setup": "./scripts/setup-lgpd-database.sh",
-    "lgpd:test": "node scripts/test-lgpd.js",
-    "lgpd:verify": "./scripts/verificar-lgpd.sh",
-    "lgpd:compliance": "echo 'Abrindo painel LGPD em http://localhost:3000/lgpd-compliance.html'",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "build": "echo 'Build completed successfully'"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
-    "@fullcalendar/core": "^6.1.10",
-    "@fullcalendar/daygrid": "^6.1.10",
-    "@fullcalendar/interaction": "^6.1.10",
-    "@fullcalendar/react": "^6.1.10",
-    "@fullcalendar/timegrid": "^6.1.10",
-    "@mui/icons-material": "^5.15.0",
-    "@mui/material": "^5.15.0",
-    "@mui/x-date-pickers": "^6.18.0",
-    "@reduxjs/toolkit": "^2.0.1",
     "@sendgrid/mail": "^8.1.5",
-    "aws-sdk": "^2.1491.0",
     "axios": "^1.11.0",
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
-    "connect-redis": "^7.1.0",
     "cors": "^2.8.5",
-    "date-fns": "^2.30.0",
     "dotenv": "^16.6.1",
     "express": "^4.18.2",
-    "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^7.1.5",
     "express-session": "^1.17.3",
-    "express-slow-down": "^2.0.1",
     "express-validator": "^7.0.1",
-    "google-auth-library": "^10.2.0",
-    "google-spreadsheet": "^4.1.2",
-    "handlebars": "^4.7.8",
     "helmet": "^7.1.0",
-    "joi": "^17.11.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
-    "node-fetch": "^2.7.0",
-    "nodemailer": "^6.10.1",
     "pg": "^8.16.3",
-    "puppeteer": "^21.5.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^9.0.4",
-    "react-router-dom": "^6.20.1",
-    "react-scripts": "5.0.1",
-    "redis": "^4.6.10",
-    "sharp": "^0.32.6",
     "stripe": "^18.3.0",
-    "twilio": "^4.23.0",
-    "xss": "^1.0.14"
-  },
-  "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/react": "^18.2.42",
-    "@types/react-dom": "^18.2.17",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.57.1",
-    "eslint-config-standard": "^17.1.0",
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.1",
-    "supertest": "^6.3.4"
+    "twilio": "^4.23.0"
   },
   "keywords": [
     "portal",
-    "google-sheets",
-    "authentication",
-    "medicina",
-    "lgpd",
-    "pagamentos",
-    "comunicacao",
-    "nodejs",
-    "express",
-    "postgresql",
-    "healthcare",
-    "gestao",
-    "pacientes"
+    "medico",
+    "sendgrid",
+    "twilio",
+    "railway"
   ],
   "author": "Dr. Marcio Scartozzoni",
-  "license": "MIT",
-  "jest": {
-    "testEnvironment": "node",
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/**/*.test.js",
-      "!coverage/**"
-    ],
-    "testMatch": [
-      "**/tests/**/*.test.js"
-    ],
-    "setupFilesAfterEnv": [
-      "<rootDir>/tests/setup.js"
-    ]
-  }
+  "license": "MIT"
 }
