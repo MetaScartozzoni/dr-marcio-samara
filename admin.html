@@ -167,8 +167,8 @@
             background: #fff8e1;
             border: 2px solid #ff9800;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
             transition: all 0.3s ease;
         }
         
@@ -180,20 +180,21 @@
         .pending-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            align-items: flex-start;
+            margin-bottom: 20px;
         }
         
         .pending-info h4 {
             color: #e65100;
-            margin: 0 0 5px 0;
-            font-size: 18px;
+            margin: 0 0 12px 0;
+            font-size: 20px;
         }
         
         .pending-info p {
             color: #666;
-            margin: 0;
-            font-size: 14px;
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            line-height: 1.6;
         }
         
         .pending-actions {
@@ -280,6 +281,12 @@
         <div class="admin-header">
             <h1>🏥 Portal Administrativo - Dr. Marcio</h1>
             <p>Sistema de gerenciamento de usuários e autorizações</p>
+            <div style="margin-top: 15px;">
+                <button onclick="atualizarDadosManual()" class="btn-refresh" style="background: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    🔄 Atualizar Dados
+                </button>
+                <span id="lastUpdate" style="margin-left: 15px; color: rgba(255,255,255,0.8); font-size: 14px;"></span>
+            </div>
         </div>
         
         <!-- Seções lado a lado: Perfil e Status -->
@@ -611,8 +618,13 @@
                         </div>
                     `;
                     
-                    // Recarregar apenas lista de usuários cadastrados (não a de pendentes)
-                    carregarUsuarios();
+                    // Recarregar ambas as listas imediatamente
+                    await carregarUsuariosPendentes();
+                    await carregarUsuarios();
+                    
+                    // Feedback adicional
+                    console.log(`✅ Usuário ${nome} aprovado como ${tipo} e listas atualizadas`);
+                    
                 } else {
                     alert('❌ Erro ao aprovar usuário: ' + result.message);
                 }
@@ -707,11 +719,13 @@
                         </div>
                     `;
                     
-                    // Recarregar listas
-                    setTimeout(() => {
-                        carregarUsuarios();
-                        carregarUsuariosPendentes();
-                    }, 2000);
+                    // Recarregar listas imediatamente
+                    await carregarUsuariosPendentes();
+                    await carregarUsuarios();
+                    
+                    // Feedback adicional
+                    console.log(`✅ Usuário ${nome} aprovado e listas atualizadas`);
+                    
                 } else {
                     alert('❌ Erro na ativação rápida: ' + authResult.erro);
                 }
@@ -810,11 +824,78 @@
             }
         }
         
+        // Sistema de auto-refresh para garantir dados atualizados
+        let autoRefreshInterval;
+        
+        function atualizarTimestamp() {
+            const now = new Date();
+            const timestamp = now.toLocaleString('pt-BR');
+            document.getElementById('lastUpdate').textContent = `Última atualização: ${timestamp}`;
+        }
+        
+        async function atualizarDadosManual() {
+            console.log('🔄 Atualização manual solicitada...');
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Atualizando...';
+            btn.disabled = true;
+            
+            try {
+                await carregarUsuariosPendentes();
+                await carregarUsuarios();
+                atualizarTimestamp();
+                
+                btn.innerHTML = '✅ Atualizado!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+                
+                console.log('✅ Dados atualizados manualmente');
+            } catch (error) {
+                console.error('❌ Erro na atualização manual:', error);
+                btn.innerHTML = '❌ Erro';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+        
+        function iniciarAutoRefresh() {
+            // Atualizar dados a cada 30 segundos
+            autoRefreshInterval = setInterval(async () => {
+                console.log('🔄 Auto-refresh: Atualizando dados...');
+                await carregarUsuariosPendentes();
+                await carregarUsuarios();
+                atualizarTimestamp();
+            }, 30000); // 30 segundos
+        }
+        
+        function pararAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+        
         // Inicializar página
-        window.onload = function() {
-            carregarUsuariosPendentes();
-            carregarUsuarios();
+        window.onload = async function() {
+            console.log('🚀 Iniciando painel administrativo...');
+            
+            // Carregar dados iniciais
+            await carregarUsuariosPendentes();
+            await carregarUsuarios();
+            atualizarTimestamp();
+            
+            // Iniciar auto-refresh
+            iniciarAutoRefresh();
+            
+            console.log('✅ Painel administrativo carregado com sucesso!');
         };
+        
+        // Parar auto-refresh quando sair da página
+        window.addEventListener('beforeunload', pararAutoRefresh);
     </script>
 </body>
 </html>
