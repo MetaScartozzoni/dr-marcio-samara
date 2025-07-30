@@ -5,20 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="gestao-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="dashboard-container">
         <header class="dashboard-header">
-            <h1>📊 Gestão de Pacientes - Portal Dr. Marcio</h1>
+            <h1><i class="fas fa-chart-bar"></i> Gestão de Pacientes - Portal Dr. Marcio</h1>
             <div class="header-actions">
-                <button onclick="voltarDashboard()" class="btn-back">⬅️ Voltar ao Dashboard</button>
-                <button onclick="atualizarDados()" class="btn-refresh">🔄 Atualizar</button>
-                <button onclick="exportarDados()" class="btn-export">📊 Exportar</button>
+                <button onclick="voltarDashboard()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button>
+                <button onclick="atualizarDados()" class="btn-refresh"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                <button onclick="exportarDados()" class="btn-export"><i class="fas fa-download"></i> Exportar</button>
             </div>
         </header>
 
         <div class="filters-section">
-            <h2>Filtros</h2>
+            <h2><i class="fas fa-filter"></i> Filtros</h2>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="filtroId">ID Paciente:</label>
@@ -54,38 +55,38 @@
                 </div>
                 
                 <div class="filter-actions">
-                    <button onclick="aplicarFiltros()" class="btn-primary">Aplicar Filtros</button>
-                    <button onclick="limparFiltros()" class="btn-secondary">Limpar</button>
+                    <button onclick="aplicarFiltros()" class="btn-primary"><i class="fas fa-filter"></i> Aplicar Filtros</button>
+                    <button onclick="limparFiltros()" class="btn-secondary"><i class="fas fa-eraser"></i> Limpar</button>
                 </div>
             </div>
         </div>
 
         <div class="stats-section">
             <div class="stat-card">
-                <h3>Total de Pacientes</h3>
+                <h3><i class="fas fa-users"></i> Total de Pacientes</h3>
                 <div class="stat-number" id="totalPacientes">0</div>
             </div>
             
             <div class="stat-card">
-                <h3>Agendamentos Hoje</h3>
+                <h3><i class="fas fa-calendar-day"></i> Agendamentos Hoje</h3>
                 <div class="stat-number" id="agendamentosHoje">0</div>
             </div>
             
             <div class="stat-card">
-                <h3>Orçamentos Pendentes</h3>
+                <h3><i class="fas fa-file-invoice"></i> Orçamentos Pendentes</h3>
                 <div class="stat-number" id="orcamentosPendentes">0</div>
             </div>
             
             <div class="stat-card">
-                <h3>Pagamentos Pendentes</h3>
+                <h3><i class="fas fa-credit-card"></i> Pagamentos Pendentes</h3>
                 <div class="stat-number" id="pagamentosPendentes">0</div>
             </div>
         </div>
 
         <div class="table-section">
             <div class="table-header">
-                <h2>Gestão de Pacientes</h2>
-                <button onclick="adicionarPaciente()" class="btn-add">+ Adicionar Paciente</button>
+                <h2><i class="fas fa-users"></i> Gestão de Pacientes</h2>
+                <button onclick="adicionarPaciente()" class="btn-add"><i class="fas fa-user-plus"></i> Adicionar Paciente</button>
             </div>
             
             <div class="table-container">
