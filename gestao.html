@@ -3,482 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Orçamentos - Portal Dr. Marcio</title>
-    <link rel="stylesheet" href="gestao-style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <title>Gestão de Orçamentos - Dr. Marcio Scartozzoni</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-improvements.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Meta tags para SEO e acessibilidade -->
+    <meta name="description" content="Sistema de gestão de orçamentos e pacientes - Dr. Marcio Scartozzoni">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://drmarcioscartozzoni.com/gestao">
+    
+    <!-- Preload recursos críticos -->
+    <link rel="preload" href="gestao-script-v2.js" as="script">
+    <link rel="preload" href="config-api-integration.js" as="script">
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Sistema de Gestão de Orçamentos Pós-Consulta -->
-        <header class="dashboard-header">
-            <h1><i class="fas fa-file-invoice-dollar"></i> Gestão de Pacientes Pós-Consulta - Portal Dr. Marcio</h1>
-            <div class="header-actions">
-                <button onclick="voltarDashboard()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button>
-                <button onclick="atualizarDados()" class="btn-refresh"><i class="fas fa-sync-alt"></i> Atualizar</button>
-                <button onclick="exportarDados()" class="btn-export"><i class="fas fa-download"></i> Exportar</button>
-            </div>
-        </header>
-
-        <div class="filters-section">
-            <h2><i class="fas fa-filter"></i> Filtros de Orçamentos</h2>
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label for="filtroId">ID Paciente:</label>
-                    <input type="text" id="filtroId" placeholder="Digite o ID">
-                </div>
+    <!-- Header melhorado -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-calculator" aria-hidden="true"></i>
+                    Gestão de Orçamentos
+                </h1>
                 
-                <div class="filter-group">
-                    <label for="filtroNome">Nome do Paciente:</label>
-                    <input type="text" id="filtroNome" placeholder="Digite o nome">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="filtroDataInicio">Data Orçamento (Início):</label>
-                    <input type="date" id="filtroDataInicio">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="filtroDataFim">Data Orçamento (Fim):</label>
-                    <input type="date" id="filtroDataFim">
-                </div>
-                
-                <div class="filter-group">
-                    <label for="filtroStatus">Status Orçamento:</label>
-                    <select id="filtroStatus">
-                        <option value="">Todos</option>
-                        <option value="Pendente">Pendente</option>
-                        <option value="Enviado">Enviado</option>
-                        <option value="Aceito">Aceito</option>
-                        <option value="Rejeitado">Rejeitado</option>
-                        <option value="Expirado">Expirado</option>
-                        <option value="Pago">Pago</option>
-                        <option value="Concluído">Concluído</option>
-                    </select>
-                </div>
-                
-                <div class="filter-actions">
-                    <button onclick="aplicarFiltros()" class="btn-primary"><i class="fas fa-filter"></i> Aplicar Filtros</button>
-                    <button onclick="limparFiltros()" class="btn-secondary"><i class="fas fa-eraser"></i> Limpar</button>
+                <div class="header-actions">
+                    <button onclick="abrirAgendamentoRapido()" class="btn btn-info btn-sm" title="Agendamento Rápido">
+                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                        <span class="sr-only">Agendamento Rápido</span>
+                    </button>
+                    
+                    <button onclick="voltarDashboard()" class="btn btn-secondary btn-sm" title="Voltar ao Dashboard">
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        Dashboard
+                    </button>
+                    
+                    <button onclick="AuthManager.logout()" class="btn btn-danger btn-sm" title="Sair do Sistema">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                        <span class="sr-only">Sair</span>
+                    </button>
                 </div>
             </div>
         </div>
+    </header>
 
-        <div class="stats-section">
-            <div class="stat-card">
-                <h3><i class="fas fa-file-invoice"></i> Total de Orçamentos</h3>
-                <div class="stat-number" id="totalOrcamentos">0</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3><i class="fas fa-clock"></i> Orçamentos Pendentes</h3>
-                <div class="stat-number" id="orcamentosPendentes">0</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3><i class="fas fa-check-circle"></i> Orçamentos Aceitos</h3>
-                <div class="stat-number" id="orcamentosAceitos">0</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3><i class="fas fa-dollar-sign"></i> Valor Total Pendente</h3>
-                <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
-            </div>
-        </div>
-
-        <div class="table-section">
-            <div class="table-header">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Gestão de Orçamentos Pós-Consulta</h2>
-                <div class="header-buttons">
-                    <button onclick="adicionarOrcamento()" class="btn-add"><i class="fas fa-file-plus"></i> Novo Orçamento</button>
-                    <button onclick="abrirAgendamentoRapido()" class="btn-calendar"><i class="fas fa-calendar-plus"></i> Agendamento Rápido</button>
-                    <button onclick="exportarOrcamentos()" class="btn-export"><i class="fas fa-file-excel"></i> Exportar Excel</button>
-                </div>
-            </div>
-            
-            <div class="table-container">
-                <table id="tabelaGestao">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Paciente</th>
-                            <th>Data Consulta</th>
-                            <th>Data Orçamento</th>
-                            <th>Procedimento</th>
-                            <th>Valor Total</th>
-                            <th>Status Orçamento</th>
-                            <th>Pagamento</th>
-                            <th>Vencimento</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="corpoTabela">
-                        <!-- Dados serão carregados via JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="loading" class="loading" style="display: none;">
-            Carregando dados...
-        </div>
-    </div>
-
-    <!-- Modal para Novo Orçamento -->
-    <div id="modalNovoOrcamento" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-file-plus"></i> Novo Orçamento Pós-Consulta</h3>
-                <span class="close" onclick="fecharModalOrcamento()">&times;</span>
-            </div>
-            
-            <div class="modal-body">
-                <form id="formNovoOrcamento">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="pacienteOrcamento">Paciente:</label>
-                            <select id="pacienteOrcamento" required>
-                                <option value="">Selecione o paciente</option>
-                                <!-- Opções carregadas dinamicamente -->
-                            </select>
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Estatísticas melhoradas -->
+            <section class="stats-section" aria-labelledby="stats-title">
+                <h2 id="stats-title" class="sr-only">Estatísticas dos Orçamentos</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calculator" aria-hidden="true"></i>
                         </div>
-                        
-                        <div class="form-group">
-                            <label for="dataConsulta">Data da Consulta:</label>
-                            <input type="date" id="dataConsulta" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="procedimentoPrincipal">Procedimento Principal:</label>
-                            <select id="procedimentoPrincipal" required onchange="calcularValorTotal()">
-                                <option value="">Selecione o procedimento</option>
-                                <option value="rinoplastia" data-valor="8000">Rinoplastia - R$ 8.000,00</option>
-                                <option value="mamoplastia" data-valor="12000">Mamoplastia de Aumento - R$ 12.000,00</option>
-                                <option value="lipoaspiracao" data-valor="6000">Lipoaspiração - R$ 6.000,00</option>
-                                <option value="abdominoplastia" data-valor="10000">Abdominoplastia - R$ 10.000,00</option>
-                                <option value="blefaroplastia" data-valor="5000">Blefaroplastia - R$ 5.000,00</option>
-                                <option value="lifting" data-valor="15000">Lifting Facial - R$ 15.000,00</option>
-                                <option value="otoplastia" data-valor="4000">Otoplastia - R$ 4.000,00</option>
-                                <option value="gluteoplastia" data-valor="8000">Gluteoplastia - R$ 8.000,00</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="procedimentosAdicionais">Procedimentos Adicionais:</label>
-                            <textarea id="procedimentosAdicionais" rows="3" placeholder="Descreva procedimentos complementares..."></textarea>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valorProcedimento">Valor do Procedimento:</label>
-                            <input type="number" id="valorProcedimento" step="0.01" required placeholder="0.00" onchange="calcularValorTotal()">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valorAnestesia">Valor Anestesia:</label>
-                            <input type="number" id="valorAnestesia" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valorHospital">Valor Hospital/Clínica:</label>
-                            <input type="number" id="valorHospital" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valorMaterial">Valor Material/Prótese:</label>
-                            <input type="number" id="valorMaterial" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="valorTotal">Valor Total:</label>
-                            <input type="number" id="valorTotal" step="0.01" required readonly style="background: #f0f0f0; font-weight: bold;">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="formaPagamento">Forma de Pagamento:</label>
-                            <select id="formaPagamento" required>
-                                <option value="">Selecione a forma</option>
-                                <option value="vista">À Vista (10% desconto)</option>
-                                <option value="2x">2x sem juros</option>
-                                <option value="3x">3x sem juros</option>
-                                <option value="6x">6x com juros (2% a.m.)</option>
-                                <option value="12x">12x com juros (3% a.m.)</option>
-                                <option value="financiamento">Financiamento</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="validadeOrcamento">Validade do Orçamento:</label>
-                            <input type="date" id="validadeOrcamento" required>
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label for="observacoesOrcamento">Observações:</label>
-                            <textarea id="observacoesOrcamento" rows="3" placeholder="Informações adicionais sobre o orçamento..."></textarea>
+                        <div class="stat-content">
+                            <div class="stat-number" id="totalOrcamentos">0</div>
+                            <div class="stat-label">Total de Orçamentos</div>
                         </div>
                     </div>
                     
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Salvar Orçamento
-                        </button>
-                        <button type="button" onclick="fecharModalOrcamento()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="orcamentosPendentes">0</div>
+                            <div class="stat-label">Orçamentos Pendentes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="orcamentosAceitos">0</div>
+                            <div class="stat-label">Orçamentos Aceitos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i class="fas fa-dollar-sign" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
+                            <div class="stat-label">Valor Total Pendente</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Filtros melhorados -->
+            <section class="filters-section" aria-labelledby="filters-title">
+                <h2 id="filters-title" class="section-title">Filtros</h2>
+                
+                <div class="filters-container">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label for="filtroId">ID do Orçamento</label>
+                            <input type="text" id="filtroId" class="form-control" placeholder="Ex: ORC001" autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroNome">Nome do Paciente</label>
+                            <input type="text" id="filtroNome" class="form-control" placeholder="Digite o nome..." autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroStatus">Status</label>
+                            <select id="filtroStatus" class="form-control">
+                                <option value="">Todos os status</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Enviado">Enviado</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataInicio">Data Início</label>
+                            <input type="date" id="filtroDataInicio" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataFim">Data Fim</label>
+                            <input type="date" id="filtroDataFim" class="form-control">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button onclick="limparFiltros()" class="btn btn-secondary" title="Limpar todos os filtros">
+                                <i class="fas fa-eraser" aria-hidden="true"></i>
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ações principais -->
+            <section class="actions-section" aria-labelledby="actions-title">
+                <h2 id="actions-title" class="sr-only">Ações Principais</h2>
+                
+                <div class="actions-bar">
+                    <button onclick="adicionarOrcamento()" class="btn btn-primary">
+                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        Novo Orçamento
+                    </button>
+                    
+                    <button onclick="exportarDados()" class="btn btn-info">
+                        <i class="fas fa-download" aria-hidden="true"></i>
+                        Exportar CSV
+                    </button>
+                    
+                    <button onclick="carregarDados()" class="btn btn-secondary" title="Atualizar dados">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        Atualizar
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tabela melhorada -->
+            <section class="table-section" aria-labelledby="table-title">
+                <h2 id="table-title" class="section-title">Lista de Orçamentos</h2>
+                
+                <div class="table-container">
+                    <div id="loading" class="table-loading" style="display: none;">
+                        <div class="spinner" aria-label="Carregando dados"></div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" role="table" aria-label="Tabela de orçamentos">
+                            <thead>
+                                <tr role="row">
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Paciente</th>
+                                    <th scope="col">Data Consulta</th>
+                                    <th scope="col">Data Orçamento</th>
+                                    <th scope="col">Procedimento</th>
+                                    <th scope="col">Valor Total</th>
+                                    <th scope="col">Status Orçamento</th>
+                                    <th scope="col">Status Pagamento</th>
+                                    <th scope="col">Validade</th>
+                                    <th scope="col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabela" role="rowgroup">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Novo Orçamento - Melhorado -->
+    <div id="modalNovoOrcamento" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="modal-title">Novo Orçamento</h3>
+                <button onclick="fecharModalOrcamento()" class="close" aria-label="Fechar modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formNovoOrcamento" novalidate>
+                    <div class="form-group">
+                        <label for="pacienteOrcamento">Paciente *</label>
+                        <select id="pacienteOrcamento" name="paciente_id" class="form-control" required aria-required="true">
+                            <option value="">Selecione o paciente</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dataConsulta">Data da Consulta *</label>
+                        <input type="date" id="dataConsulta" name="data_consulta" class="form-control" required aria-required="true">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="procedimentoPrincipal">Procedimento Principal *</label>
+                        <select id="procedimentoPrincipal" name="procedimento_principal" class="form-control" required aria-required="true" onchange="calcularValorTotal()">
+                            <option value="">Selecione o procedimento</option>
+                            <option value="Rinoplastia" data-valor="8500">Rinoplastia</option>
+                            <option value="Mamoplastia de Aumento" data-valor="12000">Mamoplastia de Aumento</option>
+                            <option value="Lipoaspiração" data-valor="7500">Lipoaspiração</option>
+                            <option value="Abdominoplastia" data-valor="10000">Abdominoplastia</option>
+                            <option value="Blefaroplastia" data-valor="6000">Blefaroplastia</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="procedimentosAdicionais">Procedimentos Adicionais</label>
+                        <textarea id="procedimentosAdicionais" name="procedimentos_adicionais" class="form-control" rows="2" placeholder="Descreva procedimentos adicionais..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="valorProcedimento">Valor do Procedimento *</label>
+                            <input type="number" id="valorProcedimento" name="valor_procedimento" class="form-control" step="0.01" min="0" required aria-required="true" onchange="calcularValorTotal()">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="valorAnestesia">Valor da Anestesia</label>
+                            <input type="number" id="valorAnestesia" name="valor_anestesia" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="valorHospital">Valor do Hospital</label>
+                            <input type="number" id="valorHospital" name="valor_hospital" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="valorMaterial">Valor do Material</label>
+                            <input type="number" id="valorMaterial" name="valor_material" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valorTotal">Valor Total *</label>
+                        <input type="number" id="valorTotal" name="valor_total" class="form-control" step="0.01" min="0" required aria-required="true" readonly>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="formaPagamento">Forma de Pagamento *</label>
+                            <select id="formaPagamento" name="forma_pagamento" class="form-control" required aria-required="true">
+                                <option value="">Selecione</option>
+                                <option value="vista">À Vista</option>
+                                <option value="2x">2x sem juros</option>
+                                <option value="3x">3x sem juros</option>
+                                <option value="4x">4x sem juros</option>
+                                <option value="6x">6x sem juros</option>
+                                <option value="12x">12x com juros</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="validadeOrcamento">Validade *</label>
+                            <input type="date" id="validadeOrcamento" name="validade" class="form-control" required aria-required="true">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacoesOrcamento">Observações</label>
+                        <textarea id="observacoesOrcamento" name="observacoes" class="form-control" rows="3" placeholder="Observações adicionais..."></textarea>
                     </div>
                 </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" onclick="fecharModalOrcamento()" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" form="formNovoOrcamento" class="btn btn-primary">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Salvar Orçamento
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Ações do Orçamento -->
-    <div id="modalAcoesOrcamento" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
+    <!-- Modal Ações do Orçamento - Melhorado -->
+    <div id="modalAcoesOrcamento" class="modal" role="dialog" aria-labelledby="modal-acoes-title" aria-hidden="true">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-file-invoice-dollar"></i> Ações do Orçamento</h3>
-                <span class="close" onclick="fecharModalAcoes()">&times;</span>
+                <h3 id="modal-acoes-title" class="modal-title">Ações do Orçamento</h3>
+                <button onclick="fecharModalAcoes()" class="close" aria-label="Fechar modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             
             <div class="modal-body">
                 <div class="orcamento-info">
-                    <h4 id="infoOrcamento">Orçamento #001 - Maria Silva</h4>
+                    <h4>Informações do Orçamento</h4>
                     <div class="info-grid">
-                        <div><strong>Procedimento:</strong> <span id="infoProcedimento">-</span></div>
-                        <div><strong>Valor Total:</strong> <span id="infoValor">-</span></div>
-                        <div><strong>Status:</strong> <span id="infoStatus">-</span></div>
-                        <div><strong>Validade:</strong> <span id="infoValidade">-</span></div>
+                        <div class="info-item">
+                            <strong>Orçamento:</strong>
+                            <span id="infoOrcamento">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Procedimento:</strong>
+                            <span id="infoProcedimento">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Valor:</strong>
+                            <span id="infoValor">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Status:</strong>
+                            <span id="infoStatus">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Validade:</strong>
+                            <span id="infoValidade">-</span>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="acoes-grid">
-                    <button onclick="gerarPDFOrcamento()" class="btn-action">
-                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                    <button onclick="gerarPDFOrcamento()" class="btn btn-primary btn-action">
+                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        Gerar PDF
                     </button>
                     
-                    <button onclick="imprimirOrcamento()" class="btn-action">
-                        <i class="fas fa-print"></i> Imprimir
+                    <button onclick="enviarPorEmail()" class="btn btn-info btn-action">
+                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        Enviar Email
                     </button>
                     
-                    <button onclick="copiarOrcamento()" class="btn-action">
-                        <i class="fas fa-copy"></i> Copiar Texto
+                    <button onclick="copiarOrcamento()" class="btn btn-secondary btn-action">
+                        <i class="fas fa-copy" aria-hidden="true"></i>
+                        Copiar Texto
                     </button>
                     
-                    <button onclick="enviarPorEmail()" class="btn-action">
-                        <i class="fas fa-envelope"></i> Enviar por Email
+                    <button onclick="imprimirOrcamento()" class="btn btn-secondary btn-action">
+                        <i class="fas fa-print" aria-hidden="true"></i>
+                        Imprimir
                     </button>
                     
-                    <button onclick="marcarComoAceito()" class="btn-action success">
-                        <i class="fas fa-check"></i> Marcar Aceito
+                    <button onclick="marcarComoAceito()" class="btn btn-success btn-action">
+                        <i class="fas fa-check" aria-hidden="true"></i>
+                        Marcar como Aceito
                     </button>
                     
-                    <button onclick="editarOrcamento()" class="btn-action">
-                        <i class="fas fa-edit"></i> Editar
+                    <button onclick="editarOrcamento()" class="btn btn-warning btn-action">
+                        <i class="fas fa-edit" aria-hidden="true"></i>
+                        Editar
                     </button>
                 </div>
-                
-                <div class="modal-actions">
-                    <button type="button" onclick="fecharModalAcoes()" class="btn-secondary">
-                        <i class="fas fa-times"></i> Fechar
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal para agendamento rápido -->
-    <div id="modalAgendamentoRapido" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3><i class="fas fa-calendar-plus"></i> Agendamento Rápido</h3>
-                <span class="close" onclick="fecharModalAgendamento()">&times;</span>
             </div>
             
-            <div class="modal-body">
-                <form id="formAgendamentoRapido">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="tipoAgendamento">Tipo de Agendamento:</label>
-                            <select id="tipoAgendamento" required onchange="atualizarDuracao()">
-                                <option value="">Selecione o tipo</option>
-                                <option value="consulta">👩‍⚕️ Consulta</option>
-                                <option value="cirurgia">🏥 Cirurgia</option>
-                                <option value="reuniao">👥 Reunião</option>
-                                <option value="retorno">🔄 Retorno</option>
-                                <option value="avaliacao">📋 Avaliação</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="pacienteSelect">Paciente:</label>
-                            <select id="pacienteSelect" required>
-                                <option value="">Selecione o paciente</option>
-                                <!-- Será preenchido dinamicamente -->
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="dataAgendamento">Data:</label>
-                            <input type="date" id="dataAgendamento" required min="">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="horaAgendamento">Horário:</label>
-                            <select id="horaAgendamento" required>
-                                <option value="">Selecione o horário</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="duracaoAgendamento">Duração:</label>
-                            <select id="duracaoAgendamento" required>
-                                <option value="30">30 minutos</option>
-                                <option value="60">1 hora</option>
-                                <option value="90">1h 30min</option>
-                                <option value="120">2 horas</option>
-                                <option value="180">3 horas</option>
-                                <option value="240">4 horas</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label for="observacoesAgendamento">Observações:</label>
-                            <textarea id="observacoesAgendamento" rows="3" placeholder="Motivo da consulta, preparação necessária, etc."></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-calendar-check"></i> Agendar
-                        </button>
-                        <button type="button" onclick="fecharModalAgendamento()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                        <button type="button" onclick="abrirCalendarioCompleto()" class="btn-calendar">
-                            <i class="fas fa-calendar"></i> Calendário Completo
-                        </button>
-                    </div>
-                </form>
+            <div class="modal-footer">
+                <button onclick="fecharModalAcoes()" class="btn btn-secondary">Fechar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal para edição -->
-    <div id="modalEdicao" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Editar Paciente</h3>
-                <span class="close" onclick="fecharModal()">&times;</span>
-            </div>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="config-api-integration.js"></script>
+    <script src="gestao-script-v2.js"></script>
+    
+    <!-- Script de inicialização -->
+    <script>
+        // Verificar se todas as dependências estão carregadas
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Sistema de gestão inicializado');
             
-            <div class="modal-body">
-                <form id="formEdicao">
-                    <input type="hidden" id="editId">
-                    
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="editNome">Nome:</label>
-                            <input type="text" id="editNome" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editAgendamentoData">Data Agendamento:</label>
-                            <input type="date" id="editAgendamentoData">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editAgendamentoHora">Hora Agendamento:</label>
-                            <input type="time" id="editAgendamentoHora">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editAgendamentoStatus">Status Agendamento:</label>
-                            <select id="editAgendamentoStatus">
-                                <option value="Pendente">Pendente</option>
-                                <option value="Confirmado">Confirmado</option>
-                                <option value="Reagendado">Reagendado</option>
-                                <option value="Cancelado">Cancelado</option>
-                                <option value="Realizado">Realizado</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editConsultaStatus">Status Consulta:</label>
-                            <select id="editConsultaStatus">
-                                <option value="Não Realizada">Não Realizada</option>
-                                <option value="Em Andamento">Em Andamento</option>
-                                <option value="Concluída">Concluída</option>
-                                <option value="Cancelada">Cancelada</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editOrcamentoStatus">Status Orçamento:</label>
-                            <select id="editOrcamentoStatus">
-                                <option value="Não Enviado">Não Enviado</option>
-                                <option value="Em Elaboração">Em Elaboração</option>
-                                <option value="Enviado">Enviado</option>
-                                <option value="Aceito">Aceito</option>
-                                <option value="Rejeitado">Rejeitado</option>
-                                <option value="Expirado">Expirado</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editOrcamentoPdf">Link PDF Orçamento:</label>
-                            <input type="url" id="editOrcamentoPdf" placeholder="https://...">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editOrcamentoAceite">Link Aceite:</label>
-                            <input type="url" id="editOrcamentoAceite" placeholder="https://...">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editStatusAceite">Status Aceite:</label>
-                            <select id="editStatusAceite">
-                                <option value="Pendente">Pendente</option>
-                                <option value="Aceito">Aceito</option>
-                                <option value="Rejeitado">Rejeitado</option>
-                                <option value="Expirado">Expirado</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editValorEntrada">Valor Entrada:</label>
-                            <input type="number" id="editValorEntrada" step="0.01" placeholder="0.00">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editComprovante">Comprovante Pagamento:</label>
-                            <input type="url" id="editComprovante" placeholder="https://...">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="editStatusGeral">Status Geral:</label>
-                            <select id="editStatusGeral">
-                                <option value="Novo">Novo</option>
-                                <option value="Em Atendimento">Em Atendimento</option>
-                                <option value="Aguardando Pagamento">Aguardando Pagamento</option>
-                                <option value="Pago">Pago</option>
-                                <option value="Concluído">Concluído</option>
-                                <option value="Cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group full-width">
-                            <label for="editObservacao">Observações:</label>
-                            <textarea id="editObservacao" rows="3"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="submit" class="btn-primary">Salvar</button>
-                        <button type="button" onclick="fecharModal()" class="btn-secondary">Cancelar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script src="gestao-script-new.js"></script>
+            // Verificar dependências
+            if (typeof NotificationManager === 'undefined') {
+                console.error('❌ NotificationManager não carregado');
+                return;
+            }
+            
+            if (typeof AuthManager === 'undefined') {
+                console.error('❌ AuthManager não carregado');
+                return;
+            }
+            
+            // Sistema pronto
+            console.log('🚀 Todas as dependências carregadas com sucesso');
+        });
+    </script>
 </body>
 </html>
