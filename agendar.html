@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Consulta - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .calendar-header-day {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .calendar-day {
+            background: white;
+            padding: 10px;
+            min-height: 100px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+
+        .calendar-day.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .calendar-day.other-month {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .calendar-day.past {
+            background: #fafafa;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.has-appointment {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .day-appointments {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .time-slots {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .time-slots.active {
+            display: block;
+        }
+
+        .time-slots h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .time-slot {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .time-slot:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+
+        .time-slot.selected {
+            background: #007bff;
+            color: white;
+            border-color: #0056b3;
+        }
+
+        .time-slot.unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            cursor: not-allowed;
+        }
+
+        .appointment-form {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+
+        .appointment-form.active {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .appointment-summary {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 15px;
+            border-radius: 3px;
+        }
+
+        .today {
+            background: #e8f5e8 !important;
+            border-color: #28a745 !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
+            <p>Agendamento de Consultas</p>
+            <div class="user-info">
+                <span id="userName">Carregando...</span>
+                <a href="/dashboard.html" class="btn-secondary">← Voltar ao Dashboard</a>
+            </div>
+        </header>
+
+        <div class="calendar-container">
+            <!-- Mensagens de feedback -->
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- Cabeçalho do calendário -->
+            <div class="calendar-header">
+                <div>
+                    <h2 id="currentMonth">Carregando...</h2>
+                    <p>Selecione uma data para agendar sua consulta</p>
+                </div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" onclick="previousMonth()">← Anterior</button>
+                    <button class="nav-btn" onclick="currentMonth()">Hoje</button>
+                    <button class="nav-btn" onclick="nextMonth()">Próximo →</button>
+                </div>
+            </div>
+
+            <!-- Legenda -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e8f5e8; border: 2px solid #28a745;"></div>
+                    <span>Hoje</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fff3cd; border-left: 4px solid #ffc107;"></div>
+                    <span>Com agendamentos</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fafafa;"></div>
+                    <span>Indisponível</span>
+                </div>
+            </div>
+
+            <!-- Grade do calendário -->
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="loading">🔄 Carregando calendário...</div>
+            </div>
+
+            <!-- Seleção de horários -->
+            <div id="timeSlots" class="time-slots">
+                <h3>Horários disponíveis para <span id="selectedDate"></span></h3>
+                <div id="slotsGrid" class="slots-grid">
+                    <!-- Horários serão carregados aqui -->
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="clearSelection()">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Formulário de agendamento -->
+            <div id="appointmentForm" class="appointment-form">
+                <h3>Finalizar Agendamento</h3>
+                
+                <div class="appointment-summary" id="appointmentSummary">
+                    <!-- Resumo será preenchido aqui -->
+                </div>
+
+                <form id="bookingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipoConsulta">Tipo de Consulta *</label>
+                            <select id="tipoConsulta" name="tipoConsulta" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="consulta-geral">Consulta Geral</option>
+                                <option value="retorno">Retorno</option>
+                                <option value="primeira-consulta">Primeira Consulta</option>
+                                <option value="urgencia">Urgência</option>
+                                <option value="teleconsulta">Teleconsulta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="convenio">Convênio</label>
+                            <select id="convenio" name="convenio">
+                                <option value="particular">Particular</option>
+                                <option value="unimed">Unimed</option>
+                                <option value="bradesco">Bradesco Saúde</option>
+                                <option value="sulamerica">SulAmérica</option>
+                                <option value="amil">Amil</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observacoes">Observações (opcional)</label>
+                        <textarea id="observacoes" name="observacoes" rows="3" 
+                                  placeholder="Descreva brevemente o motivo da consulta ou observações importantes"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefoneContato">Telefone de Contato *</label>
+                        <input type="tel" id="telefoneContato" name="telefoneContato" required 
+                               placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="backToTimeSlots()">← Voltar</button>
+                        <button type="submit" class="btn-primary">📅 Confirmar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        let selectedTime = null;
+        let userInfo = null;
+
+        // Carregar informações do usuário
+        async function loadUserInfo() {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch('/api/user-info', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    userInfo = await response.json();
+                    document.getElementById('userName').textContent = userInfo.nome;
+                } else {
+                    throw new Error('Não autorizado');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuário:', error);
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Inicializar calendário
+        function initCalendar() {
+            generateCalendar();
+            loadAppointments();
+        }
+
+        // Gerar grade do calendário
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthHeader = document.getElementById('currentMonth');
+            
+            // Atualizar cabeçalho
+            monthHeader.textContent = currentDate.toLocaleDateString('pt-BR', { 
+                month: 'long', 
+                year: 'numeric' 
+            }).replace(/^\w/, c => c.toUpperCase());
+
+            // Limpar grade
+            grid.innerHTML = '';
+
+            // Cabeçalhos dos dias
+            const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            weekDays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header-day';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+
+            // Primeiro dia do mês
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            // Gerar dias
+            const today = new Date();
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                // Classes condicionais
+                if (date.getMonth() !== currentDate.getMonth()) {
+                    dayElement.classList.add('other-month');
+                }
+                if (date < today.setHours(0,0,0,0)) {
+                    dayElement.classList.add('past');
+                }
+                if (date.toDateString() === new Date().toDateString()) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.innerHTML = `
+                    <div class="day-number">${date.getDate()}</div>
+                    <div class="day-appointments" id="appointments-${date.toISOString().split('T')[0]}">
+                        <!-- Agendamentos serão carregados aqui -->
+                    </div>
+                `;
+
+                // Event listener para seleção
+                if (!dayElement.classList.contains('past') && !dayElement.classList.contains('other-month')) {
+                    dayElement.addEventListener('click', () => selectDate(date));
+                }
+
+                grid.appendChild(dayElement);
+            }
+        }
+
+        // Selecionar data
+        function selectDate(date) {
+            // Remover seleção anterior
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+
+            // Adicionar seleção
+            const dayElement = event.currentTarget;
+            dayElement.classList.add('selected');
+
+            selectedDate = date;
+            document.getElementById('selectedDate').textContent = 
+                date.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+            // Mostrar horários
+            loadTimeSlots(date);
+            document.getElementById('timeSlots').classList.add('active');
+            document.getElementById('appointmentForm').classList.remove('active');
+        }
+
+        // Carregar horários disponíveis
+        async function loadTimeSlots(date) {
+            const slotsGrid = document.getElementById('slotsGrid');
+            slotsGrid.innerHTML = '<div class="loading">🔄 Carregando horários...</div>';
+
+            try {
+                const dateStr = date.toISOString().split('T')[0];
+                const response = await fetch(`/api/available-slots?date=${dateStr}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                const slots = await response.json();
+                
+                if (response.ok) {
+                    renderTimeSlots(slots);
+                } else {
+                    throw new Error(slots.message || 'Erro ao carregar horários');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar horários:', error);
+                slotsGrid.innerHTML = '<div class="error">❌ Erro ao carregar horários</div>';
+            }
+        }
+
+        // Renderizar horários
+        function renderTimeSlots(slots) {
+            const slotsGrid = document.getElementById('slotsGrid');
+            
+            if (slots.length === 0) {
+                slotsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666;">Nenhum horário disponível para esta data</div>';
+                return;
+            }
+
+            slotsGrid.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot.time;
+                
+                if (slot.available) {
+                    slotElement.addEventListener('click', () => selectTimeSlot(slot.time, slotElement));
+                } else {
+                    slotElement.classList.add('unavailable');
+                    slotElement.title = 'Horário não disponível';
+                }
+                
+                slotsGrid.appendChild(slotElement);
+            });
+        }
+
+        // Selecionar horário
+        function selectTimeSlot(time, element) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // Adicionar seleção
+            element.classList.add('selected');
+            selectedTime = time;
+
+            // Mostrar formulário
+            showAppointmentForm();
+        }
+
+        // Mostrar formulário de agendamento
+        function showAppointmentForm() {
+            document.getElementById('timeSlots').classList.remove('active');
+            document.getElementById('appointmentForm').classList.add('active');
+
+            // Preencher resumo
+            const summary = document.getElementById('appointmentSummary');
+            summary.innerHTML = `
+                <h4>📅 Resumo do Agendamento</h4>
+                <p><strong>Data:</strong> ${selectedDate.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                })}</p>
+                <p><strong>Horário:</strong> ${selectedTime}</p>
+                <p><strong>Paciente:</strong> ${userInfo.nome}</p>
+            `;
+        }
+
+        // Voltar para seleção de horários
+        function backToTimeSlots() {
+            document.getElementById('appointmentForm').classList.remove('active');
+            document.getElementById('timeSlots').classList.add('active');
+        }
+
+        // Limpar seleção
+        function clearSelection() {
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+            document.getElementById('timeSlots').classList.remove('active');
+            document.getElementById('appointmentForm').classList.remove('active');
+            selectedDate = null;
+            selectedTime = null;
+        }
+
+        // Navegação do calendário
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            generateCalendar();
+            loadAppointments();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            generateCalendar();
+            loadAppointments();
+        }
+
+        function currentMonth() {
+            currentDate = new Date();
+            generateCalendar();
+            loadAppointments();
+        }
+
+        // Carregar agendamentos existentes
+        async function loadAppointments() {
+            try {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth() + 1;
+                
+                const response = await fetch(`/api/appointments?year=${year}&month=${month}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                if (response.ok) {
+                    const appointments = await response.json();
+                    displayAppointments(appointments);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos:', error);
+            }
+        }
+
+        // Exibir agendamentos no calendário
+        function displayAppointments(appointments) {
+            appointments.forEach(appointment => {
+                const date = new Date(appointment.data_consulta);
+                const dateStr = date.toISOString().split('T')[0];
+                const appointmentElement = document.getElementById(`appointments-${dateStr}`);
+                
+                if (appointmentElement) {
+                    appointmentElement.innerHTML += `
+                        <div style="font-size: 10px; background: #fff3cd; padding: 2px; border-radius: 2px; margin-bottom: 2px;">
+                            ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    `;
+                    appointmentElement.closest('.calendar-day').classList.add('has-appointment');
+                }
+            });
+        }
+
+        // Submeter formulário de agendamento
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const appointmentData = {
+                data_consulta: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,
+                tipo_consulta: formData.get('tipoConsulta'),
+                convenio: formData.get('convenio'),
+                observacoes: formData.get('observacoes'),
+                telefone_contato: formData.get('telefoneContato')
+            };
+
+            try {
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(appointmentData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showMessage('success', '✅ Consulta agendada com sucesso! Você receberá uma confirmação por email.');
+                    clearSelection();
+                    generateCalendar();
+                    loadAppointments();
+                    e.target.reset();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao agendar:', error);
+                showMessage('error', '❌ Erro ao agendar consulta: ' + error.message);
+            }
+        });
+
+        // Mostrar mensagens
+        function showMessage(type, text) {
+            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            messageElement.textContent = text;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Formatação de telefone
+        document.getElementById('telefoneContato').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserInfo();
+            initCalendar();
+        });
+    </script>
+</body>
+</html>

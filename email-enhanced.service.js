@@ -211,6 +211,83 @@ class EmailService {
         }
     }
 
+    async enviarConfirmacaoAgendamento(email, nome, dadosConsulta) {
+        if (!this.configurado) {
+            console.log('📧 [SIMULADO] Confirmação de agendamento para', email);
+            return { success: true, message: 'Email simulado (sem configuração SMTP)' };
+        }
+
+        try {
+            const mailOptions = {
+                from: 'noreply@mscartozzoni.com.br',
+                to: email,
+                subject: '📅 Consulta Agendada - Dr. Marcio Scartozzoni',
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                            <h1 style="margin: 0; font-size: 28px;">🏥 Dr. Marcio Scartozzoni</h1>
+                            <p style="margin: 10px 0 0 0; opacity: 0.9;">Consulta Agendada com Sucesso!</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px;">
+                            <h2 style="color: #333; margin-bottom: 20px;">Olá, ${nome}!</h2>
+                            
+                            <p style="color: #666; line-height: 1.6;">
+                                Sua consulta foi agendada com sucesso! Confira os detalhes abaixo:
+                            </p>
+                            
+                            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 25px 0;">
+                                <h3 style="margin: 0 0 15px 0; color: #495057;">📋 Detalhes da Consulta:</h3>
+                                <p style="margin: 8px 0; color: #666;"><strong>📅 Data:</strong> ${dadosConsulta.data}</p>
+                                <p style="margin: 8px 0; color: #666;"><strong>🕐 Horário:</strong> ${dadosConsulta.horario}</p>
+                                <p style="margin: 8px 0; color: #666;"><strong>🩺 Tipo:</strong> ${dadosConsulta.tipo}</p>
+                                <p style="margin: 8px 0; color: #666;"><strong>💳 Convênio:</strong> ${dadosConsulta.convenio}</p>
+                            </div>
+                            
+                            <div style="background: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                                <h4 style="margin: 0 0 10px 0; color: #1976d2;">📍 Informações Importantes:</h4>
+                                <ul style="margin: 0; padding-left: 20px; color: #666;">
+                                    <li>Chegue com 15 minutos de antecedência</li>
+                                    <li>Traga documento com foto e carteirinha do convênio</li>
+                                    <li>Em caso de exames, traga os resultados mais recentes</li>
+                                    <li>Para cancelar, entre em contato com 48h de antecedência</li>
+                                </ul>
+                            </div>
+
+                            <div style="background: #f1f3f4; border-radius: 8px; padding: 15px; margin: 20px 0;">
+                                <h4 style="margin: 0 0 10px 0; color: #333;">📞 Contato:</h4>
+                                <p style="margin: 5px 0; color: #666;">Telefone: (11) 99999-9999</p>
+                                <p style="margin: 5px 0; color: #666;">WhatsApp: (11) 99999-9999</p>
+                                <p style="margin: 5px 0; color: #666;">Email: contato@mscartozzoni.com.br</p>
+                            </div>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="https://portal-dr-marcio-production-dda8.up.railway.app/dashboard.html" 
+                                   style="background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                                    🏥 Acessar Portal
+                                </a>
+                            </div>
+                            
+                            <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 25px 0;">
+                            
+                            <p style="color: #999; font-size: 12px; text-align: center;">
+                                Este é um email automático, não responda.<br>
+                                © 2024 Dr. Marcio Scartozzoni - Todos os direitos reservados
+                            </p>
+                        </div>
+                    </div>
+                `
+            };
+
+            const result = await this.transporter.sendMail(mailOptions);
+            console.log('✅ Email de confirmação de agendamento enviado para:', email);
+            return { success: true, messageId: result.messageId };
+        } catch (error) {
+            console.error('❌ Erro ao enviar confirmação de agendamento:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     async testarConfiguracao() {
         if (!this.configurado) {
             return {

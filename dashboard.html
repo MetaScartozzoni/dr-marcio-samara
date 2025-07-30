@@ -537,17 +537,20 @@
             
             if (userInfo.tipo === 'admin') {
                 navLinks.innerHTML = `
+                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
                     <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão</a>
                     <a href="/admin.html" class="nav-link"><i class="fas fa-users-cog"></i> Usuários</a>
                     <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
                 `;
             } else if (userInfo.tipo === 'funcionario') {
                 navLinks.innerHTML = `
+                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
                     <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão</a>
                     <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
                 `;
             } else {
                 navLinks.innerHTML = `
+                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
                     <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
                 `;
             }

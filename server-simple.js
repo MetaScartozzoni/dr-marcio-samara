@@ -65,9 +65,21 @@ async function initializeDatabase() {
                 tipo_consulta VARCHAR(100),
                 observacoes TEXT,
                 status VARCHAR(50) DEFAULT 'agendada',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                convenio VARCHAR(100),
+                telefone_contato VARCHAR(20),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+
+        // Adicionar novas colunas se não existirem (para bancos existentes)
+        try {
+            await pool.query(`ALTER TABLE consultas ADD COLUMN IF NOT EXISTS convenio VARCHAR(100)`);
+            await pool.query(`ALTER TABLE consultas ADD COLUMN IF NOT EXISTS telefone_contato VARCHAR(20)`);
+            await pool.query(`ALTER TABLE consultas ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+        } catch (error) {
+            // Colunas já existem, ignorar erro
+        }
 
         // Criar usuário admin se não existir
         const adminExists = await pool.query('SELECT * FROM usuarios WHERE email = $1', ['admin@mscartozzoni.com.br']);
@@ -340,6 +352,10 @@ app.post('/api/login', async (req, res) => {
         const senhaValida = await bcrypt.compare(senha, user.senha);
         
         if (senhaValida) {
+            // Gerar token simples
+            const tokenData = `${user.email}:${Date.now()}`;
+            const token = Buffer.from(tokenData).toString('base64');
+            
             // Definir redirecionamento baseado no tipo de usuário
             let redirectUrl = '/dashboard.html'; // Dashboard universal que detecta o tipo
             
@@ -351,6 +367,7 @@ app.post('/api/login', async (req, res) => {
             res.json({
                 success: true,
                 message: 'Login realizado com sucesso',
+                token: token,
                 user: {
                     id: user.id,
                     nome: user.nome,
@@ -793,6 +810,321 @@ app.post('/api/check-status', async (req, res) => {
             success: false,
             message: 'Erro interno do servidor'
         });
+    }
+});
+
+// ====================================
+// SISTEMA DE CALENDÁRIO E AGENDAMENTO
+// ====================================
+
+// Middleware para verificar autenticação
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ message: 'Token de acesso requerido' });
+    }
+
+    try {
+        // Simulação simples de autenticação
+        // Em produção, use JWT ou sessões adequadas
+        
+        // Por enquanto, vamos usar o email no "token" para simplicidade
+        // Format: "email:timestamp"
+        const [email, timestamp] = Buffer.from(token, 'base64').toString().split(':');
+        
+        if (!email || !timestamp) {
+            throw new Error('Token inválido');
+        }
+
+        // Verificar se o token não expirou (24 horas)
+        const tokenTime = parseInt(timestamp);
+        const now = Date.now();
+        if (now - tokenTime > 24 * 60 * 60 * 1000) {
+            throw new Error('Token expirado');
+        }
+
+        // Buscar usuário pelo email
+        pool.query('SELECT id, email, nome, tipo FROM usuarios WHERE email = $1', [email])
+            .then(result => {
+                if (result.rows.length === 0) {
+                    return res.status(404).json({ message: 'Usuário não encontrado' });
+                }
+                
+                req.user = result.rows[0];
+                req.userId = result.rows[0].id;
+                next();
+            })
+            .catch(error => {
+                console.error('Erro na autenticação:', error);
+                return res.status(500).json({ message: 'Erro interno' });
+            });
+
+    } catch (error) {
+        return res.status(403).json({ message: 'Token inválido' });
+    }
+}
+
+// Obter informações do usuário logado
+app.get('/api/user-info', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT id, nome, email, telefone FROM usuarios WHERE id = $1',
+            [req.userId]
+        );
+
+        if (result.rows.length > 0) {
+            res.json(result.rows[0]);
+        } else {
+            res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+    } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Obter horários disponíveis para uma data
+app.get('/api/available-slots', authenticateToken, async (req, res) => {
+    try {
+        const { date } = req.query;
+
+        if (!date) {
+            return res.status(400).json({ message: 'Data é obrigatória' });
+        }
+
+        // Verificar se é dia útil (segunda a sexta)
+        const selectedDate = new Date(date);
+        const dayOfWeek = selectedDate.getDay();
+        
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            return res.json([]); // Sem horários nos fins de semana
+        }
+
+        // Horários padrão do consultório
+        const standardSlots = [
+            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+            '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
+            '16:00', '16:30', '17:00', '17:30'
+        ];
+
+        // Buscar agendamentos existentes para a data
+        const existingAppointments = await pool.query(
+            'SELECT EXTRACT(HOUR FROM data_consulta) as hour, EXTRACT(MINUTE FROM data_consulta) as minute FROM consultas WHERE DATE(data_consulta) = $1',
+            [date]
+        );
+
+        const bookedTimes = existingAppointments.rows.map(row => {
+            const hour = String(row.hour).padStart(2, '0');
+            const minute = String(row.minute).padStart(2, '0');
+            return `${hour}:${minute}`;
+        });
+
+        // Criar lista de horários com disponibilidade
+        const slots = standardSlots.map(time => ({
+            time: time,
+            available: !bookedTimes.includes(time)
+        }));
+
+        res.json(slots);
+    } catch (error) {
+        console.error('Erro ao buscar horários:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Listar agendamentos do mês
+app.get('/api/appointments', authenticateToken, async (req, res) => {
+    try {
+        const { year, month } = req.query;
+
+        if (!year || !month) {
+            return res.status(400).json({ message: 'Ano e mês são obrigatórios' });
+        }
+
+        const result = await pool.query(`
+            SELECT c.*, u.nome as paciente_nome 
+            FROM consultas c
+            JOIN usuarios u ON c.paciente_id = u.id
+            WHERE EXTRACT(YEAR FROM c.data_consulta) = $1 
+            AND EXTRACT(MONTH FROM c.data_consulta) = $2
+            ORDER BY c.data_consulta ASC
+        `, [year, month]);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar agendamentos:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Criar novo agendamento
+app.post('/api/appointments', authenticateToken, async (req, res) => {
+    try {
+        const {
+            data_consulta,
+            tipo_consulta,
+            convenio,
+            observacoes,
+            telefone_contato
+        } = req.body;
+
+        // Validações básicas
+        if (!data_consulta || !tipo_consulta) {
+            return res.status(400).json({ 
+                message: 'Data e tipo de consulta são obrigatórios' 
+            });
+        }
+
+        // Verificar se o horário ainda está disponível
+        const existingAppointment = await pool.query(
+            'SELECT id FROM consultas WHERE data_consulta = $1',
+            [data_consulta]
+        );
+
+        if (existingAppointment.rows.length > 0) {
+            return res.status(409).json({ 
+                message: 'Este horário já foi agendado por outro paciente' 
+            });
+        }
+
+        // Criar o agendamento
+        const result = await pool.query(`
+            INSERT INTO consultas (
+                paciente_id, 
+                data_consulta, 
+                tipo_consulta, 
+                observacoes, 
+                convenio,
+                telefone_contato,
+                status
+            ) VALUES ($1, $2, $3, $4, $5, $6, 'agendada')
+            RETURNING *
+        `, [req.userId, data_consulta, tipo_consulta, observacoes, convenio, telefone_contato]);
+
+        const appointment = result.rows[0];
+
+        // Buscar dados do paciente para notificação
+        const userResult = await pool.query(
+            'SELECT nome, email FROM usuarios WHERE id = $1',
+            [req.userId]
+        );
+        const user = userResult.rows[0];
+
+        // Enviar email de confirmação
+        try {
+            const emailService = require('./email-enhanced.service.js');
+            await emailService.enviarConfirmacaoAgendamento(
+                user.email,
+                user.nome,
+                {
+                    data: new Date(data_consulta).toLocaleDateString('pt-BR'),
+                    horario: new Date(data_consulta).toLocaleTimeString('pt-BR', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }),
+                    tipo: tipo_consulta,
+                    convenio: convenio || 'Particular'
+                }
+            );
+        } catch (emailError) {
+            console.error('Erro ao enviar email de confirmação:', emailError);
+            // Não falhar o agendamento por erro de email
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'Consulta agendada com sucesso',
+            appointment: appointment
+        });
+
+    } catch (error) {
+        console.error('Erro ao criar agendamento:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Cancelar agendamento
+app.delete('/api/appointments/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar se o agendamento pertence ao usuário ou se é admin
+        const result = await pool.query(
+            'SELECT * FROM consultas WHERE id = $1 AND (paciente_id = $2 OR $2 IN (SELECT id FROM usuarios WHERE tipo = \'admin\'))',
+            [id, req.userId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ 
+                message: 'Agendamento não encontrado ou sem permissão' 
+            });
+        }
+
+        // Atualizar status para cancelado
+        await pool.query(
+            'UPDATE consultas SET status = \'cancelada\' WHERE id = $1',
+            [id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Agendamento cancelado com sucesso'
+        });
+
+    } catch (error) {
+        console.error('Erro ao cancelar agendamento:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Listar agendamentos do usuário
+app.get('/api/my-appointments', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT * FROM consultas 
+            WHERE paciente_id = $1 
+            AND status != 'cancelada'
+            ORDER BY data_consulta ASC
+        `, [req.userId]);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Erro ao buscar agendamentos do usuário:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
+    }
+});
+
+// Atualizar agendamento (admin)
+app.put('/api/appointments/:id', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, observacoes } = req.body;
+
+        // Verificar se é admin
+        const adminCheck = await pool.query(
+            'SELECT tipo FROM usuarios WHERE id = $1',
+            [req.userId]
+        );
+
+        if (adminCheck.rows.length === 0 || adminCheck.rows[0].tipo !== 'admin') {
+            return res.status(403).json({ message: 'Acesso negado' });
+        }
+
+        await pool.query(
+            'UPDATE consultas SET status = $1, observacoes = $2 WHERE id = $3',
+            [status, observacoes, id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Agendamento atualizado com sucesso'
+        });
+
+    } catch (error) {
+        console.error('Erro ao atualizar agendamento:', error);
+        res.status(500).json({ message: 'Erro interno do servidor' });
     }
 });
 
