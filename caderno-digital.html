@@ -487,6 +487,131 @@
             box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
         }
 
+        /* CSS para Modais */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .preset-texts {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .preset-btn:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -530,6 +655,14 @@
             
             <button onclick="novoDocumento()">
                 <i class="fas fa-plus"></i> Novo Documento
+            </button>
+            
+            <button onclick="gerarReceita()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                <i class="fas fa-prescription"></i> Gerar Receita
+            </button>
+            
+            <button onclick="gerarExames()" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);">
+                <i class="fas fa-vial"></i> Gerar Exames
             </button>
             
             <button onclick="capturarFoto()">
@@ -867,6 +1000,130 @@
         </button>
     </div>
 
+    <!-- Modal para Gerar Receita -->
+    <div id="modal-receita" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 900px; width: 90%;">
+            <div class="modal-header">
+                <h2><i class="fas fa-prescription"></i> Gerar Receita Médica</h2>
+                <button onclick="fecharModal('modal-receita')" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px;">
+                    <!-- Área principal de edição -->
+                    <div style="flex: 2;">
+                        <div class="form-group">
+                            <label>Prescrição:</label>
+                            <textarea id="receita-texto" rows="15" 
+                                style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Courier New', monospace;"
+                                placeholder="Digite a prescrição médica aqui...&#10;&#10;Exemplo:&#10;1. Dipirona 500mg - Tomar 1 comprimido de 6/6h por 5 dias&#10;2. Omeprazol 20mg - Tomar 1 cápsula em jejum por 7 dias"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Orientações Gerais:</label>
+                            <textarea id="receita-orientacoes" rows="3" 
+                                style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;"
+                                placeholder="Orientações adicionais ao paciente..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <!-- Textos pré-configurados -->
+                    <div style="flex: 1;">
+                        <h4>📝 Textos Pré-configurados</h4>
+                        <div class="preset-texts">
+                            <button onclick="inserirTextoReceita('antibiotico')" class="preset-btn">Antibiótico</button>
+                            <button onclick="inserirTextoReceita('analgesia')" class="preset-btn">Analgesia</button>
+                            <button onclick="inserirTextoReceita('anti-inflamatorio')" class="preset-btn">Anti-inflamatório</button>
+                            <button onclick="inserirTextoReceita('pos-operatorio')" class="preset-btn">Pós-operatório</button>
+                            <button onclick="inserirTextoReceita('vitaminas')" class="preset-btn">Vitaminas</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="assinarDigitalmente('receita')" class="btn-primary" style="background: #28a745;">
+                    <i class="fas fa-signature"></i> Assinar Digitalmente (VIDAAS)
+                </button>
+                <button onclick="gerarPDFReceita()" class="btn-primary" style="background: #dc3545;">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+                <button onclick="imprimirReceita()" class="btn-primary" style="background: #6f42c1;">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button onclick="enviarPorEmail('receita')" class="btn-secondary">
+                    <i class="fas fa-envelope"></i> Enviar por Email
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Gerar Exames -->
+    <div id="modal-exames" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 900px; width: 90%;">
+            <div class="modal-header">
+                <h2><i class="fas fa-vial"></i> Gerar Solicitação de Exames</h2>
+                <button onclick="fecharModal('modal-exames')" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div style="display: flex; gap: 20px;">
+                    <!-- Área principal de edição -->
+                    <div style="flex: 2;">
+                        <div class="form-group">
+                            <label>Exames Solicitados:</label>
+                            <textarea id="exames-texto" rows="12" 
+                                style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: 'Courier New', monospace;"
+                                placeholder="Digite os exames solicitados...&#10;&#10;Exemplo:&#10;□ Hemograma completo&#10;□ Glicemia de jejum&#10;□ Colesterol total e frações&#10;□ Ureia e creatinina"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Justificativa Clínica:</label>
+                            <textarea id="exames-justificativa" rows="3" 
+                                style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;"
+                                placeholder="Justificativa para solicitação dos exames..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>CID-10:</label>
+                            <input type="text" id="exames-cid" 
+                                style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px;"
+                                placeholder="Ex: Z01.0 - Exame médico geral">
+                        </div>
+                    </div>
+                    
+                    <!-- Exames pré-configurados -->
+                    <div style="flex: 1;">
+                        <h4>🧪 Exames Pré-configurados</h4>
+                        <div class="preset-texts">
+                            <button onclick="inserirTextoExames('rotina')" class="preset-btn">Check-up Rotina</button>
+                            <button onclick="inserirTextoExames('pre-operatorio')" class="preset-btn">Pré-operatório</button>
+                            <button onclick="inserirTextoExames('cardiologico')" class="preset-btn">Cardiológico</button>
+                            <button onclick="inserirTextoExames('diabetes')" class="preset-btn">Diabetes</button>
+                            <button onclick="inserirTextoExames('tireoide')" class="preset-btn">Tireoide</button>
+                            <button onclick="inserirTextoExames('hepatico')" class="preset-btn">Função Hepática</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="assinarDigitalmente('exames')" class="btn-primary" style="background: #28a745;">
+                    <i class="fas fa-signature"></i> Assinar Digitalmente (VIDAAS)
+                </button>
+                <button onclick="gerarPDFExames()" class="btn-primary" style="background: #dc3545;">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+                <button onclick="imprimirExames()" class="btn-primary" style="background: #6f42c1;">
+                    <i class="fas fa-print"></i> Imprimir
+                </button>
+                <button onclick="enviarPorEmail('exames')" class="btn-secondary">
+                    <i class="fas fa-envelope"></i> Enviar por Email
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="caderno-digital-functions.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
@@ -1079,6 +1336,324 @@
         function sincronizar() {
             alert('Sincronizando com o servidor... (Funcionalidade em desenvolvimento)');
         }
+
+        // === FUNÇÕES PARA RECEITA MÉDICA ===
+        function gerarReceita() {
+            document.getElementById('modal-receita').style.display = 'flex';
+        }
+
+        function gerarExames() {
+            document.getElementById('modal-exames').style.display = 'flex';
+        }
+
+        function fecharModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Textos pré-configurados para receitas
+        const textosReceita = {
+            antibiotico: `1. Amoxicilina 500mg - Tomar 1 cápsula de 8/8h por 7 dias
+2. Omeprazol 20mg - Tomar 1 cápsula em jejum por 7 dias (protetor gástrico)`,
+            
+            analgesia: `1. Dipirona 500mg - Tomar 1 comprimido de 6/6h se dor (máximo 4x/dia)
+2. Paracetamol 750mg - Tomar 1 comprimido de 8/8h se necessário`,
+            
+            'anti-inflamatorio': `1. Ibuprofeno 600mg - Tomar 1 comprimido de 8/8h por 5 dias (após alimentação)
+2. Omeprazol 20mg - Tomar 1 cápsula em jejum por 7 dias`,
+            
+            'pos-operatorio': `1. Dipirona 500mg - Tomar 1 comprimido de 6/6h por 3 dias
+2. Amoxicilina + Clavulanato 875mg - Tomar 1 comprimido de 12/12h por 7 dias
+3. Omeprazol 20mg - Tomar 1 cápsula em jejum por 7 dias
+4. Aplicar gelo local 15min de 4/4h nas primeiras 48h`,
+            
+            vitaminas: `1. Complexo B - Tomar 1 comprimido ao dia por 30 dias
+2. Vitamina D3 2000UI - Tomar 1 cápsula ao dia por 30 dias
+3. Vitamina C 1g - Tomar 1 comprimido ao dia por 30 dias`
+        };
+
+        // Textos pré-configurados para exames
+        const textosExames = {
+            rotina: `□ Hemograma completo
+□ Glicemia de jejum
+□ Colesterol total e frações
+□ Triglicerídeos
+□ Ureia e creatinina
+□ TGO e TGP
+□ Urina tipo 1`,
+            
+            'pre-operatorio': `□ Hemograma completo
+□ Coagulograma (TAP/PTT)
+□ Glicemia de jejum
+□ Ureia e creatinina
+□ Sódio e potássio
+□ ECG
+□ Raio-X de tórax`,
+            
+            cardiologico: `□ ECG de repouso
+□ Ecocardiograma
+□ Teste ergométrico
+□ Colesterol total e frações
+□ Triglicerídeos
+□ PCR ultrassensível`,
+            
+            diabetes: `□ Glicemia de jejum
+□ Hemoglobina glicada (HbA1c)
+□ Insulina de jejum
+□ Peptídeo C
+□ Microalbuminúria
+□ Fundo de olho`,
+            
+            tireoide: `□ TSH
+□ T4 livre
+□ T3 livre
+□ Anti-TPO
+□ Anti-tireoglobulina
+□ Ultrassom de tireoide`,
+            
+            hepatico: `□ TGO (AST)
+□ TGP (ALT)
+□ GGT
+□ Fosfatase alcalina
+□ Bilirrubinas (total e frações)
+□ Albumina`
+        };
+
+        function inserirTextoReceita(tipo) {
+            const textarea = document.getElementById('receita-texto');
+            const textoAtual = textarea.value;
+            const novoTexto = textosReceita[tipo];
+            
+            if (textoAtual.trim() === '') {
+                textarea.value = novoTexto;
+            } else {
+                textarea.value = textoAtual + '\n\n' + novoTexto;
+            }
+            
+            // Focar no textarea
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+
+        function inserirTextoExames(tipo) {
+            const textarea = document.getElementById('exames-texto');
+            const textoAtual = textarea.value;
+            const novoTexto = textosExames[tipo];
+            
+            if (textoAtual.trim() === '') {
+                textarea.value = novoTexto;
+            } else {
+                textarea.value = textoAtual + '\n\n' + novoTexto;
+            }
+            
+            // Focar no textarea
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+
+        // Função para assinatura digital via VIDAAS
+        function assinarDigitalmente(tipo) {
+            try {
+                // Tentar abrir o VIDAAS
+                const vidaasUrl = 'vidaas://assinar';
+                
+                // Criar link temporário para abrir o app
+                const link = document.createElement('a');
+                link.href = vidaasUrl;
+                link.click();
+                
+                // Fallback: se não conseguir abrir o app, mostrar instruções
+                setTimeout(() => {
+                    const confirmar = confirm(`📱 Tentando abrir o VIDAAS para assinatura digital...
+
+Se o aplicativo não abriu automaticamente:
+1. Abra o VIDAAS manualmente
+2. Selecione o documento de ${tipo}
+3. Realize a assinatura digital
+
+Deseja continuar com a geração do PDF após assinar?`);
+                    
+                    if (confirmar) {
+                        if (tipo === 'receita') {
+                            gerarPDFReceita();
+                        } else {
+                            gerarPDFExames();
+                        }
+                    }
+                }, 1000);
+                
+            } catch (error) {
+                alert('❌ Erro ao tentar abrir o VIDAAS. Abra o aplicativo manualmente para assinar o documento.');
+                console.error('Erro:', error);
+            }
+        }
+
+        // Função para gerar PDF da receita
+        function gerarPDFReceita() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cabeçalho
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('RECEITA MÉDICA', 105, 30, { align: 'center' });
+            
+            // Dados do médico
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Dr. Marcio Scartozzoni', 20, 50);
+            doc.text('CRM: [NÚMERO]', 20, 60);
+            doc.text('Especialidade: [ESPECIALIDADE]', 20, 70);
+            
+            // Data
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            doc.text(`Data: ${hoje}`, 150, 50);
+            
+            // Paciente
+            const pacienteSelecionado = document.getElementById('pacienteSelect').value;
+            doc.text(`Paciente: ${pacienteSelecionado || '[Nome do Paciente]'}`, 20, 90);
+            
+            // Prescrição
+            doc.setFont(undefined, 'bold');
+            doc.text('PRESCRIÇÃO:', 20, 110);
+            
+            doc.setFont(undefined, 'normal');
+            const prescricao = document.getElementById('receita-texto').value || '[Prescrição não informada]';
+            const linhasPrescricao = doc.splitTextToSize(prescricao, 170);
+            doc.text(linhasPrescricao, 20, 125);
+            
+            // Orientações
+            const orientacoes = document.getElementById('receita-orientacoes').value;
+            if (orientacoes) {
+                doc.setFont(undefined, 'bold');
+                doc.text('ORIENTAÇÕES:', 20, 125 + (linhasPrescricao.length * 7) + 15);
+                
+                doc.setFont(undefined, 'normal');
+                const linhasOrientacoes = doc.splitTextToSize(orientacoes, 170);
+                doc.text(linhasOrientacoes, 20, 125 + (linhasPrescricao.length * 7) + 30);
+            }
+            
+            // Assinatura
+            doc.setFont(undefined, 'bold');
+            doc.text('_________________________________', 20, 250);
+            doc.text('Dr. Marcio Scartozzoni', 20, 260);
+            doc.text('CRM: [NÚMERO]', 20, 270);
+            
+            // Gerar e abrir PDF
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            
+            alert('✅ PDF da receita gerado com sucesso!');
+        }
+
+        // Função para gerar PDF dos exames
+        function gerarPDFExames() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cabeçalho
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('SOLICITAÇÃO DE EXAMES', 105, 30, { align: 'center' });
+            
+            // Dados do médico
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text('Dr. Marcio Scartozzoni', 20, 50);
+            doc.text('CRM: [NÚMERO]', 20, 60);
+            doc.text('Especialidade: [ESPECIALIDADE]', 20, 70);
+            
+            // Data
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            doc.text(`Data: ${hoje}`, 150, 50);
+            
+            // Paciente
+            const pacienteSelecionado = document.getElementById('pacienteSelect').value;
+            doc.text(`Paciente: ${pacienteSelecionado || '[Nome do Paciente]'}`, 20, 90);
+            
+            // CID
+            const cid = document.getElementById('exames-cid').value;
+            if (cid) {
+                doc.text(`CID-10: ${cid}`, 20, 100);
+            }
+            
+            // Exames solicitados
+            doc.setFont(undefined, 'bold');
+            doc.text('EXAMES SOLICITADOS:', 20, 120);
+            
+            doc.setFont(undefined, 'normal');
+            const exames = document.getElementById('exames-texto').value || '[Exames não informados]';
+            const linhasExames = doc.splitTextToSize(exames, 170);
+            doc.text(linhasExames, 20, 135);
+            
+            // Justificativa
+            const justificativa = document.getElementById('exames-justificativa').value;
+            if (justificativa) {
+                doc.setFont(undefined, 'bold');
+                doc.text('JUSTIFICATIVA CLÍNICA:', 20, 135 + (linhasExames.length * 7) + 15);
+                
+                doc.setFont(undefined, 'normal');
+                const linhasJustificativa = doc.splitTextToSize(justificativa, 170);
+                doc.text(linhasJustificativa, 20, 135 + (linhasExames.length * 7) + 30);
+            }
+            
+            // Assinatura
+            doc.setFont(undefined, 'bold');
+            doc.text('_________________________________', 20, 250);
+            doc.text('Dr. Marcio Scartozzoni', 20, 260);
+            doc.text('CRM: [NÚMERO]', 20, 270);
+            
+            // Gerar e abrir PDF
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            
+            alert('✅ PDF da solicitação de exames gerado com sucesso!');
+        }
+
+        // Função para imprimir receita
+        function imprimirReceita() {
+            gerarPDFReceita();
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        }
+
+        // Função para imprimir exames
+        function imprimirExames() {
+            gerarPDFExames();
+            setTimeout(() => {
+                window.print();
+            }, 1000);
+        }
+
+        // Função para enviar por email
+        function enviarPorEmail(tipo) {
+            const assunto = tipo === 'receita' ? 'Receita Médica' : 'Solicitação de Exames';
+            const paciente = document.getElementById('pacienteSelect').value || '[Nome do Paciente]';
+            
+            const corpo = `Olá,
+
+Segue em anexo ${tipo === 'receita' ? 'a receita médica' : 'a solicitação de exames'} para o paciente: ${paciente}
+
+Data: ${new Date().toLocaleDateString('pt-BR')}
+
+Atenciosamente,
+Dr. Marcio Scartozzoni`;
+
+            // Abrir cliente de email
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+            window.location.href = mailtoLink;
+            
+            alert(`📧 Cliente de email aberto. Anexe o PDF da ${tipo} antes de enviar.`);
+        }
+
+        // Fechar modais clicando fora
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+            }
+        });
 
         // Funções para o modelo de orçamento
         function visualizarOrcamentoModelo() {
