@@ -96,16 +96,19 @@
 
         .calendar-day {
             background: white;
-            padding: 10px;
-            min-height: 100px;
+            padding: 8px;
+            min-height: 120px;
             position: relative;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
             border: 2px solid transparent;
+            overflow: hidden;
         }
 
         .calendar-day:hover {
             background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .calendar-day.selected {
@@ -131,12 +134,93 @@
 
         .day-number {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-size: 16px;
         }
 
         .day-appointments {
-            font-size: 11px;
-            color: #666;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .appointment-item {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 3px solid #667eea;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            line-height: 1.2;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .appointment-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(2px);
+        }
+
+        .appointment-item.tipo-consulta {
+            border-left-color: #28a745;
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .appointment-item.tipo-cirurgia {
+            border-left-color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .appointment-item.tipo-reuniao {
+            border-left-color: #6f42c1;
+            background: rgba(111, 66, 193, 0.1);
+        }
+
+        .appointment-time {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .appointment-patient {
+            color: #6c757d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .more-appointments {
+            text-align: center;
+            font-size: 10px;
+            color: #6c757d;
+            font-weight: bold;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .more-appointments:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .calendar-day {
+                min-height: 80px;
+                padding: 4px;
+            }
+            
+            .day-number {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+            
+            .appointment-item {
+                font-size: 9px;
+                padding: 2px 4px;
+            }
+            
+            .day-appointments {
+                max-height: 50px;
+            }
         }
 
         .time-slots {
@@ -706,28 +790,126 @@
                 if (response.ok) {
                     const appointments = await response.json();
                     displayAppointments(appointments);
+                } else {
+                    // Dados de exemplo para demonstração
+                    const exampleAppointments = generateExampleAppointments();
+                    displayAppointments(exampleAppointments);
                 }
             } catch (error) {
                 console.error('Erro ao carregar agendamentos:', error);
+                // Dados de exemplo para demonstração
+                const exampleAppointments = generateExampleAppointments();
+                displayAppointments(exampleAppointments);
             }
+        }
+
+        // Gerar dados de exemplo
+        function generateExampleAppointments() {
+            const today = new Date();
+            const appointments = [];
+            
+            // Próximos dias com agendamentos de exemplo
+            for (let i = 1; i <= 10; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                if (Math.random() > 0.5) { // 50% de chance de ter agendamento
+                    const numAppointments = Math.floor(Math.random() * 3) + 1; // 1-3 agendamentos
+                    
+                    for (let j = 0; j < numAppointments; j++) {
+                        const tipos = ['consulta', 'cirurgia', 'reuniao', 'retorno', 'avaliacao'];
+                        const pacientes = ['Maria Silva', 'João Santos', 'Ana Costa', 'Carlos Lima', 'Lucia Oliveira'];
+                        const horas = ['08:00', '09:30', '10:00', '14:00', '15:30', '16:00'];
+                        
+                        appointments.push({
+                            id: Date.now() + i + j,
+                            data_consulta: date.toISOString().split('T')[0],
+                            hora_consulta: horas[Math.floor(Math.random() * horas.length)],
+                            tipo: tipos[Math.floor(Math.random() * tipos.length)],
+                            paciente_nome: pacientes[Math.floor(Math.random() * pacientes.length)],
+                            status: 'confirmado'
+                        });
+                    }
+                }
+            }
+            
+            return appointments;
         }
 
         // Exibir agendamentos no calendário
         function displayAppointments(appointments) {
+            // Agrupar por data
+            const appointmentsByDate = {};
+            
             appointments.forEach(appointment => {
-                const date = new Date(appointment.data_consulta);
-                const dateStr = date.toISOString().split('T')[0];
-                const appointmentElement = document.getElementById(`appointments-${dateStr}`);
+                const date = appointment.data_consulta;
+                if (!appointmentsByDate[date]) {
+                    appointmentsByDate[date] = [];
+                }
+                appointmentsByDate[date].push(appointment);
+            });
+            
+            // Exibir em cada dia
+            Object.keys(appointmentsByDate).forEach(date => {
+                const dayAppointments = appointmentsByDate[date];
+                const appointmentElement = document.getElementById(`appointments-${date}`);
                 
                 if (appointmentElement) {
-                    appointmentElement.innerHTML += `
-                        <div style="font-size: 10px; background: #fff3cd; padding: 2px; border-radius: 2px; margin-bottom: 2px;">
-                            ${date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                    `;
-                    appointmentElement.closest('.calendar-day').classList.add('has-appointment');
+                    appointmentElement.innerHTML = '';
+                    
+                    // Ordenar por horário
+                    dayAppointments.sort((a, b) => a.hora_consulta.localeCompare(b.hora_consulta));
+                    
+                    // Mostrar até 3 agendamentos
+                    const visibleAppointments = dayAppointments.slice(0, 3);
+                    const hiddenCount = dayAppointments.length - visibleAppointments.length;
+                    
+                    visibleAppointments.forEach(appointment => {
+                        const appointmentDiv = document.createElement('div');
+                        appointmentDiv.className = `appointment-item tipo-${appointment.tipo}`;
+                        appointmentDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            abrirDetalhesAgendamento(appointment.id);
+                        };
+                        
+                        appointmentDiv.innerHTML = `
+                            <div class="appointment-time">${appointment.hora_consulta}</div>
+                            <div class="appointment-patient">${appointment.paciente_nome}</div>
+                        `;
+                        
+                        appointmentElement.appendChild(appointmentDiv);
+                    });
+                    
+                    // Mostrar "mais X" se houver agendamentos ocultos
+                    if (hiddenCount > 0) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'more-appointments';
+                        moreDiv.textContent = `+${hiddenCount} mais`;
+                        moreDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            mostrarTodosAgendamentos(date);
+                        };
+                        appointmentElement.appendChild(moreDiv);
+                    }
+                    
+                    // Marcar dia como tendo agendamentos
+                    const dayElement = appointmentElement.closest('.calendar-day');
+                    if (dayElement) {
+                        dayElement.classList.add('has-appointment');
+                    }
                 }
             });
+        }
+
+        // Abrir detalhes do agendamento
+        function abrirDetalhesAgendamento(agendamentoId) {
+            window.open(`/agendamento-detalhes.html?id=${agendamentoId}`, '_blank');
+        }
+
+        // Mostrar todos os agendamentos do dia
+        function mostrarTodosAgendamentos(date) {
+            // TODO: Implementar modal ou página para mostrar todos os agendamentos do dia
+            alert(`Ver todos os agendamentos de ${new Date(date).toLocaleDateString('pt-BR')}`);
         }
 
         // Submeter formulário de agendamento

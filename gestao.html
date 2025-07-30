@@ -87,7 +87,10 @@
         <div class="table-section">
             <div class="table-header">
                 <h2><i class="fas fa-users"></i> Gestão de Pacientes</h2>
-                <button onclick="adicionarPaciente()" class="btn-add"><i class="fas fa-user-plus"></i> Adicionar Paciente</button>
+                <div class="header-buttons">
+                    <button onclick="adicionarPaciente()" class="btn-add"><i class="fas fa-user-plus"></i> Adicionar Paciente</button>
+                    <button onclick="abrirAgendamentoRapido()" class="btn-calendar"><i class="fas fa-calendar-plus"></i> Agendamento Rápido</button>
+                </div>
             </div>
             
             <div class="table-container">
@@ -117,6 +120,83 @@
 
         <div id="loading" class="loading" style="display: none;">
             Carregando dados...
+        </div>
+    </div>
+
+    <!-- Modal para agendamento rápido -->
+    <div id="modalAgendamentoRapido" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-plus"></i> Agendamento Rápido</h3>
+                <span class="close" onclick="fecharModalAgendamento()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formAgendamentoRapido">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tipoAgendamento">Tipo de Agendamento:</label>
+                            <select id="tipoAgendamento" required onchange="atualizarDuracao()">
+                                <option value="">Selecione o tipo</option>
+                                <option value="consulta">👩‍⚕️ Consulta</option>
+                                <option value="cirurgia">🏥 Cirurgia</option>
+                                <option value="reuniao">👥 Reunião</option>
+                                <option value="retorno">🔄 Retorno</option>
+                                <option value="avaliacao">📋 Avaliação</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pacienteSelect">Paciente:</label>
+                            <select id="pacienteSelect" required>
+                                <option value="">Selecione o paciente</option>
+                                <!-- Será preenchido dinamicamente -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dataAgendamento">Data:</label>
+                            <input type="date" id="dataAgendamento" required min="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="horaAgendamento">Horário:</label>
+                            <select id="horaAgendamento" required>
+                                <option value="">Selecione o horário</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duracaoAgendamento">Duração:</label>
+                            <select id="duracaoAgendamento" required>
+                                <option value="30">30 minutos</option>
+                                <option value="60">1 hora</option>
+                                <option value="90">1h 30min</option>
+                                <option value="120">2 horas</option>
+                                <option value="180">3 horas</option>
+                                <option value="240">4 horas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="observacoesAgendamento">Observações:</label>
+                            <textarea id="observacoesAgendamento" rows="3" placeholder="Motivo da consulta, preparação necessária, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-calendar-check"></i> Agendar
+                        </button>
+                        <button type="button" onclick="fecharModalAgendamento()" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="button" onclick="abrirCalendarioCompleto()" class="btn-calendar">
+                            <i class="fas fa-calendar"></i> Calendário Completo
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

@@ -483,3 +483,74 @@ tr:hover {
         font-size: 14px;
     }
 }
+
+/* Estilos para agendamento rápido */
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-calendar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+}
+
+.btn-calendar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-calendar i {
+    margin-right: 8px;
+}
+
+/* Modal de agendamento responsivo */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95% !important;
+        max-width: none !important;
+        margin: 10px auto !important;
+    }
+    
+    .header-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .btn-calendar {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Estilo para seleção de tipo de agendamento */
+#tipoAgendamento {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #667eea;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 16px;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+#tipoAgendamento option {
+    padding: 8px;
+    font-weight: 500;
+}
+
+/* Indicadores visuais para tipos de agendamento */
+.tipo-consulta { color: #28a745; }
+.tipo-cirurgia { color: #dc3545; }
+.tipo-reuniao { color: #6f42c1; }
+.tipo-retorno { color: #fd7e14; }
+.tipo-avaliacao { color: #20c997; }

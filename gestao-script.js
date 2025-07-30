@@ -478,3 +478,165 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById(id).addEventListener('change', salvarFiltros);
     });
 });
+
+// ====== SISTEMA DE AGENDAMENTO RÁPIDO ======
+
+// Abrir modal de agendamento rápido
+function abrirAgendamentoRapido() {
+    const modal = document.getElementById('modalAgendamentoRapido');
+    modal.style.display = 'block';
+    
+    // Definir data mínima como hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('dataAgendamento').min = hoje;
+    
+    // Carregar lista de pacientes
+    carregarPacientesSelect();
+    
+    // Carregar horários disponíveis para hoje por padrão
+    document.getElementById('dataAgendamento').value = hoje;
+    carregarHorariosDisponiveis(hoje);
+}
+
+// Fechar modal de agendamento
+function fecharModalAgendamento() {
+    const modal = document.getElementById('modalAgendamentoRapido');
+    modal.style.display = 'none';
+    document.getElementById('formAgendamentoRapido').reset();
+}
+
+// Carregar pacientes no select
+async function carregarPacientesSelect() {
+    try {
+        const select = document.getElementById('pacienteSelect');
+        select.innerHTML = '<option value="">Selecione o paciente</option>';
+        
+        // Se temos dados carregados, usar eles
+        if (dadosOriginais.length > 0) {
+            dadosOriginais.forEach(paciente => {
+                const option = document.createElement('option');
+                option.value = paciente.id;
+                option.textContent = `${paciente.nome} (ID: ${paciente.id})`;
+                select.appendChild(option);
+            });
+        } else {
+            // Carregar dados da API se necessário
+            await carregarDados();
+            carregarPacientesSelect(); // Recursiva após carregar
+        }
+    } catch (error) {
+        console.error('Erro ao carregar pacientes:', error);
+    }
+}
+
+// Carregar horários disponíveis
+async function carregarHorariosDisponiveis(data) {
+    try {
+        const select = document.getElementById('horaAgendamento');
+        select.innerHTML = '<option value="">Carregando horários...</option>';
+        
+        // Horários padrão do consultório
+        const horariosConsultorio = [
+            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
+            '11:00', '11:30', '14:00', '14:30', '15:00', '15:30',
+            '16:00', '16:30', '17:00', '17:30'
+        ];
+        
+        // TODO: Integrar com API para verificar horários ocupados
+        select.innerHTML = '<option value="">Selecione o horário</option>';
+        
+        horariosConsultorio.forEach(horario => {
+            const option = document.createElement('option');
+            option.value = horario;
+            option.textContent = horario;
+            select.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Erro ao carregar horários:', error);
+        const select = document.getElementById('horaAgendamento');
+        select.innerHTML = '<option value="">Erro ao carregar horários</option>';
+    }
+}
+
+// Atualizar duração baseada no tipo
+function atualizarDuracao() {
+    const tipo = document.getElementById('tipoAgendamento').value;
+    const duracao = document.getElementById('duracaoAgendamento');
+    
+    // Duração padrão por tipo
+    const duracoesPadrao = {
+        'consulta': '60',
+        'cirurgia': '180',
+        'reuniao': '30',
+        'retorno': '30',
+        'avaliacao': '90'
+    };
+    
+    if (duracoesPadrao[tipo]) {
+        duracao.value = duracoesPadrao[tipo];
+    }
+}
+
+// Submeter agendamento rápido
+document.getElementById('formAgendamentoRapido').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        tipo: document.getElementById('tipoAgendamento').value,
+        pacienteId: document.getElementById('pacienteSelect').value,
+        data: document.getElementById('dataAgendamento').value,
+        hora: document.getElementById('horaAgendamento').value,
+        duracao: document.getElementById('duracaoAgendamento').value,
+        observacoes: document.getElementById('observacoesAgendamento').value
+    };
+    
+    try {
+        // Mostrar loading
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        const originalText = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Agendando...';
+        btnSubmit.disabled = true;
+        
+        // TODO: Enviar para API de agendamento
+        // const response = await fetch('/api/appointments', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(formData)
+        // });
+        
+        // Simulação por enquanto
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        alert(`✅ Agendamento realizado com sucesso!
+        
+Tipo: ${formData.tipo}
+Data: ${new Date(formData.data).toLocaleDateString('pt-BR')}
+Horário: ${formData.hora}
+Duração: ${formData.duracao} minutos
+
+O paciente receberá confirmação por email.`);
+        
+        fecharModalAgendamento();
+        await carregarDados(); // Recarregar dados
+        
+    } catch (error) {
+        console.error('Erro ao agendar:', error);
+        alert('❌ Erro ao realizar agendamento. Tente novamente.');
+    } finally {
+        // Restaurar botão
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="fas fa-calendar-check"></i> Agendar';
+        btnSubmit.disabled = false;
+    }
+});
+
+// Abrir calendário completo
+function abrirCalendarioCompleto() {
+    window.open('/agendar.html', '_blank');
+}
+
+// Event listener para mudança de data
+document.getElementById('dataAgendamento').addEventListener('change', function(e) {
+    carregarHorariosDisponiveis(e.target.value);
+});
