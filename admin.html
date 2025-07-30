@@ -581,6 +581,22 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Verificar se o usuário aprovado está logado no momento
+                    const userInfo = localStorage.getItem('userInfo');
+                    if (userInfo) {
+                        const currentUser = JSON.parse(userInfo);
+                        if (currentUser.email === email) {
+                            // Atualizar localStorage com autorização
+                            currentUser.autorizado = true;
+                            currentUser.tipo = tipo;
+                            localStorage.setItem('userInfo', JSON.stringify(currentUser));
+                            
+                            alert('✅ Você foi aprovado! O sistema será atualizado automaticamente.');
+                            // Opcional: recarregar a página se necessário
+                            // window.location.reload();
+                        }
+                    }
+                    
                     // Remover card da lista
                     document.getElementById(`pending-${userId}`).remove();
                     
@@ -664,6 +680,19 @@
                 const authResult = await authResponse.json();
                 
                 if (authResult.sucesso) {
+                    // Verificar se o usuário aprovado está logado no momento
+                    const userInfo = localStorage.getItem('userInfo');
+                    if (userInfo) {
+                        const currentUser = JSON.parse(userInfo);
+                        if (currentUser.email === email) {
+                            // Atualizar localStorage com autorização
+                            currentUser.autorizado = true;
+                            localStorage.setItem('userInfo', JSON.stringify(currentUser));
+                            
+                            alert('✅ Você foi aprovado! O sistema será atualizado automaticamente.');
+                        }
+                    }
+                    
                     // Remover da lista de pendentes
                     document.getElementById(`pending-${userId}`)?.remove();
                     

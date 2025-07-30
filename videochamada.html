@@ -198,6 +198,14 @@
                 return;
             }
             
+            // Verificar se funcionário está autorizado
+            if (userInfo.tipo === 'funcionario' && !userInfo.autorizado) {
+                alert('⚠️ Seu acesso ainda não foi autorizado pelo administrador.\n\nVocê será redirecionado para a tela de login.');
+                localStorage.removeItem('userInfo');
+                window.location.href = '/login.html';
+                return;
+            }
+            
             // Mostrar info do usuário
             document.getElementById('user-info').innerHTML = `
                 👤 <strong>${userInfo.nome}</strong> | ${userInfo.role || 'Usuário'}<br>

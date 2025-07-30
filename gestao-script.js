@@ -1,6 +1,31 @@
 let dadosOriginais = [];
 let dadosFiltrados = [];
 
+// Verificação de autorização no carregamento
+function checkAuth() {
+    const userInfo = localStorage.getItem('userInfo');
+    
+    if (!userInfo) {
+        console.log('❌ Nenhuma sessão encontrada - redirecionando para login');
+        window.location.href = '/login.html';
+        return false;
+    }
+    
+    const user = JSON.parse(userInfo);
+    console.log('👤 Usuário logado:', user.nome, '| Tipo:', user.tipo, '| Autorizado:', user.autorizado);
+    
+    // Verificar se funcionário está autorizado
+    if (user.tipo === 'funcionario' && !user.autorizado) {
+        console.log('⛔ Funcionário não autorizado - redirecionando para login');
+        alert('⚠️ Seu acesso ainda não foi autorizado pelo administrador.\n\nVocê será redirecionado para a tela de login.');
+        localStorage.removeItem('userInfo');
+        window.location.href = '/login.html';
+        return false;
+    }
+    
+    return true;
+}
+
 // Função para voltar ao dashboard
 function voltarDashboard() {
     // Verificar se existe informação do usuário
@@ -441,6 +466,11 @@ function carregarFiltrosSalvos() {
 
 // Carregar filtros salvos ao inicializar
 document.addEventListener('DOMContentLoaded', function() {
+    // Verificar autorização primeiro
+    if (!checkAuth()) {
+        return; // Não continuar carregamento se não autorizado
+    }
+    
     carregarFiltrosSalvos();
     
     // Salvar filtros quando mudarem

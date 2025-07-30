@@ -468,6 +468,14 @@
             const userInfo = JSON.parse(user);
             console.log('Dados do usuário:', userInfo); // Debug
             console.log('Tipo do usuário:', userInfo.tipo); // Debug
+            console.log('Autorizado:', userInfo.autorizado); // Debug
+            
+            // Verificar se funcionário está autorizado
+            if (userInfo.tipo === 'funcionario' && !userInfo.autorizado) {
+                alert('⏳ Aguardando aprovação do administrador.\n\nSeu acesso ainda está pendente de autorização.');
+                window.location.href = '/login.html';
+                return;
+            }
             
             // Melhorar o título com cores
             const welcomeMessage = document.getElementById('welcome-message');
@@ -480,6 +488,7 @@
             userInfoDiv.innerHTML = `
                 <span style="color: #E6F3FF; font-size: 18px;">
                     <strong>Tipo:</strong> ${userInfo.tipo || 'paciente'} | 
+                    <strong>Status:</strong> ${userInfo.autorizado ? 'Autorizado' : 'Pendente'} |
                     <strong>Último acesso:</strong> ${new Date().toLocaleDateString('pt-BR')}
                 </span>
             `;
