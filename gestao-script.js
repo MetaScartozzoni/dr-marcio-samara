@@ -56,7 +56,48 @@ async function carregarDados() {
         
     } catch (error) {
         console.error('Erro ao carregar dados:', error);
-        alert('Erro ao carregar dados');
+        
+        // Dados de demonstração para teste local
+        dadosOriginais = [
+            {
+                id_paciente: 'PAC001',
+                nome_paciente: 'João Silva',
+                data_criacao: '2025-01-15',
+                data_ultima_update: '2025-07-29',
+                agendamento_data: '2025-08-05',
+                agendamento_hora: '14:00',
+                agendamento_status: 'Confirmado',
+                consulta_status: 'Não Realizada',
+                orcamento_status: 'Enviado',
+                orcamento_status_aceite: 'Pendente',
+                pagamento_valor_entrada: '1500.00',
+                status_geral: 'Em Atendimento',
+                orcamento_pdf_link: '',
+                orcamento_link_aceite: ''
+            },
+            {
+                id_paciente: 'PAC002', 
+                nome_paciente: 'Maria Santos',
+                data_criacao: '2025-01-20',
+                data_ultima_update: '2025-07-28',
+                agendamento_data: '2025-08-10',
+                agendamento_hora: '10:30',
+                agendamento_status: 'Pendente',
+                consulta_status: 'Não Realizada',
+                orcamento_status: 'Em Elaboração',
+                orcamento_status_aceite: 'Pendente',
+                pagamento_valor_entrada: '0.00',
+                status_geral: 'Novo',
+                orcamento_pdf_link: '',
+                orcamento_link_aceite: ''
+            }
+        ];
+        dadosFiltrados = [...dadosOriginais];
+        
+        atualizarTabela();
+        atualizarEstatisticas();
+        
+        alert('Usando dados de demonstração (API indisponível)');
     } finally {
         loading.style.display = 'none';
     }
