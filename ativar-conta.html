@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ativar Conta - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .activation-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .codigo-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .success-animation {
+            text-align: center;
+            font-size: 64px;
+            color: #28a745;
+            animation: bounce 1s ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        .timer {
+            text-align: center;
+            color: #dc3545;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
+            <p>Ativação de Conta</p>
+        </header>
+
+        <div class="activation-container">
+            <!-- Passo 1: Solicitar código -->
+            <div class="step active" id="step1">
+                <h2>📧 Ativar Conta</h2>
+                <p>Digite seu email para receber o código de ativação:</p>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                </div>
+
+                <button type="button" class="btn-primary" onclick="solicitarCodigo()">
+                    📨 Enviar Código
+                </button>
+
+                <div class="links">
+                    <a href="/login.html">← Voltar ao Login</a>
+                </div>
+            </div>
+
+            <!-- Passo 2: Inserir código -->
+            <div class="step" id="step2">
+                <h2>🔐 Código de Ativação</h2>
+                <p>Digite o código de 6 dígitos enviado para seu email:</p>
+                
+                <div class="form-group">
+                    <label for="codigo">Código de Ativação</label>
+                    <input type="text" id="codigo" name="codigo" class="codigo-input" 
+                           placeholder="000000" maxlength="6" required>
+                </div>
+
+                <div class="timer" id="timer"></div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="voltarPasso()">
+                        ← Voltar
+                    </button>
+                    <button type="button" class="btn-primary" onclick="validarCodigo()">
+                        ✅ Validar
+                    </button>
+                </div>
+
+                <div class="links">
+                    <a href="javascript:void(0)" onclick="reenviarCodigo()">Reenviar código</a>
+                </div>
+            </div>
+
+            <!-- Passo 3: Definir senha -->
+            <div class="step" id="step3">
+                <h2>🔒 Definir Senha</h2>
+                <p>Crie uma senha segura para sua conta:</p>
+                
+                <div class="form-group">
+                    <label for="senha">Nova Senha</label>
+                    <input type="password" id="senha" name="senha" required 
+                           minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmarSenha">Confirmar Senha</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="voltarPasso()">
+                        ← Voltar
+                    </button>
+                    <button type="button" class="btn-primary" onclick="definirSenha()">
+                        💾 Salvar Senha
+                    </button>
+                </div>
+            </div>
+
+            <!-- Passo 4: Sucesso -->
+            <div class="step" id="step4">
+                <div class="success-animation">✅</div>
+                <h2>🎉 Conta Ativada!</h2>
+                <p>Sua conta foi ativada com sucesso! Você já pode fazer login no sistema.</p>
+                
+                <div class="button-group">
+                    <a href="/login.html" class="btn-primary">
+                        🚀 Fazer Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let passoAtual = 1;
+        let emailUsuario = '';
+        let timerInterval = null;
+
+        function mostrarPasso(numero) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${numero}`).classList.add('active');
+            passoAtual = numero;
+        }
+
+        function voltarPasso() {
+            if (passoAtual > 1) {
+                mostrarPasso(passoAtual - 1);
+            }
+        }
+
+        async function solicitarCodigo() {
+            const email = document.getElementById('email').value.trim();
+
+            if (!email) {
+                alert('Por favor, digite seu email.');
+                return;
+            }
+
+            emailUsuario = email;
+
+            try {
+                const response = await fetch('/api/solicitar-codigo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarPasso(2);
+                    iniciarTimer();
+                    alert('Código enviado para seu email!');
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao enviar código.');
+            }
+        }
+
+        async function reenviarCodigo() {
+            if (!emailUsuario) {
+                alert('Email não informado.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/solicitar-codigo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailUsuario })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    iniciarTimer();
+                    alert('Novo código enviado!');
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao reenviar código.');
+            }
+        }
+
+        async function validarCodigo() {
+            const codigo = document.getElementById('codigo').value.trim();
+
+            if (!codigo || codigo.length !== 6) {
+                alert('Digite um código válido de 6 dígitos.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/validar-codigo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: emailUsuario,
+                        codigo: codigo 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    pararTimer();
+                    mostrarPasso(3);
+                } else {
+                    alert('Código inválido ou expirado.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao validar código.');
+            }
+        }
+
+        async function definirSenha() {
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+            if (!senha || senha.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            if (senha !== confirmarSenha) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/definir-senha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: emailUsuario,
+                        senha: senha
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarPasso(4);
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao definir senha.');
+            }
+        }
+
+        function iniciarTimer() {
+            let segundos = 900; // 15 minutos
+            const timerElement = document.getElementById('timer');
+
+            pararTimer();
+
+            timerInterval = setInterval(() => {
+                const minutos = Math.floor(segundos / 60);
+                const seg = segundos % 60;
+                
+                timerElement.textContent = `⏰ Código expira em: ${minutos}:${seg.toString().padStart(2, '0')}`;
+                
+                segundos--;
+                
+                if (segundos < 0) {
+                    pararTimer();
+                    timerElement.textContent = '⚠️ Código expirado! Solicite um novo.';
+                    timerElement.style.color = '#dc3545';
+                }
+            }, 1000);
+        }
+
+        function pararTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Formatação automática do código
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').toUpperCase();
+        });
+
+        // Auto-preencher email da URL se fornecido
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailParam = urlParams.get('email');
+        if (emailParam) {
+            document.getElementById('email').value = emailParam;
+        }
+    </script>
+</body>
+</html>
