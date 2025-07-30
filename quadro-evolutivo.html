@@ -400,6 +400,205 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn-modal {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .paciente-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .comunicacao-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .comunicacao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .comunicacao-autor {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .comunicacao-data {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .prioridade-alta {
+            border-left-color: #dc3545 !important;
+        }
+
+        .prioridade-media {
+            border-left-color: #ffc107 !important;
+        }
+
+        .prioridade-baixa {
+            border-left-color: #28a745 !important;
+        }
     </style>
 </head>
 <body>
@@ -732,17 +931,184 @@
 
         function adicionarEvolucao(pacienteId) {
             const paciente = pacientesData.find(p => p.id === pacienteId);
-            const novaEvolucao = prompt(`📝 Nova evolução para ${paciente.nome}:\n\nDescreva a evolução médica:`);
             
-            if (novaEvolucao) {
-                const hoje = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                paciente.evolucoes.unshift({
-                    data: hoje,
-                    texto: novaEvolucao
-                });
-                renderizarPacientes();
-                alert('✅ Evolução adicionada com sucesso!');
+            // Preencher informações do paciente no modal
+            document.getElementById('pacienteInfoEvolucao').innerHTML = `
+                <h4><i class="fas fa-user"></i> ${paciente.nome}</h4>
+                <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
+                <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
+            `;
+            
+            // Definir data atual
+            document.getElementById('dataEvolucao').value = new Date().toISOString().split('T')[0];
+            
+            // Armazenar ID do paciente para usar na função de salvar
+            window.pacienteAtualEvolucao = pacienteId;
+            
+            // Mostrar modal
+            document.getElementById('modalEvolucao').style.display = 'block';
+        }
+
+        function verDetalhes(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            // Preencher informações do paciente no modal
+            document.getElementById('pacienteInfoDetalhes').innerHTML = `
+                <h4><i class="fas fa-user"></i> ${paciente.nome}</h4>
+                <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
+                <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
+            `;
+            
+            // Armazenar ID do paciente
+            window.pacienteAtualDetalhes = pacienteId;
+            
+            // Mostrar modal
+            document.getElementById('modalDetalhes').style.display = 'block';
+        }
+
+        // Funções dos modais
+        function fecharModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Limpar formulários
+            if (modalId === 'modalEvolucao') {
+                document.getElementById('textoEvolucao').value = '';
+                document.getElementById('proximaEtapa').value = '';
+            } else if (modalId === 'modalDetalhes') {
+                document.getElementById('mensagemComunicacao').value = '';
+                document.getElementById('formNovaComunicacao').style.display = 'none';
+                document.getElementById('historicoComunicacoes').style.display = 'none';
             }
+        }
+
+        function salvarEvolucao() {
+            const pacienteId = window.pacienteAtualEvolucao;
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            const tipo = document.getElementById('tipoEvolucao').value;
+            const data = document.getElementById('dataEvolucao').value;
+            const texto = document.getElementById('textoEvolucao').value;
+            const proxima = document.getElementById('proximaEtapa').value;
+            
+            if (!texto.trim()) {
+                alert('⚠️ Por favor, descreva a evolução do paciente.');
+                return;
+            }
+            
+            // Adicionar evolução
+            const dataFormatada = new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            paciente.evolucoes.unshift({
+                data: dataFormatada,
+                tipo: tipo,
+                texto: texto,
+                proxima: proxima,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Atualizar última evolução
+            paciente.ultimaEvolucao = `${dataFormatada} - ${tipo}`;
+            
+            renderizarPacientes();
+            fecharModal('modalEvolucao');
+            
+            alert('✅ Evolução salva com sucesso!');
+        }
+
+        function salvarEAbrirCaderno() {
+            const pacienteId = window.pacienteAtualEvolucao;
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            // Primeiro salvar a evolução
+            salvarEvolucao();
+            
+            // Preparar dados para o Caderno Digital
+            const dadosPaciente = {
+                id: paciente.id,
+                nome: paciente.nome,
+                statusGeral: getStatusLabel(paciente.status),
+                dataUltimaConsulta: new Date().toISOString().split('T')[0],
+                observacoes: document.getElementById('textoEvolucao').value,
+                origem: 'quadro-evolutivo'
+            };
+            
+            localStorage.setItem('pacienteCaderno', JSON.stringify(dadosPaciente));
+            
+            // Abrir Caderno Digital
+            window.open('/caderno-digital.html', '_blank');
+        }
+
+        function mostrarNovaComunicacao() {
+            document.getElementById('formNovaComunicacao').style.display = 'block';
+            document.getElementById('historicoComunicacoes').style.display = 'none';
+        }
+
+        function mostrarHistorico() {
+            document.getElementById('formNovaComunicacao').style.display = 'none';
+            document.getElementById('historicoComunicacoes').style.display = 'block';
+            carregarHistoricoComunicacoes();
+        }
+
+        function cancelarComunicacao() {
+            document.getElementById('formNovaComunicacao').style.display = 'none';
+            document.getElementById('mensagemComunicacao').value = '';
+        }
+
+        function salvarComunicacao() {
+            const pacienteId = window.pacienteAtualDetalhes;
+            const tipo = document.getElementById('tipoComunicacao').value;
+            const destinatario = document.getElementById('destinatario').value;
+            const prioridade = document.getElementById('prioridade').value;
+            const mensagem = document.getElementById('mensagemComunicacao').value;
+            
+            if (!mensagem.trim()) {
+                alert('⚠️ Por favor, escreva uma mensagem.');
+                return;
+            }
+            
+            // Salvar comunicação (em produção, enviar para servidor)
+            const comunicacao = {
+                id: Date.now(),
+                pacienteId: pacienteId,
+                tipo: tipo,
+                destinatario: destinatario,
+                prioridade: prioridade,
+                mensagem: mensagem,
+                autor: 'Usuário Atual', // Em produção, pegar do usuário logado
+                data: new Date().toISOString(),
+                lida: false
+            };
+            
+            // Armazenar no localStorage
+            const comunicacoes = JSON.parse(localStorage.getItem('comunicacoes') || '[]');
+            comunicacoes.unshift(comunicacao);
+            localStorage.setItem('comunicacoes', JSON.stringify(comunicacoes));
+            
+            alert('✅ Comunicação enviada com sucesso!');
+            cancelarComunicacao();
+            mostrarHistorico();
+        }
+
+        function carregarHistoricoComunicacoes() {
+            const pacienteId = window.pacienteAtualDetalhes;
+            const comunicacoes = JSON.parse(localStorage.getItem('comunicacoes') || '[]');
+            const comunicacoesPaciente = comunicacoes.filter(c => c.pacienteId === pacienteId);
+            
+            const container = document.getElementById('listaComunicacoes');
+            
+            if (comunicacoesPaciente.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">Nenhuma comunicação encontrada para este paciente.</p>';
+                return;
+            }
+            
+            container.innerHTML = comunicacoesPaciente.map(com => `
+                <div class="comunicacao-item prioridade-${com.prioridade}">
+                    <div class="comunicacao-header">
+                        <span class="comunicacao-autor">${com.autor} → ${com.destinatario}</span>
+                        <span class="comunicacao-data">${new Date(com.data).toLocaleString('pt-BR')}</span>
+                    </div>
+                    <p><strong>${com.tipo.toUpperCase()}:</strong> ${com.mensagem}</p>
+                </div>
+            `).join('');
         }
 
         function entrarContato(pacienteId) {
@@ -761,11 +1127,146 @@
             alert(`💬 Entrar em contato com ${paciente.nome}\n\nMeios disponíveis:\n${opcoes.join('\n')}\n\n(Funcionalidade em desenvolvimento)`);
         }
 
-        function verDetalhes(pacienteId) {
-            const paciente = pacientesData.find(p => p.id === pacienteId);
-            
-            alert(`👁️ Detalhes de ${paciente.nome}\n\nID: ${paciente.id}\nStatus: ${getStatusLabel(paciente.status)}\nÚltima evolução: ${paciente.ultimaEvolucao}\n\n(Em breve: tela completa de detalhes)`);
-        }
+        // Fechar modal clicando fora
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
     </script>
+
+    <!-- Modal Evolução -->
+    <div id="modalEvolucao" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-notes-medical"></i> Nova Evolução Médica</h2>
+                <button class="close-btn" onclick="fecharModal('modalEvolucao')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="paciente-info" id="pacienteInfoEvolucao">
+                    <!-- Informações do paciente serão inseridas aqui -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoEvolucao">Tipo de Evolução</label>
+                    <select id="tipoEvolucao">
+                        <option value="consulta">Consulta</option>
+                        <option value="procedimento">Procedimento</option>
+                        <option value="pos-operatorio">Pós-operatório</option>
+                        <option value="retorno">Retorno</option>
+                        <option value="intercorrencia">Intercorrência</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataEvolucao">Data da Evolução</label>
+                    <input type="date" id="dataEvolucao">
+                </div>
+
+                <div class="form-group">
+                    <label for="textoEvolucao">Descrição da Evolução</label>
+                    <textarea id="textoEvolucao" placeholder="Descreva a evolução médica do paciente..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="proximaEtapa">Próxima Etapa</label>
+                    <input type="text" id="proximaEtapa" placeholder="Ex: Retorno em 7 dias, Exames complementares...">
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-modal btn-primary" onclick="salvarEvolucao()">
+                        <i class="fas fa-save"></i> Salvar Evolução
+                    </button>
+                    <button class="btn-modal btn-success" onclick="salvarEAbrirCaderno()">
+                        <i class="fas fa-book-medical"></i> Salvar e Abrir Caderno
+                    </button>
+                    <button class="btn-modal btn-secondary" onclick="fecharModal('modalEvolucao')">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes/Comunicação -->
+    <div id="modalDetalhes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-comments"></i> Comunicação Interna</h2>
+                <button class="close-btn" onclick="fecharModal('modalDetalhes')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="paciente-info" id="pacienteInfoDetalhes">
+                    <!-- Informações do paciente serão inseridas aqui -->
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <button class="btn-modal btn-primary" onclick="mostrarNovaComunicacao()">
+                        <i class="fas fa-plus"></i> Nova Comunicação
+                    </button>
+                    <button class="btn-modal btn-success" onclick="mostrarHistorico()">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                </div>
+
+                <!-- Formulário Nova Comunicação -->
+                <div id="formNovaComunicacao" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Nova Comunicação</h4>
+                    
+                    <div class="form-group">
+                        <label for="tipoComunicacao">Tipo</label>
+                        <select id="tipoComunicacao">
+                            <option value="pendencia">Pendência</option>
+                            <option value="solicitacao">Solicitação</option>
+                            <option value="lembrete">Lembrete</option>
+                            <option value="observacao">Observação</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destinatario">Para</label>
+                        <select id="destinatario">
+                            <option value="medico">Dr. Marcio</option>
+                            <option value="secretaria">Secretária</option>
+                            <option value="assistente">Assistente</option>
+                            <option value="equipe">Toda Equipe</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prioridade">Prioridade</label>
+                        <select id="prioridade">
+                            <option value="baixa">Baixa</option>
+                            <option value="media">Média</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensagemComunicacao">Mensagem</label>
+                        <textarea id="mensagemComunicacao" placeholder="Descreva a pendência, solicitação ou observação..."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn-modal btn-primary" onclick="salvarComunicacao()">
+                            <i class="fas fa-paper-plane"></i> Enviar
+                        </button>
+                        <button class="btn-modal btn-secondary" onclick="cancelarComunicacao()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Histórico de Comunicações -->
+                <div id="historicoComunicacoes" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Histórico de Comunicações</h4>
+                    <div id="listaComunicacoes">
+                        <!-- Comunicações serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
