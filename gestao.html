@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão - Portal Dr. Marcio</title>
+    <title>Gestão de Orçamentos - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="gestao-style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="dashboard-container">
-        <!-- Integração Gestão → Caderno Digital ativa -->
+        <!-- Sistema de Gestão de Orçamentos Pós-Consulta -->
         <header class="dashboard-header">
-            <h1><i class="fas fa-chart-bar"></i> Gestão de Pacientes - Portal Dr. Marcio</h1>
+            <h1><i class="fas fa-file-invoice-dollar"></i> Gestão de Pacientes Pós-Consulta - Portal Dr. Marcio</h1>
             <div class="header-actions">
                 <button onclick="voltarDashboard()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button>
                 <button onclick="atualizarDados()" class="btn-refresh"><i class="fas fa-sync-alt"></i> Atualizar</button>
@@ -20,7 +21,7 @@
         </header>
 
         <div class="filters-section">
-            <h2><i class="fas fa-filter"></i> Filtros</h2>
+            <h2><i class="fas fa-filter"></i> Filtros de Orçamentos</h2>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="filtroId">ID Paciente:</label>
@@ -33,25 +34,26 @@
                 </div>
                 
                 <div class="filter-group">
-                    <label for="filtroDataInicio">Data Criação (Início):</label>
+                    <label for="filtroDataInicio">Data Orçamento (Início):</label>
                     <input type="date" id="filtroDataInicio">
                 </div>
                 
                 <div class="filter-group">
-                    <label for="filtroDataFim">Data Criação (Fim):</label>
+                    <label for="filtroDataFim">Data Orçamento (Fim):</label>
                     <input type="date" id="filtroDataFim">
                 </div>
                 
                 <div class="filter-group">
-                    <label for="filtroStatus">Status Geral:</label>
+                    <label for="filtroStatus">Status Orçamento:</label>
                     <select id="filtroStatus">
                         <option value="">Todos</option>
-                        <option value="Novo">Novo</option>
-                        <option value="Em Atendimento">Em Atendimento</option>
-                        <option value="Aguardando Pagamento">Aguardando Pagamento</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Enviado">Enviado</option>
+                        <option value="Aceito">Aceito</option>
+                        <option value="Rejeitado">Rejeitado</option>
+                        <option value="Expirado">Expirado</option>
                         <option value="Pago">Pago</option>
                         <option value="Concluído">Concluído</option>
-                        <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
                 
@@ -64,32 +66,33 @@
 
         <div class="stats-section">
             <div class="stat-card">
-                <h3><i class="fas fa-users"></i> Total de Pacientes</h3>
-                <div class="stat-number" id="totalPacientes">0</div>
+                <h3><i class="fas fa-file-invoice"></i> Total de Orçamentos</h3>
+                <div class="stat-number" id="totalOrcamentos">0</div>
             </div>
             
             <div class="stat-card">
-                <h3><i class="fas fa-calendar-day"></i> Agendamentos Hoje</h3>
-                <div class="stat-number" id="agendamentosHoje">0</div>
-            </div>
-            
-            <div class="stat-card">
-                <h3><i class="fas fa-file-invoice"></i> Orçamentos Pendentes</h3>
+                <h3><i class="fas fa-clock"></i> Orçamentos Pendentes</h3>
                 <div class="stat-number" id="orcamentosPendentes">0</div>
             </div>
             
             <div class="stat-card">
-                <h3><i class="fas fa-credit-card"></i> Pagamentos Pendentes</h3>
-                <div class="stat-number" id="pagamentosPendentes">0</div>
+                <h3><i class="fas fa-check-circle"></i> Orçamentos Aceitos</h3>
+                <div class="stat-number" id="orcamentosAceitos">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3><i class="fas fa-dollar-sign"></i> Valor Total Pendente</h3>
+                <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
             </div>
         </div>
 
         <div class="table-section">
             <div class="table-header">
-                <h2><i class="fas fa-users"></i> Gestão de Pacientes</h2>
+                <h2><i class="fas fa-file-invoice-dollar"></i> Gestão de Orçamentos Pós-Consulta</h2>
                 <div class="header-buttons">
-                    <button onclick="adicionarPaciente()" class="btn-add"><i class="fas fa-user-plus"></i> Adicionar Paciente</button>
+                    <button onclick="adicionarOrcamento()" class="btn-add"><i class="fas fa-file-plus"></i> Novo Orçamento</button>
                     <button onclick="abrirAgendamentoRapido()" class="btn-calendar"><i class="fas fa-calendar-plus"></i> Agendamento Rápido</button>
+                    <button onclick="exportarOrcamentos()" class="btn-export"><i class="fas fa-file-excel"></i> Exportar Excel</button>
                 </div>
             </div>
             
@@ -98,16 +101,14 @@
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Nome</th>
-                            <th>Data Criação</th>
-                            <th>Última Update</th>
-                            <th>Agendamento</th>
-                            <th>Status Agend.</th>
-                            <th>Consulta</th>
-                            <th>Orçamento</th>
-                            <th>Status Aceite</th>
+                            <th>Paciente</th>
+                            <th>Data Consulta</th>
+                            <th>Data Orçamento</th>
+                            <th>Procedimento</th>
+                            <th>Valor Total</th>
+                            <th>Status Orçamento</th>
                             <th>Pagamento</th>
-                            <th>Status Geral</th>
+                            <th>Vencimento</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -120,6 +121,166 @@
 
         <div id="loading" class="loading" style="display: none;">
             Carregando dados...
+        </div>
+    </div>
+
+    <!-- Modal para Novo Orçamento -->
+    <div id="modalNovoOrcamento" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-plus"></i> Novo Orçamento Pós-Consulta</h3>
+                <span class="close" onclick="fecharModalOrcamento()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formNovoOrcamento">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pacienteOrcamento">Paciente:</label>
+                            <select id="pacienteOrcamento" required>
+                                <option value="">Selecione o paciente</option>
+                                <!-- Opções carregadas dinamicamente -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dataConsulta">Data da Consulta:</label>
+                            <input type="date" id="dataConsulta" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="procedimentoPrincipal">Procedimento Principal:</label>
+                            <select id="procedimentoPrincipal" required onchange="calcularValorTotal()">
+                                <option value="">Selecione o procedimento</option>
+                                <option value="rinoplastia" data-valor="8000">Rinoplastia - R$ 8.000,00</option>
+                                <option value="mamoplastia" data-valor="12000">Mamoplastia de Aumento - R$ 12.000,00</option>
+                                <option value="lipoaspiracao" data-valor="6000">Lipoaspiração - R$ 6.000,00</option>
+                                <option value="abdominoplastia" data-valor="10000">Abdominoplastia - R$ 10.000,00</option>
+                                <option value="blefaroplastia" data-valor="5000">Blefaroplastia - R$ 5.000,00</option>
+                                <option value="lifting" data-valor="15000">Lifting Facial - R$ 15.000,00</option>
+                                <option value="otoplastia" data-valor="4000">Otoplastia - R$ 4.000,00</option>
+                                <option value="gluteoplastia" data-valor="8000">Gluteoplastia - R$ 8.000,00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="procedimentosAdicionais">Procedimentos Adicionais:</label>
+                            <textarea id="procedimentosAdicionais" rows="3" placeholder="Descreva procedimentos complementares..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorProcedimento">Valor do Procedimento:</label>
+                            <input type="number" id="valorProcedimento" step="0.01" required placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorAnestesia">Valor Anestesia:</label>
+                            <input type="number" id="valorAnestesia" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorHospital">Valor Hospital/Clínica:</label>
+                            <input type="number" id="valorHospital" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorMaterial">Valor Material/Prótese:</label>
+                            <input type="number" id="valorMaterial" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorTotal">Valor Total:</label>
+                            <input type="number" id="valorTotal" step="0.01" required readonly style="background: #f0f0f0; font-weight: bold;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="formaPagamento">Forma de Pagamento:</label>
+                            <select id="formaPagamento" required>
+                                <option value="">Selecione a forma</option>
+                                <option value="vista">À Vista (10% desconto)</option>
+                                <option value="2x">2x sem juros</option>
+                                <option value="3x">3x sem juros</option>
+                                <option value="6x">6x com juros (2% a.m.)</option>
+                                <option value="12x">12x com juros (3% a.m.)</option>
+                                <option value="financiamento">Financiamento</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="validadeOrcamento">Validade do Orçamento:</label>
+                            <input type="date" id="validadeOrcamento" required>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="observacoesOrcamento">Observações:</label>
+                            <textarea id="observacoesOrcamento" rows="3" placeholder="Informações adicionais sobre o orçamento..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Salvar Orçamento
+                        </button>
+                        <button type="button" onclick="fecharModalOrcamento()" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ações do Orçamento -->
+    <div id="modalAcoesOrcamento" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice-dollar"></i> Ações do Orçamento</h3>
+                <span class="close" onclick="fecharModalAcoes()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="orcamento-info">
+                    <h4 id="infoOrcamento">Orçamento #001 - Maria Silva</h4>
+                    <div class="info-grid">
+                        <div><strong>Procedimento:</strong> <span id="infoProcedimento">-</span></div>
+                        <div><strong>Valor Total:</strong> <span id="infoValor">-</span></div>
+                        <div><strong>Status:</strong> <span id="infoStatus">-</span></div>
+                        <div><strong>Validade:</strong> <span id="infoValidade">-</span></div>
+                    </div>
+                </div>
+                
+                <div class="acoes-grid">
+                    <button onclick="gerarPDFOrcamento()" class="btn-action">
+                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                    </button>
+                    
+                    <button onclick="imprimirOrcamento()" class="btn-action">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                    
+                    <button onclick="copiarOrcamento()" class="btn-action">
+                        <i class="fas fa-copy"></i> Copiar Texto
+                    </button>
+                    
+                    <button onclick="enviarPorEmail()" class="btn-action">
+                        <i class="fas fa-envelope"></i> Enviar por Email
+                    </button>
+                    
+                    <button onclick="marcarComoAceito()" class="btn-action success">
+                        <i class="fas fa-check"></i> Marcar Aceito
+                    </button>
+                    
+                    <button onclick="editarOrcamento()" class="btn-action">
+                        <i class="fas fa-edit"></i> Editar
+                    </button>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="fecharModalAcoes()" class="btn-secondary">
+                        <i class="fas fa-times"></i> Fechar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -318,6 +479,6 @@
         </div>
     </div>
 
-    <script src="gestao-script.js"></script>
+    <script src="gestao-script-new.js"></script>
 </body>
 </html>

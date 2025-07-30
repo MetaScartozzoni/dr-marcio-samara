@@ -32,13 +32,61 @@
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
             padding: 30px;
-            text-align: center;
             position: relative;
         }
 
-        .header h1 {
+        .header-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-center {
+            text-align: center;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .paciente-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .paciente-info h3 {
             margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: 1.3em;
+            color: #fff;
+        }
+
+        .paciente-info .dados {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .prontuario-id {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 2.2em;
         }
 
         .header p {
@@ -47,10 +95,6 @@
         }
 
         .btn-voltar {
-            position: absolute;
-            left: 30px;
-            top: 50%;
-            transform: translateY(-50%);
             background: rgba(255,255,255,0.2);
             color: white;
             border: none;
@@ -59,11 +103,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-voltar:hover {
             background: rgba(255,255,255,0.3);
-            transform: translateY(-50%) scale(1.05);
+            transform: scale(1.05);
         }
 
         .toolbar {
@@ -217,6 +264,436 @@
         .document-info p {
             color: #7f8c8d;
             font-size: 12px;
+        }
+
+        /* Estilos para Histórico de Agendamentos */
+        .historico-container {
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .marcos-principais {
+            margin-bottom: 20px;
+        }
+
+        .marco-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .marco-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+        }
+
+        .marco-item.primeira-consulta { border-left-color: #28a745; }
+        .marco-item.retorno { border-left-color: #17a2b8; }
+        .marco-item.cirurgia { border-left-color: #dc3545; }
+        .marco-item.primeiro-retorno { border-left-color: #fd7e14; }
+        .marco-item.proximo-retorno { border-left-color: #6f42c1; }
+        .marco-item.alta { border-left-color: #20c997; }
+
+        .marco-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .marco-tipo {
+            font-weight: 600;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+
+        .marco-data {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .marco-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        .marco-status.realizado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .marco-status.agendado {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .marco-status.pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .agendamento-recente {
+            background: white;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid #667eea;
+        }
+
+        .agendamento-recente:hover {
+            transform: translateX(3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .agendamento-data {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .agendamento-tipo {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        /* Estilos para Cards de Evolução */
+        .card-evolucao {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+
+        .card-evolucao:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-evolucao.success {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .card-evolucao.warning {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+
+        .card-evolucao.danger {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-tipo {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #6c757d;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .card-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .card-status.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .card-status.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .card-prazo {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-prazo.urgente {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .card-tarefas h5 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-tarefas ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .card-tarefas li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 13px;
+        }
+
+        .card-tarefas li:last-child {
+            border-bottom: none;
+        }
+
+        .card-tarefas li.concluido span {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .card-tarefas input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #28a745;
+        }
+
+        .card-observacoes {
+            margin: 15px 0;
+        }
+
+        .card-observacoes textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .card-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #138496;
+        }
+
+        .btn-duplicate {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-duplicate:hover {
+            background: #5a6268;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        /* Estilos para Status Cards */
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .status-card.success {
+            border-left-color: #28a745;
+        }
+
+        .status-card.warning {
+            border-left-color: #ffc107;
+        }
+
+        .status-card.danger {
+            border-left-color: #dc3545;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-card.success .status-icon {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .status-card.warning .status-icon {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+
+        .status-card.danger .status-icon {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .status-info h4 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Estilos para Notificações */
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .notification.urgent {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
+            background: #f0fcff;
+        }
+
+        .notification-text {
+            font-size: 12px;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .notification-action {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .notification-action:hover {
+            background: #5a6268;
+        }
+
+        .no-notifications {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        /* Animação de pulse */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         }
 
         .canvas-area {
@@ -612,6 +1089,361 @@
             transform: translateY(-2px);
         }
 
+        /* Modal Evolução do Paciente */
+        .modal-evolucao {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-evolucao.active {
+            display: flex;
+        }
+
+        .modal-content-evolucao {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header-evolucao {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body-evolucao {
+            padding: 30px;
+        }
+
+        .timeline-evolucao {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-evolucao::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+        }
+
+        .evolucao-item {
+            position: relative;
+            background: white;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .evolucao-item::before {
+            content: '';
+            position: absolute;
+            left: -45px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .evolucao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .evolucao-data {
+            font-weight: 700;
+            color: #e74c3c;
+            font-size: 16px;
+        }
+
+        .evolucao-tipo {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .evolucao-descricao {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .evolucao-detalhes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .detalhe-item {
+            text-align: center;
+        }
+
+        .detalhe-valor {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .detalhe-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Modal Ficha de Atendimento */
+        .modal-ficha {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-ficha.active {
+            display: flex;
+        }
+
+        .modal-content-ficha {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header-ficha {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body-ficha {
+            padding: 30px;
+        }
+
+        .ficha-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .ficha-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #8e44ad;
+        }
+
+        .ficha-section h3 {
+            color: #8e44ad;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: 700;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .form-group-ficha {
+            margin-bottom: 20px;
+        }
+
+        .form-group-ficha label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group-ficha input,
+        .form-group-ficha select,
+        .form-group-ficha textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group-ficha input:focus,
+        .form-group-ficha select:focus,
+        .form-group-ficha textarea:focus {
+            border-color: #8e44ad;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .fotos-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .foto-slot {
+            aspect-ratio: 1;
+            border: 3px dashed #8e44ad;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .foto-slot:hover {
+            border-color: #7d3c98;
+            background: #f8f4fd;
+        }
+
+        .foto-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .foto-slot i {
+            font-size: 24px;
+            color: #8e44ad;
+            margin-bottom: 8px;
+        }
+
+        .foto-slot span {
+            color: #8e44ad;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-nova-evolucao {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nova-evolucao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .ficha-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .fotos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 grid-template-columns: 1fr;
@@ -639,17 +1471,40 @@
 <body>
     <div class="container">
         <div class="header">
-            <button class="btn-voltar" onclick="voltarDashboard()">
-                <i class="fas fa-arrow-left"></i> Voltar
-            </button>
-            <h1><i class="fas fa-book-medical"></i> Caderno Digital do Paciente</h1>
-            <p>Sistema integrado de documentação médica com funcionalidades do GoodNotes</p>
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="btn-voltar" onclick="voltarProntuarios()">
+                        <i class="fas fa-arrow-left"></i> Voltar aos Prontuários
+                    </button>
+                </div>
+                
+                <div class="header-center">
+                    <h1><i class="fas fa-book-medical"></i> Caderno Digital do Paciente</h1>
+                    <p>Sistema integrado de documentação médica especializada</p>
+                </div>
+                
+                <div class="header-right">
+                    <div class="paciente-info" id="pacienteInfoHeader">
+                        <div class="prontuario-id" id="prontuarioId">PRON001</div>
+                        <h3 id="nomePacienteHeader">Selecione um paciente</h3>
+                        <div class="dados" id="dadosPacienteHeader">
+                            <div>📅 Nascimento: --/--/----</div>
+                            <div>📱 Telefone: (--) --------- </div>
+                            <div>📧 Email: -------</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="toolbar">
-            <select id="pacienteSelect">
-                <option value="">Selecionar Paciente</option>
-            </select>
+            <button onclick="editarDadosPaciente()" style="background: #fd7e14;">
+                <i class="fas fa-user-edit"></i> Editar Dados do Paciente
+            </button>
+            
+            <button onclick="agendarConsultaPaciente()" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+                <i class="fas fa-calendar-plus"></i> Agendar Consulta
+            </button>
             
             <input type="date" id="dataFiltro" placeholder="Filtrar por data">
             
@@ -665,8 +1520,24 @@
                 <i class="fas fa-vial"></i> Gerar Exames
             </button>
             
+            <button onclick="abrirEvolucao()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                <i class="fas fa-chart-line"></i> Evolução Paciente
+            </button>
+            
+            <button onclick="abrirFichaAtendimento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+                <i class="fas fa-clipboard-check"></i> Ficha Atendimento
+            </button>
+            
             <button onclick="capturarFoto()">
                 <i class="fas fa-camera"></i> Capturar Foto
+            </button>
+            
+            <button onclick="configurarNotificacoes()" style="background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);">
+                <i class="fas fa-bell"></i> Configurar Notificações
+            </button>
+            
+            <button onclick="mostrarTarefasDoDia()" style="background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);">
+                <i class="fas fa-tasks"></i> Tarefas do Dia
             </button>
             
             <button onclick="exportarPDF()">
@@ -680,7 +1551,23 @@
 
         <div class="main-content">
             <div class="sidebar">
-                <h3><i class="fas fa-folder"></i> Documentos</h3>
+                <!-- Seção de Histórico de Agendamentos -->
+                <h3><i class="fas fa-calendar-alt"></i> Histórico & Marcos</h3>
+                <div class="historico-container">
+                    <div class="marcos-principais" id="marcosPrincipais">
+                        <!-- Marcos serão carregados aqui -->
+                    </div>
+                    <div class="agendamentos-recentes">
+                        <h4 style="color: #6c757d; font-size: 14px; margin: 15px 0 10px 0;">
+                            <i class="fas fa-clock"></i> Consultas Recentes
+                        </h4>
+                        <div id="agendamentosRecentes">
+                            <!-- Agendamentos serão carregados aqui -->
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;"><i class="fas fa-folder"></i> Documentos</h3>
                 <ul class="document-list">
                     <li class="document-item active" onclick="abrirDocumento('orcamento')">
                         <div class="document-header">
@@ -1769,6 +2656,895 @@ Dr. Marcio Scartozzoni`;
             container.insertBefore(infoDiv, header.nextSibling);
         }
         
+        // ============ FUNÇÕES EVOLUÇÃO DO PACIENTE ============
+        
+        function abrirEvolucao() {
+            if (!pacienteAtual) {
+                alert('⚠️ Nenhum paciente selecionado!');
+                return;
+            }
+            
+            // Criar/mostrar modal de evolução
+            mostrarQuadroEvolucao();
+        }
+
+        function mostrarQuadroEvolucao() {
+            // Criar modal se não existir
+            let modal = document.getElementById('modalQuadroEvolucao');
+            if (!modal) {
+                criarModalQuadroEvolucao();
+                modal = document.getElementById('modalQuadroEvolucao');
+            }
+            
+            // Carregar dados da evolução
+            carregarDadosEvolucao();
+            
+            // Mostrar modal
+            modal.style.display = 'flex';
+        }
+
+        function criarModalQuadroEvolucao() {
+            const modal = document.createElement('div');
+            modal.id = 'modalQuadroEvolucao';
+            modal.className = 'modal-overlay';
+            modal.style.cssText = `
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            modal.innerHTML = `
+                <div class="modal-content" style="
+                    background: white;
+                    border-radius: 20px;
+                    width: 95%;
+                    max-width: 1400px;
+                    height: 90%;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                ">
+                    <!-- Header do Modal -->
+                    <div class="evolucao-header" style="
+                        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+                        color: white;
+                        padding: 20px 30px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    ">
+                        <div>
+                            <h2><i class="fas fa-chart-line"></i> Quadro de Evolução</h2>
+                            <p id="pacienteEvolucaoNome" style="opacity: 0.9; margin-top: 5px;">Carregando...</p>
+                        </div>
+                        <button onclick="fecharQuadroEvolucao()" style="
+                            background: rgba(255,255,255,0.2);
+                            border: none;
+                            color: white;
+                            font-size: 24px;
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            cursor: pointer;
+                        ">&times;</button>
+                    </div>
+                    
+                    <!-- Conteúdo Principal -->
+                    <div class="evolucao-content" style="
+                        flex: 1;
+                        display: grid;
+                        grid-template-columns: 300px 1fr;
+                        overflow: hidden;
+                    ">
+                        <!-- Sidebar de Status -->
+                        <div class="evolucao-sidebar" style="
+                            background: #f8f9fa;
+                            padding: 20px;
+                            border-right: 2px solid #e9ecef;
+                            overflow-y: auto;
+                        ">
+                            <h3 style="margin-bottom: 20px; color: #2c3e50;">
+                                <i class="fas fa-tasks"></i> Status Geral
+                            </h3>
+                            <div id="statusCards">
+                                <!-- Cards de status serão carregados aqui -->
+                            </div>
+                            
+                            <h3 style="margin: 30px 0 20px 0; color: #2c3e50;">
+                                <i class="fas fa-bell"></i> Notificações
+                            </h3>
+                            <div id="notificacoesLista">
+                                <!-- Notificações serão carregadas aqui -->
+                            </div>
+                        </div>
+                        
+                        <!-- Área Principal de Cards -->
+                        <div class="evolucao-main" style="
+                            padding: 20px;
+                            overflow-y: auto;
+                        ">
+                            <div class="cards-header" style="
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                                margin-bottom: 20px;
+                            ">
+                                <h3><i class="fas fa-clipboard-list"></i> Cards de Evolução</h3>
+                                <button onclick="adicionarNovoCard()" style="
+                                    background: #28a745;
+                                    color: white;
+                                    border: none;
+                                    padding: 10px 20px;
+                                    border-radius: 8px;
+                                    cursor: pointer;
+                                ">
+                                    <i class="fas fa-plus"></i> Novo Card
+                                </button>
+                            </div>
+                            
+                            <div id="cardsEvolucao" class="cards-grid" style="
+                                display: grid;
+                                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+                                gap: 20px;
+                            ">
+                                <!-- Cards serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function fecharQuadroEvolucao() {
+            const modal = document.getElementById('modalQuadroEvolucao');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function carregarDadosEvolucao() {
+            if (!pacienteAtual) return;
+            
+            // Atualizar nome do paciente no header
+            document.getElementById('pacienteEvolucaoNome').textContent = 
+                `${pacienteAtual.nome} - CPF: ${pacienteAtual.cpf}`;
+            
+            // Carregar cards de evolução
+            carregarCardsEvolucao();
+            
+            // Carregar status geral
+            carregarStatusGeral();
+            
+            // Carregar notificações
+            carregarNotificacoes();
+        }
+
+        function carregarCardsEvolucao() {
+            const container = document.getElementById('cardsEvolucao');
+            const cpf = pacienteAtual.cpf;
+            
+            // Buscar cards existentes ou criar automáticos
+            let cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            
+            if (!cardsData[cpf]) {
+                cardsData[cpf] = gerarCardsAutomaticos();
+                localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+            }
+            
+            const cards = cardsData[cpf];
+            
+            container.innerHTML = cards.map(card => criarCardHTML(card)).join('');
+        }
+
+        function gerarCardsAutomaticos() {
+            const hoje = new Date();
+            const historico = obterHistoricoPaciente(pacienteAtual.cpf);
+            const marcos = historico.marcos;
+            
+            const cards = [];
+            
+            // Cards baseados nos marcos
+            marcos.forEach(marco => {
+                const diasParaMarco = Math.ceil((marco.data - hoje) / (1000 * 60 * 60 * 24));
+                
+                if (marco.tipo === 'primeira-consulta' && marco.status === 'realizado') {
+                    cards.push({
+                        id: 'pre-consulta-' + Date.now(),
+                        titulo: 'Pré-Consulta Realizada',
+                        tipo: 'pre-consulta',
+                        evento: 'CONSULTA',
+                        fase: 'POS',
+                        status: 'sem-pendencias',
+                        dataEvento: marco.data,
+                        tarefas: [
+                            { texto: 'Anamnese completa', concluido: true },
+                            { texto: 'Exame físico', concluido: true },
+                            { texto: 'Orientações iniciais', concluido: true }
+                        ],
+                        observacoes: 'Primeira consulta realizada com sucesso.',
+                        prazo: null
+                    });
+                }
+                
+                if (marco.tipo === 'cirurgia') {
+                    if (marco.status === 'agendado' && diasParaMarco > 0) {
+                        // Pré-cirurgia
+                        cards.push({
+                            id: 'pre-cirurgia-' + Date.now(),
+                            titulo: `Preparação Pré-Cirúrgica`,
+                            tipo: 'pre-cirurgia',
+                            evento: 'CIRURGIA',
+                            fase: 'PRE',
+                            status: diasParaMarco <= 7 ? 'pendente' : 'aguardando',
+                            dataEvento: marco.data,
+                            tarefas: [
+                                { texto: 'Exames pré-operatórios', concluido: false },
+                                { texto: 'Suspender medicamentos', concluido: false },
+                                { texto: 'Jejum 12h antes', concluido: false },
+                                { texto: 'Confirmar acompanhante', concluido: false }
+                            ],
+                            observacoes: `Cirurgia agendada para ${marco.data.toLocaleDateString('pt-BR')}`,
+                            prazo: marco.data
+                        });
+                    } else if (marco.status === 'realizado') {
+                        // Pós-cirurgia
+                        cards.push({
+                            id: 'pos-cirurgia-' + Date.now(),
+                            titulo: 'Acompanhamento Pós-Cirúrgico',
+                            tipo: 'pos-cirurgia',
+                            evento: 'CIRURGIA',
+                            fase: 'POS',
+                            status: 'pendente',
+                            dataEvento: marco.data,
+                            tarefas: [
+                                { texto: 'Curativo diário', concluido: false },
+                                { texto: 'Medicação prescrita', concluido: false },
+                                { texto: 'Repouso absoluto 48h', concluido: false },
+                                { texto: 'Retorno em 7 dias', concluido: false }
+                            ],
+                            observacoes: 'Acompanhar evolução pós-cirúrgica.',
+                            prazo: new Date(marco.data.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 dias após
+                        });
+                    }
+                }
+                
+                if (marco.tipo === 'primeiro-retorno' && marco.status === 'pendente') {
+                    cards.push({
+                        id: 'primeiro-retorno-' + Date.now(),
+                        titulo: '1º Retorno Pós-Cirúrgico',
+                        tipo: 'retorno',
+                        evento: 'CONSULTA',
+                        fase: 'POS',
+                        status: diasParaMarco <= 2 ? 'pendente' : 'aguardando',
+                        dataEvento: marco.data,
+                        tarefas: [
+                            { texto: 'Avaliar cicatrização', concluido: false },
+                            { texto: 'Retirar pontos', concluido: false },
+                            { texto: 'Orientar cuidados', concluido: false },
+                            { texto: 'Agendar próximo retorno', concluido: false }
+                        ],
+                        observacoes: 'Primeiro retorno após cirurgia.',
+                        prazo: marco.data
+                    });
+                }
+            });
+            
+            // Card de tarefas gerais
+            cards.push({
+                id: 'tarefas-gerais-' + Date.now(),
+                titulo: 'Tarefas do Dia',
+                tipo: 'tarefas-diarias',
+                evento: 'GERAL',
+                fase: 'ATUAL',
+                status: 'aguardando',
+                dataEvento: hoje,
+                tarefas: [
+                    { texto: 'Revisar prontuário', concluido: false },
+                    { texto: 'Confirmar próximas consultas', concluido: false },
+                    { texto: 'Verificar resultados de exames', concluido: false }
+                ],
+                observacoes: 'Tarefas diárias de acompanhamento.',
+                prazo: hoje
+            });
+            
+            return cards;
+        }
+
+        function criarCardHTML(card) {
+            const statusClass = {
+                'sem-pendencias': 'success',
+                'aguardando': 'warning', 
+                'pendente': 'danger'
+            };
+            
+            const statusIcon = {
+                'sem-pendencias': 'fas fa-check-circle',
+                'aguardando': 'fas fa-clock',
+                'pendente': 'fas fa-exclamation-triangle'
+            };
+            
+            const statusText = {
+                'sem-pendencias': 'Sem Pendências',
+                'aguardando': 'Aguardando',
+                'pendente': 'Pendente'
+            };
+            
+            const diasRestantes = card.prazo ? 
+                Math.ceil((new Date(card.prazo) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+            
+            return `
+                <div class="card-evolucao ${statusClass[card.status]}" data-card-id="${card.id}">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <h4>${card.titulo}</h4>
+                            <span class="card-tipo">${card.evento} - ${card.fase}</span>
+                        </div>
+                        <div class="card-status ${statusClass[card.status]}">
+                            <i class="${statusIcon[card.status]}"></i>
+                            ${statusText[card.status]}
+                        </div>
+                    </div>
+                    
+                    ${diasRestantes !== null ? `
+                        <div class="card-prazo ${diasRestantes <= 1 ? 'urgente' : ''}">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${diasRestantes <= 0 ? 'Vencido!' : 
+                              diasRestantes === 1 ? 'Vence hoje!' : 
+                              `${diasRestantes} dias restantes`}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="card-tarefas">
+                        <h5><i class="fas fa-tasks"></i> Tarefas (${card.tarefas.filter(t => t.concluido).length}/${card.tarefas.length})</h5>
+                        <ul>
+                            ${card.tarefas.map((tarefa, index) => `
+                                <li class="${tarefa.concluido ? 'concluido' : ''}">
+                                    <input type="checkbox" 
+                                           ${tarefa.concluido ? 'checked' : ''} 
+                                           onchange="toggleTarefa('${card.id}', ${index})">
+                                    <span>${tarefa.texto}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="card-observacoes">
+                        <textarea placeholder="Observações..." onchange="salvarObservacoes('${card.id}', this.value)">${card.observacoes || ''}</textarea>
+                    </div>
+                    
+                    <div class="card-actions">
+                        <button onclick="editarCard('${card.id}')" class="btn-edit">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button onclick="duplicarCard('${card.id}')" class="btn-duplicate">
+                            <i class="fas fa-copy"></i> Duplicar
+                        </button>
+                        <button onclick="removerCard('${card.id}')" class="btn-remove">
+                            <i class="fas fa-trash"></i> Remover
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTarefa(cardId, tarefaIndex) {
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (cardsData[cpf]) {
+                const card = cardsData[cpf].find(c => c.id === cardId);
+                if (card && card.tarefas[tarefaIndex]) {
+                    card.tarefas[tarefaIndex].concluido = !card.tarefas[tarefaIndex].concluido;
+                    
+                    // Atualizar status do card baseado nas tarefas
+                    const todasConcluidas = card.tarefas.every(t => t.concluido);
+                    const algumaConcluida = card.tarefas.some(t => t.concluido);
+                    
+                    if (todasConcluidas) {
+                        card.status = 'sem-pendencias';
+                    } else if (algumaConcluida) {
+                        card.status = 'aguardando';
+                    } else {
+                        card.status = 'pendente';
+                    }
+                    
+                    localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+                    
+                    // Recarregar cards para atualizar visual
+                    carregarCardsEvolucao();
+                    carregarStatusGeral();
+                }
+            }
+        }
+
+        function salvarObservacoes(cardId, observacoes) {
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (cardsData[cpf]) {
+                const card = cardsData[cpf].find(c => c.id === cardId);
+                if (card) {
+                    card.observacoes = observacoes;
+                    localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+                }
+            }
+        }
+
+        function editarCard(cardId) {
+            alert('🔧 Funcionalidade de edição em desenvolvimento!\n\nEm breve você poderá:\n• Editar título e descrição\n• Adicionar/remover tarefas\n• Alterar prazos\n• Configurar notificações');
+        }
+
+        function duplicarCard(cardId) {
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (cardsData[cpf]) {
+                const card = cardsData[cpf].find(c => c.id === cardId);
+                if (card) {
+                    const novoCard = {
+                        ...card,
+                        id: 'duplicado-' + Date.now(),
+                        titulo: card.titulo + ' (Cópia)',
+                        tarefas: card.tarefas.map(t => ({ ...t, concluido: false })),
+                        status: 'pendente'
+                    };
+                    
+                    cardsData[cpf].push(novoCard);
+                    localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+                    
+                    carregarCardsEvolucao();
+                    alert('✅ Card duplicado com sucesso!');
+                }
+            }
+        }
+
+        function removerCard(cardId) {
+            if (confirm('⚠️ Tem certeza que deseja remover este card?\n\nEsta ação não pode ser desfeita.')) {
+                const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+                const cpf = pacienteAtual.cpf;
+                
+                if (cardsData[cpf]) {
+                    cardsData[cpf] = cardsData[cpf].filter(c => c.id !== cardId);
+                    localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+                    
+                    carregarCardsEvolucao();
+                    carregarStatusGeral();
+                    alert('✅ Card removido com sucesso!');
+                }
+            }
+        }
+
+        function adicionarNovoCard() {
+            const titulo = prompt('Digite o título do novo card:');
+            if (!titulo) return;
+            
+            const tipo = prompt('Tipo do card:\n1 - Pré-Consulta\n2 - Pós-Consulta\n3 - Pré-Cirurgia\n4 - Pós-Cirurgia\n5 - Tarefas Gerais\n\nDigite o número:');
+            
+            const tipos = {
+                '1': { evento: 'CONSULTA', fase: 'PRE', tipo: 'pre-consulta' },
+                '2': { evento: 'CONSULTA', fase: 'POS', tipo: 'pos-consulta' },
+                '3': { evento: 'CIRURGIA', fase: 'PRE', tipo: 'pre-cirurgia' },
+                '4': { evento: 'CIRURGIA', fase: 'POS', tipo: 'pos-cirurgia' },
+                '5': { evento: 'GERAL', fase: 'ATUAL', tipo: 'tarefas-gerais' }
+            };
+            
+            if (!tipos[tipo]) {
+                alert('Tipo inválido!');
+                return;
+            }
+            
+            const novoCard = {
+                id: 'manual-' + Date.now(),
+                titulo: titulo,
+                tipo: tipos[tipo].tipo,
+                evento: tipos[tipo].evento,
+                fase: tipos[tipo].fase,
+                status: 'pendente',
+                dataEvento: new Date(),
+                tarefas: [
+                    { texto: 'Nova tarefa', concluido: false }
+                ],
+                observacoes: '',
+                prazo: null
+            };
+            
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (!cardsData[cpf]) cardsData[cpf] = [];
+            cardsData[cpf].push(novoCard);
+            
+            localStorage.setItem('cardsEvolucao', JSON.stringify(cardsData));
+            
+            carregarCardsEvolucao();
+            alert('✅ Novo card criado com sucesso!');
+        }
+
+        function carregarStatusGeral() {
+            const container = document.getElementById('statusCards');
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (!cardsData[cpf]) return;
+            
+            const cards = cardsData[cpf];
+            const statusCount = {
+                'sem-pendencias': 0,
+                'aguardando': 0,
+                'pendente': 0
+            };
+            
+            cards.forEach(card => {
+                statusCount[card.status]++;
+            });
+            
+            container.innerHTML = `
+                <div class="status-card success">
+                    <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="status-info">
+                        <h4>${statusCount['sem-pendencias']}</h4>
+                        <p>Sem Pendências</p>
+                    </div>
+                </div>
+                
+                <div class="status-card warning">
+                    <div class="status-icon"><i class="fas fa-clock"></i></div>
+                    <div class="status-info">
+                        <h4>${statusCount['aguardando']}</h4>
+                        <p>Aguardando</p>
+                    </div>
+                </div>
+                
+                <div class="status-card danger">
+                    <div class="status-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="status-info">
+                        <h4>${statusCount['pendente']}</h4>
+                        <p>Pendente</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function carregarNotificacoes() {
+            const container = document.getElementById('notificacoesLista');
+            const cardsData = JSON.parse(localStorage.getItem('cardsEvolucao') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (!cardsData[cpf]) return;
+            
+            const cards = cardsData[cpf];
+            const hoje = new Date();
+            const notificacoes = [];
+            
+            cards.forEach(card => {
+                if (card.prazo) {
+                    const diasRestantes = Math.ceil((new Date(card.prazo) - hoje) / (1000 * 60 * 60 * 24));
+                    
+                    if (diasRestantes <= 1 && card.status !== 'sem-pendencias') {
+                        notificacoes.push({
+                            tipo: diasRestantes <= 0 ? 'urgent' : 'warning',
+                            texto: diasRestantes <= 0 ? 
+                                `⚠️ ${card.titulo} - VENCIDO!` : 
+                                `⏰ ${card.titulo} - Vence hoje!`,
+                            card: card
+                        });
+                    }
+                }
+                
+                if (card.status === 'pendente') {
+                    const tarefasPendentes = card.tarefas.filter(t => !t.concluido).length;
+                    if (tarefasPendentes > 0) {
+                        notificacoes.push({
+                            tipo: 'info',
+                            texto: `📋 ${card.titulo} - ${tarefasPendentes} tarefa(s) pendente(s)`,
+                            card: card
+                        });
+                    }
+                }
+            });
+            
+            if (notificacoes.length === 0) {
+                container.innerHTML = '<div class="no-notifications">✅ Nenhuma notificação</div>';
+                return;
+            }
+            
+            container.innerHTML = notificacoes.map(notif => `
+                <div class="notification ${notif.tipo}">
+                    <div class="notification-text">${notif.texto}</div>
+                    <button onclick="focarCard('${notif.card.id}')" class="notification-action">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function focarCard(cardId) {
+            const cardElement = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (cardElement) {
+                cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                cardElement.style.animation = 'pulse 2s ease-in-out';
+                setTimeout(() => {
+                    cardElement.style.animation = '';
+                }, 2000);
+            }
+        }
+        
+        function carregarTimelineEvolucao() {
+            const timeline = document.getElementById('timelineEvolucao');
+            
+            // Dados de exemplo de evolução
+            const evolucoes = [
+                {
+                    data: '2025-07-30',
+                    tipo: 'Consulta Inicial',
+                    descricao: 'Primeira consulta para avaliação de rinoplastia. Paciente apresenta desvio de septo nasal e desejo de melhora estética. Realizada anamnese completa e exame físico.',
+                    peso: '65kg',
+                    pressao: '120/80',
+                    observacoes: 'Paciente apta para procedimento cirúrgico'
+                },
+                {
+                    data: '2025-07-25',
+                    tipo: 'Exames Pré-op',
+                    descricao: 'Solicitados exames pré-operatórios: hemograma completo, coagulograma, glicemia, ureia, creatinina, ECG e RX de tórax.',
+                    observacoes: 'Aguardando resultados dos exames'
+                },
+                {
+                    data: '2025-07-20',
+                    tipo: 'Consulta Retorno',
+                    descricao: 'Retorno para apresentação dos resultados de exames e discussão do planejamento cirúrgico. Todos os exames dentro da normalidade.',
+                    observacoes: 'Paciente liberada para cirurgia'
+                }
+            ];
+            
+            timeline.innerHTML = evolucoes.map(evolucao => `
+                <div class="evolucao-item">
+                    <div class="evolucao-header">
+                        <span class="evolucao-data">${formatarDataBrasil(evolucao.data)}</span>
+                        <span class="evolucao-tipo">${evolucao.tipo}</span>
+                    </div>
+                    <div class="evolucao-descricao">${evolucao.descricao}</div>
+                    ${evolucao.peso || evolucao.pressao ? `
+                        <div class="evolucao-detalhes">
+                            ${evolucao.peso ? `
+                                <div class="detalhe-item">
+                                    <div class="detalhe-valor">${evolucao.peso}</div>
+                                    <div class="detalhe-label">Peso</div>
+                                </div>
+                            ` : ''}
+                            ${evolucao.pressao ? `
+                                <div class="detalhe-item">
+                                    <div class="detalhe-valor">${evolucao.pressao}</div>
+                                    <div class="detalhe-label">Pressão</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    ${evolucao.observacoes ? `
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-style: italic; color: #6c757d;">
+                            <strong>Obs:</strong> ${evolucao.observacoes}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function adicionarEvolucao() {
+            const descricao = prompt('Descrição da evolução:');
+            if (!descricao) return;
+            
+            const novaEvolucao = {
+                data: new Date().toISOString().split('T')[0],
+                tipo: 'Evolução',
+                descricao: descricao,
+                observacoes: ''
+            };
+            
+            // Aqui você adicionaria ao banco de dados
+            alert('✅ Evolução adicionada com sucesso!');
+            carregarTimelineEvolucao();
+        }
+        
+        // ============ FUNÇÕES FICHA DE ATENDIMENTO ============
+        
+        function abrirFichaAtendimento() {
+            const paciente = document.getElementById('pacienteSelect').value;
+            if (!paciente) {
+                alert('⚠️ Selecione um paciente primeiro!');
+                return;
+            }
+            
+            document.getElementById('modalFicha').classList.add('active');
+            
+            // Pré-preencher nome do paciente
+            document.getElementById('pacienteNome').value = paciente;
+            
+            // Configurar listeners para cálculo automático
+            configurarCalculoIMC();
+            configurarCalculoOrcamento();
+        }
+        
+        function fecharModalFicha() {
+            document.getElementById('modalFicha').classList.remove('active');
+        }
+        
+        function configurarCalculoIMC() {
+            const peso = document.getElementById('peso');
+            const altura = document.getElementById('altura');
+            const imc = document.getElementById('imc');
+            
+            function calcularIMC() {
+                const pesoVal = parseFloat(peso.value);
+                const alturaVal = parseFloat(altura.value) / 100; // cm para metros
+                
+                if (pesoVal && alturaVal) {
+                    const imcVal = pesoVal / (alturaVal * alturaVal);
+                    imc.value = imcVal.toFixed(1);
+                    
+                    // Adicionar classificação
+                    let classificacao = '';
+                    if (imcVal < 18.5) classificacao = ' (Abaixo do peso)';
+                    else if (imcVal < 25) classificacao = ' (Peso normal)';
+                    else if (imcVal < 30) classificacao = ' (Sobrepeso)';
+                    else classificacao = ' (Obesidade)';
+                    
+                    imc.value += classificacao;
+                }
+            }
+            
+            peso.addEventListener('input', calcularIMC);
+            altura.addEventListener('input', calcularIMC);
+        }
+        
+        function configurarCalculoOrcamento() {
+            const honorarios = document.getElementById('valor-honorarios');
+            const hospital = document.getElementById('valor-hospital');
+            const anestesia = document.getElementById('valor-anestesia');
+            const total = document.getElementById('valor-total');
+            
+            function calcularTotal() {
+                const hon = parseFloat(honorarios.value) || 0;
+                const hosp = parseFloat(hospital.value) || 0;
+                const anes = parseFloat(anestesia.value) || 0;
+                
+                const totalVal = hon + hosp + anes;
+                total.value = `R$ ${totalVal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            }
+            
+            honorarios.addEventListener('input', calcularTotal);
+            hospital.addEventListener('input', calcularTotal);
+            anestesia.addEventListener('input', calcularTotal);
+        }
+        
+        function adicionarFoto(tipo) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Encontrar o slot correto
+                        const slots = document.querySelectorAll('.foto-slot');
+                        const slot = Array.from(slots).find(s => s.onclick.toString().includes(tipo));
+                        
+                        if (slot) {
+                            slot.innerHTML = `<img src="${e.target.result}" alt="${tipo}">`;
+                            slot.onclick = () => ampliarFoto(e.target.result, tipo);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            input.click();
+        }
+        
+        function ampliarFoto(src, tipo) {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.9); z-index: 2000; display: flex; 
+                align-items: center; justify-content: center; padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="max-width: 90%; max-height: 90%; position: relative;">
+                    <img src="${src}" style="max-width: 100%; max-height: 100%; border-radius: 15px;">
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="position: absolute; top: -15px; right: -15px; background: #e74c3c; 
+                                   color: white; border: none; border-radius: 50%; width: 35px; height: 35px; 
+                                   cursor: pointer; font-size: 18px;">&times;</button>
+                    <div style="text-align: center; margin-top: 15px; color: white; font-weight: 600;">
+                        ${tipo.replace('-', ' ').toUpperCase()}
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function salvarFichaAtendimento() {
+            // Coletar dados do formulário
+            const dadosFicha = {
+                paciente: document.getElementById('pacienteNome').value,
+                idade: document.getElementById('pacienteIdade').value,
+                procedimento: document.getElementById('procedimentoDesejado').value,
+                motivoPrincipal: document.getElementById('motivoPrincipal').value,
+                // ... outros campos
+            };
+            
+            // Aqui você salvaria no banco de dados
+            alert('✅ Ficha de atendimento salva com sucesso!');
+            console.log('Dados da ficha:', dadosFicha);
+        }
+        
+        function gerarPDFFicha() {
+            // Usar jsPDF para gerar PDF da ficha
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Cabeçalho
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text('FICHA DE ATENDIMENTO - CIRURGIA PLÁSTICA', 20, 25);
+            
+            doc.setFontSize(14);
+            doc.text('Dr. Marcio Scartozzoni', 20, 35);
+            
+            // Dados do paciente
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text('DADOS DO PACIENTE:', 20, 50);
+            
+            doc.setFont(undefined, 'normal');
+            doc.text(`Nome: ${document.getElementById('pacienteNome').value}`, 20, 60);
+            doc.text(`Idade: ${document.getElementById('pacienteIdade').value} anos`, 20, 70);
+            doc.text(`Procedimento: ${document.getElementById('procedimentoDesejado').value}`, 20, 80);
+            
+            // Motivo da consulta
+            doc.setFont(undefined, 'bold');
+            doc.text('MOTIVO DA CONSULTA:', 20, 100);
+            
+            doc.setFont(undefined, 'normal');
+            const motivo = document.getElementById('motivoPrincipal').value;
+            const linhasMotivo = doc.splitTextToSize(motivo, 170);
+            doc.text(linhasMotivo, 20, 110);
+            
+            // Orçamento
+            doc.setFont(undefined, 'bold');
+            doc.text('ORÇAMENTO:', 20, 180);
+            
+            doc.setFont(undefined, 'normal');
+            doc.text(`Honorários Médicos: R$ ${document.getElementById('valor-honorarios').value}`, 20, 190);
+            doc.text(`Hospital/Clínica: R$ ${document.getElementById('valor-hospital').value}`, 20, 200);
+            doc.text(`Anestesia: R$ ${document.getElementById('valor-anestesia').value}`, 20, 210);
+            doc.text(`TOTAL: ${document.getElementById('valor-total').value}`, 20, 220);
+            
+            // Assinatura
+            doc.setFont(undefined, 'bold');
+            doc.text('_________________________________', 20, 260);
+            doc.text('Dr. Marcio Scartozzoni', 20, 270);
+            doc.text('CRM: [NÚMERO]', 20, 280);
+            
+            // Gerar e abrir PDF
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            window.open(pdfUrl, '_blank');
+            
+            alert('✅ PDF da ficha de atendimento gerado com sucesso!');
+        }
+        
         // Função auxiliar para formatar data
         function formatarDataBrasil(dataISO) {
             if (!dataISO) return '';
@@ -1776,5 +3552,807 @@ Dr. Marcio Scartozzoni`;
             return data.toLocaleDateString('pt-BR');
         }
     </script>
+
+    <!-- Modal de Evolução do Paciente -->
+    <div id="modalEvolucao" class="modal-evolucao">
+        <div class="modal-content-evolucao">
+            <div class="modal-header-evolucao">
+                <h2><i class="fas fa-chart-line"></i> Evolução do Paciente</h2>
+                <button class="modal-close" onclick="fecharModalEvolucao()">&times;</button>
+            </div>
+            
+            <div class="modal-body-evolucao">
+                <button class="btn-nova-evolucao" onclick="adicionarEvolucao()">
+                    <i class="fas fa-plus"></i> Adicionar Nova Evolução
+                </button>
+                
+                <div class="timeline-evolucao" id="timelineEvolucao">
+                    <!-- Timeline será carregada dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ficha de Atendimento -->
+    <div id="modalFicha" class="modal-ficha">
+        <div class="modal-content-ficha">
+            <div class="modal-header-ficha">
+                <h2><i class="fas fa-clipboard-check"></i> Ficha de Atendimento - Cirurgia Plástica</h2>
+                <button class="modal-close" onclick="fecharModalFicha()">&times;</button>
+            </div>
+            
+            <div class="modal-body-ficha">
+                <form id="fichaAtendimentoForm">
+                    <div class="ficha-sections">
+                        <!-- Dados do Paciente -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-user"></i> Dados do Paciente</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="pacienteNome">Nome Completo:</label>
+                                <input type="text" id="pacienteNome" required>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="pacienteIdade">Idade:</label>
+                                <input type="number" id="pacienteIdade" min="0" max="120">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="pacienteProfissao">Profissão:</label>
+                                <input type="text" id="pacienteProfissao">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="pacienteEstadoCivil">Estado Civil:</label>
+                                <select id="pacienteEstadoCivil">
+                                    <option value="">Selecione</option>
+                                    <option value="solteiro">Solteiro(a)</option>
+                                    <option value="casado">Casado(a)</option>
+                                    <option value="separado">Separado(a)</option>
+                                    <option value="divorciado">Divorciado(a)</option>
+                                    <option value="viuvo">Viúvo(a)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Motivo da Consulta -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-stethoscope"></i> Motivo da Consulta</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="procedimentoDesejado">Procedimento Desejado:</label>
+                                <select id="procedimentoDesejado">
+                                    <option value="">Selecione</option>
+                                    <option value="rinoplastia">Rinoplastia</option>
+                                    <option value="mamoplastia-aumento">Mamoplastia de Aumento</option>
+                                    <option value="mamoplastia-reducao">Mamoplastia de Redução</option>
+                                    <option value="abdominoplastia">Abdominoplastia</option>
+                                    <option value="lipoaspiracaoo">Lipoaspiração</option>
+                                    <option value="blefaroplastia">Blefaroplastia</option>
+                                    <option value="lifting-facial">Lifting Facial</option>
+                                    <option value="otoplastia">Otoplastia</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="motivoPrincipal">Motivo Principal:</label>
+                                <textarea id="motivoPrincipal" rows="4" placeholder="Descreva o motivo principal da consulta..."></textarea>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="expectativas">Expectativas:</label>
+                                <textarea id="expectativas" rows="3" placeholder="Expectativas do paciente em relação ao procedimento..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- História Médica -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-notes-medical"></i> História Médica</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label>Cirurgias Anteriores:</label>
+                                <div class="checkbox-group">
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="cirurgia-plastica-anterior">
+                                        <label for="cirurgia-plastica-anterior">Cirurgia Plástica Anterior</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="cirurgia-geral">
+                                        <label for="cirurgia-geral">Cirurgia Geral</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="anestesia-geral">
+                                        <label for="anestesia-geral">Anestesia Geral</label>
+                                    </div>
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" id="complicacoes-cirurgicas">
+                                        <label for="complicacoes-cirurgicas">Complicações Cirúrgicas</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="doencas-preexistentes">Doenças Pré-existentes:</label>
+                                <textarea id="doencas-preexistentes" rows="3" placeholder="Diabetes, hipertensão, problemas cardíacos, etc..."></textarea>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="medicamentos-uso">Medicamentos em Uso:</label>
+                                <textarea id="medicamentos-uso" rows="3" placeholder="Liste os medicamentos atuais..."></textarea>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="alergias">Alergias:</label>
+                                <input type="text" id="alergias" placeholder="Medicamentos, materiais, outros...">
+                            </div>
+                        </div>
+
+                        <!-- Exame Físico -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-search"></i> Exame Físico</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="peso">Peso (kg):</label>
+                                <input type="number" id="peso" step="0.1" min="0">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="altura">Altura (cm):</label>
+                                <input type="number" id="altura" min="0" max="250">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="imc">IMC:</label>
+                                <input type="text" id="imc" readonly placeholder="Calculado automaticamente">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="exame-fisico-detalhes">Detalhes do Exame Físico:</label>
+                                <textarea id="exame-fisico-detalhes" rows="4" placeholder="Descrição detalhada do exame físico específico para o procedimento..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Avaliação Psicológica -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-brain"></i> Avaliação Psicológica</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="motivacao">Motivação para Cirurgia:</label>
+                                <select id="motivacao">
+                                    <option value="">Selecione</option>
+                                    <option value="autoestima">Melhora da Autoestima</option>
+                                    <option value="funcional">Motivo Funcional</option>
+                                    <option value="estetico">Motivo Estético</option>
+                                    <option value="profissional">Motivo Profissional</option>
+                                    <option value="outros">Outros</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="apoio-familiar">Apoio Familiar:</label>
+                                <select id="apoio-familiar">
+                                    <option value="">Selecione</option>
+                                    <option value="total">Total</option>
+                                    <option value="parcial">Parcial</option>
+                                    <option value="nenhum">Nenhum</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="expectativas-reais">Expectativas Realistas:</label>
+                                <select id="expectativas-reais">
+                                    <option value="">Selecione</option>
+                                    <option value="sim">Sim</option>
+                                    <option value="parcialmente">Parcialmente</option>
+                                    <option value="nao">Não</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="observacoes-psicologicas">Observações Psicológicas:</label>
+                                <textarea id="observacoes-psicologicas" rows="3" placeholder="Avaliação do estado psicológico do paciente..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Planejamento Cirúrgico -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-drafting-compass"></i> Planejamento Cirúrgico</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="tecnica-proposta">Técnica Proposta:</label>
+                                <textarea id="tecnica-proposta" rows="3" placeholder="Descrição da técnica cirúrgica proposta..."></textarea>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="tipo-anestesia">Tipo de Anestesia:</label>
+                                <select id="tipo-anestesia">
+                                    <option value="">Selecione</option>
+                                    <option value="local">Local</option>
+                                    <option value="local-sedacao">Local com Sedação</option>
+                                    <option value="geral">Geral</option>
+                                    <option value="peridural">Peridural</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="tempo-cirurgia">Tempo Estimado (horas):</label>
+                                <input type="number" id="tempo-cirurgia" step="0.5" min="0.5" max="12">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="local-cirurgia">Local da Cirurgia:</label>
+                                <select id="local-cirurgia">
+                                    <option value="">Selecione</option>
+                                    <option value="hospital">Hospital</option>
+                                    <option value="clinica">Clínica</option>
+                                    <option value="consultorio">Consultório</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Orçamento -->
+                        <div class="ficha-section">
+                            <h3><i class="fas fa-calculator"></i> Orçamento</h3>
+                            
+                            <div class="form-group-ficha">
+                                <label for="valor-honorarios">Honorários Médicos (R$):</label>
+                                <input type="number" id="valor-honorarios" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="valor-hospital">Hospital/Clínica (R$):</label>
+                                <input type="number" id="valor-hospital" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="valor-anestesia">Anestesia (R$):</label>
+                                <input type="number" id="valor-anestesia" step="0.01" min="0">
+                            </div>
+                            
+                            <div class="form-group-ficha">
+                                <label for="valor-total">Valor Total (R$):</label>
+                                <input type="text" id="valor-total" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Fotos Pré-operatórias -->
+                        <div class="fotos-section">
+                            <h3><i class="fas fa-camera"></i> Fotos Pré-operatórias</h3>
+                            
+                            <div class="fotos-grid">
+                                <div class="foto-slot" onclick="adicionarFoto('frente')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Foto Frontal</span>
+                                </div>
+                                <div class="foto-slot" onclick="adicionarFoto('perfil-dir')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Perfil Direito</span>
+                                </div>
+                                <div class="foto-slot" onclick="adicionarFoto('perfil-esq')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Perfil Esquerdo</span>
+                                </div>
+                                <div class="foto-slot" onclick="adicionarFoto('lateral')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Lateral</span>
+                                </div>
+                                <div class="foto-slot" onclick="adicionarFoto('detalhe1')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Detalhe 1</span>
+                                </div>
+                                <div class="foto-slot" onclick="adicionarFoto('detalhe2')">
+                                    <i class="fas fa-camera"></i>
+                                    <span>Detalhe 2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef;">
+                        <button type="button" class="btn-secondary" onclick="fecharModalFicha()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button type="button" class="btn-primary" onclick="salvarFichaAtendimento()">
+                            <i class="fas fa-save"></i> Salvar Ficha
+                        </button>
+                        <button type="button" class="btn-primary" onclick="gerarPDFFicha()">
+                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Edição de Dados do Paciente -->
+    <div id="modalEdicaoPaciente" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-edit"></i> Editar Dados do Paciente</h2>
+                <button class="modal-close" onclick="fecharModalEdicaoPaciente()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formEdicaoPaciente">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="editNome">Nome Completo: *</label>
+                            <input type="text" id="editNome" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editCPF">CPF: *</label>
+                            <input type="text" id="editCPF" required maxlength="14" readonly style="background: #f0f0f0;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editDataNascimento">Data de Nascimento: *</label>
+                            <input type="date" id="editDataNascimento" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editTelefone">Telefone: *</label>
+                            <input type="tel" id="editTelefone" required>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="editEmail">Email:</label>
+                            <input type="email" id="editEmail">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="fas fa-save"></i> Salvar Alterações
+                        </button>
+                        <button type="button" onclick="fecharModalEdicaoPaciente()" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Edição de Marcos -->
+    <div id="modalEdicaoMarco" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-edit"></i> Editar Marco</h2>
+                <button class="modal-close" onclick="fecharModalMarco()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formEdicaoMarco">
+                    <div class="form-group">
+                        <label for="editMarcoTipo">Tipo de Marco:</label>
+                        <input type="text" id="editMarcoTipo" readonly style="background: #f8f9fa;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarcoData">Data:</label>
+                        <input type="date" id="editMarcoData" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarcoStatus">Status:</label>
+                        <select id="editMarcoStatus" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="agendado">Agendado</option>
+                            <option value="realizado">Realizado</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editMarcoObservacoes">Observações:</label>
+                        <textarea id="editMarcoObservacoes" rows="3" placeholder="Observações sobre este marco..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary" style="flex: 1;">
+                            <i class="fas fa-save"></i> Salvar Marco
+                        </button>
+                        <button type="button" onclick="fecharModalMarco()" class="btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pacienteAtual = null;
+
+        // Carregar dados do paciente ao inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDadosPaciente();
+        });
+
+        function carregarDadosPaciente() {
+            const dadosPaciente = localStorage.getItem('pacienteAtual');
+            
+            if (!dadosPaciente) {
+                alert('❌ Nenhum paciente selecionado!\n\nVocê será redirecionado para a gestão de prontuários.');
+                window.location.href = '/prontuarios.html';
+                return;
+            }
+
+            pacienteAtual = JSON.parse(dadosPaciente);
+            atualizarCabecalhoPaciente();
+            preencherCabecalhosDocumentos();
+        }
+
+        function atualizarCabecalhoPaciente() {
+            if (!pacienteAtual) return;
+
+            document.getElementById('prontuarioId').textContent = pacienteAtual.id;
+            document.getElementById('nomePacienteHeader').textContent = pacienteAtual.nome;
+            
+            const dadosDiv = document.getElementById('dadosPacienteHeader');
+            dadosDiv.innerHTML = `
+                <div>📅 Nascimento: ${formatarData(pacienteAtual.dataNascimento)}</div>
+                <div>📱 Telefone: ${pacienteAtual.telefone}</div>
+                <div>📧 Email: ${pacienteAtual.email || 'Não informado'}</div>
+            `;
+        }
+
+        function preencherCabecalhosDocumentos() {
+            // Preencher campos de dados do paciente em todos os formulários
+            const campos = {
+                'nome-paciente': pacienteAtual.nome,
+                'nome-completo': pacienteAtual.nome,
+                'cpf-paciente': pacienteAtual.cpf,
+                'data-nascimento': pacienteAtual.dataNascimento,
+                'telefone-paciente': pacienteAtual.telefone,
+                'email-paciente': pacienteAtual.email,
+                // Calcular idade
+                'idade-paciente': calcularIdade(pacienteAtual.dataNascimento)
+            };
+
+            Object.keys(campos).forEach(id => {
+                const campo = document.getElementById(id);
+                if (campo) {
+                    campo.value = campos[id];
+                }
+            });
+            
+            // Carregar histórico de agendamentos
+            carregarHistoricoAgendamentos();
+        }
+
+        function carregarHistoricoAgendamentos() {
+            if (!pacienteAtual) return;
+            
+            // Simular dados de histórico (em produção viria da API)
+            const historico = obterHistoricoPaciente(pacienteAtual.cpf);
+            
+            renderizarMarcosPrincipais(historico.marcos);
+            renderizarAgendamentosRecentes(historico.agendamentos);
+        }
+
+        function obterHistoricoPaciente(cpf) {
+            // Simular histórico baseado no CPF do paciente
+            // Em produção, isso viria do banco de dados
+            const historicos = JSON.parse(localStorage.getItem('historicosAgendamentos') || '{}');
+            
+            if (!historicos[cpf]) {
+                // Criar histórico inicial se não existir
+                historicos[cpf] = {
+                    marcos: gerarMarcosIniciais(),
+                    agendamentos: gerarAgendamentosExemplo()
+                };
+                localStorage.setItem('historicosAgendamentos', JSON.stringify(historicos));
+            }
+            
+            return historicos[cpf];
+        }
+
+        function gerarMarcosIniciais() {
+            const hoje = new Date();
+            return [
+                {
+                    tipo: 'primeira-consulta',
+                    nome: 'Primeira Consulta',
+                    data: new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000), // 30 dias atrás
+                    status: 'realizado',
+                    icone: 'fas fa-user-md'
+                },
+                {
+                    tipo: 'retorno',
+                    nome: 'Consulta de Retorno',
+                    data: new Date(hoje.getTime() - 15 * 24 * 60 * 60 * 1000), // 15 dias atrás
+                    status: 'realizado',
+                    icone: 'fas fa-redo'
+                },
+                {
+                    tipo: 'cirurgia',
+                    nome: 'Data da Cirurgia',
+                    data: new Date(hoje.getTime() + 15 * 24 * 60 * 60 * 1000), // 15 dias no futuro
+                    status: 'agendado',
+                    icone: 'fas fa-procedures'
+                },
+                {
+                    tipo: 'primeiro-retorno',
+                    nome: '1º Retorno Pós-Cirúrgico',
+                    data: new Date(hoje.getTime() + 22 * 24 * 60 * 60 * 1000), // 22 dias no futuro
+                    status: 'pendente',
+                    icone: 'fas fa-stethoscope'
+                },
+                {
+                    tipo: 'proximo-retorno',
+                    nome: 'Próximo Retorno',
+                    data: new Date(hoje.getTime() + 45 * 24 * 60 * 60 * 1000), // 45 dias no futuro
+                    status: 'pendente',
+                    icone: 'fas fa-calendar-check'
+                },
+                {
+                    tipo: 'alta',
+                    nome: 'Alta Médica',
+                    data: new Date(hoje.getTime() + 90 * 24 * 60 * 60 * 1000), // 90 dias no futuro
+                    status: 'pendente',
+                    icone: 'fas fa-check-circle'
+                }
+            ];
+        }
+
+        function gerarAgendamentosExemplo() {
+            const hoje = new Date();
+            return [
+                {
+                    data: new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000),
+                    tipo: 'Primeira Consulta',
+                    status: 'realizado'
+                },
+                {
+                    data: new Date(hoje.getTime() - 15 * 24 * 60 * 60 * 1000),
+                    tipo: 'Consulta de Retorno',
+                    status: 'realizado'
+                },
+                {
+                    data: new Date(hoje.getTime() + 15 * 24 * 60 * 60 * 1000),
+                    tipo: 'Cirurgia Plástica',
+                    status: 'agendado'
+                }
+            ];
+        }
+
+        function renderizarMarcosPrincipais(marcos) {
+            const container = document.getElementById('marcosPrincipais');
+            
+            container.innerHTML = marcos.map(marco => `
+                <div class="marco-item ${marco.tipo}" onclick="editarMarco('${marco.tipo}')">
+                    <div class="marco-header">
+                        <i class="${marco.icone}"></i>
+                        <span class="marco-tipo">${marco.nome}</span>
+                        <span class="marco-status ${marco.status}">${getStatusTexto(marco.status)}</span>
+                    </div>
+                    <div class="marco-data">${formatarDataCompleta(marco.data)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderizarAgendamentosRecentes(agendamentos) {
+            const container = document.getElementById('agendamentosRecentes');
+            
+            if (agendamentos.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #6c757d; font-size: 12px; padding: 20px;">Nenhum agendamento encontrado</div>';
+                return;
+            }
+            
+            container.innerHTML = agendamentos.slice(-5).reverse().map(agendamento => `
+                <div class="agendamento-recente" onclick="abrirEvolucaoData('${agendamento.data.toISOString()}')">
+                    <div class="agendamento-data">${formatarDataCompleta(agendamento.data)}</div>
+                    <div class="agendamento-tipo">${agendamento.tipo}</div>
+                </div>
+            `).join('');
+        }
+
+        function getStatusTexto(status) {
+            const textos = {
+                'realizado': 'Realizado',
+                'agendado': 'Agendado',
+                'pendente': 'Pendente'
+            };
+            return textos[status] || status;
+        }
+
+        function formatarDataCompleta(data) {
+            const dataObj = new Date(data);
+            return dataObj.toLocaleDateString('pt-BR', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function editarMarco(tipo) {
+            // Abrir modal para editar marco
+            const nomes = {
+                'primeira-consulta': 'Primeira Consulta',
+                'retorno': 'Consulta de Retorno',
+                'cirurgia': 'Data da Cirurgia',
+                'primeiro-retorno': '1º Retorno Pós-Cirúrgico',
+                'proximo-retorno': 'Próximo Retorno',
+                'alta': 'Alta Médica'
+            };
+            
+            // Buscar dados atuais do marco
+            const historico = obterHistoricoPaciente(pacienteAtual.cpf);
+            const marco = historico.marcos.find(m => m.tipo === tipo);
+            
+            // Preencher modal
+            document.getElementById('editMarcoTipo').value = nomes[tipo];
+            document.getElementById('editMarcoData').value = marco.data.toISOString().split('T')[0];
+            document.getElementById('editMarcoStatus').value = marco.status;
+            document.getElementById('editMarcoObservacoes').value = marco.observacoes || '';
+            
+            // Salvar tipo atual para uso no submit
+            document.getElementById('formEdicaoMarco').setAttribute('data-tipo', tipo);
+            
+            // Mostrar modal
+            document.getElementById('modalEdicaoMarco').style.display = 'flex';
+        }
+
+        function fecharModalMarco() {
+            document.getElementById('modalEdicaoMarco').style.display = 'none';
+        }
+
+        // Event listener para o formulário de edição de marco
+        document.getElementById('formEdicaoMarco').addEventListener('submit', function(e) {
+            e.preventDefault();
+            salvarEdicaoMarco();
+        });
+
+        function salvarEdicaoMarco() {
+            const tipo = document.getElementById('formEdicaoMarco').getAttribute('data-tipo');
+            const novaData = document.getElementById('editMarcoData').value;
+            const novoStatus = document.getElementById('editMarcoStatus').value;
+            const observacoes = document.getElementById('editMarcoObservacoes').value;
+            
+            // Atualizar dados no localStorage
+            const historicos = JSON.parse(localStorage.getItem('historicosAgendamentos') || '{}');
+            const cpf = pacienteAtual.cpf;
+            
+            if (historicos[cpf]) {
+                const marco = historicos[cpf].marcos.find(m => m.tipo === tipo);
+                if (marco) {
+                    marco.data = new Date(novaData);
+                    marco.status = novoStatus;
+                    marco.observacoes = observacoes;
+                }
+                
+                localStorage.setItem('historicosAgendamentos', JSON.stringify(historicos));
+                
+                // Recarregar interface
+                carregarHistoricoAgendamentos();
+                
+                alert('✅ Marco atualizado com sucesso!');
+                fecharModalMarco();
+            }
+        }
+
+        function abrirEvolucaoData(dataISO) {
+            const data = new Date(dataISO);
+            const dataFormatada = data.toLocaleDateString('pt-BR');
+            
+            if (confirm(`📋 Abrir evolução do paciente do dia ${dataFormatada}?\n\nEsta funcionalidade criará/editará a evolução clínica desta consulta.`)) {
+                // Aqui seria a integração com o sistema de evolução
+                abrirEvolucao();
+            }
+        }
+
+        function editarDadosPaciente() {
+            if (!pacienteAtual) return;
+
+            // Preencher o modal com os dados atuais
+            document.getElementById('editNome').value = pacienteAtual.nome;
+            document.getElementById('editCPF').value = pacienteAtual.cpf;
+            document.getElementById('editDataNascimento').value = pacienteAtual.dataNascimento;
+            document.getElementById('editTelefone').value = pacienteAtual.telefone;
+            document.getElementById('editEmail').value = pacienteAtual.email || '';
+
+            document.getElementById('modalEdicaoPaciente').style.display = 'flex';
+        }
+
+        function fecharModalEdicaoPaciente() {
+            document.getElementById('modalEdicaoPaciente').style.display = 'none';
+        }
+
+        // Form de edição de paciente
+        document.getElementById('formEdicaoPaciente').addEventListener('submit', function(e) {
+            e.preventDefault();
+            salvarEdicaoPaciente();
+        });
+
+        function salvarEdicaoPaciente() {
+            // Atualizar dados do paciente
+            pacienteAtual.nome = document.getElementById('editNome').value;
+            pacienteAtual.dataNascimento = document.getElementById('editDataNascimento').value;
+            pacienteAtual.telefone = document.getElementById('editTelefone').value;
+            pacienteAtual.email = document.getElementById('editEmail').value;
+
+            // Salvar no localStorage
+            localStorage.setItem('pacienteAtual', JSON.stringify(pacienteAtual));
+
+            // Atualizar a interface
+            atualizarCabecalhoPaciente();
+            preencherCabecalhosDocumentos();
+
+            alert('✅ Dados do paciente atualizados com sucesso!');
+            fecharModalEdicaoPaciente();
+        }
+
+        function voltarProntuarios() {
+            if (confirm('Deseja voltar à gestão de prontuários? Certifique-se de salvar os documentos antes de sair.')) {
+                window.location.href = '/prontuarios.html';
+            }
+        }
+
+        function agendarConsultaPaciente() {
+            if (!pacienteAtual) {
+                alert('⚠️ Nenhum paciente selecionado para agendamento.');
+                return;
+            }
+
+            // Salvar dados do paciente para uso no agendamento
+            const dadosAgendamento = {
+                origem: 'caderno-digital',
+                paciente: {
+                    nome: pacienteAtual.nome,
+                    cpf: pacienteAtual.cpf,
+                    dataNascimento: pacienteAtual.dataNascimento,
+                    telefone: pacienteAtual.telefone,
+                    email: pacienteAtual.email || ''
+                }
+            };
+
+            localStorage.setItem('dadosPreAgendamento', JSON.stringify(dadosAgendamento));
+
+            // Abrir sistema de agendamento em nova aba
+            const novaAba = window.open('/agendar.html', '_blank');
+            
+            // Mostrar confirmação
+            const confirmacao = confirm(
+                `📅 Abrindo sistema de agendamento para:\n\n` +
+                `👤 ${pacienteAtual.nome}\n` +
+                `📄 CPF: ${pacienteAtual.cpf}\n\n` +
+                `Os dados do paciente já foram preenchidos automaticamente.\n\n` +
+                `Deseja continuar?`
+            );
+
+            if (!confirmacao && novaAba) {
+                novaAba.close();
+                localStorage.removeItem('dadosPreAgendamento');
+            }
+        }
+
+        function calcularIdade(dataNascimento) {
+            const hoje = new Date();
+            const nascimento = new Date(dataNascimento);
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            const mes = hoje.getMonth() - nascimento.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+                idade--;
+            }
+            
+            return idade;
+        }
+
+        function formatarData(data) {
+            if (!data) return '';
+            const date = new Date(data);
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Sobrescrever função original de voltar
+        function voltarDashboard() {
+            voltarProntuarios();
+        }
+    </script>
+
 </body>
 </html>

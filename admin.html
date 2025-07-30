@@ -386,6 +386,300 @@
             font-weight: 500;
         }
 
+        /* Gestão da Jornada do Paciente */
+        .jornada-paciente-section {
+            background: white;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .jornada-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cards-jornada-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 30px;
+        }
+
+        .card-jornada-paciente {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .card-jornada-paciente:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-jornada-paciente.urgente {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            animation: pulse-urgente 2s infinite;
+        }
+
+        .card-jornada-paciente.atencao {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fffbf0 0%, #fff3cd 100%);
+        }
+
+        .card-jornada-paciente.normal {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #f8fff8 0%, #d4edda 100%);
+        }
+
+        @keyframes pulse-urgente {
+            0% { box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); }
+            50% { box-shadow: 0 8px 25px rgba(220, 53, 69, 0.5); }
+            100% { box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3); }
+        }
+
+        .card-header-jornada {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .paciente-info-jornada h4 {
+            margin: 0 0 5px 0;
+            color: #1e3c72;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .paciente-info-jornada p {
+            margin: 0 0 3px 0;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .status-jornada {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status-jornada.confirmar-consulta { background: #ff9800; }
+        .status-jornada.enviar-orcamento { background: #2196f3; }
+        .status-jornada.aguardar-resposta { background: #9c27b0; }
+        .status-jornada.solicitar-exames { background: #f44336; }
+        .status-jornada.agendar-cirurgia { background: #4caf50; }
+        .status-jornada.preparar-cirurgia { background: #795548; }
+
+        .prazo-info {
+            background: rgba(255,255,255,0.7);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .prazo-info .prazo-label {
+            font-weight: 600;
+            color: #1e3c72;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .prazo-info .prazo-tempo {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .prazo-info .prazo-tempo.urgente {
+            color: #dc3545;
+        }
+
+        .prazo-info .prazo-tempo.atencao {
+            color: #ff9800;
+        }
+
+        .prazo-info .prazo-tempo.normal {
+            color: #28a745;
+        }
+
+        .acoes-jornada {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-acao-jornada {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-acao-jornada.confirmar {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-acao-jornada.enviar {
+            background: #2196f3;
+            color: white;
+        }
+
+        .btn-acao-jornada.anotar {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-acao-jornada.visualizar {
+            background: #6c757d;
+            color: white;
+        }
+
+        .observacoes-jornada {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .observacoes-jornada h6 {
+            margin: 0 0 5px 0;
+            color: #1e3c72;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .observacoes-jornada p {
+            margin: 0;
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Modal de Configuração */
+        .modal-configuracao {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-configuracao.active {
+            display: flex;
+        }
+
+        .modal-content-configuracao {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .config-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .config-tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .config-tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #1e3c72;
+        }
+
+        .config-content {
+            padding: 30px;
+        }
+
+        .config-section {
+            display: none;
+        }
+
+        .config-section.active {
+            display: block;
+        }
+
+        .prazo-configuracao {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .prazo-configuracao h4 {
+            margin: 0 0 15px 0;
+            color: #1e3c72;
+            font-size: 16px;
+        }
+
+        .prazo-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .prazo-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .prazo-input-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e3c72;
+            margin-bottom: 5px;
+        }
+
+        .prazo-input-group input,
+        .prazo-input-group select {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
         /* Pacientes Pendentes */
         .pacientes-pendentes-section {
             background: white;
@@ -751,6 +1045,30 @@
             </div>
         </div>
 
+        <!-- Sistema de Gestão da Jornada do Paciente -->
+        <div class="jornada-paciente-section">
+            <div class="section-header">
+                <h2><i class="fas fa-route"></i> Gestão da Jornada do Paciente</h2>
+                <div class="jornada-controls">
+                    <button class="btn-toggle" onclick="abrirConfiguracaoJornada()">
+                        <i class="fas fa-cog"></i> Configurar Prazos
+                    </button>
+                    <button class="btn-toggle" onclick="abrirPainelNotificacoes()">
+                        <i class="fas fa-bell"></i> Painel Notificações
+                    </button>
+                    <button class="btn-toggle" onclick="executarVerificacaoPrazos()">
+                        <i class="fas fa-clock"></i> Verificar Prazos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards de Pacientes com Pendências -->
+            <div id="cardsJornadaPacientes" class="cards-jornada-grid">
+                <!-- Cards serão carregados dinamicamente -->
+                <div class="loading">Carregando jornadas dos pacientes...</div>
+            </div>
+        </div>
+
         <!-- Usuários Externos Aguardando (Pacientes) -->
         <div class="pacientes-pendentes-section">
             <div class="section-header">
@@ -766,6 +1084,338 @@
 
         <div id="loading" class="loading" style="display: none;">Carregando...</div>
         <div id="message" class="message"></div>
+    </div>
+
+    <!-- Modal de Configuração da Jornada -->
+    <div id="modalConfiguracaoJornada" class="modal-configuracao">
+        <div class="modal-content-configuracao">
+            <div class="config-tabs">
+                <div class="config-tab active" onclick="abrirAbaConfig('prazos')">
+                    <i class="fas fa-clock"></i> Prazos Automáticos
+                </div>
+                <div class="config-tab" onclick="abrirAbaConfig('notificacoes')">
+                    <i class="fas fa-bell"></i> Notificações
+                </div>
+                <div class="config-tab" onclick="abrirAbaConfig('templates')">
+                    <i class="fas fa-envelope"></i> Templates
+                </div>
+                <div class="config-tab" onclick="abrirAbaConfig('automacao')">
+                    <i class="fas fa-robot"></i> Automação
+                </div>
+            </div>
+
+            <div class="config-content">
+                <!-- Configuração de Prazos -->
+                <div id="configPrazos" class="config-section active">
+                    <div class="modal-header-expandido">
+                        <h2><i class="fas fa-clock"></i> Configuração de Prazos Automáticos</h2>
+                        <button class="modal-close" onclick="fecharModalConfiguracao()">&times;</button>
+                    </div>
+
+                    <!-- Confirmar Consulta -->
+                    <div class="prazo-configuracao">
+                        <h4>📅 Confirmação de Consulta</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Prazo para Confirmação:</label>
+                                <input type="number" id="prazoConfirmacao" value="24" min="1" max="72">
+                                <small>horas antes da consulta</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Método de Contato:</label>
+                                <select id="metodoConfirmacao">
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="sms">SMS</option>
+                                    <option value="email">Email</option>
+                                    <option value="ligacao">Ligação</option>
+                                </select>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Tentativas:</label>
+                                <input type="number" id="tentativasConfirmacao" value="3" min="1" max="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Envio de Orçamento -->
+                    <div class="prazo-configuracao">
+                        <h4>💰 Envio de Orçamento</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Enviar após consulta:</label>
+                                <input type="number" id="prazoOrcamento" value="24" min="1" max="48">
+                                <small>horas após a consulta</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Primeiro Lembrete:</label>
+                                <input type="number" id="lembreteOrcamento1" value="12" min="1" max="24">
+                                <small>horas antes do prazo</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Segundo Lembrete:</label>
+                                <input type="number" id="lembreteOrcamento2" value="6" min="1" max="12">
+                                <small>horas antes do prazo</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Lembrete Final:</label>
+                                <input type="number" id="lembreteOrcamento3" value="3" min="1" max="6">
+                                <small>horas antes do prazo</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preparação Cirúrgica -->
+                    <div class="prazo-configuracao">
+                        <h4>🏥 Preparação Cirúrgica</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Solicitar Exames:</label>
+                                <input type="number" id="prazoExames" value="15" min="7" max="30">
+                                <small>dias antes da cirurgia</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Avaliar Exames:</label>
+                                <input type="number" id="prazoAvaliacaoExames" value="7" min="3" max="14">
+                                <small>dias antes da cirurgia</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Solicitar Equipe:</label>
+                                <input type="number" id="prazoEquipe" value="10" min="5" max="20">
+                                <small>dias antes da cirurgia</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Confirmar Pagamento:</label>
+                                <input type="number" id="prazoPagamento" value="5" min="1" max="10">
+                                <small>dias antes da cirurgia</small>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Solicitar Material:</label>
+                                <input type="number" id="prazoMaterial" value="7" min="3" max="15">
+                                <small>dias antes da cirurgia</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn-primary" onclick="salvarConfiguracoesPrazos()">
+                            <i class="fas fa-save"></i> Salvar Configurações
+                        </button>
+                        <button class="btn-secondary" onclick="restaurarPadrao()">
+                            <i class="fas fa-undo"></i> Restaurar Padrão
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Configuração de Notificações -->
+                <div id="configNotificacoes" class="config-section">
+                    <div class="modal-header-expandido">
+                        <h2><i class="fas fa-bell"></i> Configuração de Notificações</h2>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>📱 WhatsApp Business</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Token da API:</label>
+                                <input type="text" id="whatsappToken" placeholder="Seu token do WhatsApp Business">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Número da Clínica:</label>
+                                <input type="text" id="whatsappNumero" placeholder="(11) 99999-9999">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>📧 Email SMTP</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Servidor SMTP:</label>
+                                <input type="text" id="smtpServidor" placeholder="smtp.gmail.com">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Porta:</label>
+                                <input type="number" id="smtpPorta" value="587">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Email da Clínica:</label>
+                                <input type="email" id="emailClinica" placeholder="contato@clinica.com">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Senha do Email:</label>
+                                <input type="password" id="senhaEmail" placeholder="Senha do email">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>📲 SMS</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Provedor SMS:</label>
+                                <select id="provedorSms">
+                                    <option value="twilio">Twilio</option>
+                                    <option value="zenvia">Zenvia</option>
+                                    <option value="smsdev">SMSDev</option>
+                                </select>
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>API Key:</label>
+                                <input type="text" id="smsApiKey" placeholder="Sua API Key">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Templates de Mensagens -->
+                <div id="configTemplates" class="config-section">
+                    <div class="modal-header-expandido">
+                        <h2><i class="fas fa-envelope"></i> Templates de Mensagens</h2>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>Confirmação de Consulta</h4>
+                        <textarea id="templateConfirmacao" rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+Olá {NOME}! 
+
+Sua consulta está agendada para {DATA} às {HORA}.
+
+Por favor, confirme sua presença respondendo este mensagem com SIM.
+
+Dr. Marcio Scartozzoni
+                        </textarea>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>Envio de Orçamento</h4>
+                        <textarea id="templateOrcamento" rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+Olá {NOME}!
+
+Segue o orçamento conforme conversamos na consulta.
+
+{LINK_ORCAMENTO}
+
+Qualquer dúvida, estou à disposição!
+
+Dr. Marcio Scartozzoni
+                        </textarea>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>Lembrete de Exames</h4>
+                        <textarea id="templateExames" rows="4" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px;">
+Olá {NOME}!
+
+Para sua cirurgia em {DATA_CIRURGIA}, precisamos que realize os seguintes exames:
+
+{LISTA_EXAMES}
+
+Prazo limite: {PRAZO}
+
+Dr. Marcio Scartozzoni
+                        </textarea>
+                    </div>
+                </div>
+
+                <!-- Automação -->
+                <div id="configAutomacao" class="config-section">
+                    <div class="modal-header-expandido">
+                        <h2><i class="fas fa-robot"></i> Configuração de Automação</h2>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>🕐 Horários de Verificação</h4>
+                        <div class="prazo-inputs">
+                            <div class="prazo-input-group">
+                                <label>Verificação Manhã:</label>
+                                <input type="time" id="horarioManha" value="08:00">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Verificação Tarde:</label>
+                                <input type="time" id="horarioTarde" value="14:00">
+                            </div>
+                            <div class="prazo-input-group">
+                                <label>Dias da Semana:</label>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <label><input type="checkbox" checked> Segunda</label>
+                                    <label><input type="checkbox" checked> Terça</label>
+                                    <label><input type="checkbox" checked> Quarta</label>
+                                    <label><input type="checkbox" checked> Quinta</label>
+                                    <label><input type="checkbox" checked> Sexta</label>
+                                    <label><input type="checkbox"> Sábado</label>
+                                    <label><input type="checkbox"> Domingo</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prazo-configuracao">
+                        <h4>🎯 Ações Automáticas</h4>
+                        <div style="display: grid; gap: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="autoConfirmacao" checked>
+                                Enviar automaticamente lembrete de confirmação
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="autoOrcamento" checked>
+                                Criar card de orçamento após consulta
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="autoExames" checked>
+                                Criar card de exames após aceite do orçamento
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="autoEquipe" checked>
+                                Notificar equipe médica automaticamente
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px;">
+                                <input type="checkbox" id="autoMaterial" checked>
+                                Criar solicitação de material automaticamente
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Painel de Notificações -->
+    <div id="modalPainelNotificacoes" class="modal-configuracao">
+        <div class="modal-content-configuracao">
+            <div class="modal-header-expandido">
+                <h2><i class="fas fa-bell"></i> Painel de Notificações e Controle</h2>
+                <button class="modal-close" onclick="fecharModalNotificacoes()">&times;</button>
+            </div>
+            
+            <div class="config-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <!-- Notificações Pendentes -->
+                    <div>
+                        <h3><i class="fas fa-clock"></i> Notificações Pendentes</h3>
+                        <div id="notificacoesPendentes" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Lista de notificações -->
+                        </div>
+                    </div>
+
+                    <!-- Log de Envios -->
+                    <div>
+                        <h3><i class="fas fa-history"></i> Log de Envios</h3>
+                        <div id="logEnvios" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Log de envios -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 30px;">
+                    <button class="btn-primary" onclick="enviarTodasNotificacoes()">
+                        <i class="fas fa-paper-plane"></i> Enviar Todas
+                    </button>
+                    <button class="btn-secondary" onclick="limparLog()">
+                        <i class="fas fa-trash"></i> Limpar Log
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Modal de Detalhes do Funcionário -->
@@ -851,6 +1501,107 @@
     <script>
         let funcionarios = [];
         let pacientesPendentes = [];
+        let jornadaPacientes = [];
+        let configuracoesPrazos = {};
+        let notificacoesPendentes = [];
+
+        // Dados de exemplo para jornada de pacientes
+        const jornadaExemplo = [
+            {
+                id: 1,
+                paciente: {
+                    nome: "Maria Silva",
+                    telefone: "(11) 99999-1111",
+                    email: "maria@email.com"
+                },
+                etapaAtual: "confirmar-consulta",
+                consulta: {
+                    data: new Date(Date.now() + 20 * 60 * 60 * 1000), // 20 horas no futuro
+                    confirmada: false
+                },
+                orcamento: null,
+                cirurgia: null,
+                observacoes: "Paciente interessada em rinoplastia. Primeira consulta agendada.",
+                prioridade: "urgente",
+                proximaAcao: "Confirmar consulta até amanhã 14h",
+                prazo: new Date(Date.now() + 20 * 60 * 60 * 1000)
+            },
+            {
+                id: 2,
+                paciente: {
+                    nome: "Ana Costa",
+                    telefone: "(11) 88888-2222",
+                    email: "ana@email.com"
+                },
+                etapaAtual: "enviar-orcamento",
+                consulta: {
+                    data: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 horas atrás
+                    confirmada: true,
+                    realizada: true
+                },
+                orcamento: {
+                    valor: 15000,
+                    enviado: false
+                },
+                cirurgia: null,
+                observacoes: "Consulta realizada. Paciente aprovou procedimento de mamoplastia. Enviar orçamento urgente.",
+                prioridade: "atencao",
+                proximaAcao: "Enviar orçamento nas próximas 22 horas",
+                prazo: new Date(Date.now() + 22 * 60 * 60 * 1000)
+            },
+            {
+                id: 3,
+                paciente: {
+                    nome: "João Santos",
+                    telefone: "(11) 77777-3333",
+                    email: "joao@email.com"
+                },
+                etapaAtual: "solicitar-exames",
+                consulta: {
+                    data: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 dias atrás
+                    confirmada: true,
+                    realizada: true
+                },
+                orcamento: {
+                    valor: 12000,
+                    enviado: true,
+                    aceito: true,
+                    dataAceite: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000)
+                },
+                cirurgia: {
+                    data: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000), // 10 dias no futuro
+                    confirmada: true
+                },
+                observacoes: "Cirurgia agendada para 10 dias. Solicitar exames pré-operatórios urgente.",
+                prioridade: "urgente",
+                proximaAcao: "Solicitar exames pré-operatórios",
+                prazo: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
+            }
+        ];
+
+        // Configurações padrão de prazos
+        const configuracoesPadrao = {
+            confirmacao: {
+                prazo: 24, // horas
+                metodo: "whatsapp",
+                tentativas: 3
+            },
+            orcamento: {
+                prazo: 24, // horas após consulta
+                lembretes: [12, 6, 3] // horas antes do prazo
+            },
+            cirurgia: {
+                exames: 15, // dias antes
+                avaliacaoExames: 7, // dias antes
+                equipe: 10, // dias antes
+                pagamento: 5, // dias antes
+                material: 7 // dias antes
+            },
+            horarios: {
+                manha: "08:00",
+                tarde: "14:00"
+            }
+        };
 
         // Dados de exemplo
         const funcionariosExemplo = [
@@ -937,6 +1688,9 @@
             // Carregar dados
             carregarFuncionarios();
             carregarPacientesPendentes();
+            carregarJornadaPacientes();
+            carregarConfiguracoesPrazos();
+            iniciarVerificacaoAutomatica();
 
             // Definir data mínima para admissão
             document.getElementById('dataAdmissao').value = new Date().toISOString().split('T')[0];
@@ -1098,6 +1852,575 @@ O funcionário receberá as credenciais por email e poderá alterar a senha no p
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ============ FUNÇÕES DA JORNADA DO PACIENTE ============
+
+        // Carregar jornada dos pacientes
+        function carregarJornadaPacientes() {
+            const grid = document.getElementById('cardsJornadaPacientes');
+            
+            if (jornadaPacientes.length === 0) {
+                jornadaPacientes = [...jornadaExemplo];
+            }
+            
+            grid.innerHTML = jornadaPacientes.map(jornada => criarCardJornada(jornada)).join('');
+        }
+
+        // Criar card de jornada
+        function criarCardJornada(jornada) {
+            const tempoRestante = calcularTempoRestante(jornada.prazo);
+            const classPrioridade = jornada.prioridade;
+            const statusTexto = getStatusTexto(jornada.etapaAtual);
+            
+            return `
+                <div class="card-jornada-paciente ${classPrioridade}" data-jornada-id="${jornada.id}">
+                    <div class="card-header-jornada">
+                        <div class="paciente-info-jornada">
+                            <h4>${jornada.paciente.nome}</h4>
+                            <p><i class="fas fa-phone"></i> ${jornada.paciente.telefone}</p>
+                            <p><i class="fas fa-envelope"></i> ${jornada.paciente.email}</p>
+                        </div>
+                        <div class="status-jornada ${jornada.etapaAtual}">
+                            ${statusTexto}
+                        </div>
+                    </div>
+
+                    <div class="prazo-info">
+                        <div class="prazo-label">Próxima Ação:</div>
+                        <div class="prazo-tempo ${classPrioridade}">${jornada.proximaAcao}</div>
+                        <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                            <i class="fas fa-clock"></i> ${tempoRestante}
+                        </div>
+                    </div>
+
+                    ${jornada.observacoes ? `
+                        <div class="observacoes-jornada">
+                            <h6>Observações Importantes:</h6>
+                            <p>${jornada.observacoes}</p>
+                        </div>
+                    ` : ''}
+
+                    <div class="acoes-jornada">
+                        ${getAcoesJornada(jornada)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Calcular tempo restante
+        function calcularTempoRestante(prazo) {
+            const agora = new Date();
+            const diferenca = prazo - agora;
+            
+            if (diferenca <= 0) {
+                return "VENCIDO!";
+            }
+            
+            const horas = Math.floor(diferenca / (1000 * 60 * 60));
+            const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (horas > 24) {
+                const dias = Math.floor(horas / 24);
+                return `${dias}d ${horas % 24}h restantes`;
+            } else if (horas > 0) {
+                return `${horas}h ${minutos}m restantes`;
+            } else {
+                return `${minutos}m restantes`;
+            }
+        }
+
+        // Obter texto do status
+        function getStatusTexto(etapa) {
+            const textos = {
+                'confirmar-consulta': 'Confirmar Consulta',
+                'enviar-orcamento': 'Enviar Orçamento',
+                'aguardar-resposta': 'Aguardar Resposta',
+                'solicitar-exames': 'Solicitar Exames',
+                'agendar-cirurgia': 'Agendar Cirurgia',
+                'preparar-cirurgia': 'Preparar Cirurgia'
+            };
+            return textos[etapa] || etapa;
+        }
+
+        // Obter ações da jornada
+        function getAcoesJornada(jornada) {
+            switch (jornada.etapaAtual) {
+                case 'confirmar-consulta':
+                    return `
+                        <button class="btn-acao-jornada confirmar" onclick="confirmarConsulta(${jornada.id})">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                        <button class="btn-acao-jornada anotar" onclick="adicionarObservacao(${jornada.id})">
+                            <i class="fas fa-edit"></i> Anotar
+                        </button>
+                        <button class="btn-acao-jornada visualizar" onclick="visualizarJornada(${jornada.id})">
+                            <i class="fas fa-eye"></i> Ver Detalhes
+                        </button>
+                    `;
+                case 'enviar-orcamento':
+                    return `
+                        <button class="btn-acao-jornada enviar" onclick="enviarOrcamento(${jornada.id})">
+                            <i class="fas fa-paper-plane"></i> Enviar
+                        </button>
+                        <button class="btn-acao-jornada anotar" onclick="adicionarObservacao(${jornada.id})">
+                            <i class="fas fa-edit"></i> Anotar
+                        </button>
+                        <button class="btn-acao-jornada visualizar" onclick="visualizarJornada(${jornada.id})">
+                            <i class="fas fa-eye"></i> Ver Detalhes
+                        </button>
+                    `;
+                case 'solicitar-exames':
+                    return `
+                        <button class="btn-acao-jornada enviar" onclick="solicitarExames(${jornada.id})">
+                            <i class="fas fa-vial"></i> Solicitar
+                        </button>
+                        <button class="btn-acao-jornada anotar" onclick="adicionarObservacao(${jornada.id})">
+                            <i class="fas fa-edit"></i> Anotar
+                        </button>
+                        <button class="btn-acao-jornada visualizar" onclick="visualizarJornada(${jornada.id})">
+                            <i class="fas fa-eye"></i> Ver Detalhes
+                        </button>
+                    `;
+                default:
+                    return `
+                        <button class="btn-acao-jornada anotar" onclick="adicionarObservacao(${jornada.id})">
+                            <i class="fas fa-edit"></i> Anotar
+                        </button>
+                        <button class="btn-acao-jornada visualizar" onclick="visualizarJornada(${jornada.id})">
+                            <i class="fas fa-eye"></i> Ver Detalhes
+                        </button>
+                    `;
+            }
+        }
+
+        // ============ AÇÕES DA JORNADA ============
+
+        function confirmarConsulta(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (!jornada) return;
+
+            if (confirm(`Confirmar consulta de ${jornada.paciente.nome}?`)) {
+                jornada.consulta.confirmada = true;
+                jornada.etapaAtual = 'aguardar-consulta';
+                jornada.proximaAcao = `Consulta agendada para ${jornada.consulta.data.toLocaleDateString('pt-BR')}`;
+                jornada.prioridade = 'normal';
+                
+                // Programar próxima etapa (envio de orçamento após consulta)
+                const prazoOrcamento = new Date(jornada.consulta.data.getTime() + 24 * 60 * 60 * 1000);
+                programarEtapa(id, 'enviar-orcamento', prazoOrcamento);
+                
+                salvarJornadaPacientes();
+                carregarJornadaPacientes();
+                
+                alert(`✅ Consulta confirmada!\n\nPróxima ação: Enviar orçamento após a consulta.`);
+            }
+        }
+
+        function enviarOrcamento(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (!jornada) return;
+
+            const valor = prompt(`Valor do orçamento para ${jornada.paciente.nome}:`, '15000');
+            if (!valor) return;
+
+            jornada.orcamento = {
+                valor: parseFloat(valor),
+                enviado: true,
+                dataEnvio: new Date()
+            };
+            
+            jornada.etapaAtual = 'aguardar-resposta';
+            jornada.proximaAcao = 'Aguardando resposta do orçamento';
+            jornada.prioridade = 'atencao';
+            jornada.prazo = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias para resposta
+            
+            // Enviar por WhatsApp/Email
+            enviarNotificacao(jornada.paciente, 'orcamento', {
+                valor: valor,
+                link: `https://clinica.com/orcamento/${id}`
+            });
+            
+            salvarJornadaPacientes();
+            carregarJornadaPacientes();
+            
+            alert(`✅ Orçamento de R$ ${valor} enviado para ${jornada.paciente.nome}!`);
+        }
+
+        function solicitarExames(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (!jornada) return;
+
+            const exames = prompt(
+                `Exames para ${jornada.paciente.nome}:`,
+                'Hemograma completo\nCoagulograma\nGlicemia\nECG'
+            );
+            
+            if (!exames) return;
+
+            jornada.exames = {
+                lista: exames.split('\n'),
+                solicitados: true,
+                dataSolicitacao: new Date()
+            };
+            
+            jornada.etapaAtual = 'aguardar-exames';
+            jornada.proximaAcao = 'Aguardando resultados dos exames';
+            jornada.prioridade = 'atencao';
+            
+            // Calcular prazo para avaliação dos exames
+            const prazoAvaliacao = new Date(jornada.cirurgia.data.getTime() - 7 * 24 * 60 * 60 * 1000);
+            jornada.prazo = prazoAvaliacao;
+            
+            // Enviar notificação
+            enviarNotificacao(jornada.paciente, 'exames', {
+                lista: exames,
+                prazo: prazoAvaliacao.toLocaleDateString('pt-BR')
+            });
+            
+            salvarJornadaPacientes();
+            carregarJornadaPacientes();
+            
+            alert(`✅ Solicitação de exames enviada para ${jornada.paciente.nome}!`);
+        }
+
+        function adicionarObservacao(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (!jornada) return;
+
+            const observacao = prompt(
+                `Adicionar observação para ${jornada.paciente.nome}:`,
+                jornada.observacoes || ''
+            );
+            
+            if (observacao !== null) {
+                const agora = new Date().toLocaleString('pt-BR');
+                jornada.observacoes = observacao + `\n\n[${agora}] Nova observação adicionada`;
+                
+                salvarJornadaPacientes();
+                carregarJornadaPacientes();
+                
+                alert('✅ Observação adicionada com sucesso!');
+            }
+        }
+
+        function visualizarJornada(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (!jornada) return;
+
+            alert(`📋 Detalhes da Jornada - ${jornada.paciente.nome}
+
+🏥 Consulta:
+   Data: ${jornada.consulta.data.toLocaleString('pt-BR')}
+   Confirmada: ${jornada.consulta.confirmada ? 'Sim' : 'Não'}
+   Realizada: ${jornada.consulta.realizada ? 'Sim' : 'Não'}
+
+💰 Orçamento:
+   ${jornada.orcamento ? 
+     `Valor: R$ ${jornada.orcamento.valor}\n   Enviado: ${jornada.orcamento.enviado ? 'Sim' : 'Não'}\n   Aceito: ${jornada.orcamento.aceito ? 'Sim' : 'Não'}` : 
+     'Não enviado'}
+
+🏥 Cirurgia:
+   ${jornada.cirurgia ? 
+     `Data: ${jornada.cirurgia.data.toLocaleDateString('pt-BR')}\n   Confirmada: ${jornada.cirurgia.confirmada ? 'Sim' : 'Não'}` : 
+     'Não agendada'}
+
+📝 Etapa Atual: ${getStatusTexto(jornada.etapaAtual)}
+⏰ Próxima Ação: ${jornada.proximaAcao}
+🕐 Prazo: ${jornada.prazo.toLocaleString('pt-BR')}
+
+📋 Observações:
+${jornada.observacoes || 'Nenhuma observação'}`);
+        }
+
+        // ============ CONFIGURAÇÕES ============
+
+        function abrirConfiguracaoJornada() {
+            document.getElementById('modalConfiguracaoJornada').classList.add('active');
+            carregarConfiguracoesPrazos();
+        }
+
+        function fecharModalConfiguracao() {
+            document.getElementById('modalConfiguracaoJornada').classList.remove('active');
+        }
+
+        function abrirPainelNotificacoes() {
+            document.getElementById('modalPainelNotificacoes').classList.add('active');
+            carregarNotificacoesPendentes();
+            carregarLogEnvios();
+        }
+
+        function fecharModalNotificacoes() {
+            document.getElementById('modalPainelNotificacoes').classList.remove('active');
+        }
+
+        function abrirAbaConfig(aba) {
+            // Remover active de todas as abas
+            document.querySelectorAll('.config-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.config-section').forEach(section => section.classList.remove('active'));
+            
+            // Ativar aba clicada
+            event.target.classList.add('active');
+            document.getElementById('config' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
+        }
+
+        function carregarConfiguracoesPrazos() {
+            const saved = localStorage.getItem('configuracoesPrazos');
+            configuracoesPrazos = saved ? JSON.parse(saved) : configuracoesPadrao;
+            
+            // Preencher campos
+            document.getElementById('prazoConfirmacao').value = configuracoesPrazos.confirmacao.prazo;
+            document.getElementById('metodoConfirmacao').value = configuracoesPrazos.confirmacao.metodo;
+            document.getElementById('tentativasConfirmacao').value = configuracoesPrazos.confirmacao.tentativas;
+            
+            document.getElementById('prazoOrcamento').value = configuracoesPrazos.orcamento.prazo;
+            document.getElementById('lembreteOrcamento1').value = configuracoesPrazos.orcamento.lembretes[0];
+            document.getElementById('lembreteOrcamento2').value = configuracoesPrazos.orcamento.lembretes[1];
+            document.getElementById('lembreteOrcamento3').value = configuracoesPrazos.orcamento.lembretes[2];
+            
+            document.getElementById('prazoExames').value = configuracoesPrazos.cirurgia.exames;
+            document.getElementById('prazoAvaliacaoExames').value = configuracoesPrazos.cirurgia.avaliacaoExames;
+            document.getElementById('prazoEquipe').value = configuracoesPrazos.cirurgia.equipe;
+            document.getElementById('prazoPagamento').value = configuracoesPrazos.cirurgia.pagamento;
+            document.getElementById('prazoMaterial').value = configuracoesPrazos.cirurgia.material;
+            
+            document.getElementById('horarioManha').value = configuracoesPrazos.horarios.manha;
+            document.getElementById('horarioTarde').value = configuracoesPrazos.horarios.tarde;
+        }
+
+        function salvarConfiguracoesPrazos() {
+            configuracoesPrazos = {
+                confirmacao: {
+                    prazo: parseInt(document.getElementById('prazoConfirmacao').value),
+                    metodo: document.getElementById('metodoConfirmacao').value,
+                    tentativas: parseInt(document.getElementById('tentativasConfirmacao').value)
+                },
+                orcamento: {
+                    prazo: parseInt(document.getElementById('prazoOrcamento').value),
+                    lembretes: [
+                        parseInt(document.getElementById('lembreteOrcamento1').value),
+                        parseInt(document.getElementById('lembreteOrcamento2').value),
+                        parseInt(document.getElementById('lembreteOrcamento3').value)
+                    ]
+                },
+                cirurgia: {
+                    exames: parseInt(document.getElementById('prazoExames').value),
+                    avaliacaoExames: parseInt(document.getElementById('prazoAvaliacaoExames').value),
+                    equipe: parseInt(document.getElementById('prazoEquipe').value),
+                    pagamento: parseInt(document.getElementById('prazoPagamento').value),
+                    material: parseInt(document.getElementById('prazoMaterial').value)
+                },
+                horarios: {
+                    manha: document.getElementById('horarioManha').value,
+                    tarde: document.getElementById('horarioTarde').value
+                }
+            };
+            
+            localStorage.setItem('configuracoesPrazos', JSON.stringify(configuracoesPrazos));
+            alert('✅ Configurações salvas com sucesso!');
+            fecharModalConfiguracao();
+        }
+
+        function restaurarPadrao() {
+            if (confirm('Restaurar configurações padrão?\n\nTodas as configurações personalizadas serão perdidas.')) {
+                configuracoesPrazos = configuracoesPadrao;
+                localStorage.setItem('configuracoesPrazos', JSON.stringify(configuracoesPrazos));
+                carregarConfiguracoesPrazos();
+                alert('✅ Configurações padrão restauradas!');
+            }
+        }
+
+        // ============ VERIFICAÇÃO AUTOMÁTICA ============
+
+        function executarVerificacaoPrazos() {
+            console.log('🕐 Executando verificação de prazos...');
+            
+            let notificacoesGeradas = 0;
+            const agora = new Date();
+            
+            jornadaPacientes.forEach(jornada => {
+                const tempoRestante = jornada.prazo - agora;
+                const horasRestantes = tempoRestante / (1000 * 60 * 60);
+                
+                // Verificar se precisa gerar notificação
+                if (horasRestantes <= 24 && horasRestantes > 0) {
+                    // Gerar notificação de atenção
+                    gerarNotificacao(jornada, 'atencao');
+                    notificacoesGeradas++;
+                } else if (horasRestantes <= 0) {
+                    // Gerar notificação urgente
+                    gerarNotificacao(jornada, 'urgente');
+                    jornada.prioridade = 'urgente';
+                    notificacoesGeradas++;
+                }
+            });
+            
+            if (notificacoesGeradas > 0) {
+                salvarJornadaPacientes();
+                carregarJornadaPacientes();
+                alert(`⚠️ ${notificacoesGeradas} notificação(ões) gerada(s)!\n\nVerifique o painel de notificações.`);
+            } else {
+                alert('✅ Nenhuma notificação pendente no momento.');
+            }
+        }
+
+        function iniciarVerificacaoAutomatica() {
+            // Verificar a cada 30 minutos
+            setInterval(() => {
+                executarVerificacaoPrazos();
+            }, 30 * 60 * 1000);
+            
+            console.log('🤖 Verificação automática iniciada (a cada 30 minutos)');
+        }
+
+        function gerarNotificacao(jornada, tipo) {
+            const notificacao = {
+                id: Date.now(),
+                pacienteId: jornada.id,
+                pacienteNome: jornada.paciente.nome,
+                tipo: tipo,
+                etapa: jornada.etapaAtual,
+                mensagem: `${jornada.proximaAcao} - ${jornada.paciente.nome}`,
+                timestamp: new Date(),
+                enviada: false
+            };
+            
+            notificacoesPendentes.push(notificacao);
+            localStorage.setItem('notificacoesPendentes', JSON.stringify(notificacoesPendentes));
+        }
+
+        function carregarNotificacoesPendentes() {
+            const container = document.getElementById('notificacoesPendentes');
+            const saved = localStorage.getItem('notificacoesPendentes');
+            notificacoesPendentes = saved ? JSON.parse(saved) : [];
+            
+            if (notificacoesPendentes.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Nenhuma notificação pendente</div>';
+                return;
+            }
+            
+            container.innerHTML = notificacoesPendentes.map(notif => `
+                <div class="notification ${notif.tipo}" style="margin-bottom: 10px;">
+                    <div class="notification-text">
+                        <strong>${notif.pacienteNome}</strong><br>
+                        ${notif.mensagem}<br>
+                        <small>${new Date(notif.timestamp).toLocaleString('pt-BR')}</small>
+                    </div>
+                    <button onclick="enviarNotificacaoManual(${notif.id})" class="btn-acao-jornada enviar">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function carregarLogEnvios() {
+            const container = document.getElementById('logEnvios');
+            const saved = localStorage.getItem('logEnvios');
+            const log = saved ? JSON.parse(saved) : [];
+            
+            if (log.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">Nenhum envio registrado</div>';
+                return;
+            }
+            
+            container.innerHTML = log.slice(-20).reverse().map(item => `
+                <div style="padding: 10px; border-bottom: 1px solid #eee; font-size: 12px;">
+                    <strong>${item.paciente}</strong> - ${item.tipo}<br>
+                    <span style="color: #666;">${new Date(item.timestamp).toLocaleString('pt-BR')}</span><br>
+                    <span style="color: ${item.sucesso ? '#28a745' : '#dc3545'};">
+                        ${item.sucesso ? '✅ Enviado' : '❌ Falha'}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function enviarNotificacaoManual(id) {
+            const notificacao = notificacoesPendentes.find(n => n.id === id);
+            if (!notificacao) return;
+            
+            // Simular envio
+            const sucesso = confirm(`Enviar notificação para ${notificacao.pacienteNome}?\n\n${notificacao.mensagem}`);
+            
+            if (sucesso) {
+                // Registrar no log
+                registrarEnvio(notificacao.pacienteNome, notificacao.tipo, true);
+                
+                // Remover da lista de pendentes
+                notificacoesPendentes = notificacoesPendentes.filter(n => n.id !== id);
+                localStorage.setItem('notificacoesPendentes', JSON.stringify(notificacoesPendentes));
+                
+                carregarNotificacoesPendentes();
+                carregarLogEnvios();
+                
+                alert('✅ Notificação enviada com sucesso!');
+            }
+        }
+
+        function enviarTodasNotificacoes() {
+            if (notificacoesPendentes.length === 0) {
+                alert('Nenhuma notificação pendente para enviar.');
+                return;
+            }
+            
+            if (confirm(`Enviar todas as ${notificacoesPendentes.length} notificações pendentes?`)) {
+                notificacoesPendentes.forEach(notif => {
+                    registrarEnvio(notif.pacienteNome, notif.tipo, true);
+                });
+                
+                notificacoesPendentes = [];
+                localStorage.setItem('notificacoesPendentes', JSON.stringify(notificacoesPendentes));
+                
+                carregarNotificacoesPendentes();
+                carregarLogEnvios();
+                
+                alert('✅ Todas as notificações foram enviadas!');
+            }
+        }
+
+        function registrarEnvio(paciente, tipo, sucesso) {
+            const saved = localStorage.getItem('logEnvios');
+            const log = saved ? JSON.parse(saved) : [];
+            
+            log.push({
+                paciente: paciente,
+                tipo: tipo,
+                sucesso: sucesso,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Manter apenas os últimos 100 registros
+            if (log.length > 100) {
+                log.splice(0, log.length - 100);
+            }
+            
+            localStorage.setItem('logEnvios', JSON.stringify(log));
+        }
+
+        function limparLog() {
+            if (confirm('Limpar todo o log de envios?')) {
+                localStorage.removeItem('logEnvios');
+                carregarLogEnvios();
+                alert('✅ Log limpo com sucesso!');
+            }
+        }
+
+        // ============ FUNÇÕES AUXILIARES ============
+
+        function programarEtapa(jornadaId, etapa, prazo) {
+            // Esta função seria usada para programar etapas futuras
+            console.log(`Programando etapa "${etapa}" para jornada ${jornadaId} em ${prazo}`);
+        }
+
+        function enviarNotificacao(paciente, tipo, dados = {}) {
+            // Esta função integraria com APIs de WhatsApp, SMS, Email
+            console.log(`Enviando notificação ${tipo} para ${paciente.nome}`, dados);
+            
+            // Registrar no log
+            registrarEnvio(paciente.nome, tipo, true);
+        }
+
+        function salvarJornadaPacientes() {
+            localStorage.setItem('jornadaPacientes', JSON.stringify(jornadaPacientes));
         }
 
         // Carregar pacientes pendentes
