@@ -1101,6 +1101,9 @@
             // Inicializar caderno digital
             cadernoDigital.inicializar();
             
+            // Verificar se existe paciente vindo da Gestão
+            const pacienteDaGestao = localStorage.getItem('pacienteCaderno');
+            
             // Simular carregamento de pacientes
             const pacientes = [
                 'João Silva',
@@ -1110,6 +1113,25 @@
             ];
 
             const select = document.getElementById('pacienteSelect');
+            
+            // Se veio da gestão, adicionar o paciente no topo da lista
+            if (pacienteDaGestao) {
+                const dadosPaciente = JSON.parse(pacienteDaGestao);
+                
+                // Criar opção para o paciente da gestão
+                const optionGestao = document.createElement('option');
+                optionGestao.value = dadosPaciente.nome;
+                optionGestao.textContent = `${dadosPaciente.nome} (ID: ${dadosPaciente.id})`;
+                optionGestao.selected = true;
+                select.appendChild(optionGestao);
+                
+                // Mostrar informações do paciente
+                mostrarInfoPacienteGestao(dadosPaciente);
+                
+                // Limpar dados do localStorage após uso
+                localStorage.removeItem('pacienteCaderno');
+            }
+
             pacientes.forEach(paciente => {
                 const option = document.createElement('option');
                 option.value = paciente;
@@ -1117,6 +1139,37 @@
                 select.appendChild(option);
             });
         };
+        
+        // Função para mostrar informações do paciente da gestão
+        function mostrarInfoPacienteGestao(dadosPaciente) {
+            // Adicionar uma notificação visual no topo do caderno
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'paciente-gestao-info';
+            infoDiv.innerHTML = `
+                <div style="background: #e8f5e8; border: 2px solid #27ae60; border-radius: 8px; padding: 15px; margin: 10px 0; color: #2c3e50;">
+                    <h4 style="margin: 0 0 10px 0; color: #27ae60;">
+                        <i class="fas fa-user-check"></i> Paciente da Gestão
+                    </h4>
+                    <p style="margin: 5px 0;"><strong>Nome:</strong> ${dadosPaciente.nome}</p>
+                    <p style="margin: 5px 0;"><strong>ID:</strong> ${dadosPaciente.id}</p>
+                    <p style="margin: 5px 0;"><strong>Status Geral:</strong> ${dadosPaciente.statusGeral}</p>
+                    ${dadosPaciente.dataUltimaConsulta ? `<p style="margin: 5px 0;"><strong>Última Consulta:</strong> ${formatarDataBrasil(dadosPaciente.dataUltimaConsulta)}</p>` : ''}
+                    ${dadosPaciente.observacoes ? `<p style="margin: 5px 0;"><strong>Observações:</strong> ${dadosPaciente.observacoes}</p>` : ''}
+                </div>
+            `;
+            
+            // Inserir após o header
+            const container = document.querySelector('.container');
+            const header = container.querySelector('.header');
+            container.insertBefore(infoDiv, header.nextSibling);
+        }
+        
+        // Função auxiliar para formatar data
+        function formatarDataBrasil(dataISO) {
+            if (!dataISO) return '';
+            const data = new Date(dataISO);
+            return data.toLocaleDateString('pt-BR');
+        }
     </script>
 </body>
 </html>

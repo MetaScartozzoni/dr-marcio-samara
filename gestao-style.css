@@ -243,12 +243,16 @@ tr:hover {
     gap: 5px;
 }
 
-.btn-edit, .btn-view {
+.btn-edit, .btn-view, .btn-caderno {
     padding: 5px 10px;
     border: none;
     border-radius: 3px;
     cursor: pointer;
     font-size: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .btn-edit {
@@ -259,6 +263,17 @@ tr:hover {
 .btn-view {
     background: #95a5a6;
     color: white;
+}
+
+.btn-caderno {
+    background: #27ae60;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-caderno:hover {
+    background: #229954;
+    transform: translateY(-1px);
 }
 
 .loading {

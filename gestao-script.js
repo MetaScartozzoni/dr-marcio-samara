@@ -83,6 +83,9 @@ function atualizarTabela() {
             <td>
                 <div class="action-buttons">
                     <button class="btn-edit" onclick="editarPaciente('${item.id_paciente}')">Editar</button>
+                    <button class="btn-caderno" onclick="abrirCaderno('${item.id_paciente}', '${item.nome_paciente}')">
+                        <i class="fas fa-book-medical"></i> Caderno
+                    </button>
                     ${item.orcamento_pdf_link ? `<a href="${item.orcamento_pdf_link}"  class="btn-view">PDF</a>` : ''}
                     ${item.orcamento_link_aceite ? `<a href="${item.orcamento_link_aceite}"  class="btn-view">Aceite</a>` : ''}
                 </div>
@@ -191,6 +194,29 @@ function editarPaciente(idPaciente) {
     
     // Mostrar modal
     document.getElementById('modalEdicao').style.display = 'flex';
+}
+
+function abrirCaderno(idPaciente, nomePaciente) {
+    // Armazenar dados do paciente no localStorage para o Caderno Digital
+    const dadosPaciente = dadosOriginais.find(p => p.id_paciente === idPaciente);
+    
+    if (dadosPaciente) {
+        const pacienteParaCaderno = {
+            id: dadosPaciente.id_paciente,
+            nome: dadosPaciente.nome_paciente,
+            dataUltimaConsulta: dadosPaciente.agendamento_data,
+            statusGeral: dadosPaciente.status_geral,
+            observacoes: dadosPaciente.pagamento_observacao || '',
+            origem: 'gestao' // Identificar que veio da gestão
+        };
+        
+        localStorage.setItem('pacienteCaderno', JSON.stringify(pacienteParaCaderno));
+        
+        // Abrir Caderno Digital em nova aba
+        window.open('/caderno-digital.html', '_blank');
+    } else {
+        alert('Erro: Dados do paciente não encontrados');
+    }
 }
 
 async function salvarEdicao() {
