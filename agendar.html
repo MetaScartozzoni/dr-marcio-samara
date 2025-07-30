@@ -5,7 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar Consulta - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        .nav-link {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 2px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-link i {
+            margin-right: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-link {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+
         .calendar-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -254,11 +286,24 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
-            <p>Agendamento de Consultas</p>
-            <div class="user-info">
-                <span id="userName">Carregando...</span>
-                <a href="/dashboard.html" class="btn-secondary">← Voltar ao Dashboard</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div>
+                    <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
+                    <p>Agendamento de Consultas</p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="user-info" style="margin-bottom: 10px;">
+                        <span id="userName" style="color: #FFD700; font-weight: bold;">Carregando...</span>
+                    </div>
+                    <div id="nav-links" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+                        <!-- Links serão carregados dinamicamente -->
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <button onclick="logout()" class="btn-secondary" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </button>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -376,24 +421,55 @@
         // Carregar informações do usuário
         async function loadUserInfo() {
             try {
-                const token = localStorage.getItem('token');
-                if (!token) {
+                // Usar o mesmo sistema de autenticação do dashboard
+                const storedUserInfo = localStorage.getItem('userInfo');
+                if (!storedUserInfo) {
                     window.location.href = '/login.html';
                     return;
                 }
 
-                const response = await fetch('/api/user-info', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    userInfo = await response.json();
-                    document.getElementById('userName').textContent = userInfo.nome;
-                } else {
-                    throw new Error('Não autorizado');
+                userInfo = JSON.parse(storedUserInfo);
+                
+                // Atualizar interface com informações do usuário
+                document.getElementById('userName').textContent = userInfo.nome || 'Usuário';
+                
+                // Configurar navegação baseada no tipo de usuário (igual ao dashboard)
+                const navLinks = document.getElementById('nav-links');
+                if (navLinks) {
+                    if (userInfo.tipo === 'admin') {
+                        navLinks.innerHTML = `
+                            <a href="/dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão</a>
+                            <a href="/admin.html" class="nav-link"><i class="fas fa-users-cog"></i> Usuários</a>
+                            <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                        `;
+                    } else if (userInfo.tipo === 'funcionario') {
+                        navLinks.innerHTML = `
+                            <a href="/dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão</a>
+                            <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                        `;
+                    } else {
+                        navLinks.innerHTML = `
+                            <a href="/dashboard.html" class="nav-link"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                            <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                        `;
+                    }
                 }
+                
+                // Verificar se é funcionário não autorizado
+                if (userInfo.tipo === 'funcionario' && !userInfo.autorizado) {
+                    alert('⏳ Aguardando aprovação do administrador.\n\nSeu acesso ainda está pendente de autorização.');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                console.log('Usuário carregado:', userInfo);
+                
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error);
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('authToken');
                 window.location.href = '/login.html';
             }
         }
@@ -703,6 +779,16 @@
             setTimeout(() => {
                 messageElement.style.display = 'none';
             }, 5000);
+        }
+
+        // Função de logout (integrada com o dashboard)
+        function logout() {
+            if (confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('userInfo');
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('token');
+                window.location.href = '/login.html';
+            }
         }
 
         // Formatação de telefone
