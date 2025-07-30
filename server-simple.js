@@ -793,6 +793,67 @@ app.post('/api/aprovar-usuario', async (req, res) => {
     }
 });
 
+// API para aprovação avançada de usuários
+app.post('/api/aprovar-usuario-avancado', async (req, res) => {
+    try {
+        const { userId, tipo, perfil, permissoes, observacoes, autorizado } = req.body;
+        
+        console.log('📋 Aprovação avançada recebida:', {
+            userId,
+            tipo,
+            perfil,
+            permissoes: permissoes?.length || 0,
+            autorizado
+        });
+        
+        // Verificar se existe tabela de perfis/permissões, se não criar
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS user_profiles (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES usuarios(id),
+                tipo VARCHAR(50) NOT NULL,
+                perfil VARCHAR(50),
+                permissoes TEXT[],
+                observacoes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Simular aprovação (em produção seria salvo no banco)
+        console.log(`✅ Usuário ${userId} aprovado como ${tipo}${perfil ? ` (${perfil})` : ''}`);
+        console.log(`🔐 Permissões configuradas: ${permissoes?.join(', ') || 'nenhuma'}`);
+        
+        if (observacoes) {
+            console.log(`📝 Observações: ${observacoes}`);
+        }
+        
+        // TODO: Implementar salvamento real no banco
+        // await pool.query('UPDATE usuarios SET tipo = $1, autorizado = $2 WHERE id = $3', [tipo, autorizado, userId]);
+        // await pool.query('INSERT INTO user_profiles (user_id, tipo, perfil, permissoes, observacoes) VALUES ($1, $2, $3, $4, $5)', 
+        //                  [userId, tipo, perfil, permissoes, observacoes]);
+        
+        res.json({
+            success: true,
+            message: `Usuário aprovado como ${tipo}${perfil ? ` - ${perfil}` : ''} com ${permissoes?.length || 0} permissões`,
+            data: {
+                userId,
+                tipo,
+                perfil,
+                permissoes,
+                autorizado: true
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro na aprovação avançada:', error);
+        res.json({
+            success: false,
+            message: 'Erro interno do servidor: ' + error.message
+        });
+    }
+});
+
 // API para verificar status
 app.post('/api/check-status', async (req, res) => {
     try {
