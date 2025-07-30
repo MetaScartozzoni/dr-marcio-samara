@@ -599,13 +599,20 @@
                             localStorage.setItem('userInfo', JSON.stringify(currentUser));
                             
                             alert('✅ Você foi aprovado! O sistema será atualizado automaticamente.');
-                            // Opcional: recarregar a página se necessário
-                            // window.location.reload();
                         }
                     }
                     
-                    // Remover card da lista
-                    document.getElementById(`pending-${userId}`).remove();
+                    // Remover card da lista imediatamente
+                    const cardElement = document.getElementById(`pending-${userId}`);
+                    if (cardElement) {
+                        cardElement.style.transition = 'all 0.3s ease';
+                        cardElement.style.opacity = '0';
+                        cardElement.style.transform = 'translateX(-100%)';
+                        
+                        setTimeout(() => {
+                            cardElement.remove();
+                        }, 300);
+                    }
                     
                     // Mostrar mensagem de sucesso
                     const message = document.getElementById('message');
@@ -618,12 +625,12 @@
                         </div>
                     `;
                     
-                    // Recarregar ambas as listas imediatamente
-                    await carregarUsuariosPendentes();
-                    await carregarUsuarios();
+                    // Recarregar apenas lista de usuários (não pendentes para evitar loop)
+                    setTimeout(async () => {
+                        await carregarUsuarios();
+                    }, 500);
                     
-                    // Feedback adicional
-                    console.log(`✅ Usuário ${nome} aprovado como ${tipo} e listas atualizadas`);
+                    console.log(`✅ Usuário ${nome} aprovado como ${tipo}`);
                     
                 } else {
                     alert('❌ Erro ao aprovar usuário: ' + result.message);
@@ -705,8 +712,17 @@
                         }
                     }
                     
-                    // Remover da lista de pendentes
-                    document.getElementById(`pending-${userId}`)?.remove();
+                    // Remover da lista de pendentes com animação
+                    const cardElement = document.getElementById(`pending-${userId}`);
+                    if (cardElement) {
+                        cardElement.style.transition = 'all 0.3s ease';
+                        cardElement.style.opacity = '0';
+                        cardElement.style.transform = 'translateX(-100%)';
+                        
+                        setTimeout(() => {
+                            cardElement.remove();
+                        }, 300);
+                    }
                     
                     // Mostrar feedback
                     const message = document.getElementById('message');
@@ -719,12 +735,12 @@
                         </div>
                     `;
                     
-                    // Recarregar listas imediatamente
-                    await carregarUsuariosPendentes();
-                    await carregarUsuarios();
+                    // Recarregar apenas lista de usuários (não pendentes)
+                    setTimeout(async () => {
+                        await carregarUsuarios();
+                    }, 500);
                     
-                    // Feedback adicional
-                    console.log(`✅ Usuário ${nome} aprovado e listas atualizadas`);
+                    console.log(`✅ Usuário ${nome} aprovado rapidamente`);
                     
                 } else {
                     alert('❌ Erro na ativação rápida: ' + authResult.erro);
@@ -763,6 +779,7 @@
                                         <th style="text-align: center;">🏷️ Tipo</th>
                                         <th style="text-align: center;">✅ Status</th>
                                         <th style="text-align: center;">📅 Cadastro</th>
+                                        <th style="text-align: center;">⚡ Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -793,6 +810,20 @@
                                 </td>
                                 <td style="text-align: center; color: #666;">
                                     ${dataCadastro}
+                                </td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                        <button onclick="arquivarUsuario('${user.email}', '${user.nome}')" 
+                                            class="btn-action" style="background: #ffc107; color: #000; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;" 
+                                            title="Arquivar usuário">
+                                            📦 Arquivar
+                                        </button>
+                                        <button onclick="deletarUsuario('${user.email}', '${user.nome}')" 
+                                            class="btn-action" style="background: #dc3545; color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;" 
+                                            title="Deletar usuário permanentemente">
+                                            🗑️ Deletar
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -864,13 +895,12 @@
         }
         
         function iniciarAutoRefresh() {
-            // Atualizar dados a cada 30 segundos
+            // Atualizar dados a cada 60 segundos (reduzido para evitar loop)
             autoRefreshInterval = setInterval(async () => {
-                console.log('🔄 Auto-refresh: Atualizando dados...');
+                console.log('🔄 Auto-refresh: Verificando apenas pendentes...');
                 await carregarUsuariosPendentes();
-                await carregarUsuarios();
                 atualizarTimestamp();
-            }, 30000); // 30 segundos
+            }, 60000); // 60 segundos, só pendentes
         }
         
         function pararAutoRefresh() {
@@ -896,6 +926,105 @@
         
         // Parar auto-refresh quando sair da página
         window.addEventListener('beforeunload', pararAutoRefresh);
+        
+        // Função para arquivar usuário
+        async function arquivarUsuario(email, nome) {
+            if (!confirm(`📦 Arquivar usuário "${nome}"?\n\nO usuário será marcado como arquivado e não poderá mais fazer login.\n\nEssa ação pode ser revertida posteriormente.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/arquivar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        arquivado: true
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.sucesso) {
+                    alert(`✅ Usuário "${nome}" foi arquivado com sucesso!`);
+                    
+                    // Recarregar lista
+                    await carregarUsuarios();
+                    
+                    // Mostrar feedback
+                    const message = document.getElementById('message');
+                    message.innerHTML = `
+                        <div class="success">
+                            📦 Usuário arquivado com sucesso!<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Email:</strong> ${email}
+                        </div>
+                    `;
+                } else {
+                    alert('❌ Erro ao arquivar usuário: ' + result.erro);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao arquivar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
+        
+        // Função para deletar usuário
+        async function deletarUsuario(email, nome) {
+            if (!confirm(`🗑️ DELETAR PERMANENTEMENTE o usuário "${nome}"?\n\n⚠️ ATENÇÃO: Esta ação é IRREVERSÍVEL!\n\n• Todos os dados serão perdidos\n• Não poderá ser recuperado\n• Histórico será apagado\n\nTem certeza absoluta?`)) {
+                return;
+            }
+            
+            // Confirmação dupla para deleção
+            if (!confirm(`🚨 ÚLTIMA CONFIRMAÇÃO!\n\nDeletar permanentemente "${nome}" (${email})?\n\nDigite "DELETAR" na próxima tela para confirmar.`)) {
+                return;
+            }
+            
+            const confirmacao = prompt(`Para confirmar a deleção de "${nome}", digite: DELETAR`);
+            if (confirmacao !== 'DELETAR') {
+                alert('❌ Confirmação incorreta. Deleção cancelada.');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/deletar-usuario', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.sucesso) {
+                    alert(`✅ Usuário "${nome}" foi deletado permanentemente!`);
+                    
+                    // Recarregar listas
+                    await carregarUsuarios();
+                    await carregarUsuariosPendentes();
+                    
+                    // Mostrar feedback
+                    const message = document.getElementById('message');
+                    message.innerHTML = `
+                        <div class="success">
+                            🗑️ Usuário deletado permanentemente!<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Email:</strong> ${email}
+                        </div>
+                    `;
+                } else {
+                    alert('❌ Erro ao deletar usuário: ' + result.erro);
+                }
+            } catch (error) {
+                console.error('❌ Erro ao deletar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
     </script>
 </body>
 </html>
