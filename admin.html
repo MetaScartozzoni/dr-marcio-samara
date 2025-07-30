@@ -499,22 +499,9 @@
                                         </div>
                                         <div class="pending-actions">
                                             <button class="btn-approve" onclick="mostrarFormAprovacao(${user.id})">
-                                                ✅ Aprovar Rápido
+                                                ✅ Aprovar
                                             </button>
                                         </div>
-                                    </div>
-                                    
-                                    <!-- Botões de Ação Rápida -->
-                                    <div style="margin: 15px 0; display: flex; gap: 8px; flex-wrap: wrap;">
-                                        <button class="btn btn-secondary" onclick="copiarEmailParaTipo('${user.email}')" style="font-size: 12px; padding: 6px 12px;">
-                                            📋 Copiar p/ Tipo
-                                        </button>
-                                        <button class="btn btn-secondary" onclick="copiarEmailParaAuth('${user.email}')" style="font-size: 12px; padding: 6px 12px;">
-                                            🔓 Copiar p/ Autorização
-                                        </button>
-                                        <button class="btn btn-secondary" onclick="aprovarRapido('${user.id}', '${user.email}', '${user.nome}')" style="font-size: 12px; padding: 6px 12px; background: #28a745;">
-                                            ⚡ Ativar Rápido
-                                        </button>
                                     </div>
                                     
                                     <div id="approval-form-${user.id}" style="display: none;" class="approval-form">
@@ -569,7 +556,7 @@
         async function aprovarUsuario(userId, nome, email) {
             const tipo = document.getElementById(`tipo-${userId}`).value;
             
-            if (!confirm(`Confirmar aprovação de "${nome}" como ${tipo}?`)) {
+            if (!confirm(`Confirmar aprovação de "${nome}" como ${tipo}?\\n\\n✅ O usuário será automaticamente ATIVADO`)) {
                 return;
             }
             
@@ -581,7 +568,8 @@
                     },
                     body: JSON.stringify({
                         userId: userId,
-                        tipo: tipo
+                        tipo: tipo,
+                        autorizado: true  // Automaticamente ativar
                     })
                 });
                 
@@ -598,7 +586,7 @@
                             currentUser.tipo = tipo;
                             localStorage.setItem('userInfo', JSON.stringify(currentUser));
                             
-                            alert('✅ Você foi aprovado! O sistema será atualizado automaticamente.');
+                            alert('✅ Você foi aprovado e ativado! O sistema será atualizado automaticamente.');
                         }
                     }
                     
@@ -618,10 +606,11 @@
                     const message = document.getElementById('message');
                     message.innerHTML = `
                         <div class="success">
-                            ✅ Usuário aprovado com sucesso!<br>
+                            ✅ Usuário aprovado e ativado com sucesso!<br>
                             <strong>Nome:</strong> ${nome}<br>
                             <strong>Email:</strong> ${email}<br>
-                            <strong>Tipo:</strong> ${tipo}
+                            <strong>Tipo:</strong> ${tipo}<br>
+                            <strong>Status:</strong> ✅ Ativo
                         </div>
                     `;
                     
@@ -630,123 +619,13 @@
                         await carregarUsuarios();
                     }, 500);
                     
-                    console.log(`✅ Usuário ${nome} aprovado como ${tipo}`);
+                    console.log(`✅ Usuário ${nome} aprovado como ${tipo} e ativado`);
                     
                 } else {
                     alert('❌ Erro ao aprovar usuário: ' + result.message);
                 }
             } catch (error) {
                 console.error('❌ Erro ao aprovar usuário:', error);
-                alert('❌ Erro de conexão. Tente novamente.');
-            }
-        }
-        
-        // Função para copiar email para o campo de tipo
-        function copiarEmailParaTipo(email) {
-            document.getElementById('email').value = email;
-            document.getElementById('email').focus();
-            
-            // Mostrar feedback visual
-            const message = document.getElementById('message');
-            message.innerHTML = `
-                <div class="success">
-                    📋 Email copiado para "Atualizar Tipo de Usuário"!<br>
-                    <strong>Email:</strong> ${email}
-                </div>
-            `;
-            
-            // Scroll para a seção
-            document.getElementById('email').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        // Função para copiar email para o campo de autorização
-        function copiarEmailParaAuth(email) {
-            document.getElementById('emailAuth').value = email;
-            document.getElementById('emailAuth').focus();
-            
-            // Mostrar feedback visual
-            const message = document.getElementById('message');
-            message.innerHTML = `
-                <div class="success">
-                    🔓 Email copiado para "Gerenciar Autorização"!<br>
-                    <strong>Email:</strong> ${email}
-                </div>
-            `;
-            
-            // Scroll para a seção
-            document.getElementById('emailAuth').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        // Função para aprovação rápida (autorizar + tornar paciente se não for funcionário)
-        async function aprovarRapido(userId, email, nome) {
-            if (!confirm(`⚡ Ativação Rápida de "${nome}"?\n\nIsso vai:\n✅ Autorizar o usuário\n✅ Manter como paciente (se já for)\n✅ Ativar acesso imediatamente`)) {
-                return;
-            }
-            
-            try {
-                // Primeiro autorizar
-                const authResponse = await fetch('/api/atualizar-autorizacao', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        autorizado: true
-                    })
-                });
-                
-                const authResult = await authResponse.json();
-                
-                if (authResult.sucesso) {
-                    // Verificar se o usuário aprovado está logado no momento
-                    const userInfo = localStorage.getItem('userInfo');
-                    if (userInfo) {
-                        const currentUser = JSON.parse(userInfo);
-                        if (currentUser.email === email) {
-                            // Atualizar localStorage com autorização
-                            currentUser.autorizado = true;
-                            localStorage.setItem('userInfo', JSON.stringify(currentUser));
-                            
-                            alert('✅ Você foi aprovado! O sistema será atualizado automaticamente.');
-                        }
-                    }
-                    
-                    // Remover da lista de pendentes com animação
-                    const cardElement = document.getElementById(`pending-${userId}`);
-                    if (cardElement) {
-                        cardElement.style.transition = 'all 0.3s ease';
-                        cardElement.style.opacity = '0';
-                        cardElement.style.transform = 'translateX(-100%)';
-                        
-                        setTimeout(() => {
-                            cardElement.remove();
-                        }, 300);
-                    }
-                    
-                    // Mostrar feedback
-                    const message = document.getElementById('message');
-                    message.innerHTML = `
-                        <div class="success">
-                            ⚡ Usuário ativado com sucesso!<br>
-                            <strong>Nome:</strong> ${nome}<br>
-                            <strong>Email:</strong> ${email}<br>
-                            <strong>Status:</strong> Autorizado e Ativo
-                        </div>
-                    `;
-                    
-                    // Recarregar apenas lista de usuários (não pendentes)
-                    setTimeout(async () => {
-                        await carregarUsuarios();
-                    }, 500);
-                    
-                    console.log(`✅ Usuário ${nome} aprovado rapidamente`);
-                    
-                } else {
-                    alert('❌ Erro na ativação rápida: ' + authResult.erro);
-                }
-            } catch (error) {
-                console.error('❌ Erro na ativação rápida:', error);
                 alert('❌ Erro de conexão. Tente novamente.');
             }
         }
