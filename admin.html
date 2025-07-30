@@ -895,12 +895,12 @@
         }
         
         function iniciarAutoRefresh() {
-            // Atualizar dados a cada 60 segundos (reduzido para evitar loop)
+            // Verificar dados apenas a cada 2 minutos (mais conservador)
             autoRefreshInterval = setInterval(async () => {
-                console.log('🔄 Auto-refresh: Verificando apenas pendentes...');
+                console.log('🔄 Auto-refresh: Verificação periódica de pendentes...');
                 await carregarUsuariosPendentes();
                 atualizarTimestamp();
-            }, 60000); // 60 segundos, só pendentes
+            }, 120000); // 2 minutos
         }
         
         function pararAutoRefresh() {

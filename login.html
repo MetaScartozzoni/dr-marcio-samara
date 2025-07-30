@@ -99,15 +99,15 @@
                         loginTime: new Date().toISOString()
                     }));
                     
-                    // Determinar redirecionamento
-                    const redirectUrl = data.user.tipo === 'admin' ? '/admin.html' : '/dashboard.html';
-                    console.log('🔄 Redirecionando para:', redirectUrl);
+                    // Todos os usuários vão para o Dashboard central por segurança
+                    const redirectUrl = '/dashboard.html';
+                    console.log('🔄 Redirecionando para Dashboard central:', redirectUrl);
                     
                     // Mostrar onde vai redirecionar
                     message.innerHTML = `
                         <div class="success">
                             ✅ Login realizado com sucesso!<br>
-                            🔄 Redirecionando para ${data.user.tipo === 'admin' ? 'Painel Administrativo' : 'Dashboard'}...
+                            🔄 Redirecionando para Dashboard Central...
                         </div>
                     `;
                     

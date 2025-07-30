@@ -133,6 +133,41 @@
             display: none;
         }
         
+        /* Notificação visual para novos cadastros */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+            z-index: 10;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+        
+        .dashboard-card {
+            position: relative; /* Para posicionar a bolinha de notificação */
+        }
+        
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -424,12 +459,16 @@
                     </div>
                 </div>
                 
-                <div class="dashboard-card">
+                <div class="dashboard-card" id="gestao-usuarios-card">
+                    <div id="notification-badge" class="notification-badge" style="display: none;">0</div>
                     <h3><span class="icon"><i class="fas fa-hospital"></i></span>Gestão Clínica</h3>
                     <p>Administração geral do consultório e gestão de pacientes.</p>
                     <div class="quick-actions">
                         <a href="/gestao" class="action-btn"><i class="fas fa-tasks"></i> Gestão de Pacientes</a>
-                        <a href="/admin" class="action-btn"><i class="fas fa-users-cog"></i> Gerenciar Usuários</a>
+                        <a href="/admin.html" class="action-btn" id="gerenciar-usuarios-btn">
+                            <i class="fas fa-users-cog"></i> Gerenciar Usuários
+                            <span id="pending-count" style="display: none; background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-left: 5px;">0</span>
+                        </a>
                         <a href="#" class="action-btn"><i class="fas fa-chart-pie"></i> Relatórios</a>
                     </div>
                 </div>
@@ -852,7 +891,53 @@ Em breve você poderá atualizar:
         }
         
         // Executar verificação quando a página carregar
-        window.onload = checkAuth;
+        window.onload = function() {
+            checkAuth();
+            // Verificar novos cadastros se for admin
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                const user = JSON.parse(userInfo);
+                if (user.tipo === 'admin') {
+                    verificarNovosCadastros();
+                    // Verificar a cada 30 segundos
+                    setInterval(verificarNovosCadastros, 30000);
+                }
+            }
+        };
+        
+        // Função para verificar novos cadastros pendentes
+        async function verificarNovosCadastros() {
+            try {
+                const response = await fetch('/api/usuarios-pendentes');
+                const result = await response.json();
+                
+                if (result.success && result.usuarios) {
+                    const total = result.usuarios.length;
+                    
+                    // Atualizar bolinha de notificação
+                    const badge = document.getElementById('notification-badge');
+                    const countSpan = document.getElementById('pending-count');
+                    
+                    if (total > 0) {
+                        // Mostrar notificação
+                        badge.style.display = 'flex';
+                        badge.textContent = total;
+                        
+                        // Mostrar contador no botão
+                        countSpan.style.display = 'inline';
+                        countSpan.textContent = total;
+                        
+                        console.log(`🔔 ${total} novos cadastros pendentes encontrados`);
+                    } else {
+                        // Esconder notificação
+                        badge.style.display = 'none';
+                        countSpan.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao verificar novos cadastros:', error);
+            }
+        }
     </script>
 </body>
 </html>
