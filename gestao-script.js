@@ -934,3 +934,8 @@ function exportarDados() {
         NotificationManager.show(`Erro ao exportar dados: ${error.message}`, 'error');
     }
 }
+
+// Função para abrir agendamento rápido
+function abrirAgendamentoRapido() {
+    window.open('agendar.html', '_blank');
+}
