@@ -74,6 +74,72 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela usuarios (substituir Google Sheets)
+        if (!tableNames.includes('usuarios')) {
+            console.log('🔧 Criando tabela de usuários...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS usuarios (
+                    id SERIAL PRIMARY KEY,
+                    user_id VARCHAR(50) UNIQUE NOT NULL,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    full_name VARCHAR(255) NOT NULL,
+                    telefone VARCHAR(20),
+                    role VARCHAR(20) DEFAULT 'patient',
+                    status VARCHAR(20) DEFAULT 'ativo',
+                    autorizado VARCHAR(10) DEFAULT 'nao',
+                    password_hash TEXT,
+                    last_login TIMESTAMP,
+                    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    observacoes TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            // Criar índices
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+                CREATE INDEX IF NOT EXISTS idx_usuarios_user_id ON usuarios(user_id);
+                CREATE INDEX IF NOT EXISTS idx_usuarios_role ON usuarios(role);
+            `);
+        }
+        
+        // Criar tabela leads (captura de leads)
+        if (!tableNames.includes('leads')) {
+            console.log('🔧 Criando tabela de leads...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS leads (
+                    id SERIAL PRIMARY KEY,
+                    protocolo VARCHAR(50) UNIQUE NOT NULL,
+                    nome VARCHAR(255) NOT NULL,
+                    telefone VARCHAR(20),
+                    email VARCHAR(255),
+                    idade INTEGER,
+                    procedimento VARCHAR(255) NOT NULL,
+                    observacoes TEXT,
+                    origem VARCHAR(100) DEFAULT 'landing-publica',
+                    status VARCHAR(20) DEFAULT 'novo',
+                    data_captura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    convertido_em_paciente BOOLEAN DEFAULT false,
+                    paciente_id INTEGER,
+                    data_conversao TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            // Criar índices para leads
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_leads_protocolo ON leads(protocolo);
+                CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+                CREATE INDEX IF NOT EXISTS idx_leads_origem ON leads(origem);
+                CREATE INDEX IF NOT EXISTS idx_leads_data_captura ON leads(data_captura);
+            `);
+        }
+        
         // Se não existir tabela system_config, criar
         if (!tableNames.includes('system_config')) {
             console.log('🔧 Criando tabela de configurações...');

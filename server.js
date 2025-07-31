@@ -125,16 +125,16 @@ async function initSheet() {
     }
 }
 
-// Verificar se email existe na planilha
+// Verificar se email existe (PostgreSQL only)
 app.post('/api/verificar-email', async (req, res) => {
     try {
         const { email } = req.body;
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
         
-        const usuario = rows.find(row => row.email === email);
+        const query = 'SELECT email, password_hash, role FROM usuarios WHERE email = $1';
+        const result = await pool.query(query, [email]);
         
-        if (usuario) {
+        if (result.rows.length > 0) {
+            const usuario = result.rows[0];
             res.json({ 
                 existe: true, 
                 temSenha: !!usuario.password_hash,
@@ -149,17 +149,16 @@ app.post('/api/verificar-email', async (req, res) => {
     }
 });
 
-// Cadastrar novo usuário
+// Cadastrar novo usuário (PostgreSQL only)
 app.post('/api/cadastrar', async (req, res) => {
     try {
         const { email, full_name, telefone, role } = req.body;
-        const sheet = doc.sheetsByTitle['Usuario'];
         
         // Verificar se email já existe
-        const rows = await sheet.getRows();
-        const usuarioExiste = rows.find(row => row.email === email);
+        const checkQuery = 'SELECT email FROM usuarios WHERE email = $1';
+        const checkResult = await pool.query(checkQuery, [email]);
         
-        if (usuarioExiste) {
+        if (checkResult.rows.length > 0) {
             return res.status(400).json({ erro: 'Email já cadastrado' });
         }
         
@@ -169,20 +168,21 @@ app.post('/api/cadastrar', async (req, res) => {
         // Definir role (padrão patient se não especificado)
         const userRole = role || 'patient';
         
-        // Adicionar nova linha
-        await sheet.addRow({
-            email,
-            full_name,
-            telefone,
-            role: userRole,
-            user_id,
-            status: 'ativo',
-            autorizado: 'nao',
-            last_login: '',
-            password_hash: '',
-            data_criacao: new Date().toISOString(),
-            observacoes: 'Cadastro via webapp'
-        });
+        // Inserir novo usuário
+        const insertQuery = `
+            INSERT INTO usuarios (
+                email, full_name, telefone, role, user_id, status, 
+                autorizado, last_login, password_hash, data_criacao, observacoes
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING user_id
+        `;
+        
+        const values = [
+            email, full_name, telefone, userRole, user_id, 'ativo',
+            'nao', null, '', new Date().toISOString(), 'Cadastro via webapp'
+        ];
+        
+        const result = await pool.query(insertQuery, values);
         
         res.json({ sucesso: true, message: 'Usuário cadastrado com sucesso', role: userRole });
     } catch (error) {
@@ -191,16 +191,16 @@ app.post('/api/cadastrar', async (req, res) => {
     }
 });
 
-// Criar senha
+// Criar senha (PostgreSQL only)
 app.post('/api/criar-senha', async (req, res) => {
     try {
         const { email, senha } = req.body;
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
         
-        const usuario = rows.find(row => row.email === email);
+        // Verificar se usuário existe
+        const checkQuery = 'SELECT user_id FROM usuarios WHERE email = $1';
+        const checkResult = await pool.query(checkQuery, [email]);
         
-        if (!usuario) {
+        if (checkResult.rows.length === 0) {
             return res.status(404).json({ erro: 'Usuário não encontrado' });
         }
         
@@ -208,9 +208,9 @@ app.post('/api/criar-senha', async (req, res) => {
         const saltRounds = 10;
         const password_hash = await bcrypt.hash(senha, saltRounds);
         
-        // Atualizar senha na planilha
-        usuario.password_hash = password_hash;
-        await usuario.save();
+        // Atualizar senha no banco
+        const updateQuery = 'UPDATE usuarios SET password_hash = $1 WHERE email = $2';
+        await pool.query(updateQuery, [password_hash, email]);
         
         res.json({ sucesso: true, message: 'Senha criada com sucesso' });
     } catch (error) {
@@ -219,22 +219,22 @@ app.post('/api/criar-senha', async (req, res) => {
     }
 });
 
-// Login
+// Login (PostgreSQL only)
 app.post('/api/login', async (req, res) => {
     try {
         const { email, senha } = req.body;
         console.log('Tentativa de login para:', email); // Debug
         
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
+        // Buscar usuário no PostgreSQL
+        const query = 'SELECT email, password_hash, role, full_name FROM usuarios WHERE email = $1';
+        const result = await pool.query(query, [email]);
         
-        const usuario = rows.find(row => row.email === email);
-        
-        if (!usuario) {
+        if (result.rows.length === 0) {
             console.log('Usuário não encontrado:', email); // Debug
             return res.status(404).json({ erro: 'Usuário não encontrado' });
         }
         
+        const usuario = result.rows[0];
         console.log('Usuário encontrado:', email, 'Role:', usuario.role); // Debug
         console.log('Tem senha hash?', !!usuario.password_hash); // Debug
         
@@ -254,8 +254,8 @@ app.post('/api/login', async (req, res) => {
         }
         
         // Atualizar last_login
-        usuario.last_login = new Date().toISOString();
-        await usuario.save();
+        const updateQuery = 'UPDATE usuarios SET last_login = $1 WHERE email = $2';
+        await pool.query(updateQuery, [new Date().toISOString(), email]);
         
         console.log('Login bem-sucedido para:', email, 'Role:', usuario.role); // Debug
         
@@ -404,7 +404,7 @@ app.get('/api/leads', async (req, res) => {
     }
 });
 
-// Atualizar role de usuário existente
+// Atualizar role de usuário existente (PostgreSQL only)
 app.post('/api/atualizar-role', async (req, res) => {
     try {
         const { email, novoRole } = req.body;
@@ -420,20 +420,19 @@ app.post('/api/atualizar-role', async (req, res) => {
             return res.status(400).json({ erro: 'Role inválido. Use: patient, staff, admin' });
         }
         
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
+        // Buscar usuário
+        const checkQuery = 'SELECT role FROM usuarios WHERE email = $1';
+        const checkResult = await pool.query(checkQuery, [email]);
         
-        // Encontrar usuário
-        const usuario = rows.find(row => row.email === email);
-        
-        if (!usuario) {
+        if (checkResult.rows.length === 0) {
             return res.status(404).json({ erro: 'Usuário não encontrado' });
         }
         
+        const roleAnterior = checkResult.rows[0].role;
+        
         // Atualizar role
-        const roleAnterior = usuario.role;
-        usuario.role = novoRole;
-        await usuario.save();
+        const updateQuery = 'UPDATE usuarios SET role = $1 WHERE email = $2';
+        await pool.query(updateQuery, [novoRole, email]);
         
         console.log(`Role atualizado para ${email}: ${roleAnterior} -> ${novoRole}`);
         
@@ -450,7 +449,7 @@ app.post('/api/atualizar-role', async (req, res) => {
     }
 });
 
-// Atualizar autorização de usuário
+// Atualizar autorização de usuário (PostgreSQL only)
 app.post('/api/atualizar-autorizacao', async (req, res) => {
     try {
         const { email, autorizado } = req.body;
@@ -466,20 +465,19 @@ app.post('/api/atualizar-autorizacao', async (req, res) => {
             return res.status(400).json({ erro: 'Autorização deve ser "sim" ou "nao"' });
         }
         
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
+        // Buscar usuário
+        const checkQuery = 'SELECT autorizado FROM usuarios WHERE email = $1';
+        const checkResult = await pool.query(checkQuery, [email]);
         
-        // Encontrar usuário
-        const usuario = rows.find(row => row.email === email);
-        
-        if (!usuario) {
+        if (checkResult.rows.length === 0) {
             return res.status(404).json({ erro: 'Usuário não encontrado' });
         }
         
+        const autorizacaoAnterior = checkResult.rows[0].autorizado;
+        
         // Atualizar autorização
-        const autorizacaoAnterior = usuario.autorizado;
-        usuario.autorizado = autorizado;
-        await usuario.save();
+        const updateQuery = 'UPDATE usuarios SET autorizado = $1 WHERE email = $2';
+        await pool.query(updateQuery, [autorizado, email]);
         
         console.log(`Autorização atualizada para ${email}: ${autorizacaoAnterior} -> ${autorizado}`);
         
@@ -496,146 +494,35 @@ app.post('/api/atualizar-autorizacao', async (req, res) => {
     }
 });
 
-// Aprovar usuário pendente
+// ROTAS DESABILITADAS - Google Sheets não disponível em produção
+/*
+// Aprovar usuário pendente - DESABILITADO (Google Sheets)
 app.post('/api/aprovar-usuario', async (req, res) => {
-    try {
-        const { userId, tipo } = req.body;
-        
-        // Validar dados de entrada
-        if (!userId || !tipo) {
-            return res.status(400).json({ success: false, message: 'UserId e tipo são obrigatórios' });
-        }
-        
-        // Validar tipo (role)
-        const tiposPermitidos = ['admin', 'funcionario', 'usuario'];
-        if (!tiposPermitidos.includes(tipo)) {
-            return res.status(400).json({ success: false, message: 'Tipo deve ser admin, funcionario ou usuario' });
-        }
-        
-        const pendingSheet = doc.sheetsByTitle['Pending'];
-        const usuarioSheet = doc.sheetsByTitle['Usuario'];
-        
-        // Buscar usuário na tabela Pending pelo userId
-        const pendingRows = await pendingSheet.getRows();
-        const usuarioPendente = pendingRows.find(row => row.userId === userId || row.email === userId);
-        
-        if (!usuarioPendente) {
-            return res.status(404).json({ success: false, message: 'Usuário não encontrado na lista de pendentes' });
-        }
-        
-        const email = usuarioPendente.email;
-        const nome = usuarioPendente.nome;
-        
-        // Verificar se já existe na tabela Usuario
-        const usuarioRows = await usuarioSheet.getRows();
-        const usuarioExistente = usuarioRows.find(row => row.email === email);
-        
-        if (usuarioExistente) {
-            // Se já existe, apenas atualizar
-            usuarioExistente.nome = nome;
-            usuarioExistente.role = tipo;
-            usuarioExistente.autorizado = 'sim';
-            usuarioExistente.status = 'ativo';
-            await usuarioExistente.save();
-        } else {
-            // Criar novo usuário na tabela Usuario
-            await usuarioSheet.addRow({
-                email: email,
-                nome: nome,
-                role: tipo,
-                autorizado: 'sim',
-                status: 'ativo',
-                senha: usuarioPendente.senha || '', // Manter senha se existir
-                dataRegistro: usuarioPendente.dataRegistro || new Date().toISOString()
-            });
-        }
-        
-        // Remover da tabela Pending
-        await usuarioPendente.delete();
-        
-        console.log(`Usuário aprovado e movido: ${email} -> Role: ${tipo}`);
-        
-        res.json({ 
-            success: true, 
-            message: `Usuário ${nome} aprovado com sucesso como ${tipo}`,
-            email: email,
-            nome: nome,
-            tipo: tipo
-        });
-        
-    } catch (error) {
-        console.error('Erro ao aprovar usuário:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erro interno do servidor', 
-            detalhes: error.message 
-        });
-    }
+    res.status(503).json({ 
+        success: false, 
+        message: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
+    });
 });
 
-// Listar usuários pendentes
+// Listar usuários pendentes - DESABILITADO (Google Sheets)
 app.get('/api/usuarios-pendentes', async (req, res) => {
-    try {
-        const pendingSheet = doc.sheetsByTitle['Pending'];
-        const rows = await pendingSheet.getRows();
-        
-        const usuariosPendentes = rows.map((row, index) => ({
-            id: row.email || index, // Usar email como ID único
-            nome: row.nome || '',
-            email: row.email || '',
-            telefone: row.telefone || '',
-            tipo: row.role || 'usuario',
-            status: 'pending',
-            autorizado: 'nao',
-            created_at: row.dataRegistro || new Date().toISOString()
-        }));
-        
-        res.json({
-            success: true,
-            usuarios: usuariosPendentes
-        });
-        
-    } catch (error) {
-        console.error('Erro ao buscar usuários pendentes:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Erro interno do servidor',
-            usuarios: []
-        });
-    }
+    res.json({
+        success: true,
+        usuarios: [],
+        message: 'Migração para PostgreSQL - funcionalidade em desenvolvimento'
+    });
 });
 
-// Listar usuários cadastrados
+// Listar usuários cadastrados - DESABILITADO (Google Sheets)  
 app.get('/api/listar-usuarios', async (req, res) => {
-    try {
-        const usuarioSheet = doc.sheetsByTitle['Usuario'];
-        const rows = await usuarioSheet.getRows();
-        
-        const usuarios = rows.map(row => ({
-            email: row.email || '',
-            nome: row.nome || '',
-            role: row.role || 'usuario',
-            autorizado: row.autorizado || 'nao',
-            status: row.status || 'ativo',
-            dataRegistro: row.dataRegistro || ''
-        }));
-        
-        res.json({
-            sucesso: true,
-            total: usuarios.length,
-            usuarios: usuarios
-        });
-        
-    } catch (error) {
-        console.error('Erro ao listar usuários:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            message: 'Erro interno do servidor',
-            total: 0,
-            usuarios: []
-        });
-    }
+    res.json({
+        sucesso: true,
+        total: 0,
+        usuarios: [],
+        message: 'Migração para PostgreSQL - funcionalidade em desenvolvimento'
+    });
 });
+*/
 
 // Servir páginas HTML
 app.get('/', (req, res) => {
@@ -662,233 +549,36 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-// Obter todos os dados da gestão
+// ROTAS DE GESTÃO DESABILITADAS - Google Sheets não disponível
+/*
+// Obter todos os dados da gestão - DESABILITADO
 app.get('/api/gestao/dados', async (req, res) => {
-    try {
-        const sheet = doc.sheetsByTitle['Gestao_Geral'];
-        if (!sheet) {
-            return res.status(404).json({ erro: 'Aba Gestao_Geral não encontrada' });
-        }
-        
-        const rows = await sheet.getRows();
-        const dados = rows.map(row => ({
-            id_paciente: row.ID_Paciente || '',
-            nome_paciente: row.Nome_Paciente || '',
-            data_criacao: row.Data_Criacao || '',
-            data_ultima_update: row.Data_Ultima_Update || '',
-            agendamento_data: row.Agendamento_Data || '',
-            agendamento_hora: row.Agendamento_Hora || '',
-            agendamento_status: row.Agendamento_Status || 'Pendente',
-            consulta_status: row.Consulta_Status || 'Não Realizada',
-            consulta_observacao: row.Consulta_Observacao || '',
-            orcamento_status: row.Orcamento_Status || 'Não Enviado',
-            orcamento_data: row.Orcamento_Data || '',
-            orcamento_link_editar: row.Orcamento_Link_Editar || '',
-            orcamento_pdf_link: row.Orcamento_PDF_Link || '',
-            orcamento_link_aceite: row.Orcamento_Link_Aceite || '',
-            orcamento_status_aceite: row.Orcamento_Status_Aceite || 'Pendente',
-            pagamento_valor_entrada: row.Pagamento_Valor_Entrada || '',
-            pagamento_comprovante: row.Pagamento_Comprovante || '',
-            pagamento_observacao: row.Pagamento_Observacao || '',
-            status_geral: row.Status_Geral || 'Novo',
-            ultima_acao: row.Ultima_Acao || ''
-        }));
-        
-        res.json(dados);
-    } catch (error) {
-        console.error('Erro ao obter dados da gestão:', error);
-        res.status(500).json({ erro: 'Erro interno do servidor' });
-    }
+    res.status(503).json({ 
+        erro: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
+    });
 });
 
-// Atualizar dados da gestão
+// Atualizar dados da gestão - DESABILITADO  
 app.post('/api/gestao/atualizar', async (req, res) => {
-    try {
-        const dadosAtualizacao = req.body;
-        const sheet = doc.sheetsByTitle['Gestao_Geral'];
-        
-        if (!sheet) {
-            return res.status(404).json({ erro: 'Aba Gestao_Geral não encontrada' });
-        }
-        
-        const rows = await sheet.getRows();
-        let pacienteEncontrado = false;
-        
-        // Procurar paciente existente
-        for (let row of rows) {
-            if (row.ID_Paciente === dadosAtualizacao.id_paciente) {
-                // Atualizar dados existentes
-                row.Nome_Paciente = dadosAtualizacao.nome_paciente;
-                row.Data_Ultima_Update = new Date().toISOString();
-                row.Agendamento_Data = dadosAtualizacao.agendamento_data;
-                row.Agendamento_Hora = dadosAtualizacao.agendamento_hora;
-                row.Agendamento_Status = dadosAtualizacao.agendamento_status;
-                row.Consulta_Status = dadosAtualizacao.consulta_status;
-                row.Consulta_Observacao = dadosAtualizacao.consulta_observacao || '';
-                row.Orcamento_Status = dadosAtualizacao.orcamento_status;
-                row.Orcamento_Data = dadosAtualizacao.orcamento_data || new Date().toISOString();
-                row.Orcamento_Link_Editar = dadosAtualizacao.orcamento_link_editar || '';
-                row.Orcamento_PDF_Link = dadosAtualizacao.orcamento_pdf_link || '';
-                row.Orcamento_Link_Aceite = dadosAtualizacao.orcamento_link_aceite || '';
-                row.Orcamento_Status_Aceite = dadosAtualizacao.orcamento_status_aceite;
-                row.Pagamento_Valor_Entrada = dadosAtualizacao.pagamento_valor_entrada || '';
-                row.Pagamento_Comprovante = dadosAtualizacao.pagamento_comprovante || '';
-                row.Pagamento_Observacao = dadosAtualizacao.pagamento_observacao || '';
-                row.Status_Geral = dadosAtualizacao.status_geral;
-                row.Ultima_Acao = `Atualizado em ${new Date().toLocaleString('pt-BR')}`;
-                
-                await row.save();
-                pacienteEncontrado = true;
-                break;
-            }
-        }
-        
-        // Se não encontrou, criar novo registro
-        if (!pacienteEncontrado) {
-            await sheet.addRow({
-                ID_Paciente: dadosAtualizacao.id_paciente,
-                Nome_Paciente: dadosAtualizacao.nome_paciente,
-                Data_Criacao: new Date().toISOString(),
-                Data_Ultima_Update: new Date().toISOString(),
-                Agendamento_Data: dadosAtualizacao.agendamento_data || '',
-                Agendamento_Hora: dadosAtualizacao.agendamento_hora || '',
-                Agendamento_Status: dadosAtualizacao.agendamento_status || 'Pendente',
-                Consulta_Status: dadosAtualizacao.consulta_status || 'Não Realizada',
-                Consulta_Observacao: dadosAtualizacao.consulta_observacao || '',
-                Orcamento_Status: dadosAtualizacao.orcamento_status || 'Não Enviado',
-                Orcamento_Data: dadosAtualizacao.orcamento_data || '',
-                Orcamento_Link_Editar: dadosAtualizacao.orcamento_link_editar || '',
-                Orcamento_PDF_Link: dadosAtualizacao.orcamento_pdf_link || '',
-                Orcamento_Link_Aceite: dadosAtualizacao.orcamento_link_aceite || '',
-                Orcamento_Status_Aceite: dadosAtualizacao.orcamento_status_aceite || 'Pendente',
-                Pagamento_Valor_Entrada: dadosAtualizacao.pagamento_valor_entrada || '',
-                Pagamento_Comprovante: dadosAtualizacao.pagamento_comprovante || '',
-                Pagamento_Observacao: dadosAtualizacao.pagamento_observacao || '',
-                Status_Geral: dadosAtualizacao.status_geral || 'Novo',
-                Ultima_Acao: `Criado em ${new Date().toLocaleString('pt-BR')}`
-            });
-        }
-        
-        res.json({ sucesso: true, message: 'Dados atualizados com sucesso' });
-    } catch (error) {
-        console.error('Erro ao atualizar gestão:', error);
-        res.status(500).json({ erro: 'Erro interno do servidor' });
-    }
+    res.status(503).json({ 
+        erro: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
+    });
 });
 
-// Sincronizar dados da aba Usuario com Gestao_Geral
+// Sincronizar dados - DESABILITADO
 app.post('/api/gestao/sincronizar', async (req, res) => {
-    try {
-        const usuarioSheet = doc.sheetsByTitle['Usuario'];
-        const gestaoSheet = doc.sheetsByTitle['Gestao_Geral'];
-        
-        if (!usuarioSheet || !gestaoSheet) {
-            return res.status(404).json({ erro: 'Abas não encontradas' });
-        }
-        
-        const usuarioRows = await usuarioSheet.getRows();
-        const gestaoRows = await gestaoSheet.getRows();
-        
-        // Criar mapa dos IDs existentes na gestão
-        const idsExistentes = new Set(gestaoRows.map(row => row.ID_Paciente));
-        
-        let novosRegistros = 0;
-        
-        for (let usuarioRow of usuarioRows) {
-            if (usuarioRow.role === 'patient' && !idsExistentes.has(usuarioRow.user_id)) {
-                // Adicionar novo paciente na gestão
-                await gestaoSheet.addRow({
-                    ID_Paciente: usuarioRow.user_id,
-                    Nome_Paciente: usuarioRow.full_name,
-                    Data_Criacao: usuarioRow.data_criacao || new Date().toISOString(),
-                    Data_Ultima_Update: new Date().toISOString(),
-                    Agendamento_Data: '',
-                    Agendamento_Hora: '',
-                    Agendamento_Status: 'Pendente',
-                    Consulta_Status: 'Não Realizada',
-                    Consulta_Observacao: '',
-                    Orcamento_Status: 'Não Enviado',
-                    Orcamento_Data: '',
-                    Orcamento_Link_Editar: '',
-                    Orcamento_PDF_Link: '',
-                    Orcamento_Link_Aceite: '',
-                    Orcamento_Status_Aceite: 'Pendente',
-                    Pagamento_Valor_Entrada: '',
-                    Pagamento_Comprovante: '',
-                    Pagamento_Observacao: '',
-                    Status_Geral: 'Novo',
-                    Ultima_Acao: 'Sincronizado automaticamente'
-                });
-                novosRegistros++;
-            }
-        }
-        
-        res.json({ 
-            sucesso: true, 
-            message: `Sincronização concluída. ${novosRegistros} novos registros adicionados.` 
-        });
-    } catch (error) {
-        console.error('Erro ao sincronizar:', error);
-        res.status(500).json({ erro: 'Erro interno do servidor' });
-    }
+    res.status(503).json({ 
+        erro: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
+    });
 });
 
-// Obter estatísticas do dashboard
+// Obter estatísticas do dashboard - DESABILITADO
 app.get('/api/gestao/estatisticas', async (req, res) => {
-    try {
-        const sheet = doc.sheetsByTitle['Gestao_Geral'];
-        if (!sheet) {
-            return res.status(404).json({ erro: 'Aba Gestao_Geral não encontrada' });
-        }
-        
-        const rows = await sheet.getRows();
-        const hoje = new Date().toISOString().split('T')[0];
-        
-        const estatisticas = {
-            totalPacientes: rows.length,
-            agendamentosHoje: 0,
-            orcamentosPendentes: 0,
-            pagamentosPendentes: 0,
-            statusDistribuicao: {},
-            agendamentosProximosDias: 0
-        };
-        
-        const proximosDias = new Date();
-        proximosDias.setDate(proximosDias.getDate() + 7);
-        const proximosDiasStr = proximosDias.toISOString().split('T')[0];
-        
-        rows.forEach(row => {
-            // Agendamentos hoje
-            if (row.Agendamento_Data && row.Agendamento_Data.includes(hoje)) {
-                estatisticas.agendamentosHoje++;
-            }
-            
-            // Agendamentos próximos 7 dias
-            if (row.Agendamento_Data && row.Agendamento_Data <= proximosDiasStr && row.Agendamento_Data >= hoje) {
-                estatisticas.agendamentosProximosDias++;
-            }
-            
-            // Orçamentos pendentes
-            if (row.Orcamento_Status === 'Enviado') {
-                estatisticas.orcamentosPendentes++;
-            }
-            
-            // Pagamentos pendentes
-            if (row.Status_Geral === 'Aguardando Pagamento') {
-                estatisticas.pagamentosPendentes++;
-            }
-            
-            // Distribuição de status
-            const status = row.Status_Geral || 'Indefinido';
-            estatisticas.statusDistribuicao[status] = (estatisticas.statusDistribuicao[status] || 0) + 1;
-        });
-        
-        res.json(estatisticas);
-    } catch (error) {
-        console.error('Erro ao obter estatísticas:', error);
-        res.status(500).json({ erro: 'Erro interno do servidor' });
-    }
+    res.status(503).json({ 
+        erro: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
+    });
 });
+*/
 
 // Servir página de gestão
 app.get('/gestao', (req, res) => {
@@ -921,103 +611,11 @@ app.use('/api/admin', adminRoutes);
 const configRoutes = require('./src/routes/config.routes');
 app.use('/api/config', configRoutes);
 
-// ==================== ROTAS DE AUTENTICAÇÃO COMPLETA ====================
-
-// Cadastro de funcionário
-app.post('/api/auth/cadastrar-funcionario', async (req, res) => {
-    try {
-        const resultado = await authSystem.cadastrarFuncionario(req.body);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro no cadastro:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Verificar código de email
-app.post('/api/auth/verificar-codigo', async (req, res) => {
-    try {
-        const { email, codigo } = req.body;
-        const resultado = await authSystem.verificarCodigo(email, codigo);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro na verificação:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Reenviar código
-app.post('/api/auth/reenviar-codigo', async (req, res) => {
-    try {
-        const { email } = req.body;
-        const resultado = await authSystem.reenviarCodigo(email);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro ao reenviar código:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Criar senha
-app.post('/api/auth/criar-senha', async (req, res) => {
-    try {
-        const { email, senha, confirmarSenha } = req.body;
-        const resultado = await authSystem.criarSenha(email, senha, confirmarSenha);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro ao criar senha:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Login completo
-app.post('/api/auth/login-completo', async (req, res) => {
-    try {
-        const { email, senha } = req.body;
-        const resultado = await authSystem.realizarLogin(email, senha);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro no login:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Autorizar funcionário (apenas admin)
-app.post('/api/auth/autorizar-funcionario', async (req, res) => {
-    try {
-        const { email, acao } = req.body;
-        // TODO: Adicionar verificação de admin aqui
-        const resultado = await authSystem.autorizarFuncionario(email, acao);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro ao autorizar funcionário:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Listar solicitações (apenas admin)
-app.get('/api/auth/listar-solicitacoes', async (req, res) => {
-    try {
-        // TODO: Adicionar verificação de admin aqui
-        const resultado = await authSystem.listarSolicitacoes();
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro ao listar solicitações:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
-
-// Verificar status de autorização
-app.post('/api/auth/verificar-status', async (req, res) => {
-    try {
-        const { email } = req.body;
-        const resultado = await authSystem.verificarStatusAutorizacao(email);
-        res.json(resultado);
-    } catch (error) {
-        console.error('Erro ao verificar status:', error);
-        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
-    }
-});
+// ROTAS DE AUTENTICAÇÃO DESABILITADAS - Google Sheets não disponível
+/*
+// Rotas duplicadas removidas - dependiam do Google Sheets
+// As funcionalidades foram migradas para PostgreSQL nas rotas do sistema principal
+*/
 
 // Health Check para Railway
 app.get('/api/health', (req, res) => {
@@ -1208,273 +806,9 @@ app.get('/api/config-info', (req, res) => {
     }
 });
 
-// ================================
-// NOVAS ROTAS DE AUTENTICAÇÃO COMPLETA
-// ================================
-
-// 1. CADASTRO DE FUNCIONÁRIO COM EMAIL DE CONFIRMAÇÃO
-app.post('/api/auth/cadastrar-funcionario', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const resultado = await authSystem.cadastrarFuncionario(req.body);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(400).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro na rota de cadastro:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 2. VERIFICAÇÃO DE CÓDIGO DE EMAIL
-app.post('/api/auth/verificar-codigo', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const { email, codigo } = req.body;
-        
-        if (!email || !codigo) {
-            return res.status(400).json({ 
-                sucesso: false, 
-                erro: 'Email e código são obrigatórios' 
-            });
-        }
-
-        const resultado = await authSystem.verificarCodigo(email, codigo);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(400).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro na verificação de código:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 3. CRIAÇÃO DE SENHA APÓS VERIFICAÇÃO
-app.post('/api/auth/criar-senha', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const { email, senha, confirmarSenha } = req.body;
-        
-        if (!email || !senha || !confirmarSenha) {
-            return res.status(400).json({ 
-                sucesso: false, 
-                erro: 'Todos os campos são obrigatórios' 
-            });
-        }
-
-        const resultado = await authSystem.criarSenha(email, senha, confirmarSenha);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(400).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro na criação de senha:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 4. LOGIN COMPLETO COM VERIFICAÇÕES
-app.post('/api/auth/login-completo', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const { email, senha } = req.body;
-        
-        if (!email || !senha) {
-            return res.status(400).json({ 
-                sucesso: false, 
-                erro: 'Email e senha são obrigatórios' 
-            });
-        }
-
-        const resultado = await authSystem.realizarLogin(email, senha);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(401).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro no login:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 5. AUTORIZAÇÃO DE FUNCIONÁRIO (ADMIN)
-app.post('/api/auth/autorizar-funcionario', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const { adminEmail, funcionarioEmail, autorizado } = req.body;
-        
-        if (!adminEmail || !funcionarioEmail || autorizado === undefined) {
-            return res.status(400).json({ 
-                sucesso: false, 
-                erro: 'Todos os campos são obrigatórios' 
-            });
-        }
-
-        const resultado = await authSystem.autorizarFuncionario(adminEmail, funcionarioEmail, autorizado);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(403).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro na autorização:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 6. REENVIO DE CÓDIGO
-app.post('/api/auth/reenviar-codigo', async (req, res) => {
-    try {
-        if (!authSystem) {
-            return res.status(500).json({ 
-                sucesso: false, 
-                erro: 'Sistema de autenticação não inicializado' 
-            });
-        }
-
-        const { email } = req.body;
-        
-        if (!email) {
-            return res.status(400).json({ 
-                sucesso: false, 
-                erro: 'Email é obrigatório' 
-            });
-        }
-
-        const resultado = await authSystem.reenviarCodigo(email);
-        
-        if (resultado.sucesso) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(400).json(resultado);
-        }
-    } catch (error) {
-        console.error('Erro no reenvio de código:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 7. LISTAR FUNCIONÁRIOS PENDENTES (ADMIN)
-app.get('/api/auth/funcionarios-pendentes', async (req, res) => {
-    try {
-        const sheet = doc.sheetsByTitle['Usuario'];
-        const rows = await sheet.getRows();
-        
-        const funcionariosPendentes = rows
-            .filter(row => 
-                row.role === 'funcionario' && 
-                (row.autorizado === 'nao' || row.status === 'ativo_pendente_autorizacao')
-            )
-            .map(row => ({
-                user_id: row.user_id,
-                email: row.email,
-                nome: row.full_name,
-                telefone: row.telefone,
-                status: row.status,
-                autorizado: row.autorizado,
-                created_at: row.created_at,
-                verified_at: row.verified_at
-            }));
-
-        res.json({
-            sucesso: true,
-            funcionarios: funcionariosPendentes,
-            total: funcionariosPendentes.length
-        });
-
-    } catch (error) {
-        console.error('Erro ao listar funcionários pendentes:', error);
-        res.status(500).json({ 
-            sucesso: false, 
-            erro: 'Erro interno do servidor' 
-        });
-    }
-});
-
-// 8. STATUS DO SISTEMA DE AUTENTICAÇÃO
-app.get('/api/auth/status', (req, res) => {
-    res.json({
-        sistema: 'Portal Dr. Marcio - Autenticação',
-        versao: '2.0',
-        status: authSystem ? 'Operacional' : 'Não Inicializado',
-        recursos: [
-            'Cadastro com verificação por email',
-            'Códigos de confirmação',
-            'Autorização de funcionários',
-            'Login com verificações completas',
-            'Redirecionamento inteligente',
-            'Notificações por email'
-        ],
-        endpoints: [
-            'POST /api/auth/cadastrar-funcionario',
-            'POST /api/auth/verificar-codigo',
-            'POST /api/auth/criar-senha',
-            'POST /api/auth/login-completo',
-            'POST /api/auth/autorizar-funcionario',
-            'POST /api/auth/reenviar-codigo',
-            'GET /api/auth/funcionarios-pendentes'
-        ]
-    });
-});
+// SISTEMA DE AUTENTICAÇÃO LIMPO - PostgreSQL Only
+// Todas as rotas de autenticação foram migradas para PostgreSQL
+// Removidas dependências do Google Sheets para produção
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
