@@ -391,3 +391,5 @@ curl https://portal-dr-marcio.railway.app/api/health
 *Última atualização: 29 de Janeiro de 2025*
 
 Basta conectar no Railway e seu portal médico estará funcionando!
+
+## Redeploy forçado em 31/07/2025 para atualização do Railway.
