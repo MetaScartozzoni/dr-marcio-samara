@@ -52,52 +52,66 @@
     <!-- Main content -->
     <main class="main-content">
         <div class="container">
-            <!-- Estatísticas melhoradas -->
-            <section class="stats-section" aria-labelledby="stats-title">
-                <h2 id="stats-title" class="sr-only">Estatísticas dos Orçamentos</h2>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-calculator" aria-hidden="true"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="totalOrcamentos">0</div>
-                            <div class="stat-label">Total de Orçamentos</div>
-                        </div>
-                    </div>
+            <!-- Navegação por Tabs -->
+            <nav class="tab-navigation" role="tablist">
+                <button class="tab-button active" id="tab-orcamentos" role="tab" aria-selected="true" aria-controls="panel-orcamentos">
+                    <i class="fas fa-calculator"></i>
+                    Gestão de Orçamentos
+                </button>
+                <button class="tab-button" id="tab-pacientes" role="tab" aria-selected="false" aria-controls="panel-pacientes">
+                    <i class="fas fa-users"></i>
+                    Gestão de Pacientes
+                </button>
+            </nav>
+
+            <!-- Painel de Orçamentos -->
+            <div id="panel-orcamentos" class="tab-panel active" role="tabpanel" aria-labelledby="tab-orcamentos">
+                <!-- Estatísticas melhoradas -->
+                <section class="stats-section" aria-labelledby="stats-title">
+                    <h2 id="stats-title" class="sr-only">Estatísticas dos Orçamentos</h2>
                     
-                    <div class="stat-card">
-                        <div class="stat-icon warning">
-                            <i class="fas fa-clock" aria-hidden="true"></i>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-calculator" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalOrcamentos">0</div>
+                                <div class="stat-label">Total de Orçamentos</div>
+                            </div>
                         </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="orcamentosPendentes">0</div>
-                            <div class="stat-label">Orçamentos Pendentes</div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-clock" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="orcamentosPendentes">0</div>
+                                <div class="stat-label">Orçamentos Pendentes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="orcamentosAceitos">0</div>
+                                <div class="stat-label">Orçamentos Aceitos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                <i class="fas fa-dollar-sign" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
+                                <div class="stat-label">Valor Total Pendente</div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon success">
-                            <i class="fas fa-check-circle" aria-hidden="true"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="orcamentosAceitos">0</div>
-                            <div class="stat-label">Orçamentos Aceitos</div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon info">
-                            <i class="fas fa-dollar-sign" aria-hidden="true"></i>
-                        </div>
-                        <div class="stat-content">
-                            <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
-                            <div class="stat-label">Valor Total Pendente</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+                </section>
 
             <!-- Filtros melhorados -->
             <section class="filters-section" aria-labelledby="filters-title">
@@ -392,6 +406,174 @@
             </div>
         </div>
     </div>
+            </div> <!-- Fim do panel-orcamentos -->
+
+            <!-- Painel de Pacientes -->
+            <div id="panel-pacientes" class="tab-panel" role="tabpanel" aria-labelledby="tab-pacientes">
+                <section class="stats-section">
+                    <h2 class="sr-only">Estatísticas dos Pacientes</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalPacientes">0</div>
+                                <div class="stat-label">Total de Pacientes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="pacientesNovos">0</div>
+                                <div class="stat-label">Novos este Mês</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-user-check" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="pacientesAtivos">0</div>
+                                <div class="stat-label">Pacientes Ativos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="consultasAgendadas">0</div>
+                                <div class="stat-label">Consultas Agendadas</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filtros para Pacientes -->
+                <section class="filters-section">
+                    <h2><i class="fas fa-filter"></i> Filtros de Pacientes</h2>
+                    
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filtroNomePaciente">Nome do Paciente:</label>
+                            <input type="text" id="filtroNomePaciente" class="form-control" placeholder="Digite o nome..." autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroCpfPaciente">CPF:</label>
+                            <input type="text" id="filtroCpfPaciente" class="form-control" placeholder="000.000.000-00" autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroStatusPaciente">Status:</label>
+                            <select id="filtroStatusPaciente" class="form-control">
+                                <option value="">Todos os Status</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="bloqueado">Bloqueado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroAcessoDashboard">Acesso Dashboard:</label>
+                            <select id="filtroAcessoDashboard" class="form-control">
+                                <option value="">Todos</option>
+                                <option value="true">Com Acesso</option>
+                                <option value="false">Sem Acesso</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-actions">
+                        <button onclick="filtrarPacientes()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                        <button onclick="limparFiltrosPacientes()" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button onclick="adicionarPaciente()" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Novo Paciente
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tabela de Pacientes -->
+                <section class="table-section">
+                    <h2><i class="fas fa-users"></i> Lista de Pacientes</h2>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Email</th>
+                                    <th>Telefone</th>
+                                    <th>Dashboard</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabelaPacientes">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div> <!-- Fim do panel-pacientes -->
+        </div>
+    </main>
+
+    <!-- Modal de Ações para Pacientes -->
+    <div id="modalAcoesPaciente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ações do Paciente</h3>
+                <button onclick="fecharModalAcoesPaciente()" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="paciente-info">
+                    <h4 id="nomePacienteSelecionado">Nome do Paciente</h4>
+                    <p id="detalhesPacienteSelecionado">Detalhes do paciente</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="editarPaciente()" class="btn btn-primary btn-action">
+                        <i class="fas fa-edit" aria-hidden="true"></i>
+                        Editar Dados
+                    </button>
+                    
+                    <button onclick="verHistoricoPaciente()" class="btn btn-info btn-action">
+                        <i class="fas fa-history" aria-hidden="true"></i>
+                        Ver Histórico
+                    </button>
+                    
+                    <button onclick="gerenciarAcesso()" class="btn btn-warning btn-action">
+                        <i class="fas fa-key" aria-hidden="true"></i>
+                        Gerenciar Acesso
+                    </button>
+                    
+                    <button onclick="agendarConsulta()" class="btn btn-success btn-action">
+                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                        Agendar Consulta
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="fecharModalAcoesPaciente()" class="btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -413,6 +595,12 @@
             if (typeof AuthManager === 'undefined') {
                 console.error('❌ AuthManager não carregado');
                 return;
+            }
+            
+            // Inicializar sistema de tabs
+            if (typeof initializeTabs === 'function') {
+                initializeTabs();
+                console.log('✅ Sistema de tabs inicializado');
             }
             
             // Sistema pronto

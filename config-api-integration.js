@@ -2,9 +2,9 @@
 
 const CONFIG = {
     // URLs da API
-    API_BASE_URL: process.env.NODE_ENV === 'production' 
-        ? 'https://api.drmarcioscartozzoni.com'
-        : 'http://localhost:3000',
+    API_BASE_URL: window.location.hostname === 'localhost' 
+        ? 'http://localhost:3001'
+        : 'https://portal-dr-marcio-production.up.railway.app',
     
     // Endpoints
     ENDPOINTS: {

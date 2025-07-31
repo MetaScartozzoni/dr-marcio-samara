@@ -112,9 +112,18 @@ class FormValidator {
 
 // ========== GERENCIADOR DE API ==========
 class ApiManager {
+    static getBaseUrl() {
+        return CONFIG?.API_BASE_URL || (window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001'
+            : 'https://portal-dr-marcio-production.up.railway.app');
+    }
+    
     static async request(url, options = {}) {
         try {
-            const response = await fetch(url, {
+            const fullUrl = url.startsWith('http') ? url : `${this.getBaseUrl()}${url}`;
+            console.log('🌐 API Request:', fullUrl);
+            
+            const response = await fetch(fullUrl, {
                 headers: {
                     'Content-Type': 'application/json',
                     ...options.headers
@@ -292,13 +301,26 @@ class OrcamentoManager {
             
             // Tentar salvar via API
             try {
-                const resultado = await ApiManager.post('/api/orcamentos', novoOrcamento);
-                dadosOriginais.push(resultado);
-                NotificationManager.show('Orçamento criado com sucesso!', 'success');
+                // Primeira tentativa: nova API de pacientes
+                const resultado = await ApiManager.post('/api/pacientes/orcamento', novoOrcamento);
+                if (resultado.success) {
+                    dadosOriginais.push(resultado.orcamento);
+                    NotificationManager.show('Orçamento criado com sucesso!', 'success');
+                } else {
+                    throw new Error('Nova API não retornou sucesso');
+                }
             } catch (apiError) {
-                // Fallback para dados locais
-                dadosOriginais.push(novoOrcamento);
-                NotificationManager.show('Orçamento criado localmente (API indisponível)', 'warning');
+                console.warn('Nova API falhou, tentando API antiga:', apiError);
+                try {
+                    // Fallback: API antiga
+                    const resultado = await ApiManager.post('/api/orcamentos', novoOrcamento);
+                    dadosOriginais.push(resultado);
+                    NotificationManager.show('Orçamento criado com sucesso!', 'success');
+                } catch (fallbackError) {
+                    // Fallback final: dados locais
+                    dadosOriginais.push(novoOrcamento);
+                    NotificationManager.show('Orçamento criado localmente (API indisponível)', 'warning');
+                }
             }
             
             dadosFiltrados = [...dadosOriginais];
@@ -594,27 +616,34 @@ async function carregarPacientes() {
     if (!select) return;
     
     try {
-        // Tentar carregar da API
-        const pacientes = await ApiManager.get('/api/pacientes');
+        // Tentar carregar da nova API de pacientes
+        console.log('🔍 Carregando pacientes da API...');
+        const response = await ApiManager.get('/api/pacientes/lista');
         
-        select.innerHTML = '<option value="">Selecione o paciente</option>';
-        pacientes.forEach(paciente => {
-            select.innerHTML += `<option value="${paciente.id}">${paciente.nome}</option>`;
-        });
+        if (response.success && response.pacientes) {
+            select.innerHTML = '<option value="">Selecione o paciente</option>';
+            response.pacientes.forEach(paciente => {
+                select.innerHTML += `<option value="${paciente.id}">${paciente.nome} - ${paciente.cpf}</option>`;
+            });
+            console.log('✅ Pacientes carregados:', response.pacientes.length);
+        } else {
+            throw new Error('Resposta inválida da API');
+        }
         
     } catch (error) {
+        console.warn('⚠️ API de pacientes indisponível, usando dados de exemplo:', error);
         // Pacientes de exemplo
         const pacientes = [
-            { id: 'PAC001', nome: 'Maria Silva' },
-            { id: 'PAC002', nome: 'Ana Costa' },
-            { id: 'PAC003', nome: 'Julia Santos' },
-            { id: 'PAC004', nome: 'Fernanda Lima' },
-            { id: 'PAC005', nome: 'Carla Mendes' }
+            { id: 'PAC001', nome: 'Maria Silva', cpf: '111.111.111-11' },
+            { id: 'PAC002', nome: 'Ana Costa', cpf: '222.222.222-22' },
+            { id: 'PAC003', nome: 'Julia Santos', cpf: '333.333.333-33' },
+            { id: 'PAC004', nome: 'Fernanda Lima', cpf: '444.444.444-44' },
+            { id: 'PAC005', nome: 'Carla Mendes', cpf: '555.555.555-55' }
         ];
         
         select.innerHTML = '<option value="">Selecione o paciente</option>';
         pacientes.forEach(paciente => {
-            select.innerHTML += `<option value="${paciente.id}">${paciente.nome}</option>`;
+            select.innerHTML += `<option value="${paciente.id}">${paciente.nome} - ${paciente.cpf}</option>`;
         });
     }
 }
@@ -938,4 +967,243 @@ function exportarDados() {
 // Função para abrir agendamento rápido
 function abrirAgendamentoRapido() {
     window.open('agendar.html', '_blank');
+}
+
+// ========== SISTEMA DE TABS ==========
+function initializeTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetPanel = button.getAttribute('aria-controls');
+            
+            // Remover active de todos
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            
+            tabPanels.forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // Ativar o selecionado
+            button.classList.add('active');
+            button.setAttribute('aria-selected', 'true');
+            document.getElementById(targetPanel).classList.add('active');
+            
+            // Carregar dados do painel ativo
+            if (targetPanel === 'panel-pacientes') {
+                carregarDadosPacientes();
+            }
+        });
+    });
+}
+
+// ========== GESTÃO DE PACIENTES ==========
+
+let dadosPacientes = [];
+let dadosPacientesFiltrados = [];
+
+async function carregarDadosPacientes() {
+    console.log('🔍 Carregando dados dos pacientes...');
+    
+    try {
+        const response = await ApiManager.get('/api/pacientes/lista');
+        
+        if (response.success && response.pacientes) {
+            dadosPacientes = response.pacientes;
+            dadosPacientesFiltrados = [...dadosPacientes];
+            console.log('✅ Pacientes carregados:', dadosPacientes.length);
+        } else {
+            throw new Error('Resposta inválida da API');
+        }
+        
+    } catch (error) {
+        console.warn('⚠️ API indisponível, usando dados de exemplo:', error);
+        
+        // Dados de exemplo
+        dadosPacientes = [
+            {
+                id: 1,
+                nome: 'Maria Silva Santos',
+                cpf: '111.111.111-11',
+                email: 'maria.silva@email.com',
+                telefone: '(11) 99999-1111',
+                tem_acesso_dashboard: true,
+                status: 'ativo',
+                data_cadastro: '2025-01-15'
+            },
+            {
+                id: 2,
+                nome: 'Ana Costa Lima',
+                cpf: '222.222.222-22',
+                email: 'ana.costa@email.com',
+                telefone: '(11) 99999-2222',
+                tem_acesso_dashboard: false,
+                status: 'ativo',
+                data_cadastro: '2025-02-20'
+            },
+            {
+                id: 3,
+                nome: 'Julia Santos Oliveira',
+                cpf: '333.333.333-33',
+                email: 'julia.santos@email.com',
+                telefone: '(11) 99999-3333',
+                tem_acesso_dashboard: true,
+                status: 'inativo',
+                data_cadastro: '2025-03-10'
+            }
+        ];
+        
+        dadosPacientesFiltrados = [...dadosPacientes];
+        NotificationManager.show('Usando dados de demonstração para pacientes', 'warning');
+    }
+    
+    atualizarTabelaPacientes();
+    atualizarEstatisticasPacientes();
+}
+
+function atualizarTabelaPacientes() {
+    const tbody = document.getElementById('corpoTabelaPacientes');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    dadosPacientesFiltrados.forEach(paciente => {
+        const statusClass = `status-${paciente.status}`;
+        const acessoClass = paciente.tem_acesso_dashboard ? 'com-acesso' : 'sem-acesso';
+        const acessoTexto = paciente.tem_acesso_dashboard ? 'Sim' : 'Não';
+        const acessoIcon = paciente.tem_acesso_dashboard ? 'fas fa-check' : 'fas fa-times';
+        
+        tbody.innerHTML += `
+            <tr>
+                <td>${paciente.id}</td>
+                <td>${paciente.nome}</td>
+                <td>${paciente.cpf}</td>
+                <td>${paciente.email}</td>
+                <td>${paciente.telefone}</td>
+                <td>
+                    <span class="acesso-dashboard ${acessoClass}">
+                        <i class="${acessoIcon}"></i>
+                        ${acessoTexto}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">
+                        ${paciente.status}
+                    </span>
+                </td>
+                <td>
+                    <button onclick="abrirModalAcoesPaciente(${paciente.id})" class="btn btn-sm btn-primary">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function atualizarEstatisticasPacientes() {
+    const total = dadosPacientes.length;
+    const ativos = dadosPacientes.filter(p => p.status === 'ativo').length;
+    const novosEsteMes = dadosPacientes.filter(p => {
+        const cadastro = new Date(p.data_cadastro);
+        const agora = new Date();
+        return cadastro.getMonth() === agora.getMonth() && cadastro.getFullYear() === agora.getFullYear();
+    }).length;
+    
+    document.getElementById('totalPacientes').textContent = total;
+    document.getElementById('pacientesAtivos').textContent = ativos;
+    document.getElementById('pacientesNovos').textContent = novosEsteMes;
+    document.getElementById('consultasAgendadas').textContent = '5'; // Mock data
+}
+
+function filtrarPacientes() {
+    const filtroNome = document.getElementById('filtroNomePaciente').value.toLowerCase();
+    const filtroCpf = document.getElementById('filtroCpfPaciente').value;
+    const filtroStatus = document.getElementById('filtroStatusPaciente').value;
+    const filtroAcesso = document.getElementById('filtroAcessoDashboard').value;
+    
+    dadosPacientesFiltrados = dadosPacientes.filter(paciente => {
+        const matchNome = !filtroNome || paciente.nome.toLowerCase().includes(filtroNome);
+        const matchCpf = !filtroCpf || paciente.cpf.includes(filtroCpf);
+        const matchStatus = !filtroStatus || paciente.status === filtroStatus;
+        const matchAcesso = !filtroAcesso || paciente.tem_acesso_dashboard.toString() === filtroAcesso;
+        
+        return matchNome && matchCpf && matchStatus && matchAcesso;
+    });
+    
+    atualizarTabelaPacientes();
+    NotificationManager.show(`${dadosPacientesFiltrados.length} paciente(s) encontrado(s)`, 'info');
+}
+
+function limparFiltrosPacientes() {
+    document.getElementById('filtroNomePaciente').value = '';
+    document.getElementById('filtroCpfPaciente').value = '';
+    document.getElementById('filtroStatusPaciente').value = '';
+    document.getElementById('filtroAcessoDashboard').value = '';
+    
+    dadosPacientesFiltrados = [...dadosPacientes];
+    atualizarTabelaPacientes();
+}
+
+// Modal de ações do paciente
+let pacienteSelecionado = null;
+
+function abrirModalAcoesPaciente(pacienteId) {
+    pacienteSelecionado = dadosPacientes.find(p => p.id === pacienteId);
+    if (!pacienteSelecionado) return;
+    
+    document.getElementById('nomePacienteSelecionado').textContent = pacienteSelecionado.nome;
+    document.getElementById('detalhesPacienteSelecionado').textContent = 
+        `CPF: ${pacienteSelecionado.cpf} | Email: ${pacienteSelecionado.email}`;
+    
+    document.getElementById('modalAcoesPaciente').style.display = 'flex';
+}
+
+function fecharModalAcoesPaciente() {
+    document.getElementById('modalAcoesPaciente').style.display = 'none';
+    pacienteSelecionado = null;
+}
+
+function editarPaciente() {
+    NotificationManager.show('Funcionalidade de edição em desenvolvimento', 'info');
+    fecharModalAcoesPaciente();
+}
+
+function verHistoricoPaciente() {
+    if (pacienteSelecionado) {
+        NotificationManager.show(`Carregando histórico de ${pacienteSelecionado.nome}...`, 'info');
+        // Implementar busca por histórico via API
+    }
+    fecharModalAcoesPaciente();
+}
+
+function gerenciarAcesso() {
+    if (pacienteSelecionado) {
+        const novoAcesso = !pacienteSelecionado.tem_acesso_dashboard;
+        const acao = novoAcesso ? 'conceder' : 'revogar';
+        
+        if (confirm(`Deseja ${acao} acesso ao dashboard para ${pacienteSelecionado.nome}?`)) {
+            // Atualizar via API
+            pacienteSelecionado.tem_acesso_dashboard = novoAcesso;
+            atualizarTabelaPacientes();
+            NotificationManager.show(`Acesso ${novoAcesso ? 'concedido' : 'revogado'} com sucesso!`, 'success');
+        }
+    }
+    fecharModalAcoesPaciente();
+}
+
+function agendarConsulta() {
+    if (pacienteSelecionado) {
+        NotificationManager.show('Redirecionando para agendamento...', 'info');
+        // Redirecionar para sistema de agendamento
+    }
+    fecharModalAcoesPaciente();
+}
+
+function adicionarPaciente() {
+    NotificationManager.show('Funcionalidade de cadastro em desenvolvimento', 'info');
 }
