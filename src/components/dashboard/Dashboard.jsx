@@ -43,6 +43,7 @@ import { ptBR } from 'date-fns/locale';
 import { fetchAgendamentos } from '../../store/agendamentoSlice';
 import { fetchPacientes } from '../../store/pacienteSlice';
 import { fetchOrcamentos, fetchEstatisticas } from '../../store/orcamentoSlice';
+import AgendamentoRapido from './AgendamentoRapido';
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -266,32 +267,8 @@ const Dashboard = () => {
 
         {/* Sidebar */}
         <Grid item xs={12} md={4}>
-          {/* Próximos Agendamentos */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" component="h2" gutterBottom>
-                Próximos Agendamentos
-              </Typography>
-              
-              {proximosAgendamentos.length === 0 ? (
-                <Typography color="text.secondary" variant="body2">
-                  Nenhum agendamento próximo
-                </Typography>
-              ) : (
-                <List dense>
-                  {proximosAgendamentos.map((agendamento) => (
-                    <ListItem key={agendamento.id} sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={agendamento.paciente_nome}
-                        secondary={format(new Date(agendamento.data_hora), 'dd/MM - HH:mm', { locale: ptBR })}
-                      />
-                      {getStatusChip(agendamento.status)}
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </CardContent>
-          </Card>
+          {/* Componente de Agendamento Rápido */}
+          <AgendamentoRapido />
 
           {/* Pacientes Recentes */}
           <Card sx={{ mb: 3 }}>
@@ -357,23 +334,6 @@ const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
-
-      {/* Botão de Ação Flutuante */}
-      <Tooltip title="Novo Agendamento">
-        <Fab
-          color="primary"
-          aria-label="add"
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
-          }}
-          href="/agendamentos/novo"
-        >
-          <Add />
-        </Fab>
-      </Tooltip>
     </Box>
   );
 };
