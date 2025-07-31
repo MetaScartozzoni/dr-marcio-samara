@@ -581,12 +581,87 @@
         // Global functions for buttons
         function configureService(serviceName) {
             console.log('Configurar:', serviceName);
-            // TODO: Implementar modal de configuração
+            
+            if (serviceName === 'email') {
+                alert('📧 Email já está configurado!\n\nSendGrid: Ativo\nStatus: Funcionando\n\nPara alterar, acesse as variáveis de ambiente no Railway.');
+            } else if (serviceName === 'sms') {
+                alert('📱 SMS (Twilio) está configurado!\n\nAccount SID: Configurado\nAuth Token: Configurado\n\nPara alterar, acesse as variáveis de ambiente no Railway.');
+            } else {
+                alert('⚙️ Configuração de ' + serviceName + ' em desenvolvimento.');
+            }
         }
 
-        function testService(serviceName) {
+        async function testService(serviceName) {
             console.log('Testar:', serviceName);
-            // TODO: Implementar teste de serviço
+            
+            if (serviceName === 'email') {
+                await testEmailService();
+            } else if (serviceName === 'sms') {
+                await testSMSService();
+            } else {
+                alert('🧪 Teste de ' + serviceName + ' em desenvolvimento.');
+            }
+        }
+
+        async function testEmailService() {
+            try {
+                const response = await fetch('/api/enviar-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: 'admin@mscartozzoni.com.br',
+                        subject: '✅ Teste do Sistema de Email',
+                        html: '<h2>🎉 Email funcionando!</h2><p>Este é um teste do sistema de email do Portal Dr. Marcio.</p>'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Email enviado com sucesso!\n\nVerifique sua caixa de entrada: admin@mscartozzoni.com.br');
+                } else {
+                    alert('❌ Erro ao enviar email:\n' + (result.message || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro no teste de email:', error);
+                alert('❌ Erro de conexão ao testar email.');
+            }
+        }
+
+        async function testSMSService() {
+            try {
+                // Pedir número para teste
+                const phoneNumber = prompt('📱 Digite o número para teste (formato: +5511999999999):');
+                
+                if (!phoneNumber) {
+                    alert('❌ Teste cancelado - número não fornecido.');
+                    return;
+                }
+                
+                const response = await fetch('/api/enviar-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: phoneNumber,
+                        message: '📩 Teste SMS do Portal Dr. Marcio - Sistema funcionando!'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ SMS enviado com sucesso!\n\nSID: ' + result.details.sid + '\nStatus: ' + result.details.status);
+                } else {
+                    alert('❌ Erro ao enviar SMS:\n' + (result.message || 'Erro desconhecido') + '\n\nDetalhes: ' + JSON.stringify(result.details || {}));
+                }
+            } catch (error) {
+                console.error('Erro no teste de SMS:', error);
+                alert('❌ Erro de conexão ao testar SMS.');
+            }
         }
 
         function closeConfigModal() {

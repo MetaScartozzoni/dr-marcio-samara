@@ -902,6 +902,93 @@ app.get('/api/email/test', async (req, res) => {
     }
 });
 
+// Endpoint de teste de email via POST
+app.post('/api/enviar-email', async (req, res) => {
+    try {
+        const { to, subject, html } = req.body;
+        
+        if (!to || !subject || !html) {
+            return res.status(400).json({
+                success: false,
+                message: 'Campos obrigatórios: to, subject, html'
+            });
+        }
+        
+        const EmailService = require('./src/services/email-sendgrid.service');
+        const emailService = new EmailService();
+        
+        const resultado = await emailService.enviarEmail(to, subject, html);
+        
+        res.json({
+            success: resultado.sucesso,
+            message: resultado.sucesso ? 'Email enviado com sucesso!' : 'Erro ao enviar email',
+            details: resultado
+        });
+    } catch (error) {
+        console.error('Erro ao enviar email:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro no serviço de email',
+            error: error.message
+        });
+    }
+});
+
+// Endpoint de teste de SMS via POST
+app.post('/api/enviar-sms', async (req, res) => {
+    try {
+        const { to, message } = req.body;
+        
+        if (!to || !message) {
+            return res.status(400).json({
+                success: false,
+                message: 'Campos obrigatórios: to, message'
+            });
+        }
+        
+        // Verificar se o Twilio está configurado
+        if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN || !process.env.TWILIO_PHONE_NUMBER) {
+            return res.status(400).json({
+                success: false,
+                message: 'Serviço SMS não configurado. Faltam variáveis do Twilio.',
+                details: {
+                    account_sid: process.env.TWILIO_ACCOUNT_SID ? 'Configurado' : 'Não configurado',
+                    auth_token: process.env.TWILIO_AUTH_TOKEN ? 'Configurado' : 'Não configurado',
+                    phone_number: process.env.TWILIO_PHONE_NUMBER ? 'Configurado' : 'Não configurado'
+                }
+            });
+        }
+        
+        // Importar Twilio dinamicamente
+        const twilio = require('twilio');
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        
+        const resultado = await client.messages.create({
+            body: message,
+            from: process.env.TWILIO_PHONE_NUMBER,
+            to: to
+        });
+        
+        res.json({
+            success: true,
+            message: 'SMS enviado com sucesso!',
+            details: {
+                sid: resultado.sid,
+                status: resultado.status,
+                to: to
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao enviar SMS:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro no serviço de SMS',
+            error: error.message
+        });
+    }
+});
+
 // ================================
 // NOVAS ROTAS DE AUTENTICAÇÃO COMPLETA
 // ================================
