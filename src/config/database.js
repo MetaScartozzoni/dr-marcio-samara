@@ -374,6 +374,42 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabelas de orçamentos
+        if (!tableNames.includes('orcamentos')) {
+            console.log('🔧 Criando estrutura de orçamentos...');
+            
+            // Executar migração de orçamentos
+            const fs = require('fs');
+            const path = require('path');
+            const migrationPath = path.join(__dirname, '../../database/migrations/create_orcamentos_tables.sql');
+            
+            try {
+                const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+                await client.query(migrationSQL);
+                console.log('✅ Tabelas de orçamentos criadas com sucesso');
+            } catch (migrationError) {
+                console.error('❌ Erro ao executar migração de orçamentos:', migrationError);
+                
+                // Fallback - criar estrutura básica
+                await client.query(`
+                    CREATE TABLE IF NOT EXISTS orcamentos (
+                        id SERIAL PRIMARY KEY,
+                        paciente_id INTEGER,
+                        numero_orcamento VARCHAR(20) UNIQUE NOT NULL,
+                        valor_total DECIMAL(10,2) NOT NULL,
+                        descricao_procedimento TEXT,
+                        forma_pagamento VARCHAR(50),
+                        observacoes TEXT,
+                        vencimento DATE,
+                        status VARCHAR(30) DEFAULT 'pendente',
+                        criado_por INTEGER,
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                `);
+            }
+        }
+        
         console.log('✅ Estrutura do banco verificada/criada');
         
     } catch (error) {
