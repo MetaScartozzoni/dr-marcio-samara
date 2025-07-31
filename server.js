@@ -4,6 +4,7 @@ const { JWT } = require('google-auth-library');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 const app = express();
 
 // Importar configuração de banco
@@ -35,6 +36,7 @@ const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require
 // Middleware básico
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // MIDDLEWARE DE SETUP - DEVE VIR ANTES DOS OUTROS
 app.use(checkSystemSetup);
@@ -327,6 +329,383 @@ app.post('/api/capturar-lead', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// ==================== APIS DE AGENDAMENTO ====================
+
+// Criar agendamento (auto-agendamento ou secretaria)
+app.post('/api/agendamentos', async (req, res) => {
+    try {
+        const {
+            paciente_nome,
+            paciente_email,
+            paciente_telefone,
+            data_agendamento,
+            hora_agendamento,
+            tipo_consulta,
+            observacoes,
+            origem
+        } = req.body;
+
+        // Validações
+        if (!paciente_nome || !data_agendamento || !hora_agendamento) {
+            return res.status(400).json({
+                success: false,
+                message: 'Nome do paciente, data e hora são obrigatórios'
+            });
+        }
+
+        // Gerar protocolo único
+        const protocolo = `AGD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+
+        // Verificar disponibilidade do horário
+        const checkQuery = `
+            SELECT id FROM agendamentos 
+            WHERE data_agendamento = $1 AND hora_agendamento = $2 AND status != 'cancelado'
+        `;
+        const checkResult = await pool.query(checkQuery, [data_agendamento, hora_agendamento]);
+
+        if (checkResult.rows.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'Horário já ocupado'
+            });
+        }
+
+        // Inserir agendamento
+        const insertQuery = `
+            INSERT INTO agendamentos (
+                protocolo, paciente_nome, paciente_email, paciente_telefone,
+                data_agendamento, hora_agendamento, tipo_consulta, observacoes,
+                origem, status, confirmado, created_by
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            RETURNING *
+        `;
+
+        const values = [
+            protocolo,
+            paciente_nome,
+            paciente_email || null,
+            paciente_telefone || null,
+            data_agendamento,
+            hora_agendamento,
+            tipo_consulta || 'consulta',
+            observacoes || null,
+            origem || 'auto_agendamento',
+            origem === 'auto_agendamento' ? 'agendado' : 'confirmado',
+            origem === 'auto_agendamento' ? false : true,
+            'sistema'
+        ];
+
+        const result = await pool.query(insertQuery, values);
+        const agendamento = result.rows[0];
+
+        console.log(`✅ Agendamento criado: ${protocolo} - ${paciente_nome}`);
+
+        res.json({
+            success: true,
+            message: 'Agendamento criado com sucesso',
+            agendamento: agendamento,
+            protocolo: protocolo
+        });
+
+    } catch (error) {
+        console.error('Erro ao criar agendamento:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Listar agendamentos
+app.get('/api/agendamentos', async (req, res) => {
+    try {
+        const { data_inicio, data_fim, status, origem } = req.query;
+
+        let query = `
+            SELECT * FROM agendamentos 
+            WHERE 1=1
+        `;
+        const values = [];
+        let paramCount = 1;
+
+        if (data_inicio) {
+            query += ` AND data_agendamento >= $${paramCount}`;
+            values.push(data_inicio);
+            paramCount++;
+        }
+
+        if (data_fim) {
+            query += ` AND data_agendamento <= $${paramCount}`;
+            values.push(data_fim);
+            paramCount++;
+        }
+
+        if (status) {
+            query += ` AND status = $${paramCount}`;
+            values.push(status);
+            paramCount++;
+        }
+
+        if (origem) {
+            query += ` AND origem = $${paramCount}`;
+            values.push(origem);
+            paramCount++;
+        }
+
+        query += ` ORDER BY data_agendamento ASC, hora_agendamento ASC`;
+
+        const result = await pool.query(query, values);
+
+        res.json({
+            success: true,
+            agendamentos: result.rows,
+            total: result.rows.length
+        });
+
+    } catch (error) {
+        console.error('Erro ao listar agendamentos:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Obter disponibilidade do calendário
+app.get('/api/agendamentos/disponibilidade', async (req, res) => {
+    try {
+        const { data_inicio, data_fim } = req.query;
+
+        if (!data_inicio || !data_fim) {
+            return res.status(400).json({
+                success: false,
+                message: 'Data início e fim são obrigatórias'
+            });
+        }
+
+        // Buscar configuração do calendário
+        const configQuery = `
+            SELECT * FROM calendario_config 
+            WHERE ativo = true 
+            ORDER BY dia_semana, hora_inicio
+        `;
+        const configResult = await pool.query(configQuery);
+
+        // Buscar agendamentos existentes
+        const agendQuery = `
+            SELECT data_agendamento, hora_agendamento 
+            FROM agendamentos 
+            WHERE data_agendamento BETWEEN $1 AND $2 
+            AND status != 'cancelado'
+        `;
+        const agendResult = await pool.query(agendQuery, [data_inicio, data_fim]);
+
+        // Buscar bloqueios
+        const bloqueiosQuery = `
+            SELECT data_inicio, data_fim FROM calendario_bloqueios
+            WHERE (data_inicio <= $2 AND data_fim >= $1)
+        `;
+        const bloqueiosResult = await pool.query(bloqueiosQuery, [data_inicio, data_fim]);
+
+        res.json({
+            success: true,
+            configuracao: configResult.rows,
+            agendamentos_ocupados: agendResult.rows,
+            bloqueios: bloqueiosResult.rows
+        });
+
+    } catch (error) {
+        console.error('Erro ao obter disponibilidade:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Atualizar status do agendamento
+app.patch('/api/agendamentos/:id/status', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, observacoes } = req.body;
+
+        const statusPermitidos = ['agendado', 'confirmado', 'realizado', 'cancelado', 'falta', 'reagendado'];
+        if (!statusPermitidos.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Status inválido'
+            });
+        }
+
+        const updateQuery = `
+            UPDATE agendamentos 
+            SET status = $1, observacoes = COALESCE($2, observacoes), updated_at = CURRENT_TIMESTAMP
+            WHERE id = $3
+            RETURNING *
+        `;
+
+        const result = await pool.query(updateQuery, [status, observacoes, id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Agendamento não encontrado'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Status atualizado com sucesso',
+            agendamento: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Confirmar agendamento (para auto-agendamentos)
+app.patch('/api/agendamentos/:id/confirmar', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const updateQuery = `
+            UPDATE agendamentos 
+            SET confirmado = true, status = 'confirmado', updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1 AND origem = 'auto_agendamento'
+            RETURNING *
+        `;
+
+        const result = await pool.query(updateQuery, [id]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Agendamento não encontrado ou não é auto-agendamento'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Agendamento confirmado com sucesso',
+            agendamento: result.rows[0]
+        });
+
+    } catch (error) {
+        console.error('Erro ao confirmar agendamento:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Obter agendamentos do dia (dashboard)
+app.get('/api/agendamentos/hoje', async (req, res) => {
+    try {
+        const hoje = new Date().toISOString().split('T')[0];
+
+        const query = `
+            SELECT * FROM agendamentos 
+            WHERE data_agendamento = $1 
+            AND status != 'cancelado'
+            ORDER BY hora_agendamento ASC
+        `;
+
+        const result = await pool.query(query, [hoje]);
+
+        res.json({
+            success: true,
+            agendamentos: result.rows,
+            total: result.rows.length
+        });
+
+    } catch (error) {
+        console.error('Erro ao buscar agendamentos de hoje:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// ==================== APIS DE CONFIGURAÇÃO DO CALENDÁRIO ====================
+
+// Obter configuração do calendário
+app.get('/api/calendario/config', async (req, res) => {
+    try {
+        const query = `
+            SELECT * FROM calendario_config 
+            ORDER BY dia_semana, hora_inicio
+        `;
+        const result = await pool.query(query);
+
+        res.json({
+            success: true,
+            configuracao: result.rows
+        });
+
+    } catch (error) {
+        console.error('Erro ao obter configuração do calendário:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Atualizar configuração do calendário
+app.put('/api/calendario/config', async (req, res) => {
+    try {
+        const { configuracao } = req.body;
+
+        // Validar dados
+        if (!Array.isArray(configuracao)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Configuração deve ser um array'
+            });
+        }
+
+        // Limpar configuração atual
+        await pool.query('DELETE FROM calendario_config');
+
+        // Inserir nova configuração
+        for (const config of configuracao) {
+            const insertQuery = `
+                INSERT INTO calendario_config (
+                    dia_semana, hora_inicio, hora_fim, intervalo_consulta, ativo, observacoes
+                ) VALUES ($1, $2, $3, $4, $5, $6)
+            `;
+            
+            await pool.query(insertQuery, [
+                config.dia_semana,
+                config.hora_inicio,
+                config.hora_fim,
+                config.intervalo_consulta || 30,
+                config.ativo !== false,
+                config.observacoes || null
+            ]);
+        }
+
+        res.json({
+            success: true,
+            message: 'Configuração do calendário atualizada com sucesso'
+        });
+
+    } catch (error) {
+        console.error('Erro ao atualizar configuração do calendário:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
         });
     }
 });
