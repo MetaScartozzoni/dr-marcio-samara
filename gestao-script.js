@@ -996,6 +996,8 @@ function initializeTabs() {
             // Carregar dados do painel ativo
             if (targetPanel === 'panel-pacientes') {
                 carregarDadosPacientes();
+            } else if (targetPanel === 'panel-logs') {
+                carregarDadosLogs();
             }
         });
     });
@@ -1181,22 +1183,46 @@ function verHistoricoPaciente() {
     fecharModalAcoesPaciente();
 }
 
-function gerenciarAcesso() {
-    if (pacienteSelecionado) {
-        const novoAcesso = !pacienteSelecionado.tem_acesso_dashboard;
-        const acao = novoAcesso ? 'conceder' : 'revogar';
-        
-        if (confirm(`Deseja ${acao} acesso ao dashboard para ${pacienteSelecionado.nome}?`)) {
-            // Atualizar via API
-            pacienteSelecionado.tem_acesso_dashboard = novoAcesso;
-            atualizarTabelaPacientes();
-            NotificationManager.show(`Acesso ${novoAcesso ? 'concedido' : 'revogado'} com sucesso!`, 'success');
+        function gerenciarAcesso() {
+            if (pacienteSelecionado) {
+                const novoAcesso = !pacienteSelecionado.tem_acesso_dashboard;
+                const acao = novoAcesso ? 'conceder' : 'revogar';
+                
+                if (confirm(`Deseja ${acao} acesso ao dashboard para ${pacienteSelecionado.nome}?`)) {
+                    // Atualizar via API
+                    atualizarAcessoPaciente(pacienteSelecionado.id, novoAcesso);
+                }
+            }
+            fecharModalAcoesPaciente();
         }
-    }
-    fecharModalAcoesPaciente();
-}
-
-function agendarConsulta() {
+        
+        async function atualizarAcessoPaciente(pacienteId, novoAcesso) {
+            try {
+                const response = await ApiManager.put(`/api/pacientes/${pacienteId}/acesso`, {
+                    tem_acesso_dashboard: novoAcesso
+                });
+                
+                if (response.success) {
+                    // Atualizar dados locais
+                    const paciente = dadosPacientes.find(p => p.id === pacienteId);
+                    if (paciente) {
+                        paciente.tem_acesso_dashboard = novoAcesso;
+                        atualizarTabelaPacientes();
+                    }
+                    
+                    NotificationManager.show(`Acesso ${novoAcesso ? 'concedido' : 'revogado'} com sucesso!`, 'success');
+                    
+                    // Log da ação no frontend
+                    console.log(`📝 ADMIN ACTION: Acesso ${novoAcesso ? 'concedido' : 'revogado'} para paciente ID ${pacienteId}`);
+                } else {
+                    NotificationManager.show('Erro ao atualizar acesso', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao atualizar acesso:', error);
+                NotificationManager.show('Erro de comunicação com o servidor', 'error');
+            }
+        }function agendarConsulta() {
     if (pacienteSelecionado) {
         NotificationManager.show('Redirecionando para agendamento...', 'info');
         // Redirecionar para sistema de agendamento
@@ -1204,6 +1230,209 @@ function agendarConsulta() {
     fecharModalAcoesPaciente();
 }
 
-function adicionarPaciente() {
-    NotificationManager.show('Funcionalidade de cadastro em desenvolvimento', 'info');
-}
+        function adicionarPaciente() {
+            NotificationManager.show('Funcionalidade de cadastro em desenvolvimento', 'info');
+        }
+
+        // ========== GESTÃO DE LOGS ADMINISTRATIVOS ==========
+
+        let dadosLogs = [];
+        let autoRefreshLogs = false;
+        let intervalRefreshLogs = null;
+
+        async function carregarDadosLogs() {
+            console.log('🔍 Carregando logs administrativos...');
+            
+            try {
+                const response = await ApiManager.get('/api/admin/logs/recente?horas=24');
+                
+                if (response.success && response.data) {
+                    dadosLogs = response.data.logs || [];
+                    console.log('✅ Logs carregados:', dadosLogs.length);
+                    
+                    // Carregar estatísticas
+                    const statsResponse = await ApiManager.get('/api/admin/logs/estatisticas');
+                    if (statsResponse.success) {
+                        atualizarEstatisticasLogs(statsResponse.data);
+                    }
+                } else {
+                    throw new Error('Resposta inválida da API');
+                }
+                
+            } catch (error) {
+                console.warn('⚠️ API de logs indisponível, usando dados de exemplo:', error);
+                
+                // Dados de exemplo
+                dadosLogs = [
+                    {
+                        id: 1,
+                        tipo: 'PACIENTE',
+                        descricao: 'Paciente Maria Silva cadastrado com sucesso',
+                        nome_usuario: 'Dr. Marcio',
+                        data_evento: new Date().toISOString(),
+                        detalhes: { ip: '192.168.1.1', tem_acesso_dashboard: true }
+                    },
+                    {
+                        id: 2,
+                        tipo: 'ORCAMENTO',
+                        descricao: 'Orçamento ORC202507001 criado - Valor: R$ 2500.00',
+                        nome_usuario: 'Dr. Marcio',
+                        data_evento: new Date(Date.now() - 3600000).toISOString(),
+                        detalhes: { valor_total: 2500, numero_orcamento: 'ORC202507001' }
+                    },
+                    {
+                        id: 3,
+                        tipo: 'ACESSO',
+                        descricao: 'Acesso ao dashboard concedido para Ana Costa',
+                        nome_usuario: 'Dr. Marcio',
+                        data_evento: new Date(Date.now() - 7200000).toISOString(),
+                        detalhes: { acao_acesso: 'concedido', ip: '192.168.1.2' }
+                    }
+                ];
+                
+                NotificationManager.show('Usando dados de demonstração para logs', 'warning');
+            }
+            
+            atualizarTabelaLogs();
+        }
+
+        function atualizarTabelaLogs() {
+            const tbody = document.getElementById('corpoTabelaLogs');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            dadosLogs.forEach(log => {
+                const data = new Date(log.data_evento);
+                const dataFormatada = data.toLocaleString('pt-BR');
+                
+                const tipoClass = `log-tipo-${log.tipo.toLowerCase()}`;
+                
+                let detalhesText = '';
+                if (log.detalhes && typeof log.detalhes === 'object') {
+                    detalhesText = Object.keys(log.detalhes)
+                        .map(key => `${key}: ${log.detalhes[key]}`)
+                        .join(', ');
+                }
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${dataFormatada}</td>
+                        <td>
+                            <span class="tipo-badge ${tipoClass}">
+                                ${log.tipo}
+                            </span>
+                        </td>
+                        <td>${log.descricao}</td>
+                        <td>${log.nome_usuario || 'Sistema'}</td>
+                        <td>
+                            <small class="detalhes-log" title="${detalhesText}">
+                                ${detalhesText.length > 50 ? detalhesText.substring(0, 50) + '...' : detalhesText}
+                            </small>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function atualizarEstatisticasLogs(estatisticas) {
+            if (estatisticas.geral) {
+                document.getElementById('totalLogs').textContent = estatisticas.geral.total_logs || 0;
+                document.getElementById('logs24h').textContent = estatisticas.geral.atividade_24h || 0;
+                document.getElementById('usuariosAtivos').textContent = estatisticas.geral.usuarios_ativos || 0;
+                
+                const atividadeMedia = estatisticas.geral.atividade_24h 
+                    ? Math.round(estatisticas.geral.atividade_24h / 24) 
+                    : 0;
+                document.getElementById('atividadeMedia').textContent = atividadeMedia;
+            }
+        }
+
+        async function filtrarLogs() {
+            const filtros = {
+                tipo: document.getElementById('filtroTipoLog').value,
+                data_inicio: document.getElementById('filtroDataInicioLog').value,
+                data_fim: document.getElementById('filtroDataFimLog').value,
+                limit: document.getElementById('filtroLimiteLogs').value
+            };
+            
+            try {
+                let url = '/api/admin/logs?';
+                Object.keys(filtros).forEach(key => {
+                    if (filtros[key]) {
+                        url += `${key}=${encodeURIComponent(filtros[key])}&`;
+                    }
+                });
+                
+                const response = await ApiManager.get(url);
+                
+                if (response.success) {
+                    dadosLogs = response.data.logs || [];
+                    atualizarTabelaLogs();
+                    NotificationManager.show(`${dadosLogs.length} log(s) encontrado(s)`, 'info');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao filtrar logs:', error);
+                NotificationManager.show('Erro ao filtrar logs', 'error');
+            }
+        }
+
+        function limparFiltrosLogs() {
+            document.getElementById('filtroTipoLog').value = '';
+            document.getElementById('filtroDataInicioLog').value = '';
+            document.getElementById('filtroDataFimLog').value = '';
+            document.getElementById('filtroLimiteLogs').value = '100';
+            
+            carregarDadosLogs();
+        }
+
+        function atualizarLogsAutomatico() {
+            const btn = document.getElementById('btnAutoRefresh');
+            
+            if (autoRefreshLogs) {
+                // Parar auto-refresh
+                autoRefreshLogs = false;
+                clearInterval(intervalRefreshLogs);
+                btn.innerHTML = '<i class="fas fa-sync"></i> Auto-Atualizar';
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-success');
+                NotificationManager.show('Auto-atualização desativada', 'info');
+            } else {
+                // Iniciar auto-refresh
+                autoRefreshLogs = true;
+                intervalRefreshLogs = setInterval(carregarDadosLogs, 30000); // A cada 30 segundos
+                btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Ativo';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-warning');
+                NotificationManager.show('Auto-atualização ativada (30s)', 'success');
+            }
+        }
+
+        function exportarLogs() {
+            try {
+                const csvContent = [
+                    'Data/Hora,Tipo,Descrição,Usuário,Detalhes',
+                    ...dadosLogs.map(log => {
+                        const data = new Date(log.data_evento).toLocaleString('pt-BR');
+                        const detalhes = log.detalhes ? JSON.stringify(log.detalhes).replace(/"/g, '""') : '';
+                        return `"${data}","${log.tipo}","${log.descricao}","${log.nome_usuario || 'Sistema'}","${detalhes}"`;
+                    })
+                ].join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `logs_sistema_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                NotificationManager.show('Logs exportados com sucesso!', 'success');
+                
+            } catch (error) {
+                NotificationManager.show(`Erro ao exportar logs: ${error.message}`, 'error');
+            }
+        }

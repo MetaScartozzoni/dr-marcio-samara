@@ -30,6 +30,7 @@ const systemRoutes = require('./src/routes/system.routes');
 
 // Importar rotas da integração completa
 const pacientesRoutes = require('./src/routes/pacientes.routes');
+const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require('./src/routes/admin.routes');
 
 // Middleware básico
 app.use(cors());
@@ -770,6 +771,10 @@ app.use('/api/system', systemRoutes);
 
 // Rotas da integração completa de pacientes
 app.use('/api/pacientes', pacientesRoutes);
+
+// Rotas administrativas para logs
+initializeAdminRoutes(pool);
+app.use('/api/admin', adminRoutes);
 
 // ENDPOINTS ANTIGOS (Google Sheets) - Manter durante migração
 const configRoutes = require('./src/routes/config.routes');

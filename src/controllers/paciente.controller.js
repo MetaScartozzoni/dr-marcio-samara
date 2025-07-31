@@ -1,10 +1,12 @@
 // src/controllers/paciente.controller.js
 const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
+const Logger = require('../utils/logger');
 
 class PacienteController {
     constructor(db) {
         this.db = db;
+        this.logger = new Logger(db);
     }
 
     // ==========================================
@@ -91,6 +93,19 @@ class PacienteController {
             `, [paciente.id]);
 
             await client.query('COMMIT');
+
+            // LOG DA AÇÃO
+            await this.logger.logPaciente(
+                `Paciente ${paciente.nome} cadastrado com sucesso`,
+                paciente.id,
+                req.user?.id || null,
+                {
+                    tem_acesso_dashboard,
+                    prontuario_numero: numeroProntuario,
+                    ip: req.ip,
+                    user_agent: req.get('User-Agent')
+                }
+            );
 
             res.status(201).json({
                 success: true,
@@ -418,6 +433,20 @@ class PacienteController {
             }
 
             await client.query('COMMIT');
+
+            // LOG DA AÇÃO
+            const acao = tem_acesso_dashboard ? 'concedido' : 'revogado';
+            await this.logger.logPaciente(
+                `Acesso ao dashboard ${acao} para ${paciente.nome}`,
+                paciente.id,
+                req.user?.id || null,
+                {
+                    acao_acesso: acao,
+                    email_usado: email || paciente.email,
+                    ip: req.ip,
+                    user_agent: req.get('User-Agent')
+                }
+            );
 
             res.json({
                 success: true,

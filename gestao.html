@@ -529,6 +529,131 @@
                     </div>
                 </section>
             </div> <!-- Fim do panel-pacientes -->
+
+            <!-- Painel de Logs Administrativos -->
+            <div id="panel-logs" class="tab-panel" role="tabpanel" aria-labelledby="tab-logs">
+                <section class="stats-section">
+                    <h2 class="sr-only">Estatísticas dos Logs</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-alt" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalLogs">0</div>
+                                <div class="stat-label">Total de Logs</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                <i class="fas fa-clock" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="logs24h">0</div>
+                                <div class="stat-label">Últimas 24h</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                <i class="fas fa-users" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="usuariosAtivos">0</div>
+                                <div class="stat-label">Usuários Ativos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="atividadeMedia">0</div>
+                                <div class="stat-label">Atividade/Hora</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filtros para Logs -->
+                <section class="filters-section">
+                    <h2><i class="fas fa-filter"></i> Filtros de Logs</h2>
+                    
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filtroTipoLog">Tipo de Log:</label>
+                            <select id="filtroTipoLog" class="form-control">
+                                <option value="">Todos os Tipos</option>
+                                <option value="PACIENTE">Pacientes</option>
+                                <option value="ORCAMENTO">Orçamentos</option>
+                                <option value="FICHA_ATENDIMENTO">Fichas</option>
+                                <option value="ACESSO">Acessos</option>
+                                <option value="SISTEMA">Sistema</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataInicioLog">Data Início:</label>
+                            <input type="datetime-local" id="filtroDataInicioLog" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataFimLog">Data Fim:</label>
+                            <input type="datetime-local" id="filtroDataFimLog" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroLimiteLogs">Limite:</label>
+                            <select id="filtroLimiteLogs" class="form-control">
+                                <option value="50">50 registros</option>
+                                <option value="100" selected>100 registros</option>
+                                <option value="200">200 registros</option>
+                                <option value="500">500 registros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-actions">
+                        <button onclick="filtrarLogs()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                        <button onclick="limparFiltrosLogs()" class="btn btn-secondary">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                        <button onclick="exportarLogs()" class="btn btn-info">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                        <button onclick="atualizarLogsAutomatico()" class="btn btn-success" id="btnAutoRefresh">
+                            <i class="fas fa-sync"></i> Auto-Atualizar
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tabela de Logs -->
+                <section class="table-section">
+                    <h2><i class="fas fa-list"></i> Logs do Sistema</h2>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Usuário</th>
+                                    <th>Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabelaLogs">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div> <!-- Fim do panel-logs -->
         </div>
     </main>
 
