@@ -360,7 +360,7 @@ app.post('/api/login', async (req, res) => {
             let redirectUrl = '/dashboard.html'; // Dashboard universal que detecta o tipo
             
             // Admin vai direto para dashboard, outros vão para pending
-            if (user.email !== 'admin@clinica.com') {
+            if (user.tipo !== 'admin') {
                 redirectUrl = '/pending.html';
             }
             
@@ -372,8 +372,8 @@ app.post('/api/login', async (req, res) => {
                     id: user.id,
                     nome: user.nome,
                     email: user.email,
-                    tipo: user.email === 'admin@clinica.com' ? 'admin' : 'paciente',
-                    status: user.email === 'admin@clinica.com' ? 'ativo' : 'pending',
+                    tipo: user.tipo || 'paciente',
+                    status: user.tipo === 'admin' ? 'ativo' : (user.status || 'pending'),
                     autorizado: user.autorizado
                 },
                 redirect: redirectUrl
