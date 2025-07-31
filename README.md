@@ -44,6 +44,16 @@ O Portal Dr. Marcio é uma plataforma completa para gestão médica que integra:
 
 ## 👥 Sistema de Administração e Cadastro
 
+### 🔐 **PRIMEIRO ACESSO ADMINISTRATIVO**
+
+O sistema cria automaticamente um administrador padrão na primeira inicialização.
+
+```
+🚪 Login: /login.html
+🔒 Credenciais: Disponíveis via canal seguro
+⚠️ IMPORTANTE: Altere as credenciais após o primeiro login!
+```
+
 ### 🔐 **Como Funciona o Sistema de Admin/Cadastro**
 
 O Portal Dr. Marcio possui um **sistema de autorização em 3 níveis**:

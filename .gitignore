@@ -18,6 +18,12 @@ client_secret_*.json
 awesome-aurora-*.json
 service-account-*.json
 
+# Arquivos privados e sensíveis
+.private/
+**/admin-credentials.*
+**/credenciais-*
+sensitive-*
+
 # Chaves de API e tokens
 *.key
 *.pem
