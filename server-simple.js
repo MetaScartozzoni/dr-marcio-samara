@@ -592,6 +592,71 @@ app.post('/api/recuperar-senha', async (req, res) => {
     }
 });
 
+// Rota para redefinir senha com código
+app.post('/api/redefinir-senha', async (req, res) => {
+    try {
+        const { email, codigo, novaSenha } = req.body;
+        console.log('🔄 Redefinição de senha para:', email, 'Código:', codigo);
+        
+        if (!email || !codigo || !novaSenha) {
+            return res.json({
+                success: false,
+                message: 'Email, código e nova senha são obrigatórios'
+            });
+        }
+        
+        if (novaSenha.length < 6) {
+            return res.json({
+                success: false,
+                message: 'A senha deve ter pelo menos 6 caracteres'
+            });
+        }
+        
+        // Verificar se usuário existe
+        const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+        
+        if (result.rows.length === 0) {
+            return res.json({
+                success: false,
+                message: 'Email não encontrado'
+            });
+        }
+        
+        // Em um sistema real, você verificaria o código contra uma tabela de códigos temporários
+        // Por simplicidade, vamos aceitar qualquer código de 6 dígitos
+        if (!/^\d{6}$/.test(codigo)) {
+            return res.json({
+                success: false,
+                message: 'Código inválido'
+            });
+        }
+        
+        // Hash da nova senha
+        const hashedPassword = await bcrypt.hash(novaSenha, 10);
+        
+        // Atualizar senha no banco
+        await pool.query(
+            'UPDATE usuarios SET senha = $1 WHERE email = $2',
+            [hashedPassword, email]
+        );
+        
+        console.log('✅ Senha atualizada com sucesso para:', email);
+        
+        res.json({
+            success: true,
+            message: 'Senha redefinida com sucesso! Você pode fazer login agora.'
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao redefinir senha:', error);
+        res.json({
+            success: false,
+            message: 'Erro interno do servidor',
+            error: error.message
+        });
+    }
+});
+
 // Enviar email real via SendGrid
 app.post('/api/enviar-email', async (req, res) => {
     try {

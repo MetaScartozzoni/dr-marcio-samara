@@ -194,22 +194,37 @@
             message.innerHTML = '';
             
             try {
-                // Aqui você faria uma chamada para /api/redefinir-senha
-                // Por enquanto, vamos simular o sucesso
-                await new Promise(resolve => setTimeout(resolve, 1500)); // Simular delay
+                // Redefinir senha no backend
+                const response = await fetch('/api/redefinir-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: emailAtual,
+                        codigo: codigo,
+                        novaSenha: novaSenha
+                    })
+                });
                 
-                message.innerHTML = `
-                    <div class="success">
-                        ✅ Senha redefinida com sucesso!
-                        <br><br>
-                        <a href="/login.html" class="btn-primary" 
-                           style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
-                            Fazer Login
-                        </a>
-                    </div>
-                `;
+                const data = await response.json();
                 
-                document.getElementById('verificarCodigoForm').style.display = 'none';
+                if (data.success) {
+                    message.innerHTML = `
+                        <div class="success">
+                            ✅ ${data.message}
+                            <br><br>
+                            <a href="/login.html" class="btn-primary" 
+                               style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
+                                Fazer Login
+                            </a>
+                        </div>
+                    `;
+                    
+                    document.getElementById('verificarCodigoForm').style.display = 'none';
+                } else {
+                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                }
                 
             } catch (error) {
                 console.error('❌ Erro:', error);
