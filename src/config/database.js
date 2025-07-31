@@ -3,11 +3,17 @@ const { Pool } = require('pg');
 
 // Configuração do pool de conexões PostgreSQL
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:ydKZVqeDdnQVSPOsAkcKJhoTHLsOEqxu@maglev.proxy.rlwy.net:39156/railway',
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 20,
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:pFYtWUlDjHNTGWJGFUluAUyImYYqBGuf@yamabiko.proxy.rlwy.net:27448/railway',
+    ssl: process.env.NODE_ENV === 'production' ? { 
+        rejectUnauthorized: false,
+        sslmode: 'require'
+    } : false,
+    max: process.env.NODE_ENV === 'production' ? 10 : 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
+    // Configurações específicas para Railway
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
 });
 
 // Tratamento de eventos

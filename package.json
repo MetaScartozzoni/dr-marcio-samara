@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server-simple.js",
+    "dev": "node server-simple.js",
     "build": "echo 'Build completed successfully'"
   },
   "engines": {
