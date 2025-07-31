@@ -996,21 +996,44 @@ app.use('/api/config', configRoutes);
 // As funcionalidades foram migradas para PostgreSQL nas rotas do sistema principal
 */
 
-// Health Check para Railway
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
-        services: {
-            server: '✅ Online',
-            sendgrid: process.env.SENDGRID_API_KEY ? '✅ Configurado' : '❌ Não configurado',
-            twilio: process.env.TWILIO_ACCOUNT_SID ? '✅ Configurado' : '❌ Não configurado',
-            database: process.env.DATABASE_URL ? '✅ Conectado' : '❌ Não conectado'
-        },
-        version: '1.0.0',
-        uptime: process.uptime()
-    });
+// Health Check simples para Railway (sem depender do banco)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+// Health Check detalhado para Railway
+app.get('/api/health', async (req, res) => {
+    try {
+        // Testar conexão com banco
+        await testConnection();
+        
+        res.json({
+            status: 'OK',
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development',
+            services: {
+                server: '✅ Online',
+                database: '✅ Conectado',
+                sendgrid: process.env.SENDGRID_API_KEY ? '✅ Configurado' : '❌ Não configurado',
+                twilio: process.env.TWILIO_ACCOUNT_SID ? '✅ Configurado' : '❌ Não configurado'
+            },
+            version: '1.0.0',
+            uptime: process.uptime()
+        });
+    } catch (error) {
+        console.error('❌ Health check failed:', error);
+        res.status(503).json({
+            status: 'ERROR',
+            timestamp: new Date().toISOString(),
+            error: error.message,
+            services: {
+                server: '✅ Online',
+                database: '❌ Erro de conexão',
+                sendgrid: process.env.SENDGRID_API_KEY ? '✅ Configurado' : '❌ Não configurado',
+                twilio: process.env.TWILIO_ACCOUNT_SID ? '✅ Configurado' : '❌ Não configurado'
+            }
+        });
+    }
 });
 
 // Endpoint de teste de email
@@ -1203,8 +1226,20 @@ async function startServer() {
             throw new Error('Falha na conexão com banco de dados');
         }
         
-        // 2. Inicializar estrutura do banco
-        await initializeDatabase();
+        // 2. Inicializar estrutura do banco (com timeout)
+        try {
+            console.log('🔧 Inicializando estrutura do banco...');
+            await Promise.race([
+                initializeDatabase(),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout na inicialização do banco')), 30000)
+                )
+            ]);
+            console.log('✅ Banco inicializado com sucesso');
+        } catch (dbInitError) {
+            console.warn('⚠️ Aviso: Falha na inicialização do banco:', dbInitError.message);
+            console.log('📋 Servidor iniciará mesmo assim - banco será inicializado no primeiro acesso');
+        }
         
         // 3. Google Sheets desabilitado - usando apenas PostgreSQL
         // await initSheet(); // Comentado - não necessário
