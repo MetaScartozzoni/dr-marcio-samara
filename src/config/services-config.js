@@ -408,10 +408,4 @@ class ServicesConfig {
     }
 }
 
-// Criar instância
-const servicesConfig = new ServicesConfig();
-
-// Auto-detectar na inicialização
-servicesConfig.autoDetectConfigurations();
-
-module.exports = servicesConfig;
+module.exports = ServicesConfig;

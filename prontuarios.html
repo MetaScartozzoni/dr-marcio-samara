@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Prontuários - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="card-unificado.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="card-unificado.js"></script>
     <style>
         .prontuarios-container {
             max-width: 1400px;
@@ -157,13 +159,17 @@
             font-weight: 600;
         }
 
-        .prontuarios-grid {
+        .prontuarios-grid, .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
             padding: 30px;
             max-width: 1400px;
             margin: 0 auto;
+        }
+        
+        .cards-container .cards-grid {
+            display: contents; /* Para que os cards se distribuam no grid principal */
         }
 
         .prontuario-card {
@@ -473,7 +479,7 @@
                 <div class="total-prontuarios" id="totalProntuarios">0 prontuários</div>
             </div>
 
-            <div id="prontuariosGrid" class="prontuarios-grid">
+            <div id="prontuariosGrid" class="cards-container">
                 <!-- Prontuários serão carregados dinamicamente -->
             </div>
         </div>
@@ -537,6 +543,9 @@
     <script>
         let prontuarios = [];
         let prontuariosFiltrados = [];
+        
+        // Instância do sistema de cards unificados
+        let cardUnificado;
 
         // Dados de exemplo
         const prontuariosExemplo = [
@@ -575,12 +584,52 @@
                 ultimaConsulta: '2025-07-25',
                 totalConsultas: 2,
                 status: 'Ativo'
+            },
+            {
+                id: 'PRON004',
+                nome: 'Roberto Mendes Lima',
+                cpf: '321.654.987-00',
+                dataNascimento: '1982-09-10',
+                telefone: '(11) 66666-4444',
+                email: 'roberto.mendes@email.com',
+                dataCriacao: '2024-11-05',
+                ultimaConsulta: '2025-05-15',
+                totalConsultas: 8,
+                status: 'Ativo'
+            },
+            {
+                id: 'PRON005',
+                nome: 'Carmen Rodriguez',
+                cpf: '654.321.789-00',
+                dataNascimento: '1975-06-30',
+                telefone: '(11) 55555-5555',
+                email: 'carmen.rodriguez@email.com',
+                dataCriacao: '2024-08-20',
+                ultimaConsulta: '2025-07-30',
+                totalConsultas: 12,
+                status: 'Ativo'
+            },
+            {
+                id: 'PRON006',
+                nome: 'Pedro Oliveira Costa',
+                cpf: '789.123.456-00',
+                dataNascimento: '1995-11-18',
+                telefone: '(11) 44444-6666',
+                email: 'pedro.costa@email.com',
+                dataCriacao: '2025-06-10',
+                ultimaConsulta: '2025-07-31',
+                totalConsultas: 1,
+                status: 'Ativo'
             }
         ];
 
         // Inicializar página
         document.addEventListener('DOMContentLoaded', function() {
             verificarAutenticacao();
+            
+            // Inicializar sistema de cards unificados
+            cardUnificado = new CardUnificado('prontuarios');
+            
             carregarProntuarios();
             configurarEventos();
         });
@@ -648,37 +697,58 @@
                 return;
             }
 
-            grid.innerHTML = prontuariosFiltrados.map(prontuario => `
-                <div class="prontuario-card" onclick="abrirCadernoDigital('${prontuario.id}')">
-                    <div class="prontuario-actions">
-                        <button class="btn-action edit" onclick="event.stopPropagation(); editarProntuario('${prontuario.id}')" title="Editar">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-action" onclick="event.stopPropagation(); verDetalhes('${prontuario.id}')" title="Detalhes">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="prontuario-header">
-                        <div class="prontuario-info">
-                            <h3>${prontuario.nome}</h3>
-                        </div>
-                        <div class="prontuario-id">${prontuario.id}</div>
-                    </div>
-                    
-                    <div class="prontuario-dados">
-                        <div><i class="fas fa-id-card"></i> CPF: ${prontuario.cpf}</div>
-                        <div><i class="fas fa-birthday-cake"></i> Nascimento: ${formatarData(prontuario.dataNascimento)}</div>
-                        <div><i class="fas fa-phone"></i> ${prontuario.telefone}</div>
-                        <div><i class="fas fa-envelope"></i> ${prontuario.email}</div>
-                    </div>
-                    
-                    <div class="prontuario-stats">
-                        <span><i class="fas fa-calendar"></i> Criado: ${formatarData(prontuario.dataCriacao)}</span>
-                        <span><i class="fas fa-stethoscope"></i> ${prontuario.totalConsultas} consulta${prontuario.totalConsultas !== 1 ? 's' : ''}</span>
-                    </div>
+            // Usar o card unificado
+            grid.innerHTML = `
+                <div class="cards-grid">
+                    ${prontuariosFiltrados.map(prontuario => {
+                        // Adaptar dados do prontuário para o card unificado
+                        const hoje = new Date();
+                        const ultimaConsulta = new Date(prontuario.ultimaConsulta);
+                        const diasSemConsulta = Math.ceil((hoje - ultimaConsulta) / (1000 * 60 * 60 * 24));
+                        const dataNascimento = new Date(prontuario.dataNascimento);
+                        const proximoAniversario = new Date(hoje.getFullYear(), dataNascimento.getMonth(), dataNascimento.getDate());
+                        
+                        // Se já passou este ano, considerar próximo ano
+                        if (proximoAniversario < hoje) {
+                            proximoAniversario.setFullYear(hoje.getFullYear() + 1);
+                        }
+                        
+                        const pacienteAdaptado = {
+                            id: prontuario.id,
+                            nome: prontuario.nome,
+                            telefone: prontuario.telefone,
+                            email: prontuario.email,
+                            
+                            // Determinar prioridade baseada na última consulta e total de consultas
+                            prioridade: diasSemConsulta > 90 ? 'baixa' : 
+                                       (diasSemConsulta > 30 ? 'normal' : 
+                                       (prontuario.totalConsultas > 5 ? 'atencao' : 'normal')),
+                            
+                            // Dados específicos do prontuário
+                            cpf: prontuario.cpf,
+                            dataNascimento: prontuario.dataNascimento,
+                            totalConsultas: prontuario.totalConsultas,
+                            ultimaConsulta: prontuario.ultimaConsulta,
+                            dataCriacao: prontuario.dataCriacao,
+                            
+                            observacoes: diasSemConsulta > 60 ? 
+                                `Sem consulta há ${diasSemConsulta} dias - Agendar retorno` :
+                                `${prontuario.totalConsultas} consulta${prontuario.totalConsultas !== 1 ? 's' : ''} realizadas`,
+                            
+                            // Marcos baseados no histórico e aniversário
+                            proximaConsulta: diasSemConsulta > 90 ? 
+                                hoje.toISOString().split('T')[0] : // Hoje para muito tempo sem consulta
+                                new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias
+                            
+                            proximoRetorno: new Date(hoje.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 meses
+                            
+                            aniversario: proximoAniversario.toISOString().split('T')[0] // Próximo aniversário
+                        };
+                        
+                        return cardUnificado.criarCard(pacienteAdaptado);
+                    }).join('')}
                 </div>
-            `).join('');
+            `;
         }
 
         function buscarProntuarios() {

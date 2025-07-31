@@ -1,0 +1,641 @@
+/* 🎯 CARD UNIFICADO - CSS PARA TODOS OS SISTEMAS */
+/* Arquivo: card-unificado.css */
+
+/* ==============================================
+   CARD UNIFICADO BASE
+   ============================================== */
+
+.card-paciente.unified {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 5px solid var(--status-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-paciente.unified:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.card-paciente.unified::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--status-color), transparent);
+    opacity: 0.3;
+}
+
+/* ==============================================
+   HEADER UNIFICADO
+   ============================================== */
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.paciente-info h3 {
+    color: #1e3c72;
+    font-size: 18px;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.paciente-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.prontuario-id {
+    background: #667eea;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* ==============================================
+   STATUS BADGES PADRONIZADOS
+   ============================================== */
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.status-badge.ontime {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.ontime::before {
+    content: '🟢';
+    font-size: 8px;
+}
+
+.status-badge.pendente {
+    background: #ffc107;
+    color: #212529;
+}
+
+.status-badge.pendente::before {
+    content: '🟡';
+    font-size: 8px;
+}
+
+.status-badge.aguardando {
+    background: #17a2b8;
+    color: white;
+}
+
+.status-badge.aguardando::before {
+    content: '🔵';
+    font-size: 8px;
+}
+
+.status-badge.realizado {
+    background: #20c997;
+    color: white;
+}
+
+.status-badge.realizado::before {
+    content: '✅';
+    font-size: 8px;
+}
+
+.status-badge.critico {
+    background: #dc3545;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-badge.critico::before {
+    content: '🔴';
+    font-size: 8px;
+}
+
+/* ==============================================
+   NOTIFICAÇÃO BADGE
+   ============================================== */
+
+.notificacao-container {
+    position: relative;
+}
+
+.notificacao-badge {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    animation: bounce 2s infinite;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+}
+
+.notificacao-badge:empty {
+    display: none;
+}
+
+.notificacao-badge[data-count="0"] {
+    display: none;
+}
+
+/* ==============================================
+   DADOS BÁSICOS
+   ============================================== */
+
+.dados-basicos {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    color: #666;
+    flex-wrap: wrap;
+}
+
+.dado-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.dado-item i {
+    color: #999;
+    font-size: 12px;
+}
+
+/* ==============================================
+   MARCOS IMPORTANTES ("ANIVERSÁRIOS")
+   ============================================== */
+
+.marcos-importantes {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.marco-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.marco-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.marco-item.primeira-consulta {
+    background: #e3f2fd;
+    color: #1976d2;
+    border-color: #bbdefb;
+}
+
+.marco-item.cirurgia {
+    background: #fce4ec;
+    color: #c2185b;
+    border-color: #f8bbd9;
+}
+
+.marco-item.retorno {
+    background: #e8f5e8;
+    color: #388e3c;
+    border-color: #c8e6c9;
+}
+
+.marco-item.urgente {
+    background: #ffebee;
+    color: #d32f2f;
+    border-color: #ffcdd2;
+    animation: pulse 2s infinite;
+}
+
+.marco-item.hoje {
+    background: #fff3e0;
+    color: #f57c00;
+    border-color: #ffcc02;
+    font-weight: 700;
+}
+
+.marco-icon {
+    font-size: 12px;
+}
+
+.marco-data {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+/* ==============================================
+   AÇÕES DO CARD
+   ============================================== */
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+    gap: 10px;
+}
+
+.actions-primary {
+    display: flex;
+    gap: 10px;
+}
+
+.actions-navigation {
+    display: flex;
+    gap: 5px;
+}
+
+/* Botões de Ação Principal */
+.btn-action {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-action.recado {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-action.recado:hover {
+    background: #138496;
+}
+
+.btn-action.evoluir {
+    background: #28a745;
+    color: white;
+}
+
+.btn-action.evoluir:hover {
+    background: #218838;
+}
+
+/* Botões de Navegação */
+.btn-nav {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    background: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+}
+
+.btn-nav:hover {
+    background: #667eea;
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn-nav.active {
+    background: #667eea;
+    color: white;
+}
+
+/* ==============================================
+   CONTEXTOS ESPECÍFICOS POR SISTEMA
+   ============================================== */
+
+.card-context {
+    margin-bottom: 15px;
+    min-height: 40px;
+}
+
+/* Contexto Quadro Evolução */
+.card-context.evolucao {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #28a745;
+}
+
+.evolucao-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+}
+
+.evolucao-ultima {
+    color: #666;
+}
+
+.evolucao-status {
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+}
+
+/* Contexto Jornada */
+.card-context.jornada {
+    background: #fff7e6;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #ffc107;
+}
+
+.jornada-info {
+    font-size: 13px;
+}
+
+.proxima-acao {
+    font-weight: 600;
+    color: #856404;
+    margin-bottom: 5px;
+}
+
+.prazo-info {
+    color: #666;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Contexto Prontuários */
+.card-context.prontuarios {
+    background: #e8f4fd;
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 3px solid #17a2b8;
+}
+
+.prontuario-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+}
+
+/* ==============================================
+   VARIÁVEIS CSS PARA STATUS
+   ============================================== */
+
+.card-paciente.unified[data-status="ontime"] {
+    --status-color: #28a745;
+}
+
+.card-paciente.unified[data-status="pendente"] {
+    --status-color: #ffc107;
+}
+
+.card-paciente.unified[data-status="aguardando"] {
+    --status-color: #17a2b8;
+}
+
+.card-paciente.unified[data-status="realizado"] {
+    --status-color: #20c997;
+}
+
+.card-paciente.unified[data-status="critico"] {
+    --status-color: #dc3545;
+}
+
+/* ==============================================
+   ANIMAÇÕES
+   ============================================== */
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.02); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-3px);
+    }
+    60% {
+        transform: translateY(-1px);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-paciente.unified {
+    animation: slideIn 0.3s ease-out;
+}
+
+/* ==============================================
+   GRID RESPONSIVO
+   ============================================== */
+
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* ==============================================
+   RESPONSIVIDADE
+   ============================================== */
+
+@media (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .card-paciente.unified {
+        padding: 15px;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .actions-primary {
+        justify-content: center;
+    }
+    
+    .actions-navigation {
+        justify-content: center;
+    }
+    
+    .marcos-importantes {
+        justify-content: center;
+    }
+    
+    .dados-basicos {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .paciente-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-action {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+    
+    .marcos-importantes {
+        gap: 5px;
+    }
+    
+    .marco-item {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+}
+
+/* ==============================================
+   UTILITÁRIOS
+   ============================================== */
+
+.text-center {
+    text-align: center;
+}
+
+.mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.mt-10 {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ==============================================
+   ESTADOS ESPECIAIS
+   ============================================== */
+
+.card-paciente.unified.destacado {
+    border: 2px solid #667eea;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.card-paciente.unified.novo {
+    border-left-color: #20c997;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fffd 100%);
+}
+
+.card-paciente.unified.arquivo {
+    opacity: 0.7;
+    background: #f8f9fa;
+}
+
+/* ==============================================
+   MODO ESCURO (OPCIONAL)
+   ============================================== */
+
+@media (prefers-color-scheme: dark) {
+    .card-paciente.unified {
+        background: #2d3748;
+        color: #e2e8f0;
+        border-left-color: var(--status-color);
+    }
+    
+    .paciente-info h3 {
+        color: #e2e8f0;
+    }
+    
+    .dados-basicos {
+        color: #a0aec0;
+    }
+    
+    .card-actions {
+        border-top-color: #4a5568;
+    }
+    
+    .btn-nav {
+        background: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .btn-nav:hover {
+        background: #667eea;
+    }
+}

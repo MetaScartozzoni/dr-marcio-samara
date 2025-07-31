@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quadro Evolutivo - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="card-unificado.css">
+    <script src="card-unificado.js"></script>
     <style>
         * {
             margin: 0;
@@ -217,10 +219,14 @@
             outline: none;
         }
 
-        .pacientes-grid {
+        .pacientes-grid, .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
+        }
+        
+        .cards-container .cards-grid {
+            display: contents; /* Para que os cards se distribuam no grid principal */
         }
 
         .paciente-card {
@@ -732,7 +738,7 @@
         </div>
 
         <!-- Grid de Pacientes -->
-        <div class="pacientes-grid" id="pacientes-grid">
+        <div class="cards-container" id="pacientes-grid">
             <!-- Cards dos pacientes serão carregados aqui -->
         </div>
 
@@ -747,6 +753,9 @@
     <script>
         let pacientesData = [];
         let pacientesFiltrados = [];
+        
+        // Instância do sistema de cards unificados
+        let cardUnificado;
 
         // Verificação de autenticação
         function checkAuth() {
@@ -779,6 +788,9 @@
             if (!checkAuth()) {
                 return; // Não continuar carregamento se não autorizado
             }
+            
+            // Inicializar sistema de cards unificados
+            cardUnificado = new CardUnificado('quadro-evolutivo');
             
             carregarPacientes();
             configurarFiltros();
@@ -897,6 +909,60 @@
                         email: true,
                         telefone: true
                     }
+                },
+                {
+                    id: 'P006',
+                    nome: 'Dr. Eduardo Lima',
+                    status: 'estavel',
+                    ultimaEvolucao: '2025-01-25',
+                    comunicacao: 'ativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '25/01', texto: 'Pós-operatório sem complicações' },
+                        { data: '23/01', texto: 'Cirurgia plástica realizada com sucesso' },
+                        { data: '20/01', texto: 'Exames pré-operatórios aprovados' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: true,
+                        telefone: false
+                    }
+                },
+                {
+                    id: 'P007',
+                    nome: 'Luciana Santos',
+                    status: 'critico',
+                    ultimaEvolucao: '2025-01-31',
+                    comunicacao: 'pendente',
+                    temNotificacao: true,
+                    evolucoes: [
+                        { data: '31/01', texto: 'Reação alérgica intensa - medicação suspensa' },
+                        { data: '30/01', texto: 'Início de edema facial' },
+                        { data: '29/01', texto: 'Primeira aplicação do tratamento' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: false,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P008',
+                    nome: 'Marcos Oliveira',
+                    status: 'aguardando',
+                    ultimaEvolucao: '2025-01-28',
+                    comunicacao: 'inativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '28/01', texto: 'Exames de imagem solicitados' },
+                        { data: '26/01', texto: 'Avaliação inicial - possível indicação cirúrgica' },
+                        { data: '24/01', texto: 'Consulta inicial de triagem' }
+                    ],
+                    contatos: {
+                        whatsapp: false,
+                        email: true,
+                        telefone: true
+                    }
                 }
             ]);
         }
@@ -983,55 +1049,60 @@
             grid.style.display = 'grid';
             emptyState.style.display = 'none';
 
-            grid.innerHTML = pacientesFiltrados.map(paciente => `
-                <div class="paciente-card ${paciente.status}" id="card-${paciente.id}">
-                    ${paciente.temNotificacao ? '<div class="notification-badge" title="Nova comunicação interna"></div>' : ''}
-                    <div class="paciente-header">
-                        <div class="paciente-info">
-                            <h3>${paciente.nome}</h3>
-                            <div class="paciente-id">ID: ${paciente.id}</div>
-                        </div>
-                        <span class="status-badge status-${paciente.status}">
-                            ${getStatusLabel(paciente.status)}
-                        </span>
-                    </div>
-                    
-                    <div class="evolucao-timeline">
-                        <strong>📋 Últimas Evoluções:</strong>
-                        ${paciente.evolucoes.slice(0, 3).map(ev => `
-                            <div class="evolucao-item">
-                                <span class="evolucao-date">${ev.data}</span>
-                                <span class="evolucao-text">${ev.texto}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="comunicacao-status">
-                        <strong>📞 Comunicação:</strong>
-                        <span class="com-item ${paciente.contatos.whatsapp ? 'ativo' : 'inativo'}">
-                            📱 WhatsApp
-                        </span>
-                        <span class="com-item ${paciente.contatos.email ? 'ativo' : 'inativo'}">
-                            📧 Email
-                        </span>
-                        <span class="com-item ${paciente.contatos.telefone ? 'ativo' : 'inativo'}">
-                            📞 Telefone
-                        </span>
-                    </div>
-                    
-                    <div class="acao-buttons">
-                        <button class="btn-acao btn-evoluir" onclick="adicionarEvolucao('${paciente.id}')">
-                            📝 Evoluir
-                        </button>
-                        <button class="btn-acao btn-contato" onclick="entrarContato('${paciente.id}')">
-                            💬 Contato
-                        </button>
-                        <button class="btn-acao btn-detalhes" onclick="verDetalhes('${paciente.id}')">
-                            👁️ Detalhes
-                        </button>
-                    </div>
+            // Usar o card unificado
+            grid.innerHTML = `
+                <div class="cards-grid">
+                    ${pacientesFiltrados.map(paciente => {
+                        // Adaptar dados do quadro evolutivo para o card unificado
+                        const hoje = new Date();
+                        const ultimaEvolucao = new Date(paciente.ultimaEvolucao);
+                        const diasSemEvolucao = Math.ceil((hoje - ultimaEvolucao) / (1000 * 60 * 60 * 24));
+                        
+                        // Mapear status do quadro evolutivo para prioridades do card unificado
+                        const prioridadeMap = {
+                            'critico': 'urgente',
+                            'acompanhamento': 'atencao', 
+                            'estavel': 'normal',
+                            'aguardando': 'baixa'
+                        };
+                        
+                        const pacienteAdaptado = {
+                            id: paciente.id,
+                            nome: paciente.nome,
+                            telefone: '(11) 99999-0000', // Simular telefone
+                            email: paciente.nome.toLowerCase().replace(/\\s+/g, '.') + '@email.com',
+                            
+                            // Dados específicos do quadro evolutivo adaptados
+                            prioridade: prioridadeMap[paciente.status] || 'normal',
+                            statusEvolucao: paciente.status, // critico, acompanhamento, estavel, aguardando
+                            ultimaEvolucao: paciente.ultimaEvolucao,
+                            evolucoes: paciente.evolucoes,
+                            comunicacao: paciente.comunicacao,
+                            temNotificacao: paciente.temNotificacao,
+                            contatos: paciente.contatos,
+                            observacoes: paciente.evolucoes && paciente.evolucoes.length > 0 ? 
+                                paciente.evolucoes[0].texto : 'Sem evolução recente',
+                            
+                            // Marcos baseados no status evolutivo
+                            proximaConsulta: paciente.status === 'critico' ? 
+                                hoje.toISOString().split('T')[0] : // Hoje para críticos
+                                new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 dias para outros
+                            
+                            proximoRetorno: paciente.status === 'aguardando' ?
+                                new Date(hoje.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 14 dias para aguardando
+                                new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias para outros
+                            
+                            proximaEvolucao: paciente.status === 'critico' ?
+                                new Date(hoje.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 1 dia para críticos
+                                (paciente.status === 'acompanhamento' ?
+                                    new Date(hoje.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 3 dias para acompanhamento
+                                    new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) // 7 dias para estável
+                        };
+                        
+                        return cardUnificado.criarCard(pacienteAdaptado);
+                    }).join('')}
                 </div>
-            `).join('');
+            `;
         }
 
         function getStatusLabel(status) {
