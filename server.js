@@ -54,9 +54,15 @@ const SHEET_ID = '1KSZcXweNg7csm-Xi0YYg8v-3mHg6cB5xI2NympkTY4k';
 let doc;
 let authSystem; // Sistema de autenticação
 
-// Inicializar conexão com Google Sheets
+// Inicializar conexão com Google Sheets (DESABILITADO)
 async function initSheet() {
     try {
+        console.log('⚠️ Google Sheets desabilitado - usando apenas PostgreSQL');
+        // Google Sheets desabilitado por configuração
+        // Sistema funcionará apenas com PostgreSQL
+        return;
+        
+        /* CÓDIGO ORIGINAL COMENTADO
         const creds = require('./credentials.json');
         
         const serviceAccountAuth = new JWT({
@@ -68,6 +74,7 @@ async function initSheet() {
         doc = new GoogleSpreadsheet(SHEET_ID, serviceAccountAuth);
         await doc.loadInfo();
         console.log('Conectado ao Google Sheets');
+        */
         
                 // Inicializar sistema de autenticação
         const sendGridService = require('@sendgrid/mail');
@@ -260,6 +267,140 @@ app.post('/api/login', async (req, res) => {
     } catch (error) {
         console.error('Erro ao fazer login:', error);
         res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// API para captura de leads da landing page pública
+app.post('/api/capturar-lead', async (req, res) => {
+    const { nome, telefone, email, idade, procedimento, observacoes, origem } = req.body;
+    
+    try {
+        // Validação básica
+        if (!nome || !telefone || !procedimento) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Nome, telefone e procedimento são obrigatórios' 
+            });
+        }
+        
+        // Gerar protocolo único
+        const protocolo = `LEAD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+        
+        // Tentar salvar no PostgreSQL
+        const query = `
+            INSERT INTO leads (
+                protocolo, nome, telefone, email, idade, procedimento, 
+                observacoes, origem, status, data_captura, data_criacao
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING id
+        `;
+        
+        const values = [
+            protocolo,
+            nome,
+            telefone || null,
+            email || null,
+            idade || null,
+            procedimento,
+            observacoes || null,
+            origem || 'landing-publica',
+            'novo',
+            new Date(),
+            new Date()
+        ];
+        
+        const result = await pool.query(query, values);
+        const leadId = result.rows[0].id;
+        
+        console.log(`✅ Lead capturado: ${protocolo} - ${nome}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Lead capturado com sucesso',
+            protocolo: protocolo,
+            lead_id: leadId
+        });
+        
+    } catch (error) {
+        console.error('Erro ao capturar lead:', error);
+        
+        res.status(500).json({ 
+            success: false, 
+            message: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// API para listar leads (admin)
+app.get('/api/leads', async (req, res) => {
+    try {
+        // Tentar buscar no PostgreSQL primeiro
+        try {
+            const query = `
+                SELECT 
+                    id, protocolo, nome, telefone, email, idade, procedimento,
+                    observacoes, origem, status, data_captura, data_criacao,
+                    convertido_em_paciente, paciente_id, data_conversao
+                FROM leads 
+                ORDER BY data_captura DESC
+            `;
+            
+            const result = await pool.query(query);
+            
+            res.json({
+                success: true,
+                leads: result.rows,
+                total: result.rows.length,
+                source: 'postgresql'
+            });
+            
+        } catch (dbError) {
+            console.warn('Falha no PostgreSQL, tentando Google Sheets:', dbError.message);
+            
+            // Fallback para Google Sheets
+            const leadsSheet = doc.sheetsByTitle['Leads'];
+            if (!leadsSheet) {
+                return res.json({
+                    success: true,
+                    leads: [],
+                    total: 0,
+                    source: 'google_sheets'
+                });
+            }
+            
+            const rows = await leadsSheet.getRows();
+            const leads = rows.map((row, index) => ({
+                id: index + 1,
+                protocolo: row.get('Protocolo') || '',
+                nome: row.get('Nome') || '',
+                telefone: row.get('Telefone') || '',
+                email: row.get('Email') || '',
+                idade: row.get('Idade') || '',
+                procedimento: row.get('Procedimento') || '',
+                observacoes: row.get('Observações') || '',
+                origem: row.get('Origem') || '',
+                status: row.get('Status') || 'novo',
+                data_captura: row.get('Data Captura') || '',
+                data_criacao: row.get('Data Criação') || '',
+                convertido_em_paciente: false,
+                paciente_id: null,
+                data_conversao: null
+            }));
+            
+            res.json({
+                success: true,
+                leads: leads,
+                total: leads.length,
+                source: 'google_sheets'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Erro ao listar leads:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro interno do servidor'
+        });
     }
 });
 
@@ -1352,15 +1493,15 @@ async function startServer() {
         // 2. Inicializar estrutura do banco
         await initializeDatabase();
         
-        // 3. Inicializar Google Sheets (se necessário)
-        await initSheet();
+        // 3. Google Sheets desabilitado - usando apenas PostgreSQL
+        // await initSheet(); // Comentado - não necessário
         
         // 4. Iniciar servidor
         app.listen(PORT, () => {
             console.log(`✅ Servidor rodando na porta ${PORT}`);
             console.log(`🌐 URL: http://localhost:${PORT}`);
-            console.log(`🗄️ Banco de dados: Conectado`);
-            console.log(`📊 Google Sheets: Configurado`);
+            console.log(`🗄️ Banco de dados: PostgreSQL Conectado`);
+            console.log(`📊 Google Sheets: Desabilitado (usando PostgreSQL)`);
         });
         
     } catch (error) {

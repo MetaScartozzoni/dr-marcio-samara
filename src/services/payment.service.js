@@ -24,7 +24,9 @@ function initializeStripe() {
       ServiceConfig.stripe.enabled = true;
       console.log('✅ Stripe configurado e habilitado');
     } else {
-      console.log('⚠️  Stripe não configurado - usando modo desabilitado');
+      // Stripe não configurado - funcionamento normal sem pagamentos online
+      ServiceConfig.stripe.configured = false;
+      ServiceConfig.stripe.enabled = false;
     }
   } catch (error) {
     console.error('❌ Erro ao inicializar Stripe:', error.message);

@@ -113,8 +113,9 @@ class FormValidator {
 // ========== GERENCIADOR DE API ==========
 class ApiManager {
     static getBaseUrl() {
+        // Sempre usar Railway em produção, localhost apenas para desenvolvimento
         return CONFIG?.API_BASE_URL || (window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001'
+            ? 'http://localhost:3000'  // Corrigido para porta 3000
             : 'https://portal-dr-marcio-production.up.railway.app');
     }
     
@@ -672,7 +673,7 @@ function atualizarTabela() {
             <td><span class="status-badge status-${item.pagamento_status.toLowerCase().replace(' ', '-')}">${item.pagamento_status}</span></td>
             <td>${Utils.formatDate(item.validade)}</td>
             <td>
-                <div class="action-buttons">`;
+                <div class="action-buttons">
                     <button onclick="abrirAcoesOrcamento('${item.id}')" class="btn-actions" title="Ações">
                         <i class="fas fa-cog"></i>
                     </button>
