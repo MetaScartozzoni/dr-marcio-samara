@@ -475,6 +475,40 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela de pagamentos
+        if (!tableNames.includes('pagamentos')) {
+            console.log('🔧 Criando tabela de pagamentos...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS pagamentos (
+                    id SERIAL PRIMARY KEY,
+                    orcamento_id INTEGER NOT NULL,
+                    valor DECIMAL(10,2) NOT NULL,
+                    tipo_pagamento VARCHAR(50) NOT NULL,
+                    status VARCHAR(30) DEFAULT 'pendente',
+                    gateway_transaction_id VARCHAR(255),
+                    data_pagamento TIMESTAMP,
+                    data_vencimento DATE,
+                    parcela_numero INTEGER DEFAULT 1,
+                    parcela_total INTEGER DEFAULT 1,
+                    metodo_pagamento VARCHAR(50),
+                    observacoes TEXT,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_pagamentos_orcamento ON pagamentos(orcamento_id);
+                CREATE INDEX IF NOT EXISTS idx_pagamentos_status ON pagamentos(status);
+                CREATE INDEX IF NOT EXISTS idx_pagamentos_data ON pagamentos(data_pagamento);
+                CREATE INDEX IF NOT EXISTS idx_pagamentos_transaction ON pagamentos(gateway_transaction_id);
+            `);
+        }
+        
         console.log('✅ Estrutura do banco verificada/criada');
         
     } catch (error) {
