@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração Inicial - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .setup-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .setup-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .setup-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #007bff, #28a745, #ffc107, #dc3545);
+        }
+
+        .setup-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .setup-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .setup-title {
+            font-size: 2rem;
+            color: #333;
+            margin: 0 0 10px;
+        }
+
+        .setup-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .setup-steps {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .step.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .step.pending {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .setup-form {
+            display: none;
+        }
+
+        .setup-form.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .setup-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            border-color: #007bff;
+        }
+
+        .feature-item.selected {
+            border-color: #007bff;
+            background: #f8f9fa;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .feature-description {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .setup-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+
+            .setup-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-card">
+            <!-- Header -->
+            <div class="setup-header">
+                <div class="setup-logo">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <h1 class="setup-title">Portal Dr. Marcio</h1>
+                <p class="setup-subtitle">Configuração inicial do sistema</p>
+            </div>
+
+            <!-- Progress -->
+            <div class="setup-steps">
+                <div class="step active" data-step="1">1</div>
+                <div class="step pending" data-step="2">2</div>
+                <div class="step pending" data-step="3">3</div>
+                <div class="step pending" data-step="4">4</div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 25%"></div>
+            </div>
+
+            <!-- Step 1: Informações da Clínica -->
+            <form id="setupForm" class="setup-form active" data-step="1">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <div class="section-icon"><i class="fas fa-clinic-medical"></i></div>
+                        Informações da Clínica
+                    </h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Vamos começar configurando as informações básicas da sua clínica.
+                    </div>
+
+                    <div class="input-group">
+                        <label for="clinicName">Nome da Clínica *</label>
+                        <input type="text" id="clinicName" name="clinicName" required 
+                               placeholder="Ex: Clínica Dr. Marcio Scartozzoni">
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="clinicPhone">Telefone Principal *</label>
+                            <input type="tel" id="clinicPhone" name="clinicPhone" required 
+                                   placeholder="(11) 99999-9999">
+                        </div>
+                        <div class="input-group">
+                            <label for="clinicEmail">Email da Clínica *</label>
+                            <input type="email" id="clinicEmail" name="clinicEmail" required 
+                                   placeholder="contato@clinica.com.br">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="clinicAddress">Endereço Completo *</label>
+                        <input type="text" id="clinicAddress" name="clinicAddress" required 
+                               placeholder="Rua da Clínica, 123 - Bairro - Cidade/UF">
+                    </div>
+                </div>
+            </form>
+
+            <!-- Step 2: Primeiro Administrador -->
+            <form class="setup-form" data-step="2">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <div class="section-icon"><i class="fas fa-user-shield"></i></div>
+                        Primeiro Administrador
+                    </h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Crie a conta do primeiro administrador do sistema.
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="adminName">Nome Completo *</label>
+                            <input type="text" id="adminName" name="adminName" required 
+                                   placeholder="Dr. Marcio Scartozzoni">
+                        </div>
+                        <div class="input-group">
+                            <label for="adminEmail">Email *</label>
+                            <input type="email" id="adminEmail" name="adminEmail" required 
+                                   placeholder="admin@clinica.com.br">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="adminPhone">Telefone/Celular *</label>
+                            <input type="tel" id="adminPhone" name="adminPhone" required 
+                                   placeholder="(11) 99999-9999">
+                        </div>
+                        <div class="input-group">
+                            <label for="adminCpf">CPF *</label>
+                            <input type="text" id="adminCpf" name="adminCpf" required 
+                                   placeholder="000.000.000-00">
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="adminPassword">Senha *</label>
+                            <input type="password" id="adminPassword" name="adminPassword" required 
+                                   placeholder="Mínimo 8 caracteres">
+                        </div>
+                        <div class="input-group">
+                            <label for="adminPasswordConfirm">Confirmar Senha *</label>
+                            <input type="password" id="adminPasswordConfirm" name="adminPasswordConfirm" required 
+                                   placeholder="Digite a senha novamente">
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Step 3: Funcionalidades -->
+            <form class="setup-form" data-step="3">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <div class="section-icon"><i class="fas fa-puzzle-piece"></i></div>
+                        Funcionalidades Iniciais
+                    </h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Selecione as funcionalidades que deseja ativar inicialmente.
+                    </div>
+
+                    <div class="feature-grid">
+                        <div class="feature-item selected" data-feature="appointments">
+                            <div class="feature-title">
+                                <i class="fas fa-calendar-check"></i> Agendamentos
+                            </div>
+                            <div class="feature-description">
+                                Sistema de agendamento de consultas online
+                            </div>
+                        </div>
+
+                        <div class="feature-item selected" data-feature="patients">
+                            <div class="feature-title">
+                                <i class="fas fa-users"></i> Gestão de Pacientes
+                            </div>
+                            <div class="feature-description">
+                                Cadastro e histórico de pacientes
+                            </div>
+                        </div>
+
+                        <div class="feature-item" data-feature="billing">
+                            <div class="feature-title">
+                                <i class="fas fa-file-invoice-dollar"></i> Faturamento
+                            </div>
+                            <div class="feature-description">
+                                Orçamentos e controle financeiro
+                            </div>
+                        </div>
+
+                        <div class="feature-item" data-feature="notifications">
+                            <div class="feature-title">
+                                <i class="fas fa-bell"></i> Notificações
+                            </div>
+                            <div class="feature-description">
+                                SMS e Email automáticos
+                            </div>
+                        </div>
+
+                        <div class="feature-item" data-feature="reports">
+                            <div class="feature-title">
+                                <i class="fas fa-chart-bar"></i> Relatórios
+                            </div>
+                            <div class="feature-description">
+                                Relatórios de atendimento e faturamento
+                            </div>
+                        </div>
+
+                        <div class="feature-item" data-feature="lgpd">
+                            <div class="feature-title">
+                                <i class="fas fa-shield-alt"></i> LGPD
+                            </div>
+                            <div class="feature-description">
+                                Conformidade com proteção de dados
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Step 4: Confirmação -->
+            <form class="setup-form" data-step="4">
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <div class="section-icon"><i class="fas fa-check-circle"></i></div>
+                        Confirmação e Finalização
+                    </h3>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Revise as informações antes de finalizar a configuração.
+                    </div>
+
+                    <div id="reviewData">
+                        <!-- Dados serão carregados aqui -->
+                    </div>
+                </div>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message" style="display: none;">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2>Sistema Configurado com Sucesso!</h2>
+                <p>O Portal Dr. Marcio está pronto para uso.</p>
+                <button class="btn btn-primary" onclick="window.location.href='/login.html'">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Acessar Sistema
+                </button>
+            </div>
+
+            <!-- Actions -->
+            <div class="setup-actions" id="setupActions">
+                <button type="button" class="btn btn-secondary" id="prevBtn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i>
+                    Anterior
+                </button>
+                <button type="button" class="btn btn-primary" id="nextBtn">
+                    Próximo
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- Loading -->
+            <div id="loadingOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: center; border-radius: 20px;">
+                <div style="text-align: center;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #007bff; margin-bottom: 10px;"></i>
+                    <div>Configurando sistema...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SystemSetup {
+            constructor() {
+                this.currentStep = 1;
+                this.totalSteps = 4;
+                this.formData = {};
+                this.selectedFeatures = ['appointments', 'patients']; // Features padrão
+                
+                this.initEventListeners();
+                this.loadStep(1);
+            }
+
+            initEventListeners() {
+                // Botões de navegação
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextStep());
+                document.getElementById('prevBtn').addEventListener('click', () => this.prevStep());
+
+                // Features selecionáveis
+                document.querySelectorAll('.feature-item').forEach(item => {
+                    item.addEventListener('click', () => this.toggleFeature(item));
+                });
+
+                // Máscara para telefone
+                this.addPhoneMask();
+                
+                // Máscara para CPF
+                this.addCpfMask();
+            }
+
+            addPhoneMask() {
+                document.querySelectorAll('input[type="tel"]').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length <= 11) {
+                            value = value.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                        }
+                        e.target.value = value;
+                    });
+                });
+            }
+
+            addCpfMask() {
+                document.getElementById('adminCpf').addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                    e.target.value = value;
+                });
+            }
+
+            toggleFeature(item) {
+                const feature = item.dataset.feature;
+                
+                if (item.classList.contains('selected')) {
+                    // Não permitir desmarcar features essenciais
+                    if (!['appointments', 'patients'].includes(feature)) {
+                        item.classList.remove('selected');
+                        this.selectedFeatures = this.selectedFeatures.filter(f => f !== feature);
+                    }
+                } else {
+                    item.classList.add('selected');
+                    this.selectedFeatures.push(feature);
+                }
+            }
+
+            async nextStep() {
+                if (this.currentStep < this.totalSteps) {
+                    // Validar step atual
+                    if (!await this.validateCurrentStep()) {
+                        return;
+                    }
+                    
+                    // Salvar dados do step atual
+                    this.saveStepData();
+                    
+                    this.currentStep++;
+                    this.loadStep(this.currentStep);
+                } else {
+                    // Finalizar setup
+                    await this.finishSetup();
+                }
+            }
+
+            prevStep() {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                    this.loadStep(this.currentStep);
+                }
+            }
+
+            loadStep(step) {
+                // Esconder todos os forms
+                document.querySelectorAll('.setup-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+
+                // Mostrar form atual
+                const currentForm = document.querySelector(`[data-step="${step}"]`);
+                if (currentForm) {
+                    currentForm.classList.add('active');
+                }
+
+                // Atualizar steps visuais
+                this.updateStepIndicators();
+                
+                // Atualizar barra de progresso
+                const progress = (step / this.totalSteps) * 100;
+                document.querySelector('.progress-fill').style.width = `${progress}%`;
+                
+                // Atualizar botões
+                this.updateButtons();
+                
+                // Se for step 4, carregar review
+                if (step === 4) {
+                    this.loadReviewData();
+                }
+            }
+
+            updateStepIndicators() {
+                document.querySelectorAll('.step').forEach((step, index) => {
+                    const stepNumber = index + 1;
+                    
+                    step.classList.remove('active', 'completed', 'pending');
+                    
+                    if (stepNumber < this.currentStep) {
+                        step.classList.add('completed');
+                    } else if (stepNumber === this.currentStep) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.add('pending');
+                    }
+                });
+            }
+
+            updateButtons() {
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                
+                // Botão anterior
+                if (this.currentStep === 1) {
+                    prevBtn.style.display = 'none';
+                } else {
+                    prevBtn.style.display = 'inline-flex';
+                }
+                
+                // Botão próximo/finalizar
+                if (this.currentStep === this.totalSteps) {
+                    nextBtn.innerHTML = '<i class="fas fa-check"></i> Finalizar Configuração';
+                } else {
+                    nextBtn.innerHTML = 'Próximo <i class="fas fa-arrow-right"></i>';
+                }
+            }
+
+            async validateCurrentStep() {
+                const currentForm = document.querySelector(`.setup-form[data-step="${this.currentStep}"]`);
+                const inputs = currentForm.querySelectorAll('input[required]');
+                
+                for (let input of inputs) {
+                    if (!input.value.trim()) {
+                        input.focus();
+                        this.showError(`Por favor, preencha o campo: ${input.previousElementSibling.textContent}`);
+                        return false;
+                    }
+                }
+                
+                // Validações específicas
+                if (this.currentStep === 2) {
+                    const password = document.getElementById('adminPassword').value;
+                    const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+                    
+                    if (password.length < 8) {
+                        this.showError('A senha deve ter pelo menos 8 caracteres');
+                        return false;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        this.showError('As senhas não coincidem');
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            saveStepData() {
+                const currentForm = document.querySelector(`.setup-form[data-step="${this.currentStep}"]`);
+                const inputs = currentForm.querySelectorAll('input, select');
+                
+                inputs.forEach(input => {
+                    this.formData[input.name] = input.value;
+                });
+                
+                // Salvar features selecionadas
+                if (this.currentStep === 3) {
+                    this.formData.selectedFeatures = this.selectedFeatures;
+                }
+            }
+
+            loadReviewData() {
+                const reviewContainer = document.getElementById('reviewData');
+                
+                const reviewHTML = `
+                    <div style="display: grid; gap: 20px;">
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin: 0 0 10px; color: #007bff;">
+                                <i class="fas fa-clinic-medical"></i> Informações da Clínica
+                            </h4>
+                            <p><strong>Nome:</strong> ${this.formData.clinicName}</p>
+                            <p><strong>Email:</strong> ${this.formData.clinicEmail}</p>
+                            <p><strong>Telefone:</strong> ${this.formData.clinicPhone}</p>
+                            <p><strong>Endereço:</strong> ${this.formData.clinicAddress}</p>
+                        </div>
+                        
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin: 0 0 10px; color: #007bff;">
+                                <i class="fas fa-user-shield"></i> Administrador
+                            </h4>
+                            <p><strong>Nome:</strong> ${this.formData.adminName}</p>
+                            <p><strong>Email:</strong> ${this.formData.adminEmail}</p>
+                            <p><strong>Telefone:</strong> ${this.formData.adminPhone}</p>
+                            <p><strong>CPF:</strong> ${this.formData.adminCpf}</p>
+                        </div>
+                        
+                        <div style="padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin: 0 0 10px; color: #007bff;">
+                                <i class="fas fa-puzzle-piece"></i> Funcionalidades Ativadas
+                            </h4>
+                            <p>${this.getFeatureNames().join(', ')}</p>
+                        </div>
+                    </div>
+                `;
+                
+                reviewContainer.innerHTML = reviewHTML;
+            }
+
+            getFeatureNames() {
+                const featureMap = {
+                    appointments: 'Agendamentos',
+                    patients: 'Gestão de Pacientes',
+                    billing: 'Faturamento',
+                    notifications: 'Notificações',
+                    reports: 'Relatórios',
+                    lgpd: 'LGPD'
+                };
+                
+                return this.selectedFeatures.map(feature => featureMap[feature]);
+            }
+
+            async finishSetup() {
+                this.showLoading(true);
+                
+                try {
+                    const setupData = {
+                        ...this.formData,
+                        selectedFeatures: this.selectedFeatures
+                    };
+                    
+                    const response = await fetch('/api/setup/initialize', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(setupData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        this.showSuccess();
+                    } else {
+                        throw new Error(result.error || 'Erro ao configurar sistema');
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro no setup:', error);
+                    this.showError('Erro ao configurar sistema: ' + error.message);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            showSuccess() {
+                document.querySelector('.setup-card').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+            }
+
+            showLoading(show) {
+                document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+            }
+
+            showError(message) {
+                // Remover alertas anteriores
+                const existingAlert = document.querySelector('.alert-error');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+                
+                // Criar novo alerta
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-error';
+                alertDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                
+                // Inserir no topo do form atual
+                const currentForm = document.querySelector(`.setup-form[data-step="${this.currentStep}"]`);
+                currentForm.insertBefore(alertDiv, currentForm.firstChild);
+                
+                // Remover após 5 segundos
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+            }
+        }
+
+        // Inicializar quando página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new SystemSetup();
+        });
+    </script>
+</body>
+</html>

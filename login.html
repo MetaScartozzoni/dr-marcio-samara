@@ -48,87 +48,268 @@
        // Preencher email automaticamente se vier da verificação
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const emailFromUrl = urlParams.get('email');
-            const emailFromStorage = localStorage.getItem('tempEmail');
-            
-            const emailInput = document.getElementById('email');
-            
-            if (emailFromUrl) {
-                emailInput.value = emailFromUrl;
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
-            } else if (emailFromStorage) {
-                emailInput.value = emailFromStorage;
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('email').value = email;
+                document.getElementById('senha').focus();
             }
         };
-        
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-            const loading = document.getElementById('loading');
-            const message = document.getElementById('message');
-            
-            loading.style.display = 'block';
-            message.innerHTML = '';
-            
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, senha })
-                });
+
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('loginForm');
+                this.loading = document.getElementById('loading');
+                this.message = document.getElementById('message');
                 
-                const data = await response.json();
-                console.log('📥 Resposta do login:', data);
-                
-                if (data.success) {
-                    // Login bem-sucedido
-                    message.innerHTML = '<div class="success">✅ Login realizado com sucesso!</div>';
-                    
-                    // Salvar token de autenticação
-                    if (data.token) {
-                        localStorage.setItem('token', data.token);
-                    }
-                    
-                    // Salvar informações do usuário no localStorage
-                    localStorage.setItem('userInfo', JSON.stringify({
-                        id: data.user.id,
-                        nome: data.user.nome,
-                        email: data.user.email,
-                        tipo: data.user.tipo,
-                        autorizado: data.user.autorizado,
-                        loginTime: new Date().toISOString()
-                    }));
-                    
-                    // Todos os usuários vão para o Dashboard central por segurança
-                    const redirectUrl = '/dashboard.html';
-                    console.log('🔄 Redirecionando para Dashboard central:', redirectUrl);
-                    
-                    // Mostrar onde vai redirecionar
-                    message.innerHTML = `
-                        <div class="success">
-                            ✅ Login realizado com sucesso!<br>
-                            🔄 Redirecionando para Dashboard Central...
-                        </div>
-                    `;
-                    
-                    // Redirecionar baseado no tipo de usuário
-                    setTimeout(() => {
-                        window.location.href = redirectUrl;
-                    }, 1500);
-                } else {
-                    message.innerHTML = '<div class="error">❌ ' + data.message + '</div>';
-                }
-            } catch (error) {
-                message.innerHTML = '<div class="error">Erro ao fazer login. Tente novamente.</div>';
-            } finally {
-                loading.style.display = 'none';
+                this.initEventListeners();
             }
+
+            initEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleLogin(e));
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const senha = document.getElementById('senha').value;
+
+                if (!email || !senha) {
+                    this.showMessage('Por favor, preencha todos os campos.', 'error');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.clearMessage();
+
+                try {
+                    // Tentar login com sistema completo primeiro
+                    const response = await fetch('/api/auth/login-completo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, senha })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        // Login bem-sucedido
+                        this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+                        
+                        // Salvar dados do usuário
+                        localStorage.setItem('userInfo', JSON.stringify(resultado.usuario));
+                        
+                        // Redirecionar para o dashboard correto
+                        setTimeout(() => {
+                            window.location.href = resultado.redirectTo || '/dashboard.html';
+                        }, 1500);
+                        
+                    } else {
+                        // Tratar diferentes tipos de erro
+                        this.handleLoginError(resultado);
+                    }
+
+                } catch (error) {
+                    console.error('Erro no login:', error);
+                    
+                    // Fallback para sistema antigo
+                    try {
+                        const fallbackResponse = await fetch('/api/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email, senha })
+                        });
+
+                        const fallbackResult = await fallbackResponse.json();
+                        
+                        if (fallbackResult.sucesso) {
+                            this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+                            
+                            // Salvar dados do usuário
+                            localStorage.setItem('userInfo', JSON.stringify({
+                                email: email,
+                                role: fallbackResult.role,
+                                nome: fallbackResult.full_name,
+                                loggedIn: true
+                            }));
+                            
+                            setTimeout(() => {
+                                window.location.href = '/dashboard.html';
+                            }, 1500);
+                            
+                        } else if (fallbackResult.precisaCriarSenha) {
+                            this.showMessage('Você precisa criar uma senha. Redirecionando...', 'warning');
+                            setTimeout(() => {
+                                window.location.href = `/senha.html?email=${encodeURIComponent(email)}`;
+                            }, 2000);
+                        } else {
+                            this.showMessage(fallbackResult.erro || 'Erro no login. Tente novamente.', 'error');
+                        }
+                        
+                    } catch (fallbackError) {
+                        console.error('Erro no fallback:', fallbackError);
+                        this.showMessage('Erro de conexão. Tente novamente.', 'error');
+                    }
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            handleLoginError(resultado) {
+                switch (resultado.action) {
+                    case 'completar_cadastro':
+                        this.showMessage('Sua conta não foi finalizada. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'verificar_email':
+                        this.showMessage('Verifique seu email para ativar a conta. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'criar_senha':
+                        this.showMessage('Complete o cadastro criando uma senha. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `criar-senha.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'aguardar':
+                    case 'aguardar_autorizacao':
+                        this.showMessage('Sua conta está aguardando autorização do administrador.', 'info');
+                        break;
+                        
+                    case 'contatar_admin':
+                        this.showMessage(`${resultado.erro} Entre em contato: (11) 99999-9999`, 'error');
+                        break;
+                        
+                    default:
+                        this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
+                }
+            }
+
+            showLoading(show) {
+                this.loading.style.display = show ? 'block' : 'none';
+                const submitButton = this.form.querySelector('button[type="submit"]');
+                submitButton.disabled = show;
+                
+                if (show) {
+                    submitButton.textContent = 'Fazendo login...';
+                } else {
+                    submitButton.textContent = 'Entrar';
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                this.message.innerHTML = `
+                    <div class="${type}">
+                        <i class="fas ${this.getIconForType(type)}"></i>
+                        ${text}
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            clearMessage() {
+                this.message.style.display = 'none';
+                this.message.innerHTML = '';
+            }
+
+            getIconForType(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || 'fa-info-circle';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
         });
     </script>
+
+    <style>
+        .message {
+            margin: 15px 0;
+        }
+
+        .message div {
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .message .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .message .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .message i {
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 15px;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .forgot-password .link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password .link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
 </body>
 </html>

@@ -6,6 +6,9 @@ const cors = require('cors');
 const path = require('path');
 const app = express();
 
+// Importar configuração de banco
+const { pool, testConnection, initializeDatabase } = require('./src/config/database');
+
 // Importar sistema LGPD
 const lgpdRoutes = require('./src/routes/lgpd.routes');
 const LGPDMiddleware = require('./src/middleware/lgpd.middleware');
@@ -13,9 +16,21 @@ const LGPDMiddleware = require('./src/middleware/lgpd.middleware');
 // Importar sistema de pagamentos
 const paymentRoutes = require('./src/routes/payments.routes');
 
-// Middleware
+// Importar sistema de autenticação completo
+const AuthSystemComplete = require('./auth-system-complete');
+
+// Importar sistema de setup
+const setupRoutes = require('./src/routes/setup.routes');
+const { checkSystemSetup } = require('./src/middleware/setup.middleware');
+
+// Middleware básico
 app.use(cors());
 app.use(express.json());
+
+// MIDDLEWARE DE SETUP - DEVE VIR ANTES DOS OUTROS
+app.use(checkSystemSetup);
+
+// Middleware estático após verificação de setup
 app.use(express.static('.'));
 
 // Middleware LGPD
@@ -28,6 +43,7 @@ app.use(LGPDMiddleware.rateLimitByUser());
 // Configuração da planilha
 const SHEET_ID = '1KSZcXweNg7csm-Xi0YYg8v-3mHg6cB5xI2NympkTY4k';
 let doc;
+let authSystem; // Sistema de autenticação
 
 // Inicializar conexão com Google Sheets
 async function initSheet() {
@@ -43,6 +59,51 @@ async function initSheet() {
         doc = new GoogleSpreadsheet(SHEET_ID, serviceAccountAuth);
         await doc.loadInfo();
         console.log('Conectado ao Google Sheets');
+        
+                // Inicializar sistema de autenticação
+        const sendGridService = require('@sendgrid/mail');
+        sendGridService.setApiKey(process.env.SENDGRID_API_KEY);
+        
+        // Configurar Google Sheets service para AuthSystem
+        const googleSheetsService = {
+            spreadsheets: {
+                values: {
+                    get: async (params) => {
+                        const sheet = doc.sheetsByTitle[params.range.split('!')[0]] || doc.sheetsByIndex[0];
+                        const rows = await sheet.getRows();
+                        return {
+                            data: {
+                                values: rows.length > 0 ? [Object.keys(rows[0]._rawData), ...rows.map(row => Object.values(row._rawData))] : []
+                            }
+                        };
+                    },
+                    append: async (params) => {
+                        const sheetName = params.range.split('!')[0];
+                        const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
+                        await sheet.addRow(params.resource.values[0]);
+                        return { success: true };
+                    },
+                    update: async (params) => {
+                        const sheetName = params.range.split('!')[0];
+                        const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
+                        const rows = await sheet.getRows();
+                        const rowIndex = parseInt(params.range.match(/(\d+)/)[1]) - 2;
+                        if (rows[rowIndex]) {
+                            const headers = Object.keys(rows[0]._rawData);
+                            headers.forEach((header, index) => {
+                                rows[rowIndex][header] = params.resource.values[0][index] || '';
+                            });
+                            await rows[rowIndex].save();
+                        }
+                        return { success: true };
+                    }
+                }
+            }
+        };
+        
+        authSystem = new AuthSystemComplete(googleSheetsService, sendGridService);
+        console.log('Sistema de autenticação inicializado');
+        
     } catch (error) {
         console.error('Erro ao conectar com Google Sheets:', error);
     }
@@ -684,11 +745,117 @@ app.get('/gestao', (req, res) => {
     res.sendFile(path.join(__dirname, 'gestao.html'));
 });
 
+// Rotas de Setup (DEVE VIR PRIMEIRO)
+app.use('/setup', setupRoutes);
+app.use('/api/setup', setupRoutes);
+
 // Rotas LGPD
 app.use('/api/lgpd', lgpdRoutes);
 
 // Rotas de Pagamentos
 app.use('/api/payments', paymentRoutes);
+
+// Rotas de Configuração do Sistema
+const configRoutes = require('./src/routes/config.routes');
+app.use('/api/config', configRoutes);
+
+// ==================== ROTAS DE AUTENTICAÇÃO COMPLETA ====================
+
+// Cadastro de funcionário
+app.post('/api/auth/cadastrar-funcionario', async (req, res) => {
+    try {
+        const resultado = await authSystem.cadastrarFuncionario(req.body);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro no cadastro:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Verificar código de email
+app.post('/api/auth/verificar-codigo', async (req, res) => {
+    try {
+        const { email, codigo } = req.body;
+        const resultado = await authSystem.verificarCodigo(email, codigo);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro na verificação:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Reenviar código
+app.post('/api/auth/reenviar-codigo', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const resultado = await authSystem.reenviarCodigo(email);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro ao reenviar código:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Criar senha
+app.post('/api/auth/criar-senha', async (req, res) => {
+    try {
+        const { email, senha, confirmarSenha } = req.body;
+        const resultado = await authSystem.criarSenha(email, senha, confirmarSenha);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro ao criar senha:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Login completo
+app.post('/api/auth/login-completo', async (req, res) => {
+    try {
+        const { email, senha } = req.body;
+        const resultado = await authSystem.realizarLogin(email, senha);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro no login:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Autorizar funcionário (apenas admin)
+app.post('/api/auth/autorizar-funcionario', async (req, res) => {
+    try {
+        const { email, acao } = req.body;
+        // TODO: Adicionar verificação de admin aqui
+        const resultado = await authSystem.autorizarFuncionario(email, acao);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro ao autorizar funcionário:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Listar solicitações (apenas admin)
+app.get('/api/auth/listar-solicitacoes', async (req, res) => {
+    try {
+        // TODO: Adicionar verificação de admin aqui
+        const resultado = await authSystem.listarSolicitacoes();
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro ao listar solicitações:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
+
+// Verificar status de autorização
+app.post('/api/auth/verificar-status', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const resultado = await authSystem.verificarStatusAutorizacao(email);
+        res.json(resultado);
+    } catch (error) {
+        console.error('Erro ao verificar status:', error);
+        res.status(500).json({ sucesso: false, erro: 'Erro interno do servidor' });
+    }
+});
 
 // Health Check para Railway
 app.get('/api/health', (req, res) => {
@@ -735,11 +902,307 @@ app.get('/api/email/test', async (req, res) => {
     }
 });
 
+// ================================
+// NOVAS ROTAS DE AUTENTICAÇÃO COMPLETA
+// ================================
+
+// 1. CADASTRO DE FUNCIONÁRIO COM EMAIL DE CONFIRMAÇÃO
+app.post('/api/auth/cadastrar-funcionario', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const resultado = await authSystem.cadastrarFuncionario(req.body);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(400).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro na rota de cadastro:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 2. VERIFICAÇÃO DE CÓDIGO DE EMAIL
+app.post('/api/auth/verificar-codigo', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const { email, codigo } = req.body;
+        
+        if (!email || !codigo) {
+            return res.status(400).json({ 
+                sucesso: false, 
+                erro: 'Email e código são obrigatórios' 
+            });
+        }
+
+        const resultado = await authSystem.verificarCodigo(email, codigo);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(400).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro na verificação de código:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 3. CRIAÇÃO DE SENHA APÓS VERIFICAÇÃO
+app.post('/api/auth/criar-senha', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const { email, senha, confirmarSenha } = req.body;
+        
+        if (!email || !senha || !confirmarSenha) {
+            return res.status(400).json({ 
+                sucesso: false, 
+                erro: 'Todos os campos são obrigatórios' 
+            });
+        }
+
+        const resultado = await authSystem.criarSenha(email, senha, confirmarSenha);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(400).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro na criação de senha:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 4. LOGIN COMPLETO COM VERIFICAÇÕES
+app.post('/api/auth/login-completo', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const { email, senha } = req.body;
+        
+        if (!email || !senha) {
+            return res.status(400).json({ 
+                sucesso: false, 
+                erro: 'Email e senha são obrigatórios' 
+            });
+        }
+
+        const resultado = await authSystem.realizarLogin(email, senha);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(401).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro no login:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 5. AUTORIZAÇÃO DE FUNCIONÁRIO (ADMIN)
+app.post('/api/auth/autorizar-funcionario', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const { adminEmail, funcionarioEmail, autorizado } = req.body;
+        
+        if (!adminEmail || !funcionarioEmail || autorizado === undefined) {
+            return res.status(400).json({ 
+                sucesso: false, 
+                erro: 'Todos os campos são obrigatórios' 
+            });
+        }
+
+        const resultado = await authSystem.autorizarFuncionario(adminEmail, funcionarioEmail, autorizado);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(403).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro na autorização:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 6. REENVIO DE CÓDIGO
+app.post('/api/auth/reenviar-codigo', async (req, res) => {
+    try {
+        if (!authSystem) {
+            return res.status(500).json({ 
+                sucesso: false, 
+                erro: 'Sistema de autenticação não inicializado' 
+            });
+        }
+
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ 
+                sucesso: false, 
+                erro: 'Email é obrigatório' 
+            });
+        }
+
+        const resultado = await authSystem.reenviarCodigo(email);
+        
+        if (resultado.sucesso) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(400).json(resultado);
+        }
+    } catch (error) {
+        console.error('Erro no reenvio de código:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 7. LISTAR FUNCIONÁRIOS PENDENTES (ADMIN)
+app.get('/api/auth/funcionarios-pendentes', async (req, res) => {
+    try {
+        const sheet = doc.sheetsByTitle['Usuario'];
+        const rows = await sheet.getRows();
+        
+        const funcionariosPendentes = rows
+            .filter(row => 
+                row.role === 'funcionario' && 
+                (row.autorizado === 'nao' || row.status === 'ativo_pendente_autorizacao')
+            )
+            .map(row => ({
+                user_id: row.user_id,
+                email: row.email,
+                nome: row.full_name,
+                telefone: row.telefone,
+                status: row.status,
+                autorizado: row.autorizado,
+                created_at: row.created_at,
+                verified_at: row.verified_at
+            }));
+
+        res.json({
+            sucesso: true,
+            funcionarios: funcionariosPendentes,
+            total: funcionariosPendentes.length
+        });
+
+    } catch (error) {
+        console.error('Erro ao listar funcionários pendentes:', error);
+        res.status(500).json({ 
+            sucesso: false, 
+            erro: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// 8. STATUS DO SISTEMA DE AUTENTICAÇÃO
+app.get('/api/auth/status', (req, res) => {
+    res.json({
+        sistema: 'Portal Dr. Marcio - Autenticação',
+        versao: '2.0',
+        status: authSystem ? 'Operacional' : 'Não Inicializado',
+        recursos: [
+            'Cadastro com verificação por email',
+            'Códigos de confirmação',
+            'Autorização de funcionários',
+            'Login com verificações completas',
+            'Redirecionamento inteligente',
+            'Notificações por email'
+        ],
+        endpoints: [
+            'POST /api/auth/cadastrar-funcionario',
+            'POST /api/auth/verificar-codigo',
+            'POST /api/auth/criar-senha',
+            'POST /api/auth/login-completo',
+            'POST /api/auth/autorizar-funcionario',
+            'POST /api/auth/reenviar-codigo',
+            'GET /api/auth/funcionarios-pendentes'
+        ]
+    });
+});
+
 // Iniciar servidor
 const PORT = process.env.PORT || 3000;
 
-initSheet().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor rodando na porta ${PORT}`);
-    });
-});
+// Função de inicialização assíncrona
+async function startServer() {
+    try {
+        console.log('🚀 Inicializando servidor...');
+        
+        // 1. Testar conexão com banco
+        const dbConnected = await testConnection();
+        if (!dbConnected) {
+            throw new Error('Falha na conexão com banco de dados');
+        }
+        
+        // 2. Inicializar estrutura do banco
+        await initializeDatabase();
+        
+        // 3. Inicializar Google Sheets (se necessário)
+        await initSheet();
+        
+        // 4. Iniciar servidor
+        app.listen(PORT, () => {
+            console.log(`✅ Servidor rodando na porta ${PORT}`);
+            console.log(`🌐 URL: http://localhost:${PORT}`);
+            console.log(`🗄️ Banco de dados: Conectado`);
+            console.log(`📊 Google Sheets: Configurado`);
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao inicializar servidor:', error);
+        process.exit(1);
+    }
+}
+
+// Iniciar aplicação
+startServer();

@@ -315,4 +315,9 @@ class AuthMiddleware {
   };
 }
 
-module.exports = new AuthMiddleware();
+const authMiddleware = new AuthMiddleware();
+
+// Exportar tanto a instância quanto funções individuais para compatibilidade
+module.exports = authMiddleware;
+module.exports.authenticateToken = authMiddleware.verificarToken;
+module.exports.requirePermission = authMiddleware.verificarPermissao;

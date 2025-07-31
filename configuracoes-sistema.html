@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Sistema - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <i class="fas fa-cogs"></i>
+                        <h1>Portal Dr. Marcio</h1>
+                    </div>
+                    <span class="user-role">Configurações do Sistema</span>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar ao Dashboard
+                    </button>
+                    <button class="btn-primary" id="saveConfig">
+                        <i class="fas fa-save"></i>
+                        Salvar Configurações
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <!-- Status Geral -->
+            <div class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> Status Geral do Sistema</h2>
+                </div>
+                <div class="status-grid" id="statusGrid">
+                    <!-- Status será carregado aqui -->
+                </div>
+            </div>
+
+            <!-- Configuração de Serviços -->
+            <div class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-server"></i> Serviços</h2>
+                    <p>Habilite ou desabilite os serviços conforme necessário</p>
+                </div>
+                
+                <div class="services-grid">
+                    <!-- Email -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-icon email">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="service-info">
+                                <h3>Email</h3>
+                                <p>Envio de emails via SendGrid</p>
+                            </div>
+                            <div class="service-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="email-enabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="service-status" id="email-status">
+                            <span class="status-badge checking">Verificando...</span>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn-config" onclick="configureService('email')">
+                                <i class="fas fa-cog"></i>
+                                Configurar
+                            </button>
+                            <button class="btn-test" onclick="testService('email')">
+                                <i class="fas fa-vial"></i>
+                                Testar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SMS -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-icon sms">
+                                <i class="fas fa-sms"></i>
+                            </div>
+                            <div class="service-info">
+                                <h3>SMS</h3>
+                                <p>Envio de SMS via Twilio</p>
+                            </div>
+                            <div class="service-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="sms-enabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="service-status" id="sms-status">
+                            <span class="status-badge checking">Verificando...</span>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn-config" onclick="configureService('sms')">
+                                <i class="fas fa-cog"></i>
+                                Configurar
+                            </button>
+                            <button class="btn-test" onclick="testService('sms')">
+                                <i class="fas fa-vial"></i>
+                                Testar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pagamentos -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-icon payments">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="service-info">
+                                <h3>Pagamentos</h3>
+                                <p>Processamento de pagamentos</p>
+                            </div>
+                            <div class="service-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="payments-enabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="service-status" id="payments-status">
+                            <span class="status-badge checking">Verificando...</span>
+                        </div>
+                        <div class="payment-providers">
+                            <div class="provider-option">
+                                <label>
+                                    <input type="checkbox" id="stripe-enabled">
+                                    <i class="fab fa-stripe"></i>
+                                    Stripe
+                                </label>
+                            </div>
+                            <div class="provider-option">
+                                <label>
+                                    <input type="checkbox" id="pagseguro-enabled">
+                                    <i class="fas fa-money-check"></i>
+                                    PagSeguro
+                                </label>
+                            </div>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn-config" onclick="configureService('payments')">
+                                <i class="fas fa-cog"></i>
+                                Configurar
+                            </button>
+                            <button class="btn-test" onclick="testService('payments')">
+                                <i class="fas fa-vial"></i>
+                                Testar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp -->
+                    <div class="service-card">
+                        <div class="service-header">
+                            <div class="service-icon whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                            </div>
+                            <div class="service-info">
+                                <h3>WhatsApp</h3>
+                                <p>Mensagens via WhatsApp Business</p>
+                            </div>
+                            <div class="service-toggle">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="whatsapp-enabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="service-status" id="whatsapp-status">
+                            <span class="status-badge checking">Verificando...</span>
+                        </div>
+                        <div class="service-actions">
+                            <button class="btn-config" onclick="configureService('whatsapp')">
+                                <i class="fas fa-cog"></i>
+                                Configurar
+                            </button>
+                            <button class="btn-test" onclick="testService('whatsapp')">
+                                <i class="fas fa-vial"></i>
+                                Testar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funcionalidades -->
+            <div class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-puzzle-piece"></i> Funcionalidades</h2>
+                    <p>Ative ou desative funcionalidades do sistema</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <label class="feature-label">
+                            <input type="checkbox" id="feature-lgpd">
+                            <div class="feature-content">
+                                <div class="feature-icon">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <div class="feature-info">
+                                    <h4>LGPD</h4>
+                                    <p>Conformidade com Lei Geral de Proteção de Dados</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="feature-item">
+                        <label class="feature-label">
+                            <input type="checkbox" id="feature-billing">
+                            <div class="feature-content">
+                                <div class="feature-icon">
+                                    <i class="fas fa-file-invoice-dollar"></i>
+                                </div>
+                                <div class="feature-info">
+                                    <h4>Faturamento</h4>
+                                    <p>Gestão de orçamentos e cobrança</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="feature-item">
+                        <label class="feature-label">
+                            <input type="checkbox" id="feature-reports">
+                            <div class="feature-content">
+                                <div class="feature-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="feature-info">
+                                    <h4>Relatórios</h4>
+                                    <p>Relatórios e análises do sistema</p>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ambiente -->
+            <div class="config-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-flask"></i> Ambiente</h2>
+                    <p>Configurações do ambiente de execução</p>
+                </div>
+                
+                <div class="environment-options">
+                    <div class="option-group">
+                        <label for="environment-mode">Modo de Execução:</label>
+                        <select id="environment-mode">
+                            <option value="development">Desenvolvimento</option>
+                            <option value="production">Produção</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="environment-debug">
+                            <span>Modo Debug</span>
+                        </label>
+                    </div>
+
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="environment-logging">
+                            <span>Logging Detalhado</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Configuração -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="configModalTitle">Configurar Serviço</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="configModalBody">
+                <!-- Conteúdo da configuração será carregado aqui -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeConfigModal()">Cancelar</button>
+                <button class="btn-primary" onclick="saveServiceConfig()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageContainer" class="message-container"></div>
+
+    <script>
+        class SystemConfig {
+            constructor() {
+                this.config = null;
+                this.currentService = null;
+                
+                this.initEventListeners();
+                this.loadConfiguration();
+            }
+
+            initEventListeners() {
+                // Save config
+                document.getElementById('saveConfig').addEventListener('click', () => {
+                    this.saveConfiguration();
+                });
+
+                // Service toggles
+                document.querySelectorAll('input[type="checkbox"][id$="-enabled"]').forEach(toggle => {
+                    toggle.addEventListener('change', (e) => {
+                        const service = e.target.id.replace('-enabled', '');
+                        this.toggleService(service, e.target.checked);
+                    });
+                });
+
+                // Modal close
+                document.querySelectorAll('.modal-close').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.getElementById('configModal').style.display = 'none';
+                    });
+                });
+
+                // Click outside modal
+                window.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        e.target.style.display = 'none';
+                    }
+                });
+            }
+
+            async loadConfiguration() {
+                try {
+                    const response = await fetch('/api/config/services');
+                    if (response.ok) {
+                        this.config = await response.json();
+                        this.updateUI();
+                    } else {
+                        throw new Error('Erro ao carregar configuração');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    this.showMessage('Erro ao carregar configurações', 'error');
+                }
+            }
+
+            updateUI() {
+                this.updateStatusGrid();
+                this.updateServiceToggles();
+                this.updateFeatureToggles();
+                this.updateEnvironmentSettings();
+            }
+
+            updateStatusGrid() {
+                const statusGrid = document.getElementById('statusGrid');
+                const services = this.config.services;
+                
+                let html = '';
+                for (const [serviceName, serviceConfig] of Object.entries(services)) {
+                    const isReady = serviceConfig.enabled && serviceConfig.configured;
+                    const statusClass = isReady ? 'ready' : serviceConfig.configured ? 'disabled' : 'not-configured';
+                    
+                    html += `
+                        <div class="status-item ${statusClass}">
+                            <div class="status-icon">
+                                <i class="fas ${this.getServiceIcon(serviceName)}"></i>
+                            </div>
+                            <div class="status-info">
+                                <h4>${this.getServiceName(serviceName)}</h4>
+                                <span class="status-text">${this.getStatusText(serviceConfig)}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                statusGrid.innerHTML = html;
+            }
+
+            updateServiceToggles() {
+                for (const [serviceName, serviceConfig] of Object.entries(this.config.services)) {
+                    const toggle = document.getElementById(`${serviceName}-enabled`);
+                    if (toggle) {
+                        toggle.checked = serviceConfig.enabled;
+                    }
+                    
+                    // Update status badge
+                    const statusElement = document.getElementById(`${serviceName}-status`);
+                    if (statusElement) {
+                        const badge = statusElement.querySelector('.status-badge');
+                        badge.textContent = this.getStatusText(serviceConfig);
+                        badge.className = `status-badge ${this.getStatusClass(serviceConfig)}`;
+                    }
+                    
+                    // Handle payment providers
+                    if (serviceName === 'payments' && serviceConfig.providers) {
+                        for (const [providerName, providerConfig] of Object.entries(serviceConfig.providers)) {
+                            const providerToggle = document.getElementById(`${providerName}-enabled`);
+                            if (providerToggle) {
+                                providerToggle.checked = providerConfig.enabled;
+                            }
+                        }
+                    }
+                }
+            }
+
+            updateFeatureToggles() {
+                for (const [featureName, enabled] of Object.entries(this.config.features)) {
+                    const toggle = document.getElementById(`feature-${featureName}`);
+                    if (toggle) {
+                        toggle.checked = enabled;
+                    }
+                }
+            }
+
+            updateEnvironmentSettings() {
+                document.getElementById('environment-mode').value = this.config.environment.mode;
+                document.getElementById('environment-debug').checked = this.config.environment.debug;
+                document.getElementById('environment-logging').checked = this.config.environment.logging;
+            }
+
+            async toggleService(serviceName, enabled) {
+                try {
+                    const response = await fetch('/api/config/services/toggle', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ service: serviceName, enabled })
+                    });
+                    
+                    if (response.ok) {
+                        this.showMessage(`Serviço ${serviceName} ${enabled ? 'habilitado' : 'desabilitado'}`, 'success');
+                        this.loadConfiguration(); // Reload to update UI
+                    } else {
+                        throw new Error('Erro ao alterar serviço');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    this.showMessage('Erro ao alterar configuração', 'error');
+                }
+            }
+
+            async saveConfiguration() {
+                // Collect all form data
+                const config = {
+                    services: {},
+                    features: {},
+                    environment: {}
+                };
+
+                // Collect service toggles
+                document.querySelectorAll('input[type="checkbox"][id$="-enabled"]').forEach(toggle => {
+                    const service = toggle.id.replace('-enabled', '');
+                    if (!config.services[service]) config.services[service] = {};
+                    config.services[service].enabled = toggle.checked;
+                });
+
+                // Collect feature toggles
+                document.querySelectorAll('input[type="checkbox"][id^="feature-"]').forEach(toggle => {
+                    const feature = toggle.id.replace('feature-', '');
+                    config.features[feature] = toggle.checked;
+                });
+
+                // Collect environment settings
+                config.environment.mode = document.getElementById('environment-mode').value;
+                config.environment.debug = document.getElementById('environment-debug').checked;
+                config.environment.logging = document.getElementById('environment-logging').checked;
+
+                try {
+                    const response = await fetch('/api/config/services', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+                    
+                    if (response.ok) {
+                        this.showMessage('Configurações salvas com sucesso', 'success');
+                        this.loadConfiguration();
+                    } else {
+                        throw new Error('Erro ao salvar configurações');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    this.showMessage('Erro ao salvar configurações', 'error');
+                }
+            }
+
+            getServiceIcon(serviceName) {
+                const icons = {
+                    email: 'fa-envelope',
+                    sms: 'fa-sms',
+                    payments: 'fa-credit-card',
+                    whatsapp: 'fa-whatsapp',
+                    database: 'fa-database',
+                    storage: 'fa-cloud'
+                };
+                return icons[serviceName] || 'fa-cog';
+            }
+
+            getServiceName(serviceName) {
+                const names = {
+                    email: 'Email',
+                    sms: 'SMS',
+                    payments: 'Pagamentos',
+                    whatsapp: 'WhatsApp',
+                    database: 'Banco de Dados',
+                    storage: 'Armazenamento'
+                };
+                return names[serviceName] || serviceName;
+            }
+
+            getStatusText(serviceConfig) {
+                if (serviceConfig.enabled && serviceConfig.configured) {
+                    return 'Ativo';
+                } else if (serviceConfig.configured) {
+                    return 'Configurado (Desabilitado)';
+                } else {
+                    return 'Não configurado';
+                }
+            }
+
+            getStatusClass(serviceConfig) {
+                if (serviceConfig.enabled && serviceConfig.configured) {
+                    return 'ready';
+                } else if (serviceConfig.configured) {
+                    return 'disabled';
+                } else {
+                    return 'not-configured';
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${type}`;
+                messageEl.innerHTML = `
+                    <i class="fas ${this.getIconForType(type)}"></i>
+                    <span>${text}</span>
+                    <button class="message-close"><i class="fas fa-times"></i></button>
+                `;
+
+                document.getElementById('messageContainer').appendChild(messageEl);
+
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.remove();
+                    }
+                }, 5000);
+
+                messageEl.querySelector('.message-close').addEventListener('click', () => {
+                    messageEl.remove();
+                });
+            }
+
+            getIconForType(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || 'fa-info-circle';
+            }
+        }
+
+        // Global functions for buttons
+        function configureService(serviceName) {
+            console.log('Configurar:', serviceName);
+            // TODO: Implementar modal de configuração
+        }
+
+        function testService(serviceName) {
+            console.log('Testar:', serviceName);
+            // TODO: Implementar teste de serviço
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').style.display = 'none';
+        }
+
+        function saveServiceConfig() {
+            // TODO: Implementar salvamento de configuração do serviço
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SystemConfig();
+        });
+    </script>
+
+    <style>
+        .config-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .section-header h2 {
+            margin: 0 0 10px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header p {
+            margin: 0 0 20px;
+            color: #666;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .status-item.ready {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .status-item.disabled {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .status-item.not-configured {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .service-icon.email { background: #007bff; }
+        .service-icon.sms { background: #28a745; }
+        .service-icon.payments { background: #ffc107; color: #333; }
+        .service-icon.whatsapp { background: #25d366; }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-info h3 {
+            margin: 0 0 5px;
+            color: #333;
+        }
+
+        .service-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .service-status {
+            margin-bottom: 15px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.disabled {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.not-configured {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.checking {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .service-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-config, .btn-test {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-config {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-test {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .payment-providers {
+            margin-bottom: 15px;
+        }
+
+        .provider-option {
+            margin-bottom: 8px;
+        }
+
+        .provider-option label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .feature-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .feature-label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .feature-content {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .feature-info h4 {
+            margin: 0 0 5px;
+            color: #333;
+        }
+
+        .feature-info p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .environment-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .option-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+    </style>
+</body>
+</html>

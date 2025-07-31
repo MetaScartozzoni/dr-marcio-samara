@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Email - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="header-section">
+                <div class="logo">
+                    <i class="fas fa-envelope-circle-check"></i>
+                    <h1>Verificar Email</h1>
+                </div>
+                <p class="subtitle">Insira o código de 6 dígitos enviado para seu email</p>
+                <div class="email-info">
+                    <i class="fas fa-envelope"></i>
+                    <span id="emailDisplay"></span>
+                </div>
+            </div>
+            
+            <form id="verificarCodigoForm" class="auth-form">
+                <div class="codigo-section">
+                    <label for="codigo">
+                        <i class="fas fa-key"></i>
+                        Código de Verificação
+                    </label>
+                    <div class="codigo-input-container">
+                        <input type="text" 
+                               id="codigo" 
+                               name="codigo" 
+                               maxlength="6" 
+                               placeholder="000000"
+                               autocomplete="one-time-code"
+                               inputmode="numeric"
+                               pattern="[0-9]{6}"
+                               required>
+                        <div class="codigo-timer">
+                            <i class="fas fa-clock"></i>
+                            <span id="timer">5:00</span>
+                        </div>
+                    </div>
+                    <div class="input-feedback"></div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn-primary" id="btnVerificar">
+                        <i class="fas fa-check-circle"></i>
+                        Verificar Código
+                    </button>
+                    
+                    <button type="button" class="btn-secondary" id="btnReenviar">
+                        <i class="fas fa-redo"></i>
+                        Reenviar Código
+                    </button>
+                </div>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
+                Verificando código...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <h4>Não recebeu o código?</h4>
+                    <ul>
+                        <li>Verifique sua caixa de spam</li>
+                        <li>Aguarde alguns minutos e tente novamente</li>
+                        <li>Certifique-se de que o email está correto</li>
+                        <li>Use o botão "Reenviar Código" se necessário</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="auth-links">
+                <p>
+                    <a href="cadastro-funcionario.html" class="link">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar ao cadastro
+                    </a>
+                </p>
+                <p>
+                    <a href="login.html" class="link">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Já tem conta? Fazer login
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class VerificarEmail {
+            constructor() {
+                this.form = document.getElementById('verificarCodigoForm');
+                this.loading = document.getElementById('loading');
+                this.message = document.getElementById('message');
+                this.btnVerificar = document.getElementById('btnVerificar');
+                this.btnReenviar = document.getElementById('btnReenviar');
+                this.codigoInput = document.getElementById('codigo');
+                this.emailDisplay = document.getElementById('emailDisplay');
+                this.timerElement = document.getElementById('timer');
+                
+                this.email = this.getEmailFromUrl();
+                this.timeLeft = 300; // 5 minutos em segundos
+                this.timerInterval = null;
+                
+                this.init();
+            }
+
+            init() {
+                if (!this.email) {
+                    window.location.href = 'cadastro-funcionario.html';
+                    return;
+                }
+
+                this.emailDisplay.textContent = this.email;
+                this.initEventListeners();
+                this.startTimer();
+                this.codigoInput.focus();
+            }
+
+            initEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                this.btnReenviar.addEventListener('click', () => this.reenviarCodigo());
+                
+                // Formatação automática do código
+                this.codigoInput.addEventListener('input', (e) => {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 6) value = value.slice(0, 6);
+                    e.target.value = value;
+                    
+                    // Auto-submit quando o código estiver completo
+                    if (value.length === 6) {
+                        setTimeout(() => this.handleSubmit(e), 500);
+                    }
+                });
+
+                // Permitir apenas números
+                this.codigoInput.addEventListener('keypress', (e) => {
+                    if (!/[0-9]/.test(e.key) && e.key !== 'Backspace' && e.key !== 'Delete' && e.key !== 'Tab') {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            getEmailFromUrl() {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get('email');
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                const codigo = this.codigoInput.value.trim();
+                
+                if (codigo.length !== 6) {
+                    this.showError('Código deve ter 6 dígitos');
+                    return;
+                }
+
+                this.showLoading(true);
+                this.clearMessage();
+
+                try {
+                    const response = await fetch('/api/auth/verificar-codigo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: this.email,
+                            codigo: codigo
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        this.showSuccess(resultado.message);
+                        this.stopTimer();
+                        
+                        // Redirecionar para criação de senha
+                        setTimeout(() => {
+                            window.location.href = `criar-senha.html?email=${encodeURIComponent(this.email)}`;
+                        }, 2000);
+                        
+                    } else {
+                        this.showError(resultado.erro);
+                        this.codigoInput.value = '';
+                        this.codigoInput.focus();
+                    }
+
+                } catch (error) {
+                    console.error('Erro na verificação:', error);
+                    this.showError('Erro de conexão. Tente novamente.');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            async reenviarCodigo() {
+                this.btnReenviar.disabled = true;
+                this.btnReenviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reenviando...';
+
+                try {
+                    const response = await fetch('/api/auth/reenviar-codigo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: this.email
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        this.showSuccess('Novo código enviado para seu email!');
+                        this.resetTimer();
+                        this.codigoInput.value = '';
+                        this.codigoInput.focus();
+                    } else {
+                        this.showError(resultado.erro);
+                    }
+
+                } catch (error) {
+                    console.error('Erro no reenvio:', error);
+                    this.showError('Erro de conexão. Tente novamente.');
+                } finally {
+                    this.btnReenviar.disabled = false;
+                    this.btnReenviar.innerHTML = '<i class="fas fa-redo"></i> Reenviar Código';
+                }
+            }
+
+            startTimer() {
+                this.updateTimerDisplay();
+                this.timerInterval = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateTimerDisplay();
+                    
+                    if (this.timeLeft <= 0) {
+                        this.stopTimer();
+                        this.showWarning('Código expirado. Solicite um novo código.');
+                    }
+                }, 1000);
+            }
+
+            stopTimer() {
+                if (this.timerInterval) {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                }
+            }
+
+            resetTimer() {
+                this.stopTimer();
+                this.timeLeft = 300;
+                this.startTimer();
+            }
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                this.timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Mudar cor quando restam menos de 1 minuto
+                if (this.timeLeft < 60) {
+                    this.timerElement.style.color = '#dc3545';
+                } else {
+                    this.timerElement.style.color = '#6c757d';
+                }
+            }
+
+            showLoading(show) {
+                this.loading.style.display = show ? 'block' : 'none';
+                this.btnVerificar.disabled = show;
+                
+                if (show) {
+                    this.btnVerificar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                } else {
+                    this.btnVerificar.innerHTML = '<i class="fas fa-check-circle"></i> Verificar Código';
+                }
+            }
+
+            showSuccess(message) {
+                this.message.className = 'message success';
+                this.message.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <div>
+                        <strong>Sucesso!</strong>
+                        <p>${message}</p>
+                        <p><small>Redirecionando para criação de senha...</small></p>
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            showError(message) {
+                this.message.className = 'message error';
+                this.message.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Erro!</strong>
+                        <p>${message}</p>
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            showWarning(message) {
+                this.message.className = 'message warning';
+                this.message.innerHTML = `
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Atenção!</strong>
+                        <p>${message}</p>
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            clearMessage() {
+                this.message.style.display = 'none';
+                this.message.className = 'message';
+                this.message.innerHTML = '';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new VerificarEmail();
+        });
+    </script>
+
+    <style>
+        .auth-form {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: #28a745;
+        }
+
+        .logo h1 {
+            margin: 0;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .email-info {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0;
+        }
+
+        .email-info i {
+            color: #007bff;
+        }
+
+        .email-info span {
+            font-weight: 600;
+            color: #495057;
+            word-break: break-all;
+        }
+
+        .codigo-section {
+            margin: 30px 0;
+        }
+
+        .codigo-section label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .codigo-section label i {
+            color: #28a745;
+            width: 16px;
+        }
+
+        .codigo-input-container {
+            position: relative;
+        }
+
+        #codigo {
+            width: 100%;
+            padding: 20px 16px;
+            border: 3px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        #codigo:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+        }
+
+        #codigo::placeholder {
+            color: #ced4da;
+            font-weight: normal;
+        }
+
+        .codigo-timer {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 25px 0;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:disabled,
+        .btn-secondary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .info-box i {
+            color: #856404;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .info-box h4 {
+            margin: 0 0 10px;
+            color: #856404;
+            font-size: 1rem;
+        }
+
+        .info-box ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+            line-height: 1.5;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message i {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .auth-links p {
+            margin: 10px 0;
+        }
+
+        .auth-links .link {
+            color: #007bff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links .link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            #codigo {
+                font-size: 1.5rem;
+                letter-spacing: 4px;
+                padding: 15px 12px;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .email-info {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs').promises;
 const path = require('path');
-const servicesConfig = require('../config/services-config');
+const ServicesConfig = require('../config/services-config');
+
+// Instância do gerenciador de configurações
+const servicesConfig = new ServicesConfig();
 
 // GET /api/config/services - Obter configuração atual
 router.get('/services', async (req, res) => {
