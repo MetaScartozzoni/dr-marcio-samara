@@ -28,6 +28,9 @@ const funcionariosRoutes = require('./src/routes/funcionarios.routes');
 const jornadaRoutes = require('./src/routes/jornada.routes');
 const systemRoutes = require('./src/routes/system.routes');
 
+// Importar rotas da integração completa
+const pacientesRoutes = require('./src/routes/pacientes.routes');
+
 // Middleware básico
 app.use(cors());
 app.use(express.json());
@@ -764,6 +767,9 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/funcionarios', funcionariosRoutes);
 app.use('/api/jornada', jornadaRoutes);
 app.use('/api/system', systemRoutes);
+
+// Rotas da integração completa de pacientes
+app.use('/api/pacientes', pacientesRoutes);
 
 // ENDPOINTS ANTIGOS (Google Sheets) - Manter durante migração
 const configRoutes = require('./src/routes/config.routes');
