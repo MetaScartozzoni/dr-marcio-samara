@@ -1,18 +1,58 @@
 // src/services/payment.service.js
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const axios = require('axios');
 const { Pool } = require('pg');
 
+// Sistema de configuração dinâmica de serviços
+const ServiceConfig = {
+  stripe: {
+    enabled: false,
+    configured: false,
+    service: null
+  },
+  pagseguro: {
+    enabled: false,
+    configured: false
+  }
+};
+
+// Inicializar Stripe apenas se configurado e habilitado
+function initializeStripe() {
+  try {
+    if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY !== 'sk_test_seu_stripe_secret_key_aqui') {
+      ServiceConfig.stripe.service = require('stripe')(process.env.STRIPE_SECRET_KEY);
+      ServiceConfig.stripe.configured = true;
+      ServiceConfig.stripe.enabled = true;
+      console.log('✅ Stripe configurado e habilitado');
+    } else {
+      console.log('⚠️  Stripe não configurado - usando modo desabilitado');
+    }
+  } catch (error) {
+    console.error('❌ Erro ao inicializar Stripe:', error.message);
+    ServiceConfig.stripe.enabled = false;
+  }
+}
+
+// Inicializar na importação
+initializeStripe();
+
 class PaymentService {
   constructor() {
-    // Configuração do banco de dados
-    this.db = new Pool({
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-    });
+    // Configuração do banco de dados - usar DATABASE_URL se disponível
+    if (process.env.DATABASE_URL) {
+      this.db = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      });
+    } else {
+      // Fallback para configuração individual
+      this.db = new Pool({
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 5432,
+        database: process.env.DB_NAME || 'portal_dr_marcio',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || ''
+      });
+    }
 
     // Configuração PagSeguro
     this.pagseguroConfig = {
