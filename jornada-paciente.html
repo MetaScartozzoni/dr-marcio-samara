@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornada do Paciente - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Loading overlay com animação elegante */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Header aprimorado */
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-left h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header-left p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .btn-voltar {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .btn-voltar:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        /* Sistema de status em tempo real */
+        .status-bar {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Toolbar de controles */
+        .toolbar {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .toolbar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .toolbar button.btn-config {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .toolbar button.btn-notificacoes {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .toolbar button.btn-verificar {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        /* Grid de cards da jornada */
+        .jornada-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Cards da jornada do paciente */
+        .card-jornada-paciente {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            overflow: hidden;
+            border-left: 5px solid;
+        }
+
+        .card-jornada-paciente::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .card-jornada-paciente:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-jornada-paciente.urgente {
+            border-left-color: #e74c3c;
+            animation: pulse-urgente 2s infinite;
+        }
+
+        .card-jornada-paciente.atencao {
+            border-left-color: #f39c12;
+        }
+
+        .card-jornada-paciente.normal {
+            border-left-color: #2ecc71;
+        }
+
+        @keyframes pulse-urgente {
+            0% { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 15px 40px rgba(231, 76, 60, 0.3); }
+            100% { box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        }
+
+        .card-header-jornada {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .paciente-info-jornada h4 {
+            color: #2c3e50;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .paciente-info-jornada p {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-jornada {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-jornada.confirmar-consulta {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .status-jornada.enviar-orcamento {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .status-jornada.acompanhar-resposta {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+
+        .status-jornada.agendar-cirurgia {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .prazo-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .prazo-label {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .prazo-tempo {
+            font-size: 1.1em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .prazo-tempo.urgente {
+            color: #e74c3c;
+        }
+
+        .prazo-tempo.atencao {
+            color: #f39c12;
+        }
+
+        .prazo-tempo.normal {
+            color: #2ecc71;
+        }
+
+        .observacoes-jornada {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .observacoes-jornada h6 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .observacoes-jornada p {
+            color: #555;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .acoes-jornada {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-acao {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-acao.confirmar {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+
+        .btn-acao.enviar {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .btn-acao.acompanhar {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            color: white;
+        }
+
+        .btn-acao.agendar {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-acao.historico {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+        }
+
+        /* Estatísticas da jornada */
+        .stats-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-number.urgente {
+            color: #e74c3c;
+        }
+
+        .stat-number.atencao {
+            color: #f39c12;
+        }
+
+        .stat-number.normal {
+            color: #2ecc71;
+        }
+
+        .stat-number.total {
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 50px 20px;
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+
+        .loading i {
+            font-size: 2em;
+            margin-bottom: 15px;
+            animation: spin 2s linear infinite;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-left h1 {
+                font-size: 2em;
+            }
+
+            .jornada-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar button {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .acoes-jornada {
+                flex-direction: column;
+            }
+
+            .btn-acao {
+                min-width: auto;
+            }
+        }
+
+        /* Animações personalizadas */
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-in {
+            animation: slideIn 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header fade-in">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1><i class="fas fa-route"></i> Jornada do Paciente</h1>
+                    <p>Sistema completo de gestão, prazos e acompanhamento médico</p>
+                </div>
+                <div class="header-right">
+                    <a href="admin.html" class="btn-voltar">
+                        <i class="fas fa-arrow-left"></i> Voltar ao Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar slide-in">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                Sistema Online - Monitoramento Ativo
+            </div>
+            <div class="status-indicator">
+                <i class="fas fa-clock"></i>
+                Última verificação: <span id="ultimaVerificacao">--:--</span>
+            </div>
+            <div class="status-indicator">
+                <i class="fas fa-bell"></i>
+                <span id="totalNotificacoes">0</span> notificações pendentes
+            </div>
+        </div>
+
+        <!-- Estatísticas -->
+        <div class="stats-section fade-in">
+            <h3 style="margin-bottom: 25px; color: #2c3e50; font-weight: 700;">
+                <i class="fas fa-chart-bar"></i> Estatísticas da Jornada
+            </h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number total" id="totalPacientes">0</div>
+                    <div class="stat-label">Total de Pacientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number urgente" id="pacientesUrgentes">0</div>
+                    <div class="stat-label">Urgente</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number atencao" id="pacientesAtencao">0</div>
+                    <div class="stat-label">Atenção</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number normal" id="pacientesNormais">0</div>
+                    <div class="stat-label">Normal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar de Controles -->
+        <div class="toolbar slide-in">
+            <button class="btn-config" onclick="abrirConfiguracaoJornada()">
+                <i class="fas fa-cog"></i> Configurar Prazos
+            </button>
+            <button class="btn-notificacoes" onclick="abrirPainelNotificacoes()">
+                <i class="fas fa-bell"></i> Painel Notificações
+            </button>
+            <button class="btn-verificar" onclick="executarVerificacaoPrazos()">
+                <i class="fas fa-clock"></i> Verificar Prazos
+            </button>
+            <button onclick="adicionarNovoPaciente()">
+                <i class="fas fa-user-plus"></i> Novo Paciente
+            </button>
+            <button onclick="exportarRelatorio()">
+                <i class="fas fa-file-export"></i> Exportar Relatório
+            </button>
+            <button onclick="atualizarDados()">
+                <i class="fas fa-sync"></i> Atualizar
+            </button>
+        </div>
+
+        <!-- Grid de Cards da Jornada -->
+        <div id="cardsJornadaPacientes" class="jornada-grid">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                <div>Carregando jornadas dos pacientes...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let jornadaPacientes = [];
+        let configuracoesPrazos = {};
+
+        // Dados de exemplo para jornada de pacientes
+        const jornadaExemplo = [
+            {
+                id: 1,
+                paciente: {
+                    nome: "Maria Silva Santos",
+                    telefone: "(11) 99999-1234",
+                    email: "maria.silva@email.com"
+                },
+                etapaAtual: "confirmar-consulta",
+                proximaAcao: "Confirmar consulta agendada",
+                prazo: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 horas
+                prioridade: "urgente",
+                observacoes: "Paciente solicitou urgência para procedimento estético. Já possui todos os exames pré-operatórios em dia."
+            },
+            {
+                id: 2,
+                paciente: {
+                    nome: "João Carlos Oliveira",
+                    telefone: "(11) 88888-5678",
+                    email: "joao.carlos@email.com"
+                },
+                etapaAtual: "enviar-orcamento",
+                proximaAcao: "Enviar orçamento detalhado",
+                prazo: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
+                prioridade: "atencao",
+                observacoes: "Interessado em rinoplastia. Aguarda orçamento para decidir data da cirurgia."
+            },
+            {
+                id: 3,
+                paciente: {
+                    nome: "Ana Paula Costa",
+                    telefone: "(11) 77777-9012",
+                    email: "ana.paula@email.com"
+                },
+                etapaAtual: "acompanhar-resposta",
+                proximaAcao: "Acompanhar resposta do orçamento",
+                prazo: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 dias
+                prioridade: "normal",
+                observacoes: "Orçamento enviado há 2 dias. Paciente estava analisando condições de pagamento."
+            },
+            {
+                id: 4,
+                paciente: {
+                    nome: "Roberto Mendes",
+                    telefone: "(11) 66666-3456",
+                    email: "roberto.mendes@email.com"
+                },
+                etapaAtual: "agendar-cirurgia",
+                proximaAcao: "Agendar data da cirurgia",
+                prazo: new Date(Date.now() + 6 * 60 * 60 * 1000), // 6 horas
+                prioridade: "urgente",
+                observacoes: "Orçamento aprovado! Paciente ansioso para agendar. Preferência por manhãs de terça ou quinta."
+            }
+        ];
+
+        // Inicialização da página
+        document.addEventListener('DOMContentLoaded', function() {
+            showLoading();
+            
+            setTimeout(() => {
+                carregarJornadaPacientes();
+                atualizarEstatisticas();
+                atualizarUltimaVerificacao();
+                hideLoading();
+            }, 1500);
+
+            // Atualizar a cada 30 segundos
+            setInterval(() => {
+                atualizarUltimaVerificacao();
+                verificarPrazosAutomatico();
+            }, 30000);
+        });
+
+        // Loading functions
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Carregar jornada dos pacientes
+        function carregarJornadaPacientes() {
+            const grid = document.getElementById('cardsJornadaPacientes');
+            
+            if (jornadaPacientes.length === 0) {
+                jornadaPacientes = [...jornadaExemplo];
+            }
+            
+            grid.innerHTML = jornadaPacientes.map(jornada => criarCardJornada(jornada)).join('');
+            
+            // Aplicar animações escalonadas
+            setTimeout(() => {
+                const cards = grid.querySelectorAll('.card-jornada-paciente');
+                cards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('fade-in');
+                    }, index * 200);
+                });
+            }, 100);
+        }
+
+        // Criar card de jornada
+        function criarCardJornada(jornada) {
+            const tempoRestante = calcularTempoRestante(jornada.prazo);
+            const classPrioridade = jornada.prioridade;
+            const statusTexto = getStatusTexto(jornada.etapaAtual);
+            
+            return `
+                <div class="card-jornada-paciente ${classPrioridade}" data-jornada-id="${jornada.id}">
+                    <div class="card-header-jornada">
+                        <div class="paciente-info-jornada">
+                            <h4>${jornada.paciente.nome}</h4>
+                            <p><i class="fas fa-phone"></i> ${jornada.paciente.telefone}</p>
+                            <p><i class="fas fa-envelope"></i> ${jornada.paciente.email}</p>
+                        </div>
+                        <div class="status-jornada ${jornada.etapaAtual}">
+                            ${statusTexto}
+                        </div>
+                    </div>
+
+                    <div class="prazo-info">
+                        <div class="prazo-label">Próxima Ação:</div>
+                        <div class="prazo-tempo ${classPrioridade}">${jornada.proximaAcao}</div>
+                        <div style="margin-top: 5px; font-size: 11px; color: #666;">
+                            <i class="fas fa-clock"></i> ${tempoRestante}
+                        </div>
+                    </div>
+
+                    ${jornada.observacoes ? `
+                        <div class="observacoes-jornada">
+                            <h6><i class="fas fa-sticky-note"></i> Observações Importantes:</h6>
+                            <p>${jornada.observacoes}</p>
+                        </div>
+                    ` : ''}
+
+                    <div class="acoes-jornada">
+                        ${getAcoesJornada(jornada)}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Calcular tempo restante
+        function calcularTempoRestante(prazo) {
+            const agora = new Date();
+            const diferenca = prazo - agora;
+            
+            if (diferenca <= 0) {
+                return "⚠️ VENCIDO!";
+            }
+            
+            const horas = Math.floor(diferenca / (1000 * 60 * 60));
+            const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (horas > 24) {
+                const dias = Math.floor(horas / 24);
+                return `${dias}d ${horas % 24}h restantes`;
+            } else if (horas > 0) {
+                return `${horas}h ${minutos}m restantes`;
+            } else {
+                return `${minutos}m restantes`;
+            }
+        }
+
+        // Obter texto do status
+        function getStatusTexto(etapa) {
+            const textos = {
+                'confirmar-consulta': 'Confirmar Consulta',
+                'enviar-orcamento': 'Enviar Orçamento',
+                'acompanhar-resposta': 'Aguardar Resposta',
+                'agendar-cirurgia': 'Agendar Cirurgia',
+                'pos-operatorio': 'Pós-Operatório',
+                'alta-medica': 'Alta Médica'
+            };
+            return textos[etapa] || etapa;
+        }
+
+        // Obter ações da jornada
+        function getAcoesJornada(jornada) {
+            const acoes = {
+                'confirmar-consulta': `
+                    <button class="btn-acao confirmar" onclick="confirmarConsulta(${jornada.id})">
+                        <i class="fas fa-check"></i> Confirmar
+                    </button>
+                    <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                `,
+                'enviar-orcamento': `
+                    <button class="btn-acao enviar" onclick="enviarOrcamento(${jornada.id})">
+                        <i class="fas fa-paper-plane"></i> Enviar
+                    </button>
+                    <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                `,
+                'acompanhar-resposta': `
+                    <button class="btn-acao acompanhar" onclick="acompanharResposta(${jornada.id})">
+                        <i class="fas fa-eye"></i> Acompanhar
+                    </button>
+                    <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                `,
+                'agendar-cirurgia': `
+                    <button class="btn-acao agendar" onclick="agendarCirurgia(${jornada.id})">
+                        <i class="fas fa-calendar-plus"></i> Agendar
+                    </button>
+                    <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                `
+            };
+            
+            return acoes[jornada.etapaAtual] || `
+                <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
+                    <i class="fas fa-history"></i> Histórico
+                </button>
+            `;
+        }
+
+        // Atualizar estatísticas
+        function atualizarEstatisticas() {
+            const total = jornadaPacientes.length;
+            const urgentes = jornadaPacientes.filter(j => j.prioridade === 'urgente').length;
+            const atencao = jornadaPacientes.filter(j => j.prioridade === 'atencao').length;
+            const normais = jornadaPacientes.filter(j => j.prioridade === 'normal').length;
+
+            document.getElementById('totalPacientes').textContent = total;
+            document.getElementById('pacientesUrgentes').textContent = urgentes;
+            document.getElementById('pacientesAtencao').textContent = atencao;
+            document.getElementById('pacientesNormais').textContent = normais;
+            document.getElementById('totalNotificacoes').textContent = urgentes + atencao;
+        }
+
+        // Atualizar última verificação
+        function atualizarUltimaVerificacao() {
+            const agora = new Date();
+            const horario = agora.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            document.getElementById('ultimaVerificacao').textContent = horario;
+        }
+
+        // Verificação automática de prazos
+        function verificarPrazosAutomatico() {
+            const agora = new Date();
+            jornadaPacientes.forEach(jornada => {
+                if (jornada.prazo <= agora && jornada.prioridade !== 'urgente') {
+                    jornada.prioridade = 'urgente';
+                }
+            });
+            
+            carregarJornadaPacientes();
+            atualizarEstatisticas();
+        }
+
+        // Funções de ações
+        function confirmarConsulta(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (jornada) {
+                if (confirm(`Confirmar consulta para ${jornada.paciente.nome}?`)) {
+                    jornada.etapaAtual = 'enviar-orcamento';
+                    jornada.proximaAcao = 'Enviar orçamento detalhado';
+                    jornada.prazo = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                    jornada.prioridade = 'atencao';
+                    
+                    carregarJornadaPacientes();
+                    atualizarEstatisticas();
+                    
+                    mostrarNotificacao('✅ Consulta confirmada com sucesso!', 'success');
+                }
+            }
+        }
+
+        function enviarOrcamento(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (jornada) {
+                if (confirm(`Enviar orçamento para ${jornada.paciente.nome}?`)) {
+                    jornada.etapaAtual = 'acompanhar-resposta';
+                    jornada.proximaAcao = 'Acompanhar resposta do orçamento';
+                    jornada.prazo = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+                    jornada.prioridade = 'normal';
+                    
+                    carregarJornadaPacientes();
+                    atualizarEstatisticas();
+                    
+                    mostrarNotificacao('📧 Orçamento enviado com sucesso!', 'success');
+                }
+            }
+        }
+
+        function acompanharResposta(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (jornada) {
+                mostrarNotificacao(`👀 Acompanhando resposta de ${jornada.paciente.nome}`, 'info');
+            }
+        }
+
+        function agendarCirurgia(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (jornada) {
+                if (confirm(`Agendar cirurgia para ${jornada.paciente.nome}?`)) {
+                    jornada.etapaAtual = 'pos-operatorio';
+                    jornada.proximaAcao = 'Acompanhamento pós-operatório';
+                    jornada.prazo = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                    jornada.prioridade = 'normal';
+                    
+                    carregarJornadaPacientes();
+                    atualizarEstatisticas();
+                    
+                    mostrarNotificacao('📅 Cirurgia agendada com sucesso!', 'success');
+                }
+            }
+        }
+
+        function verHistorico(id) {
+            const jornada = jornadaPacientes.find(j => j.id === id);
+            if (jornada) {
+                alert(`📋 Histórico de ${jornada.paciente.nome}\n\nEtapa atual: ${getStatusTexto(jornada.etapaAtual)}\nPróxima ação: ${jornada.proximaAcao}\nPrioridade: ${jornada.prioridade.toUpperCase()}`);
+            }
+        }
+
+        // Funções da toolbar
+        function abrirConfiguracaoJornada() {
+            mostrarNotificacao('⚙️ Abrindo configurações de prazos...', 'info');
+        }
+
+        function abrirPainelNotificacoes() {
+            mostrarNotificacao('🔔 Abrindo painel de notificações...', 'info');
+        }
+
+        function executarVerificacaoPrazos() {
+            showLoading();
+            setTimeout(() => {
+                verificarPrazosAutomatico();
+                hideLoading();
+                mostrarNotificacao('✅ Verificação de prazos concluída!', 'success');
+            }, 1000);
+        }
+
+        function adicionarNovoPaciente() {
+            mostrarNotificacao('👤 Funcionalidade em desenvolvimento...', 'info');
+        }
+
+        function exportarRelatorio() {
+            mostrarNotificacao('📊 Gerando relatório...', 'info');
+        }
+
+        function atualizarDados() {
+            showLoading();
+            setTimeout(() => {
+                carregarJornadaPacientes();
+                atualizarEstatisticas();
+                atualizarUltimaVerificacao();
+                hideLoading();
+                mostrarNotificacao('🔄 Dados atualizados com sucesso!', 'success');
+            }, 1000);
+        }
+
+        // Sistema de notificações
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            const cores = {
+                'success': '#2ecc71',
+                'info': '#3498db',
+                'warning': '#f39c12',
+                'error': '#e74c3c'
+            };
+
+            const notificacao = document.createElement('div');
+            notificacao.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${cores[tipo]};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                z-index: 10000;
+                font-weight: 600;
+                animation: slideInRight 0.3s ease;
+            `;
+            notificacao.textContent = mensagem;
+
+            document.body.appendChild(notificacao);
+
+            setTimeout(() => {
+                notificacao.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notificacao);
+                }, 300);
+            }, 3000);
+        }
+
+        // CSS para animações de notificação
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
