@@ -91,3 +91,7 @@ pids
 
 # Yarn Integrity file
 .yarn-integrity
+# Ignorar backups automáticos
+*.backup-*
+*.corrupted-backup-*
+*.empty-backup-*
