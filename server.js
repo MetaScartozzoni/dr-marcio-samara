@@ -26,6 +26,7 @@ const { checkSystemSetup } = require('./src/middleware/setup.middleware');
 // Importar novas rotas do banco de dados
 const funcionariosRoutes = require('./src/routes/funcionarios.routes');
 const jornadaRoutes = require('./src/routes/jornada.routes');
+const systemRoutes = require('./src/routes/system.routes');
 
 // Middleware básico
 app.use(cors());
@@ -762,6 +763,7 @@ app.use('/api/payments', paymentRoutes);
 // Novas rotas do banco de dados
 app.use('/api/funcionarios', funcionariosRoutes);
 app.use('/api/jornada', jornadaRoutes);
+app.use('/api/system', systemRoutes);
 
 // ENDPOINTS ANTIGOS (Google Sheets) - Manter durante migração
 const configRoutes = require('./src/routes/config.routes');
