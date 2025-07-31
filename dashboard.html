@@ -111,6 +111,35 @@
         .action-btn:hover {
             background: #5a67d8;
         }
+
+        /* Botão especial para Gestão da Jornada */
+        .btn-jornada-especial {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+            border: 2px solid #ff5252 !important;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3) !important;
+            font-weight: 600 !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .btn-jornada-especial:hover {
+            background: linear-gradient(135deg, #ff5252, #e53e3e) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+        }
+
+        .btn-jornada-especial:before {
+            content: '🔥';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        .btn-jornada-especial i {
+            margin-left: 15px !important;
+        }
         
         .logout-btn {
             position: absolute;
@@ -345,11 +374,15 @@
         <div id="staff-section" class="hidden">
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-chart-line"></i></span>Quadro Evolutivo</h3>
-                    <p>Acompanhamento diário dos pacientes e evolução médica.</p>
+                    <h3><span class="icon"><i class="fas fa-route"></i></span>Jornada de Pacientes</h3>
+                    <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
                     <div class="quick-actions">
                         <a href="/quadro-evolutivo.html" class="action-btn"><i class="fas fa-chart-area"></i> Ver Quadro</a>
                         <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"><i class="fas fa-file-alt"></i> Relatório</a>
+                        <!-- Botão especial para Gestão da Jornada -->
+                        <a href="/admin.html#jornada-paciente" class="action-btn btn-jornada-especial">
+                            <i class="fas fa-route"></i> 🔥 Jornada Especial
+                        </a>
                     </div>
                 </div>
                 
@@ -432,11 +465,15 @@
             
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-chart-line"></i></span>Quadro Evolutivo</h3>
-                    <p>Acompanhamento diário dos pacientes e evolução médica.</p>
+                    <h3><span class="icon"><i class="fas fa-route"></i></span>Jornada de Pacientes</h3>
+                    <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
                     <div class="quick-actions">
                         <a href="/quadro-evolutivo.html" class="action-btn"><i class="fas fa-chart-area"></i> Ver Quadro</a>
                         <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"><i class="fas fa-file-alt"></i> Relatório</a>
+                        <!-- Botão especial para Gestão da Jornada -->
+                        <a href="/admin.html#jornada-paciente" class="action-btn btn-jornada-especial">
+                            <i class="fas fa-route"></i> 🔥 Jornada Especial
+                        </a>
                     </div>
                 </div>
                 

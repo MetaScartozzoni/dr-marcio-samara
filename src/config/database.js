@@ -106,6 +106,80 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela para pacientes (futura migração)
+        if (!tableNames.includes('pacientes')) {
+            console.log('🔧 Criando estrutura de pacientes...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS pacientes (
+                    id SERIAL PRIMARY KEY,
+                    nome VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) UNIQUE,
+                    telefone VARCHAR(20),
+                    cpf VARCHAR(14) UNIQUE,
+                    data_nascimento DATE,
+                    endereco TEXT,
+                    convenio VARCHAR(100),
+                    numero_convenio VARCHAR(50),
+                    status VARCHAR(50) DEFAULT 'ativo',
+                    primeira_consulta DATE,
+                    ultima_consulta DATE,
+                    proximo_retorno DATE,
+                    observacoes TEXT,
+                    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    cadastrado_por INTEGER,
+                    FOREIGN KEY (cadastrado_por) REFERENCES funcionarios(id)
+                )
+            `);
+        }
+        
+        // Criar tabela para jornada do paciente
+        if (!tableNames.includes('jornada_paciente')) {
+            console.log('🔧 Criando tabela de jornada do paciente...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS jornada_paciente (
+                    id SERIAL PRIMARY KEY,
+                    paciente_id INTEGER NOT NULL,
+                    tipo_evento VARCHAR(50) NOT NULL,
+                    data_prevista DATE NOT NULL,
+                    data_realizada DATE,
+                    status VARCHAR(30) DEFAULT 'pendente',
+                    observacoes TEXT,
+                    notificacao_enviada BOOLEAN DEFAULT false,
+                    data_notificacao TIMESTAMP,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+        }
+        
+        // Criar tabela para notificações
+        if (!tableNames.includes('notificacoes')) {
+            console.log('🔧 Criando tabela de notificações...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS notificacoes (
+                    id SERIAL PRIMARY KEY,
+                    paciente_id INTEGER,
+                    funcionario_id INTEGER,
+                    tipo VARCHAR(50) NOT NULL,
+                    titulo VARCHAR(255) NOT NULL,
+                    mensagem TEXT NOT NULL,
+                    canais JSONB DEFAULT '["email"]',
+                    enviada BOOLEAN DEFAULT false,
+                    data_envio TIMESTAMP,
+                    erro_envio TEXT,
+                    tentativas INTEGER DEFAULT 0,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
+                    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id)
+                )
+            `);
+        }
+        
         console.log('✅ Estrutura do banco verificada/criada');
         
     } catch (error) {

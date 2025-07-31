@@ -23,6 +23,10 @@ const AuthSystemComplete = require('./auth-system-complete');
 const setupRoutes = require('./src/routes/setup.routes');
 const { checkSystemSetup } = require('./src/middleware/setup.middleware');
 
+// Importar novas rotas do banco de dados
+const funcionariosRoutes = require('./src/routes/funcionarios.routes');
+const jornadaRoutes = require('./src/routes/jornada.routes');
+
 // Middleware básico
 app.use(cors());
 app.use(express.json());
@@ -755,7 +759,11 @@ app.use('/api/lgpd', lgpdRoutes);
 // Rotas de Pagamentos
 app.use('/api/payments', paymentRoutes);
 
-// Rotas de Configuração do Sistema
+// Novas rotas do banco de dados
+app.use('/api/funcionarios', funcionariosRoutes);
+app.use('/api/jornada', jornadaRoutes);
+
+// ENDPOINTS ANTIGOS (Google Sheets) - Manter durante migração
 const configRoutes = require('./src/routes/config.routes');
 app.use('/api/config', configRoutes);
 

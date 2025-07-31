@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Administrativo - Dr. Marcio</title>
+    <title>Portal Administrativo Completo - Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -21,6 +21,31 @@
             color: white;
             border-radius: 15px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .admin-header .btn-voltar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .admin-header .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
         
         .admin-header h1 {
@@ -31,6 +56,40 @@
         .admin-header p {
             font-size: 18px;
             opacity: 0.9;
+        }
+
+        /* Separadores visuais para seções */
+        .section-separator {
+            border: none;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            margin: 40px 0;
+            border-radius: 2px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            margin: 30px 0 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .section-title h2 {
+            color: #333;
+            margin: 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 0.95em;
         }
 
         /* Seção de Cadastro */
@@ -899,8 +958,18 @@
 <body>
     <div class="admin-container">
         <div class="admin-header">
-            <h1><i class="fas fa-users-cog"></i> Portal Administrativo</h1>
-            <p>Gestão de Funcionários e Sistema de Crachás</p>
+            <a href="/dashboard.html" class="btn-voltar">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </a>
+            <h1><i class="fas fa-users-cog"></i> Portal Administrativo Completo</h1>
+            <p>Central de Administração - Funcionários, Jornada de Pacientes e Cadastros</p>
+        </div>
+
+        <!-- 📑 SEÇÃO 1: Gestão de Funcionários -->
+        <div class="section-title">
+            <h2><i class="fas fa-users"></i> SEÇÃO 1: Gestão de Funcionários</h2>
+            <p>Cadastro, controle e gerenciamento de funcionários e sistema de crachás</p>
         </div>
 
         <!-- Área de Cadastro de Funcionário -->
@@ -1045,8 +1114,16 @@
             </div>
         </div>
 
+        <hr class="section-separator">
+
+        <!-- 📑 SEÇÃO 2: Gestão da Jornada do Paciente -->
+        <div class="section-title">
+            <h2><i class="fas fa-route"></i> SEÇÃO 2: Gestão da Jornada do Paciente</h2>
+            <p>Sistema completo de prazos, notificações e acompanhamento - FUNCIONALIDADE PERFEITA</p>
+        </div>
+
         <!-- Sistema de Gestão da Jornada do Paciente -->
-        <div class="jornada-paciente-section">
+        <div id="jornada-paciente" class="jornada-paciente-section">
             <div class="section-header">
                 <h2><i class="fas fa-route"></i> Gestão da Jornada do Paciente</h2>
                 <div class="jornada-controls">
@@ -1067,6 +1144,14 @@
                 <!-- Cards serão carregados dinamicamente -->
                 <div class="loading">Carregando jornadas dos pacientes...</div>
             </div>
+        </div>
+
+        <hr class="section-separator">
+
+        <!-- 📑 SEÇÃO 3: Cadastros Externos Aguardando -->
+        <div class="section-title">
+            <h2><i class="fas fa-user-clock"></i> SEÇÃO 3: Cadastros Externos Aguardando</h2>
+            <p>Usuários que se cadastraram pelo site e aguardam classificação como pacientes</p>
         </div>
 
         <!-- Usuários Externos Aguardando (Pacientes) -->
@@ -2536,6 +2621,27 @@ ${jornada.observacoes || 'Nenhuma observação'}`);
             // TODO: Implementar filtros
             console.log('Filtros:', { cargo: filtroCargo, status: filtroStatus });
         }
+
+        // Script para scroll automático para seção da jornada
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se há hash na URL para scroll automático
+            if (window.location.hash === '#jornada-paciente') {
+                setTimeout(() => {
+                    const elemento = document.getElementById('jornada-paciente');
+                    if (elemento) {
+                        elemento.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start' 
+                        });
+                        // Destacar temporariamente a seção
+                        elemento.style.boxShadow = '0 0 20px rgba(255, 107, 107, 0.5)';
+                        setTimeout(() => {
+                            elemento.style.boxShadow = '';
+                        }, 3000);
+                    }
+                }, 500);
+            }
+        });
     </script>
 </body>
 </html>
