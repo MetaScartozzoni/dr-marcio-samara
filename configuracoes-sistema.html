@@ -53,148 +53,167 @@
                     <p>Habilite ou desabilite os serviços conforme necessário</p>
                 </div>
                 
-                <div class="services-grid">
-                    <!-- Email -->
-                    <div class="service-card">
-                        <div class="service-header">
-                            <div class="service-icon email">
-                                <i class="fas fa-envelope"></i>
+                <!-- Layout em duas colunas para desktop -->
+                <div class="services-container">
+                    <!-- Coluna Esquerda: Comunicação -->
+                    <div class="services-column">
+                        <h3 class="column-title">
+                            <i class="fas fa-comments"></i>
+                            Comunicação
+                        </h3>
+                        <div class="services-grid">
+                            <!-- Email -->
+                            <div class="service-card">
+                                <div class="service-header">
+                                    <div class="service-icon email">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="service-info">
+                                        <h3>Email</h3>
+                                        <p>Envio de emails via SendGrid</p>
+                                    </div>
+                                    <div class="service-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="email-enabled">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="service-status" id="email-status">
+                                    <span class="status-badge checking">Verificando...</span>
+                                </div>
+                                <div class="service-actions">
+                                    <button class="btn-config" onclick="configureService('email')">
+                                        <i class="fas fa-cog"></i>
+                                        Configurar
+                                    </button>
+                                    <button class="btn-test" onclick="testService('email')">
+                                        <i class="fas fa-vial"></i>
+                                        Testar
+                                    </button>
+                                </div>
                             </div>
-                            <div class="service-info">
-                                <h3>Email</h3>
-                                <p>Envio de emails via SendGrid</p>
+
+                            <!-- SMS -->
+                            <div class="service-card">
+                                <div class="service-header">
+                                    <div class="service-icon sms">
+                                        <i class="fas fa-sms"></i>
+                                    </div>
+                                    <div class="service-info">
+                                        <h3>SMS</h3>
+                                        <p>Envio de SMS via Twilio</p>
+                                    </div>
+                                    <div class="service-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="sms-enabled">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="service-status" id="sms-status">
+                                    <span class="status-badge checking">Verificando...</span>
+                                </div>
+                                <div class="service-actions">
+                                    <button class="btn-config" onclick="configureService('sms')">
+                                        <i class="fas fa-cog"></i>
+                                        Configurar
+                                    </button>
+                                    <button class="btn-test" onclick="testService('sms')">
+                                        <i class="fas fa-vial"></i>
+                                        Testar
+                                    </button>
+                                </div>
                             </div>
-                            <div class="service-toggle">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="email-enabled">
-                                    <span class="slider"></span>
-                                </label>
+
+                            <!-- WhatsApp -->
+                            <div class="service-card">
+                                <div class="service-header">
+                                    <div class="service-icon whatsapp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </div>
+                                    <div class="service-info">
+                                        <h3>WhatsApp</h3>
+                                        <p>Mensagens via WhatsApp Business</p>
+                                    </div>
+                                    <div class="service-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="whatsapp-enabled">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="service-status" id="whatsapp-status">
+                                    <span class="status-badge checking">Verificando...</span>
+                                </div>
+                                <div class="service-actions">
+                                    <button class="btn-config" onclick="configureService('whatsapp')">
+                                        <i class="fas fa-cog"></i>
+                                        Configurar
+                                    </button>
+                                    <button class="btn-test" onclick="testService('whatsapp')">
+                                        <i class="fas fa-vial"></i>
+                                        Testar
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div class="service-status" id="email-status">
-                            <span class="status-badge checking">Verificando...</span>
-                        </div>
-                        <div class="service-actions">
-                            <button class="btn-config" onclick="configureService('email')">
-                                <i class="fas fa-cog"></i>
-                                Configurar
-                            </button>
-                            <button class="btn-test" onclick="testService('email')">
-                                <i class="fas fa-vial"></i>
-                                Testar
-                            </button>
                         </div>
                     </div>
 
-                    <!-- SMS -->
-                    <div class="service-card">
-                        <div class="service-header">
-                            <div class="service-icon sms">
-                                <i class="fas fa-sms"></i>
+                    <!-- Coluna Direita: Financeiro -->
+                    <div class="services-column">
+                        <h3 class="column-title">
+                            <i class="fas fa-credit-card"></i>
+                            Financeiro
+                        </h3>
+                        <div class="services-grid">
+                            <!-- Pagamentos -->
+                            <div class="service-card">
+                                <div class="service-header">
+                                    <div class="service-icon payments">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="service-info">
+                                        <h3>Pagamentos</h3>
+                                        <p>Processamento de pagamentos</p>
+                                    </div>
+                                    <div class="service-toggle">
+                                        <label class="toggle-switch">
+                                            <input type="checkbox" id="payments-enabled">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="service-status" id="payments-status">
+                                    <span class="status-badge checking">Verificando...</span>
+                                </div>
+                                <div class="payment-providers">
+                                    <div class="provider-option">
+                                        <label>
+                                            <input type="checkbox" id="stripe-enabled">
+                                            <i class="fab fa-stripe"></i>
+                                            Stripe
+                                        </label>
+                                    </div>
+                                    <div class="provider-option">
+                                        <label>
+                                            <input type="checkbox" id="pagseguro-enabled">
+                                            <i class="fas fa-money-check"></i>
+                                            PagSeguro
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="service-actions">
+                                    <button class="btn-config" onclick="configureService('payments')">
+                                        <i class="fas fa-cog"></i>
+                                        Configurar
+                                    </button>
+                                    <button class="btn-test" onclick="testService('payments')">
+                                        <i class="fas fa-vial"></i>
+                                        Testar
+                                    </button>
+                                </div>
                             </div>
-                            <div class="service-info">
-                                <h3>SMS</h3>
-                                <p>Envio de SMS via Twilio</p>
-                            </div>
-                            <div class="service-toggle">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="sms-enabled">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="service-status" id="sms-status">
-                            <span class="status-badge checking">Verificando...</span>
-                        </div>
-                        <div class="service-actions">
-                            <button class="btn-config" onclick="configureService('sms')">
-                                <i class="fas fa-cog"></i>
-                                Configurar
-                            </button>
-                            <button class="btn-test" onclick="testService('sms')">
-                                <i class="fas fa-vial"></i>
-                                Testar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Pagamentos -->
-                    <div class="service-card">
-                        <div class="service-header">
-                            <div class="service-icon payments">
-                                <i class="fas fa-credit-card"></i>
-                            </div>
-                            <div class="service-info">
-                                <h3>Pagamentos</h3>
-                                <p>Processamento de pagamentos</p>
-                            </div>
-                            <div class="service-toggle">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="payments-enabled">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="service-status" id="payments-status">
-                            <span class="status-badge checking">Verificando...</span>
-                        </div>
-                        <div class="payment-providers">
-                            <div class="provider-option">
-                                <label>
-                                    <input type="checkbox" id="stripe-enabled">
-                                    <i class="fab fa-stripe"></i>
-                                    Stripe
-                                </label>
-                            </div>
-                            <div class="provider-option">
-                                <label>
-                                    <input type="checkbox" id="pagseguro-enabled">
-                                    <i class="fas fa-money-check"></i>
-                                    PagSeguro
-                                </label>
-                            </div>
-                        </div>
-                        <div class="service-actions">
-                            <button class="btn-config" onclick="configureService('payments')">
-                                <i class="fas fa-cog"></i>
-                                Configurar
-                            </button>
-                            <button class="btn-test" onclick="testService('payments')">
-                                <i class="fas fa-vial"></i>
-                                Testar
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- WhatsApp -->
-                    <div class="service-card">
-                        <div class="service-header">
-                            <div class="service-icon whatsapp">
-                                <i class="fab fa-whatsapp"></i>
-                            </div>
-                            <div class="service-info">
-                                <h3>WhatsApp</h3>
-                                <p>Mensagens via WhatsApp Business</p>
-                            </div>
-                            <div class="service-toggle">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="whatsapp-enabled">
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="service-status" id="whatsapp-status">
-                            <span class="status-badge checking">Verificando...</span>
-                        </div>
-                        <div class="service-actions">
-                            <button class="btn-config" onclick="configureService('whatsapp')">
-                                <i class="fas fa-cog"></i>
-                                Configurar
-                            </button>
-                            <button class="btn-test" onclick="testService('whatsapp')">
-                                <i class="fas fa-vial"></i>
-                                Testar
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -679,6 +698,13 @@
     </script>
 
     <style>
+        /* Layout Principal Melhorado para Desktop */
+        .dashboard-main {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
         .config-section {
             background: white;
             border-radius: 12px;
@@ -693,6 +719,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.4rem;
         }
 
         .section-header p {
@@ -700,9 +727,10 @@
             color: #666;
         }
 
+        /* Grid de Status Compacto */
         .status-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
         }
 
@@ -730,17 +758,64 @@
             border-color: #dc3545;
         }
 
-        .services-grid {
+        /* Layout em Colunas para Serviços */
+        .services-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .services-column {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .column-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .services-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
         .service-card {
             border: 1px solid #e9ecef;
             border-radius: 12px;
             padding: 20px;
-            background: #f8f9fa;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Responsivo - Mobile volta ao layout original */
+        @media (max-width: 768px) {
+            .services-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .dashboard-main {
+                padding: 15px;
+            }
         }
 
         .service-header {
@@ -900,14 +975,22 @@
 
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
         }
 
         .feature-item {
             border: 1px solid #e9ecef;
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .feature-label {
@@ -916,33 +999,37 @@
         }
 
         .feature-content {
-            padding: 20px;
+            padding: 18px;
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
         .feature-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
-            background: #007bff;
+            background: linear-gradient(135deg, #007bff, #0056b3);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            flex-shrink: 0;
         }
 
         .feature-info h4 {
             margin: 0 0 5px;
             color: #333;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .feature-info p {
             margin: 0;
             color: #666;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
 
         .environment-options {
