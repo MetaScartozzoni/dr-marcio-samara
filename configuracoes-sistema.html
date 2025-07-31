@@ -598,16 +598,89 @@
         }
 
         // Global functions for buttons
-        function configureService(serviceName) {
+        async function configureService(serviceName) {
             console.log('Configurar:', serviceName);
             
-            if (serviceName === 'email') {
-                alert('📧 Email já está configurado!\n\nSendGrid: Ativo\nStatus: Funcionando\n\nPara alterar, acesse as variáveis de ambiente no Railway.');
-            } else if (serviceName === 'sms') {
-                alert('📱 SMS (Twilio) está configurado!\n\nAccount SID: Configurado\nAuth Token: Configurado\n\nPara alterar, acesse as variáveis de ambiente no Railway.');
-            } else {
-                alert('⚙️ Configuração de ' + serviceName + ' em desenvolvimento.');
+            try {
+                // Buscar informações de configuração do servidor
+                const response = await fetch('/api/config-info');
+                const data = await response.json();
+                
+                if (data.success && data.config[serviceName]) {
+                    const serviceConfig = data.config[serviceName];
+                    showConfigModal(serviceName, serviceConfig, data.railway_url);
+                } else {
+                    alert('❌ Erro ao carregar informações de configuração.');
+                }
+            } catch (error) {
+                console.error('Erro ao buscar configuração:', error);
+                alert('❌ Erro de conexão ao buscar configurações.');
             }
+        }
+
+        function showConfigModal(serviceName, config, railwayUrl) {
+            const modal = document.getElementById('configModal');
+            const title = document.getElementById('configModalTitle');
+            const body = document.getElementById('configModalBody');
+            
+            // Definir títulos
+            const serviceNames = {
+                'email': '📧 Email (SendGrid)',
+                'sms': '📱 SMS (Twilio)', 
+                'payments': '💳 Pagamentos (Stripe)',
+                'whatsapp': '💬 WhatsApp Business'
+            };
+            
+            title.textContent = `Configurar ${serviceNames[serviceName] || serviceName}`;
+            
+            // Status geral
+            const statusIcon = config.status === 'configured' ? '✅' : '❌';
+            const statusText = config.status === 'configured' ? 'Configurado' : 'Não Configurado';
+            
+            // Criar HTML do modal
+            let variablesHtml = '';
+            config.variables.forEach(variable => {
+                const icon = variable.configured ? '✅' : '❌';
+                const status = variable.configured ? 'Configurado' : 'Não Configurado';
+                variablesHtml += `
+                    <div class="config-variable">
+                        <span class="variable-icon">${icon}</span>
+                        <span class="variable-name">${variable.name}</span>
+                        <span class="variable-status">${status}</span>
+                    </div>
+                `;
+            });
+            
+            body.innerHTML = `
+                <div class="config-status">
+                    <h3>${statusIcon} Status: ${statusText}</h3>
+                </div>
+                
+                <div class="config-variables">
+                    <h4>📋 Variáveis de Ambiente:</h4>
+                    ${variablesHtml}
+                </div>
+                
+                <div class="config-instructions">
+                    <h4>⚙️ Como Configurar:</h4>
+                    <p>1. Acesse o painel do Railway</p>
+                    <p>2. Vá para Variables (Variáveis)</p>
+                    <p>3. Adicione as variáveis necessárias</p>
+                    <p>4. Faça redeploy da aplicação</p>
+                </div>
+                
+                <div class="config-links">
+                    <h4>🔗 Links Úteis:</h4>
+                    <a href="${railwayUrl}" target="_blank" class="config-link">
+                        🚂 Configurar no Railway
+                    </a>
+                    <a href="${config.docs}" target="_blank" class="config-link">
+                        📚 Documentação ${config.service}
+                    </a>
+                </div>
+            `;
+            
+            modal.style.display = 'block';
         }
 
         async function testService(serviceName) {
@@ -688,11 +761,36 @@
         }
 
         function saveServiceConfig() {
-            // TODO: Implementar salvamento de configuração do serviço
+            // Esta é uma interface de visualização/guia
+            // As configurações são feitas diretamente no Railway
+            alert('ℹ️ As configurações são gerenciadas diretamente no Railway.\n\nUse os links fornecidos para acessar o painel de variáveis.');
+            closeConfigModal();
         }
 
-        // Initialize when page loads
+        // Fechar modal clicando no X ou fora do modal
         document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('configModal');
+            const closeBtn = document.querySelector('.modal-close');
+            
+            // Fechar com X
+            if (closeBtn) {
+                closeBtn.onclick = closeConfigModal;
+            }
+            
+            // Fechar clicando fora do modal
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    closeConfigModal();
+                }
+            };
+            
+            // Fechar com ESC
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && modal.style.display === 'block') {
+                    closeConfigModal();
+                }
+            });
+            
             new SystemConfig();
         });
     </script>
@@ -1057,6 +1155,165 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
+        }
+
+        /* Modal de Configuração */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: white;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Estilos do conteúdo do modal */
+        .config-status h3 {
+            margin: 0 0 15px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+
+        .config-variables {
+            margin: 20px 0;
+        }
+
+        .config-variables h4 {
+            margin: 0 0 15px;
+            color: #333;
+        }
+
+        .config-variable {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid #007bff;
+        }
+
+        .variable-icon {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .variable-name {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #495057;
+            flex: 1;
+        }
+
+        .variable-status {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .config-instructions {
+            margin: 20px 0;
+        }
+
+        .config-instructions h4 {
+            margin: 0 0 15px;
+            color: #333;
+        }
+
+        .config-instructions p {
+            margin: 8px 0;
+            padding-left: 20px;
+            color: #666;
+        }
+
+        .config-links {
+            margin: 20px 0;
+        }
+
+        .config-links h4 {
+            margin: 0 0 15px;
+            color: #333;
+        }
+
+        .config-link {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px 10px 5px 0;
+            transition: background 0.3s;
+        }
+
+        .config-link:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
         }
     </style>
 </body>

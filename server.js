@@ -989,6 +989,63 @@ app.post('/api/enviar-sms', async (req, res) => {
     }
 });
 
+// Endpoint para informações de configuração (sem expor dados sensíveis)
+app.get('/api/config-info', (req, res) => {
+    try {
+        const configInfo = {
+            email: {
+                status: process.env.SENDGRID_API_KEY ? 'configured' : 'missing',
+                variables: [
+                    { name: 'SENDGRID_API_KEY', configured: !!process.env.SENDGRID_API_KEY },
+                    { name: 'FROM_EMAIL', configured: !!process.env.FROM_EMAIL }
+                ],
+                service: 'SendGrid',
+                docs: 'https://sendgrid.com/docs/api-reference/'
+            },
+            sms: {
+                status: (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) ? 'configured' : 'missing',
+                variables: [
+                    { name: 'TWILIO_ACCOUNT_SID', configured: !!process.env.TWILIO_ACCOUNT_SID },
+                    { name: 'TWILIO_AUTH_TOKEN', configured: !!process.env.TWILIO_AUTH_TOKEN },
+                    { name: 'TWILIO_PHONE_NUMBER', configured: !!process.env.TWILIO_PHONE_NUMBER }
+                ],
+                service: 'Twilio',
+                docs: 'https://www.twilio.com/docs/usage/api'
+            },
+            payments: {
+                status: 'not-configured',
+                variables: [
+                    { name: 'STRIPE_SECRET_KEY', configured: !!process.env.STRIPE_SECRET_KEY },
+                    { name: 'STRIPE_PUBLISHABLE_KEY', configured: !!process.env.STRIPE_PUBLISHABLE_KEY }
+                ],
+                service: 'Stripe',
+                docs: 'https://stripe.com/docs/api'
+            },
+            whatsapp: {
+                status: 'not-configured',
+                variables: [
+                    { name: 'WHATSAPP_TOKEN', configured: !!process.env.WHATSAPP_TOKEN },
+                    { name: 'WHATSAPP_PHONE_ID', configured: !!process.env.WHATSAPP_PHONE_ID }
+                ],
+                service: 'WhatsApp Business API',
+                docs: 'https://developers.facebook.com/docs/whatsapp'
+            }
+        };
+        
+        res.json({
+            success: true,
+            config: configInfo,
+            railway_url: 'https://railway.app/project/portal-dr-marcio/variables'
+        });
+    } catch (error) {
+        console.error('Erro ao buscar informações de configuração:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar configurações'
+        });
+    }
+});
+
 // ================================
 // NOVAS ROTAS DE AUTENTICAÇÃO COMPLETA
 // ================================
