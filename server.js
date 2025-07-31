@@ -906,6 +906,10 @@ app.get('/api/listar-usuarios', async (req, res) => {
 
 // Servir páginas HTML
 app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/verificar', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -927,6 +931,19 @@ app.get('/dashboard', (req, res) => {
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Rota para landing page pública (pré-cadastro/leads)
+app.get('/consulta', (req, res) => {
+    res.sendFile(path.join(__dirname, 'landing-publica.html'));
+});
+
+app.get('/agendar', (req, res) => {
+    res.sendFile(path.join(__dirname, 'landing-publica.html'));
+});
+
+app.get('/landing', (req, res) => {
+    res.sendFile(path.join(__dirname, 'landing-publica.html'));
 });
 
 // ROTAS DE GESTÃO DESABILITADAS - Google Sheets não disponível
