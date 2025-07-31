@@ -8,6 +8,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
+    <link rel="stylesheet" href="card-unificado.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Meta tags para SEO e acessibilidade -->
@@ -18,6 +19,60 @@
     <!-- Preload recursos críticos -->
     <link rel="preload" href="gestao-script.js" as="script">
     <link rel="preload" href="config-api-integration.js" as="script">
+    <script src="card-unificado.js"></script>
+    <style>
+        /* Estilos para alternância de visualização */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .view-toggle .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .view-toggle .btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .view-toggle .btn:not(.active) {
+            background-color: transparent;
+            color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .view-toggle .btn:not(.active):hover {
+            background-color: #f8f9fa;
+        }
+        
+        .empty-state {
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        /* Ajustes para container de cards */
+        #containerCards .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <!-- Header melhorado -->
@@ -184,9 +239,23 @@
 
             <!-- Tabela melhorada -->
             <section class="table-section" aria-labelledby="table-title">
-                <h2 id="table-title" class="section-title">Lista de Orçamentos</h2>
+                <div class="section-header">
+                    <h2 id="table-title" class="section-title">Lista de Orçamentos</h2>
+                    
+                    <!-- Botões de visualização -->
+                    <div class="view-toggle">
+                        <button id="btnVisualizacaoTabela" onclick="alternarVisualizacao('tabela')" class="btn btn-sm btn-outline-primary active" title="Visualização em Tabela">
+                            <i class="fas fa-table"></i>
+                            Tabela
+                        </button>
+                        <button id="btnVisualizacaoCards" onclick="alternarVisualizacao('cards')" class="btn btn-sm btn-outline-primary" title="Visualização em Cards">
+                            <i class="fas fa-th-large"></i>
+                            Cards
+                        </button>
+                    </div>
+                </div>
                 
-                <div class="table-container">
+                <div class="table-container" id="containerTabela">
                     <div id="loading" class="table-loading" style="display: none;">
                         <div class="spinner" aria-label="Carregando dados"></div>
                     </div>
@@ -211,6 +280,13 @@
                                 <!-- Dados serão inseridos aqui via JavaScript -->
                             </tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <!-- Container para visualização em cards -->
+                <div class="cards-container" id="containerCards" style="display: none;">
+                    <div class="cards-grid" id="orcamentosCards">
+                        <!-- Cards serão inseridos aqui via JavaScript -->
                     </div>
                 </div>
             </section>
@@ -707,9 +783,107 @@
     
     <!-- Script de inicialização -->
     <script>
+        // Variáveis globais para cards unificados
+        let cardUnificado;
+        let orcamentosData = [];
+        let visualizacaoAtual = 'tabela'; // 'tabela' ou 'cards'
+        
+        // Função para alternar visualização
+        function alternarVisualizacao(tipo) {
+            visualizacaoAtual = tipo;
+            
+            const containerTabela = document.getElementById('containerTabela');
+            const containerCards = document.getElementById('containerCards');
+            const btnTabela = document.getElementById('btnVisualizacaoTabela');
+            const btnCards = document.getElementById('btnVisualizacaoCards');
+            
+            if (tipo === 'tabela') {
+                containerTabela.style.display = 'block';
+                containerCards.style.display = 'none';
+                btnTabela.classList.add('active');
+                btnCards.classList.remove('active');
+            } else {
+                containerTabela.style.display = 'none';
+                containerCards.style.display = 'block';
+                btnTabela.classList.remove('active');
+                btnCards.classList.add('active');
+                
+                // Renderizar cards se houver dados
+                if (orcamentosData.length > 0) {
+                    renderizarOrcamentosCards();
+                }
+            }
+        }
+        
+        // Função para renderizar orçamentos em cards
+        function renderizarOrcamentosCards() {
+            if (!cardUnificado) return;
+            
+            const container = document.getElementById('orcamentosCards');
+            
+            if (orcamentosData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-receipt" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                        <h3>Nenhum orçamento encontrado</h3>
+                        <p>Adicione um novo orçamento para começar</p>
+                        <button onclick="adicionarOrcamento()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Novo Orçamento
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = orcamentosData.map(orcamento => {
+                // Adaptar dados do orçamento para card unificado
+                const hoje = new Date();
+                const dataValidade = new Date(orcamento.validade);
+                const diasRestantes = Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+                
+                // Determinar prioridade baseada no status e validade
+                let prioridade = 'normal';
+                if (orcamento.status_orcamento === 'Vencido' || diasRestantes < 0) {
+                    prioridade = 'urgente';
+                } else if (orcamento.status_orcamento === 'Pendente' && diasRestantes <= 7) {
+                    prioridade = 'atencao';
+                } else if (orcamento.status_orcamento === 'Aceito') {
+                    prioridade = 'baixa';
+                }
+                
+                const orcamentoAdaptado = {
+                    id: orcamento.id,
+                    nome: orcamento.paciente_nome,
+                    telefone: orcamento.telefone || '(11) 99999-0000',
+                    email: orcamento.email || 'contato@email.com',
+                    
+                    prioridade: prioridade,
+                    procedimento: orcamento.procedimento_principal,
+                    valor: orcamento.valor_total,
+                    statusOrcamento: orcamento.status_orcamento,
+                    statusPagamento: orcamento.status_pagamento,
+                    dataConsulta: orcamento.data_consulta,
+                    dataOrcamento: orcamento.data_orcamento,
+                    validade: orcamento.validade,
+                    
+                    observacoes: `${orcamento.procedimento_principal} - R$ ${orcamento.valor_total}`,
+                    
+                    // Marcos baseados no orçamento
+                    proximaConsulta: orcamento.data_consulta,
+                    validadeOrcamento: orcamento.validade,
+                    proximoRetorno: new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                };
+                
+                return cardUnificado.criarCard(orcamentoAdaptado);
+            }).join('');
+        }
+        
         // Verificar se todas as dependências estão carregadas
         document.addEventListener('DOMContentLoaded', function() {
             console.log('✅ Sistema de gestão inicializado');
+            
+            // Inicializar card unificado
+            cardUnificado = new CardUnificado('gestao-orcamentos');
             
             // Verificar dependências
             if (typeof NotificationManager === 'undefined') {

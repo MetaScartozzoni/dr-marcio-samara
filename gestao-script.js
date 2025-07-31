@@ -654,6 +654,11 @@ function atualizarTabela() {
     
     tbody.innerHTML = '';
     
+    // Atualizar dados globais para cards
+    if (typeof orcamentosData !== 'undefined') {
+        orcamentosData = [...dadosFiltrados];
+    }
+    
     dadosFiltrados.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -667,7 +672,7 @@ function atualizarTabela() {
             <td><span class="status-badge status-${item.pagamento_status.toLowerCase().replace(' ', '-')}">${item.pagamento_status}</span></td>
             <td>${Utils.formatDate(item.validade)}</td>
             <td>
-                <div class="action-buttons">
+                <div class="action-buttons">`;
                     <button onclick="abrirAcoesOrcamento('${item.id}')" class="btn-actions" title="Ações">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -679,6 +684,11 @@ function atualizarTabela() {
         `;
         tbody.appendChild(tr);
     });
+    
+    // Renderizar cards se a visualização atual for cards
+    if (typeof visualizacaoAtual !== 'undefined' && visualizacaoAtual === 'cards' && typeof renderizarOrcamentosCards !== 'undefined') {
+        renderizarOrcamentosCards();
+    }
 }
 
 function atualizarEstatisticas() {
