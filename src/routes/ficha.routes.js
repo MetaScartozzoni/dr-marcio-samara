@@ -7,14 +7,26 @@ const FichaController = require('../controllers/ficha.controller');
 const router = express.Router();
 const fichaController = new FichaController(pool);
 
-// Validações para criação de ficha
+// Validações para criação de ficha cirúrgica
 const validateFicha = [
     body('paciente_id').isInt({ min: 1 }).withMessage('ID do paciente é obrigatório'),
+    
+    // Dados básicos
     body('peso').optional().isFloat({ min: 0 }).withMessage('Peso deve ser um número válido'),
     body('altura').optional().isFloat({ min: 0 }).withMessage('Altura deve ser um número válido'),
     body('pressao_arterial').optional().isLength({ max: 20 }).withMessage('Pressão arterial deve ter no máximo 20 caracteres'),
-    body('procedimento_desejado').optional().isLength({ max: 1000 }).withMessage('Procedimento desejado deve ter no máximo 1000 caracteres'),
-    body('motivo_principal').optional().isLength({ max: 1000 }).withMessage('Motivo principal deve ter no máximo 1000 caracteres'),
+    
+    // Específicos para cirurgia plástica
+    body('queixa_principal').optional().isLength({ max: 1000 }).withMessage('Queixa principal deve ter no máximo 1000 caracteres'),
+    body('cirurgia_interesse').optional().isLength({ max: 255 }).withMessage('Cirurgia de interesse deve ter no máximo 255 caracteres'),
+    body('area_corpo').optional().isLength({ max: 255 }).withMessage('Área do corpo deve ter no máximo 255 caracteres'),
+    body('expectativa_resultado').optional().isLength({ max: 2000 }).withMessage('Expectativa de resultado deve ter no máximo 2000 caracteres'),
+    body('pontos_esteticos').optional().isLength({ max: 1000 }).withMessage('Pontos estéticos deve ter no máximo 1000 caracteres'),
+    body('alteracoes_posturais').optional().isLength({ max: 1000 }).withMessage('Alterações posturais deve ter no máximo 1000 caracteres'),
+    body('indicacao_cirurgica').optional().isLength({ max: 1000 }).withMessage('Indicação cirúrgica deve ter no máximo 1000 caracteres'),
+    body('informacoes_adicionais').optional().isLength({ max: 2000 }).withMessage('Informações adicionais deve ter no máximo 2000 caracteres'),
+    
+    // Dados médicos gerais
     body('historico_medico').optional().isLength({ max: 2000 }).withMessage('Histórico médico deve ter no máximo 2000 caracteres'),
     body('medicamentos_uso').optional().isLength({ max: 1000 }).withMessage('Medicamentos em uso deve ter no máximo 1000 caracteres'),
     body('alergias').optional().isLength({ max: 500 }).withMessage('Alergias deve ter no máximo 500 caracteres'),

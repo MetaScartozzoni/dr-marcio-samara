@@ -346,6 +346,58 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela de orçamentos (ANTES das tabelas que a referenciam)
+        if (!tableNames.includes('orcamentos')) {
+            console.log('🔧 Criando tabela de orçamentos...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS orcamentos (
+                    id SERIAL PRIMARY KEY,
+                    protocolo VARCHAR(50) UNIQUE NOT NULL,
+                    paciente_id INTEGER NOT NULL,
+                    paciente_nome VARCHAR(255) NOT NULL,
+                    paciente_email VARCHAR(255),
+                    paciente_telefone VARCHAR(20),
+                    
+                    -- Procedimentos e valores
+                    procedimentos JSONB DEFAULT '[]',
+                    valor_total DECIMAL(10,2) NOT NULL DEFAULT 0,
+                    desconto_percentual DECIMAL(5,2) DEFAULT 0,
+                    desconto_valor DECIMAL(10,2) DEFAULT 0,
+                    valor_final DECIMAL(10,2) NOT NULL DEFAULT 0,
+                    
+                    -- Status e controle
+                    status VARCHAR(30) DEFAULT 'rascunho', -- rascunho, enviado, aceito, rejeitado, expirado
+                    data_validade DATE,
+                    data_envio TIMESTAMP,
+                    data_resposta TIMESTAMP,
+                    
+                    -- Observações
+                    observacoes TEXT,
+                    observacoes_internas TEXT,
+                    
+                    -- Auditoria
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER NOT NULL,
+                    atualizado_por INTEGER,
+                    
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id),
+                    FOREIGN KEY (atualizado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            // Criar índices para orçamentos
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_orcamentos_protocolo ON orcamentos(protocolo);
+                CREATE INDEX IF NOT EXISTS idx_orcamentos_paciente ON orcamentos(paciente_id);
+                CREATE INDEX IF NOT EXISTS idx_orcamentos_status ON orcamentos(status);
+                CREATE INDEX IF NOT EXISTS idx_orcamentos_data ON orcamentos(criado_em);
+                CREATE INDEX IF NOT EXISTS idx_orcamentos_validade ON orcamentos(data_validade);
+            `);
+        }
+        
         // Criar tabela de fichas de atendimento
         if (!tableNames.includes('fichas_atendimento')) {
             console.log('🔧 Criando tabela de fichas de atendimento...');
@@ -356,12 +408,24 @@ async function initializeDatabase() {
                     paciente_id INTEGER NOT NULL,
                     prontuario_id INTEGER NOT NULL,
                     agendamento_id INTEGER,
+                    
+                    -- Dados básicos
                     peso DECIMAL(5,2),
                     altura DECIMAL(3,2),
                     imc DECIMAL(4,2),
                     pressao_arterial VARCHAR(20),
-                    procedimento_desejado TEXT,
-                    motivo_principal TEXT,
+                    
+                    -- Específicos para cirurgia plástica
+                    queixa_principal TEXT,
+                    cirurgia_interesse VARCHAR(255),
+                    area_corpo VARCHAR(255),
+                    expectativa_resultado TEXT,
+                    pontos_esteticos TEXT,
+                    alteracoes_posturais TEXT,
+                    indicacao_cirurgica TEXT,
+                    informacoes_adicionais TEXT,
+                    
+                    -- Dados médicos gerais
                     historico_medico TEXT,
                     medicamentos_uso TEXT,
                     alergias TEXT,
@@ -370,16 +434,24 @@ async function initializeDatabase() {
                     plano_tratamento TEXT,
                     orientacoes TEXT,
                     retorno_recomendado DATE,
+                    
+                    -- Status e controle
                     status VARCHAR(20) DEFAULT 'em_andamento',
                     finalizada BOOLEAN DEFAULT false,
                     data_finalizacao TIMESTAMP,
+                    orcamento_gerado BOOLEAN DEFAULT false,
+                    orcamento_id INTEGER,
+                    
+                    -- Auditoria
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     criado_por INTEGER NOT NULL,
                     atualizado_por INTEGER,
+                    
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
                     FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE CASCADE,
                     FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
+                    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE SET NULL,
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id),
                     FOREIGN KEY (atualizado_por) REFERENCES funcionarios(id)
                 )
@@ -496,6 +568,173 @@ async function initializeDatabase() {
                 CREATE INDEX IF NOT EXISTS idx_logs_exclusao_usuario ON logs_exclusao_lgpd(usuario_id);
                 CREATE INDEX IF NOT EXISTS idx_logs_exclusao_data ON logs_exclusao_lgpd(data_exclusao);
                 CREATE INDEX IF NOT EXISTS idx_logs_exclusao_status ON logs_exclusao_lgpd(status);
+            `);
+        }
+        
+        // Criar tabela de configuração de procedimentos cirúrgicos
+        if (!tableNames.includes('procedimentos_config')) {
+            console.log('🔧 Criando tabela de configuração de procedimentos...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS procedimentos_config (
+                    id SERIAL PRIMARY KEY,
+                    nome VARCHAR(255) NOT NULL UNIQUE,
+                    tipo VARCHAR(50) NOT NULL, -- 'cirurgico' ou 'estetico'
+                    area_corpo VARCHAR(100),
+                    descricao TEXT,
+                    
+                    -- Valores base
+                    valor_equipe DECIMAL(10,2) DEFAULT 0,
+                    valor_hospital DECIMAL(10,2) DEFAULT 0,
+                    valor_anestesista DECIMAL(10,2) DEFAULT 0,
+                    valor_instrumentador DECIMAL(10,2) DEFAULT 0,
+                    valor_assistente DECIMAL(10,2) DEFAULT 0,
+                    
+                    -- Pós-operatório
+                    pos_operatorio_dias INTEGER DEFAULT 0,
+                    pos_operatorio_valor_dia DECIMAL(10,2) DEFAULT 0,
+                    pos_operatorio_pacote BOOLEAN DEFAULT false,
+                    pos_operatorio_valor_pacote DECIMAL(10,2) DEFAULT 0,
+                    
+                    -- Configurações
+                    ativo BOOLEAN DEFAULT true,
+                    tempo_estimado_minutos INTEGER,
+                    observacoes TEXT,
+                    
+                    -- Auditoria
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_procedimentos_tipo ON procedimentos_config(tipo);
+                CREATE INDEX IF NOT EXISTS idx_procedimentos_area ON procedimentos_config(area_corpo);
+                CREATE INDEX IF NOT EXISTS idx_procedimentos_ativo ON procedimentos_config(ativo);
+            `);
+        }
+        
+        // Criar tabela de adicionais para procedimentos
+        if (!tableNames.includes('procedimentos_adicionais')) {
+            console.log('🔧 Criando tabela de adicionais de procedimentos...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS procedimentos_adicionais (
+                    id SERIAL PRIMARY KEY,
+                    procedimento_id INTEGER NOT NULL,
+                    nome VARCHAR(255) NOT NULL,
+                    tipo VARCHAR(50) NOT NULL, -- 'protese', 'laser', 'medicamento', 'material', 'outros'
+                    valor DECIMAL(10,2) NOT NULL,
+                    obrigatorio BOOLEAN DEFAULT false,
+                    ativo BOOLEAN DEFAULT true,
+                    observacoes TEXT,
+                    
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    
+                    FOREIGN KEY (procedimento_id) REFERENCES procedimentos_config(id) ON DELETE CASCADE,
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+        }
+        
+        // Criar tabela de acessórios para procedimentos
+        if (!tableNames.includes('procedimentos_acessorios')) {
+            console.log('🔧 Criando tabela de acessórios de procedimentos...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS procedimentos_acessorios (
+                    id SERIAL PRIMARY KEY,
+                    procedimento_id INTEGER NOT NULL,
+                    nome VARCHAR(255) NOT NULL,
+                    sem_custo BOOLEAN DEFAULT true,
+                    valor DECIMAL(10,2) DEFAULT 0,
+                    quantidade_incluida INTEGER DEFAULT 1,
+                    ativo BOOLEAN DEFAULT true,
+                    observacoes TEXT,
+                    
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    
+                    FOREIGN KEY (procedimento_id) REFERENCES procedimentos_config(id) ON DELETE CASCADE,
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+        }
+        
+        // Criar tabela de contas a receber (cirurgias)
+        if (!tableNames.includes('contas_receber')) {
+            console.log('🔧 Criando tabela de contas a receber...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS contas_receber (
+                    id SERIAL PRIMARY KEY,
+                    paciente_id INTEGER NOT NULL,
+                    orcamento_id INTEGER,
+                    procedimento VARCHAR(255),
+                    valor_total DECIMAL(10,2) NOT NULL,
+                    valor_pago DECIMAL(10,2) DEFAULT 0,
+                    valor_pendente DECIMAL(10,2) NOT NULL,
+                    
+                    data_vencimento DATE,
+                    data_pagamento TIMESTAMP,
+                    forma_pagamento VARCHAR(50),
+                    status VARCHAR(30) DEFAULT 'pendente', -- 'pendente', 'pago', 'atrasado', 'cancelado'
+                    
+                    observacoes TEXT,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
+                    FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id),
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_contas_receber_status ON contas_receber(status);
+                CREATE INDEX IF NOT EXISTS idx_contas_receber_vencimento ON contas_receber(data_vencimento);
+                CREATE INDEX IF NOT EXISTS idx_contas_receber_paciente ON contas_receber(paciente_id);
+            `);
+        }
+        
+        // Criar tabela de contas a pagar (funcionários)
+        if (!tableNames.includes('contas_pagar')) {
+            console.log('🔧 Criando tabela de contas a pagar...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS contas_pagar (
+                    id SERIAL PRIMARY KEY,
+                    funcionario_id INTEGER,
+                    tipo VARCHAR(50) NOT NULL, -- 'salario', 'comissao', 'bonus', 'reembolso', 'outros'
+                    descricao VARCHAR(255) NOT NULL,
+                    valor DECIMAL(10,2) NOT NULL,
+                    
+                    data_vencimento DATE NOT NULL,
+                    data_pagamento TIMESTAMP,
+                    forma_pagamento VARCHAR(50),
+                    status VARCHAR(30) DEFAULT 'pendente', -- 'pendente', 'pago', 'atrasado', 'cancelado'
+                    
+                    orcamento_relacionado INTEGER, -- Referência ao orçamento se for comissão
+                    observacoes TEXT,
+                    
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER,
+                    
+                    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id),
+                    FOREIGN KEY (orcamento_relacionado) REFERENCES orcamentos(id),
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_contas_pagar_status ON contas_pagar(status);
+                CREATE INDEX IF NOT EXISTS idx_contas_pagar_vencimento ON contas_pagar(data_vencimento);
+                CREATE INDEX IF NOT EXISTS idx_contas_pagar_funcionario ON contas_pagar(funcionario_id);
+                CREATE INDEX IF NOT EXISTS idx_contas_pagar_tipo ON contas_pagar(tipo);
             `);
         }
         

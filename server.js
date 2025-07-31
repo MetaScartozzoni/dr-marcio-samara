@@ -31,6 +31,8 @@ const systemRoutes = require('./src/routes/system.routes');
 // Importar rotas da integração completa
 const pacientesRoutes = require('./src/routes/pacientes.routes');
 const fichaRoutes = require('./src/routes/ficha.routes');
+const procedimentosRoutes = require('./src/routes/procedimentos.routes');
+const financeiroRoutes = require('./src/routes/financeiro.routes');
 const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require('./src/routes/admin.routes');
 
 // Middleware básico
@@ -981,6 +983,8 @@ app.use('/api/system', systemRoutes);
 // Rotas da integração completa de pacientes
 app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/fichas', fichaRoutes);
+app.use('/api/procedimentos', procedimentosRoutes);
+app.use('/api/financeiro', financeiroRoutes);
 
 // Rotas administrativas para logs
 initializeAdminRoutes(pool);

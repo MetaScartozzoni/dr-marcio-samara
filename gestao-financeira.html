@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Financeira - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .financial-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .financial-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .financial-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .financial-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .procedure-form {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .accounts-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .accounts-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .accounts-table th,
+        .accounts-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .accounts-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-pago {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-atrasado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            margin: 2px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> Gestão Financeira</h1>
+            <p>Controle completo das finanças da clínica</p>
+        </div>
+
+        <!-- Dashboard Financeiro -->
+        <div class="financial-dashboard" id="dashboard">
+            <div class="financial-card">
+                <h3><i class="fas fa-arrow-up"></i> Receitas do Mês</h3>
+                <div class="value" id="receitasMes">R$ 0,00</div>
+                <small id="receitasDetalhes">0 contas</small>
+            </div>
+            
+            <div class="financial-card">
+                <h3><i class="fas fa-arrow-down"></i> Despesas do Mês</h3>
+                <div class="value" id="despesasMes">R$ 0,00</div>
+                <small id="despesasDetalhes">0 contas</small>
+            </div>
+            
+            <div class="financial-card">
+                <h3><i class="fas fa-exclamation-triangle"></i> Contas Vencidas</h3>
+                <div class="value" id="contasVencidas">R$ 0,00</div>
+                <small id="vencidasDetalhes">0 contas</small>
+            </div>
+            
+            <div class="financial-card">
+                <h3><i class="fas fa-wallet"></i> Saldo Líquido</h3>
+                <div class="value" id="saldoLiquido">R$ 0,00</div>
+                <small>Receitas - Despesas</small>
+            </div>
+        </div>
+
+        <!-- Tabs de Navegação -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('procedimentos')">
+                <i class="fas fa-cog"></i> Configuração de Procedimentos
+            </div>
+            <div class="tab" onclick="showTab('receber')">
+                <i class="fas fa-arrow-up"></i> Contas a Receber
+            </div>
+            <div class="tab" onclick="showTab('pagar')">
+                <i class="fas fa-arrow-down"></i> Contas a Pagar
+            </div>
+        </div>
+
+        <!-- Tab: Configuração de Procedimentos -->
+        <div class="tab-content active" id="procedimentos">
+            <div class="procedure-form">
+                <h3><i class="fas fa-plus"></i> Novo Procedimento</h3>
+                <form id="procedureForm">
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Nome do Procedimento *</label>
+                            <input type="text" name="nome" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Tipo *</label>
+                            <select name="tipo" required>
+                                <option value="">Selecione</option>
+                                <option value="cirurgico">Cirúrgico</option>
+                                <option value="estetico">Estético</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Área do Corpo</label>
+                            <input type="text" name="area_corpo" placeholder="Ex: Face, Corpo, Seios">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Valor Equipe (R$)</label>
+                            <input type="number" name="valor_equipe" step="0.01" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor Hospital (R$)</label>
+                            <input type="number" name="valor_hospital" step="0.01" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor Anestesista (R$)</label>
+                            <input type="number" name="valor_anestesista" step="0.01" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Valor Instrumentador (R$)</label>
+                            <input type="number" name="valor_instrumentador" step="0.01" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor Assistente (R$)</label>
+                            <input type="number" name="valor_assistente" step="0.01" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Tempo Estimado (min)</label>
+                            <input type="number" name="tempo_estimado_minutos" min="0">
+                        </div>
+                    </div>
+                    
+                    <h4>Pós-Operatório</h4>
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Dias de Acompanhamento</label>
+                            <input type="number" name="pos_operatorio_dias" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor por Dia (R$)</label>
+                            <input type="number" name="pos_operatorio_valor_dia" step="0.01" min="0">
+                        </div>
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" name="pos_operatorio_pacote"> 
+                                Pacote Fechado
+                            </label>
+                            <input type="number" name="pos_operatorio_valor_pacote" step="0.01" min="0" placeholder="Valor do pacote">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Observações</label>
+                        <textarea name="observacoes" rows="3"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save"></i> Salvar Procedimento
+                    </button>
+                </form>
+            </div>
+            
+            <div class="accounts-table">
+                <h3 style="padding: 20px 20px 0;">Procedimentos Cadastrados</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Área</th>
+                            <th>Valor Total</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proceduresList">
+                        <!-- Procedimentos serão carregados aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Contas a Receber -->
+        <div class="tab-content" id="receber">
+            <div class="accounts-table">
+                <div style="padding: 20px; background: #f8f9fa; display: flex; justify-content: between; align-items: center;">
+                    <h3><i class="fas fa-arrow-up"></i> Contas a Receber</h3>
+                    <button class="btn-primary" onclick="openReceberModal()">
+                        <i class="fas fa-plus"></i> Nova Conta
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Procedimento</th>
+                            <th>Valor Total</th>
+                            <th>Valor Pago</th>
+                            <th>Pendente</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="receberList">
+                        <!-- Contas serão carregadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tab: Contas a Pagar -->
+        <div class="tab-content" id="pagar">
+            <div class="accounts-table">
+                <div style="padding: 20px; background: #f8f9fa; display: flex; justify-content: between; align-items: center;">
+                    <h3><i class="fas fa-arrow-down"></i> Contas a Pagar</h3>
+                    <button class="btn-primary" onclick="openPagarModal()">
+                        <i class="fas fa-plus"></i> Nova Conta
+                    </button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pagarList">
+                        <!-- Contas serão carregadas aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Adicionais/Acessórios -->
+    <div class="modal" id="additionalsModal">
+        <div class="modal-content">
+            <h3 id="additionalsTitle">Gerenciar Adicionais</h3>
+            <div id="additionalsContent"></div>
+            <button class="btn-secondary" onclick="closeModal('additionalsModal')">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        let currentProcedureId = null;
+
+        // Carregar dashboard ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+            loadProcedures();
+            loadReceberAccounts();
+            loadPagarAccounts();
+        });
+
+        // Alternar entre tabs
+        function showTab(tabName) {
+            // Ocultar todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Carregar dashboard financeiro
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/financeiro/dashboard');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const { receitas, despesas } = data.data;
+                    
+                    document.getElementById('receitasMes').textContent = 
+                        formatCurrency(receitas.receitas_pagas || 0);
+                    document.getElementById('receitasDetalhes').textContent = 
+                        `${receitas.total_contas_receber || 0} contas`;
+                    
+                    document.getElementById('despesasMes').textContent = 
+                        formatCurrency(despesas.total_despesas || 0);
+                    document.getElementById('despesasDetalhes').textContent = 
+                        `${despesas.total_contas_pagar || 0} contas`;
+                    
+                    const saldo = (receitas.receitas_pagas || 0) - (despesas.total_despesas || 0);
+                    document.getElementById('saldoLiquido').textContent = formatCurrency(saldo);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        // Carregar procedimentos
+        async function loadProcedures() {
+            try {
+                const response = await fetch('/api/procedimentos');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('proceduresList');
+                    tbody.innerHTML = data.data.map(proc => `
+                        <tr>
+                            <td>${proc.nome}</td>
+                            <td><span class="status-badge">${proc.tipo}</span></td>
+                            <td>${proc.area_corpo || '-'}</td>
+                            <td>${formatCurrency(calculateTotal(proc))}</td>
+                            <td>
+                                <button class="btn-small btn-primary" onclick="editProcedure(${proc.id})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-small btn-secondary" onclick="manageAdditionals(${proc.id})">
+                                    <i class="fas fa-plus"></i> Adicionais
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar procedimentos:', error);
+            }
+        }
+
+        // Calcular valor total do procedimento
+        function calculateTotal(proc) {
+            return (parseFloat(proc.valor_equipe) || 0) +
+                   (parseFloat(proc.valor_hospital) || 0) +
+                   (parseFloat(proc.valor_anestesista) || 0) +
+                   (parseFloat(proc.valor_instrumentador) || 0) +
+                   (parseFloat(proc.valor_assistente) || 0);
+        }
+
+        // Salvar procedimento
+        document.getElementById('procedureForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Converter checkbox para boolean
+            data.pos_operatorio_pacote = formData.has('pos_operatorio_pacote');
+            
+            try {
+                const response = await fetch('/api/procedimentos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Procedimento salvo com sucesso!');
+                    e.target.reset();
+                    loadProcedures();
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar procedimento:', error);
+                alert('Erro ao salvar procedimento');
+            }
+        });
+
+        // Gerenciar adicionais e acessórios
+        async function manageAdditionals(procedureId) {
+            currentProcedureId = procedureId;
+            
+            try {
+                const [additionalsResponse, accessoriesResponse] = await Promise.all([
+                    fetch(`/api/procedimentos/${procedureId}/adicionais`),
+                    fetch(`/api/procedimentos/${procedureId}/acessorios`)
+                ]);
+                
+                const additionalsData = await additionalsResponse.json();
+                const accessoriesData = await accessoriesResponse.json();
+                
+                const content = `
+                    <div style="margin-bottom: 20px;">
+                        <h4>Adicionais</h4>
+                        <div id="additionalsList">
+                            ${additionalsData.data.map(item => `
+                                <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                                    <strong>${item.nome}</strong> - ${item.tipo} - ${formatCurrency(item.valor)}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn-primary" onclick="addNewAdditional()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h4>Acessórios</h4>
+                        <div id="accessoriesList">
+                            ${accessoriesData.data.map(item => `
+                                <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                                    <strong>${item.nome}</strong> - 
+                                    ${item.sem_custo ? 'Sem custo' : formatCurrency(item.valor)} - 
+                                    Qtd: ${item.quantidade_incluida}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="btn-primary" onclick="addNewAccessory()">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('additionalsContent').innerHTML = content;
+                document.getElementById('additionalsModal').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erro ao carregar adicionais:', error);
+            }
+        }
+
+        // Carregar contas a receber
+        async function loadReceberAccounts() {
+            try {
+                const response = await fetch('/api/financeiro/receber');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('receberList');
+                    tbody.innerHTML = data.data.map(conta => `
+                        <tr>
+                            <td>${conta.paciente_nome}</td>
+                            <td>${conta.procedimento}</td>
+                            <td>${formatCurrency(conta.valor_total)}</td>
+                            <td>${formatCurrency(conta.valor_pago)}</td>
+                            <td>${formatCurrency(conta.valor_pendente)}</td>
+                            <td>${formatDate(conta.data_vencimento)}</td>
+                            <td><span class="status-badge status-${conta.status}">${conta.status}</span></td>
+                            <td>
+                                ${conta.status === 'pendente' ? `
+                                    <button class="btn-small btn-primary" onclick="registerPayment(${conta.id}, 'receber')">
+                                        <i class="fas fa-money-bill"></i> Pagar
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar contas a receber:', error);
+            }
+        }
+
+        // Carregar contas a pagar
+        async function loadPagarAccounts() {
+            try {
+                const response = await fetch('/api/financeiro/pagar');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const tbody = document.getElementById('pagarList');
+                    tbody.innerHTML = data.data.map(conta => `
+                        <tr>
+                            <td>${conta.funcionario_nome || '-'}</td>
+                            <td>${conta.tipo}</td>
+                            <td>${conta.descricao}</td>
+                            <td>${formatCurrency(conta.valor)}</td>
+                            <td>${formatDate(conta.data_vencimento)}</td>
+                            <td><span class="status-badge status-${conta.status}">${conta.status}</span></td>
+                            <td>
+                                ${conta.status === 'pendente' ? `
+                                    <button class="btn-small btn-primary" onclick="registerPayment(${conta.id}, 'pagar')">
+                                        <i class="fas fa-check"></i> Pagar
+                                    </button>
+                                ` : ''}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar contas a pagar:', error);
+            }
+        }
+
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('pt-BR');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Registrar pagamento
+        async function registerPayment(contaId, tipo) {
+            const valor = prompt('Valor do pagamento:');
+            const formaPagamento = prompt('Forma de pagamento:');
+            
+            if (valor && formaPagamento) {
+                try {
+                    const response = await fetch(`/api/financeiro/${tipo}/${contaId}/pagar`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            valor_pago: parseFloat(valor),
+                            forma_pagamento: formaPagamento
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        alert('Pagamento registrado com sucesso!');
+                        if (tipo === 'receber') {
+                            loadReceberAccounts();
+                        } else {
+                            loadPagarAccounts();
+                        }
+                        loadDashboard();
+                    } else {
+                        alert('Erro: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Erro ao registrar pagamento:', error);
+                    alert('Erro ao registrar pagamento');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
