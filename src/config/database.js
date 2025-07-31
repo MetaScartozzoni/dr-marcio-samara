@@ -322,6 +322,30 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela de prontuários
+        if (!tableNames.includes('prontuarios')) {
+            console.log('🔧 Criando tabela de prontuários...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS prontuarios (
+                    id SERIAL PRIMARY KEY,
+                    paciente_id INTEGER NOT NULL,
+                    numero_prontuario VARCHAR(20) UNIQUE NOT NULL,
+                    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    ativo BOOLEAN DEFAULT true,
+                    observacoes TEXT,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_prontuarios_paciente ON prontuarios(paciente_id);
+                CREATE INDEX IF NOT EXISTS idx_prontuarios_numero ON prontuarios(numero_prontuario);
+            `);
+        }
+        
         // Criar tabela de fichas de atendimento
         if (!tableNames.includes('fichas_atendimento')) {
             console.log('🔧 Criando tabela de fichas de atendimento...');

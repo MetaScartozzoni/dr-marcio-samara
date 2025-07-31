@@ -1247,7 +1247,14 @@ async function startServer() {
         // 4. Iniciar servidor
         app.listen(PORT, () => {
             console.log(`✅ Servidor rodando na porta ${PORT}`);
-            console.log(`🌐 URL: http://localhost:${PORT}`);
+            
+            if (process.env.NODE_ENV === 'production') {
+                console.log(`🌐 URL: https://portal-dr-marcio-production.up.railway.app`);
+                console.log(`🚀 Deploy Railway: ONLINE`);
+            } else {
+                console.log(`🌐 URL: http://localhost:${PORT}`);
+            }
+            
             console.log(`🗄️ Banco de dados: PostgreSQL Conectado`);
             console.log(`📊 Google Sheets: Desabilitado (usando PostgreSQL)`);
         });
