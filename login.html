@@ -83,8 +83,8 @@
                 this.clearMessage();
 
                 try {
-                    // Tentar login com sistema completo primeiro
-                    const response = await fetch('/api/auth/login-completo', {
+                    // Login principal
+                    const response = await fetch('/api/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -94,66 +94,26 @@
 
                     const resultado = await response.json();
 
-                    if (resultado.sucesso) {
+                    if (resultado.success) {
                         // Login bem-sucedido
                         this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
                         
                         // Salvar dados do usuário
-                        localStorage.setItem('userInfo', JSON.stringify(resultado.usuario));
+                        localStorage.setItem('userInfo', JSON.stringify(resultado.user));
                         
                         // Redirecionar para o dashboard correto
                         setTimeout(() => {
-                            window.location.href = resultado.redirectTo || '/dashboard.html';
+                            window.location.href = resultado.redirect || '/dashboard.html';
                         }, 1500);
                         
                     } else {
-                        // Tratar diferentes tipos de erro
-                        this.handleLoginError(resultado);
+                        // Mostrar erro do servidor
+                        this.showMessage(resultado.message || 'Erro no login. Tente novamente.', 'error');
                     }
 
                 } catch (error) {
                     console.error('Erro no login:', error);
-                    
-                    // Fallback para sistema antigo
-                    try {
-                        const fallbackResponse = await fetch('/api/login', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ email, senha })
-                        });
-
-                        const fallbackResult = await fallbackResponse.json();
-                        
-                        if (fallbackResult.sucesso) {
-                            this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
-                            
-                            // Salvar dados do usuário
-                            localStorage.setItem('userInfo', JSON.stringify({
-                                email: email,
-                                role: fallbackResult.role,
-                                nome: fallbackResult.full_name,
-                                loggedIn: true
-                            }));
-                            
-                            setTimeout(() => {
-                                window.location.href = '/dashboard.html';
-                            }, 1500);
-                            
-                        } else if (fallbackResult.precisaCriarSenha) {
-                            this.showMessage('Você precisa criar uma senha. Redirecionando...', 'warning');
-                            setTimeout(() => {
-                                window.location.href = `/senha.html?email=${encodeURIComponent(email)}`;
-                            }, 2000);
-                        } else {
-                            this.showMessage(fallbackResult.erro || 'Erro no login. Tente novamente.', 'error');
-                        }
-                        
-                    } catch (fallbackError) {
-                        console.error('Erro no fallback:', fallbackError);
-                        this.showMessage('Erro de conexão. Tente novamente.', 'error');
-                    }
+                    this.showMessage('Erro de conexão. Tente novamente.', 'error');
                 } finally {
                     this.showLoading(false);
                 }
