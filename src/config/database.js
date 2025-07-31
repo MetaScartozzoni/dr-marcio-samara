@@ -322,6 +322,54 @@ async function initializeDatabase() {
             `);
         }
         
+        // Criar tabela de fichas de atendimento
+        if (!tableNames.includes('fichas_atendimento')) {
+            console.log('🔧 Criando tabela de fichas de atendimento...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS fichas_atendimento (
+                    id SERIAL PRIMARY KEY,
+                    paciente_id INTEGER NOT NULL,
+                    prontuario_id INTEGER NOT NULL,
+                    agendamento_id INTEGER,
+                    peso DECIMAL(5,2),
+                    altura DECIMAL(3,2),
+                    imc DECIMAL(4,2),
+                    pressao_arterial VARCHAR(20),
+                    procedimento_desejado TEXT,
+                    motivo_principal TEXT,
+                    historico_medico TEXT,
+                    medicamentos_uso TEXT,
+                    alergias TEXT,
+                    observacoes_clinicas TEXT,
+                    exame_fisico TEXT,
+                    plano_tratamento TEXT,
+                    orientacoes TEXT,
+                    retorno_recomendado DATE,
+                    status VARCHAR(20) DEFAULT 'em_andamento',
+                    finalizada BOOLEAN DEFAULT false,
+                    data_finalizacao TIMESTAMP,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    criado_por INTEGER NOT NULL,
+                    atualizado_por INTEGER,
+                    FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+                    FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE CASCADE,
+                    FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
+                    FOREIGN KEY (criado_por) REFERENCES funcionarios(id),
+                    FOREIGN KEY (atualizado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            // Criar índices para fichas de atendimento
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_fichas_paciente ON fichas_atendimento(paciente_id);
+                CREATE INDEX IF NOT EXISTS idx_fichas_prontuario ON fichas_atendimento(prontuario_id);
+                CREATE INDEX IF NOT EXISTS idx_fichas_agendamento ON fichas_atendimento(agendamento_id);
+                CREATE INDEX IF NOT EXISTS idx_fichas_data ON fichas_atendimento(criado_em);
+            `);
+        }
+        
         // Criar tabela para notificações
         if (!tableNames.includes('notificacoes')) {
             console.log('🔧 Criando tabela de notificações...');
@@ -345,69 +393,86 @@ async function initializeDatabase() {
                 )
             `);
         }
-
-        // Criar tabela logs_acesso (LGPD)
+        
+        // Criar tabelas LGPD
         if (!tableNames.includes('logs_acesso')) {
-            console.log('🔧 Criando tabela de logs de acesso...');
+            console.log('🔧 Criando tabela de logs de acesso (LGPD)...');
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS logs_acesso (
                     id SERIAL PRIMARY KEY,
                     usuario_id INTEGER,
-                    email VARCHAR(255),
-                    ip_origem INET,
+                    ip_acesso INET,
                     user_agent TEXT,
-                    acao VARCHAR(100) NOT NULL,
-                    recurso_acessado VARCHAR(255),
-                    sucesso BOOLEAN DEFAULT true,
-                    detalhes JSONB,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    data_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    url_acessada VARCHAR(500),
+                    metodo_http VARCHAR(10),
+                    data_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    sessao_id VARCHAR(255),
+                    duracao_sessao INTEGER,
+                    dados_acessados TEXT,
+                    finalidade_acesso VARCHAR(255),
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
                 )
             `);
             
             await client.query(`
                 CREATE INDEX IF NOT EXISTS idx_logs_acesso_usuario ON logs_acesso(usuario_id);
-                CREATE INDEX IF NOT EXISTS idx_logs_acesso_email ON logs_acesso(email);
-                CREATE INDEX IF NOT EXISTS idx_logs_acesso_acao ON logs_acesso(acao);
                 CREATE INDEX IF NOT EXISTS idx_logs_acesso_data ON logs_acesso(data_acesso);
+                CREATE INDEX IF NOT EXISTS idx_logs_acesso_ip ON logs_acesso(ip_acesso);
             `);
         }
         
-        // Criar tabelas de orçamentos
-        if (!tableNames.includes('orcamentos')) {
-            console.log('🔧 Criando estrutura de orçamentos...');
+        if (!tableNames.includes('consentimentos_lgpd')) {
+            console.log('🔧 Criando tabela de consentimentos LGPD...');
             
-            // Executar migração de orçamentos
-            const fs = require('fs');
-            const path = require('path');
-            const migrationPath = path.join(__dirname, '../../database/migrations/create_orcamentos_tables.sql');
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS consentimentos_lgpd (
+                    id SERIAL PRIMARY KEY,
+                    usuario_id INTEGER NOT NULL,
+                    tipo_consentimento VARCHAR(100) NOT NULL,
+                    finalidade TEXT NOT NULL,
+                    data_consentimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    data_revogacao TIMESTAMP,
+                    ip_origem INET,
+                    ativo BOOLEAN DEFAULT true,
+                    versao_termos VARCHAR(20) DEFAULT '1.0',
+                    detalhes_consentimento JSONB,
+                    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+                )
+            `);
             
-            try {
-                const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
-                await client.query(migrationSQL);
-                console.log('✅ Tabelas de orçamentos criadas com sucesso');
-            } catch (migrationError) {
-                console.error('❌ Erro ao executar migração de orçamentos:', migrationError);
-                
-                // Fallback - criar estrutura básica
-                await client.query(`
-                    CREATE TABLE IF NOT EXISTS orcamentos (
-                        id SERIAL PRIMARY KEY,
-                        paciente_id INTEGER,
-                        numero_orcamento VARCHAR(20) UNIQUE NOT NULL,
-                        valor_total DECIMAL(10,2) NOT NULL,
-                        descricao_procedimento TEXT,
-                        forma_pagamento VARCHAR(50),
-                        observacoes TEXT,
-                        vencimento DATE,
-                        status VARCHAR(30) DEFAULT 'pendente',
-                        criado_por INTEGER,
-                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                `);
-            }
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_consentimentos_usuario ON consentimentos_lgpd(usuario_id);
+                CREATE INDEX IF NOT EXISTS idx_consentimentos_tipo ON consentimentos_lgpd(tipo_consentimento);
+                CREATE INDEX IF NOT EXISTS idx_consentimentos_ativo ON consentimentos_lgpd(ativo);
+            `);
+        }
+        
+        if (!tableNames.includes('logs_exclusao_lgpd')) {
+            console.log('🔧 Criando tabela de logs de exclusão LGPD...');
+            
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS logs_exclusao_lgpd (
+                    id SERIAL PRIMARY KEY,
+                    usuario_id INTEGER NOT NULL,
+                    email_original VARCHAR(255),
+                    nome_original VARCHAR(255),
+                    motivo TEXT NOT NULL,
+                    data_exclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    executado_por INTEGER,
+                    status VARCHAR(20) DEFAULT 'INICIADO',
+                    dados_backup JSONB,
+                    ip_solicitacao INET,
+                    observacoes TEXT,
+                    FOREIGN KEY (executado_por) REFERENCES funcionarios(id)
+                )
+            `);
+            
+            await client.query(`
+                CREATE INDEX IF NOT EXISTS idx_logs_exclusao_usuario ON logs_exclusao_lgpd(usuario_id);
+                CREATE INDEX IF NOT EXISTS idx_logs_exclusao_data ON logs_exclusao_lgpd(data_exclusao);
+                CREATE INDEX IF NOT EXISTS idx_logs_exclusao_status ON logs_exclusao_lgpd(status);
+            `);
         }
         
         console.log('✅ Estrutura do banco verificada/criada');

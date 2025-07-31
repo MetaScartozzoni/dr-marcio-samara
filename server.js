@@ -4,7 +4,6 @@ const { JWT } = require('google-auth-library');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const app = express();
 
 // Importar configuração de banco
@@ -31,14 +30,12 @@ const systemRoutes = require('./src/routes/system.routes');
 
 // Importar rotas da integração completa
 const pacientesRoutes = require('./src/routes/pacientes.routes');
-const orcamentoRoutes = require('./src/routes/orcamento.routes');
-const agendamentoRoutes = require('./src/routes/agendamento.routes');
+const fichaRoutes = require('./src/routes/ficha.routes');
 const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require('./src/routes/admin.routes');
 
 // Middleware básico
 app.use(cors());
 app.use(express.json());
-app.use(cookieParser());
 
 // MIDDLEWARE DE SETUP - DEVE VIR ANTES DOS OUTROS
 app.use(checkSystemSetup);
@@ -983,12 +980,7 @@ app.use('/api/system', systemRoutes);
 
 // Rotas da integração completa de pacientes
 app.use('/api/pacientes', pacientesRoutes);
-
-// Rotas de orçamentos
-app.use('/api/orcamentos', orcamentoRoutes);
-
-// Rotas de agendamentos (rotas estruturadas)
-app.use('/api/agendamentos-v2', agendamentoRoutes);
+app.use('/api/fichas', fichaRoutes);
 
 // Rotas administrativas para logs
 initializeAdminRoutes(pool);
