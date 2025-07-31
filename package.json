@@ -4,8 +4,8 @@
   "description": "Portal médico completo com SendGrid e Twilio",
   "main": "server.js",
   "scripts": {
-    "start": "node server-simple.js",
-    "dev": "node server-simple.js",
+    "start": "node server.js",
+    "dev": "node server.js",
     "build": "echo 'Build completed successfully'"
   },
   "engines": {
