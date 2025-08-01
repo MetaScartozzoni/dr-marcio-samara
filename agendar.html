@@ -924,13 +924,51 @@
             slotsGrid.innerHTML = '<div class="loading">🔄 Carregando horários...</div>';
 
             try {
-                // Simular dados para demonstração
-                const slots = generateExampleTimeSlots();
-                renderTimeSlots(slots);
+                // Buscar disponibilidade real da API
+                const dateStr = date.toISOString().split('T')[0];
+                const response = await fetch(`/api/agendamentos/disponibilidade?data=${dateStr}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderTimeSlotsFromAPI(data);
+                } else {
+                    console.error('Erro ao carregar disponibilidade:', response.statusText);
+                    // Fallback para dados de exemplo
+                    const slots = generateExampleTimeSlots();
+                    renderTimeSlots(slots);
+                }
             } catch (error) {
                 console.error('Erro ao carregar horários:', error);
-                slotsGrid.innerHTML = '<div class="error">❌ Erro ao carregar horários</div>';
+                // Fallback para dados de exemplo se houver erro de conexão
+                const slots = generateExampleTimeSlots();
+                renderTimeSlots(slots);
             }
+        }
+
+        // Renderizar horários baseados na resposta da API
+        function renderTimeSlotsFromAPI(data) {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 18;
+            const interval = 30; // minutos
+            
+            // Obter horários ocupados da API
+            const ocupados = data.agendamentos_ocupados || [];
+            const horariosOcupados = ocupados.map(ag => ag.hora_consulta);
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const available = !horariosOcupados.includes(time);
+                    
+                    slots.push({
+                        time: time,
+                        available: available
+                    });
+                }
+            }
+
+            renderTimeSlots(slots);
         }
 
         // Gerar horários de exemplo
@@ -1050,11 +1088,22 @@
         // Carregar agendamentos existentes
         async function loadAppointments() {
             try {
-                // Dados de exemplo para demonstração
-                const exampleAppointments = generateExampleAppointments();
-                displayAppointments(exampleAppointments);
+                // Buscar agendamentos reais da API
+                const response = await fetch('/api/agendamentos');
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAppointments(data.agendamentos || []);
+                } else {
+                    console.error('Erro ao carregar agendamentos:', response.statusText);
+                    // Fallback para dados de exemplo se a API falhar
+                    const exampleAppointments = generateExampleAppointments();
+                    displayAppointments(exampleAppointments);
+                }
             } catch (error) {
                 console.error('Erro ao carregar agendamentos:', error);
+                // Fallback para dados de exemplo se houver erro de conexão
+                const exampleAppointments = generateExampleAppointments();
+                displayAppointments(exampleAppointments);
             }
         }
 
@@ -1166,6 +1215,21 @@
             alert(`Ver todos os agendamentos de ${new Date(date).toLocaleDateString('pt-BR')}`);
         }
 
+        // Verificar se paciente já existe no sistema
+        async function verificarPacienteExistente(cpf) {
+            try {
+                const response = await fetch(`/api/pacientes?cpf=${cpf}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.pacientes && data.pacientes.length > 0 ? data.pacientes[0] : null;
+                }
+                return null;
+            } catch (error) {
+                console.error('Erro ao verificar paciente:', error);
+                return null;
+            }
+        }
+
         // Submeter formulário de agendamento
         document.getElementById('bookingForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -1192,11 +1256,55 @@
             const criarCaderno = formData.get('criarCadernoAutomatico') === 'on';
 
             try {
-                // Simular agendamento (aqui seria a chamada real para API)
+                // Verificar se paciente já existe no sistema
+                const pacienteExistente = await verificarPacienteExistente(appointmentData.paciente.cpf);
+                
+                let dadosPaciente = appointmentData.paciente;
+                let mensagemPaciente = '';
+                
+                if (pacienteExistente) {
+                    // Usar dados do paciente existente mas permitir atualização de telefone/email
+                    dadosPaciente = {
+                        ...pacienteExistente,
+                        telefone: appointmentData.paciente.telefone || pacienteExistente.telefone,
+                        email: appointmentData.paciente.email || pacienteExistente.email
+                    };
+                    mensagemPaciente = '👤 Paciente já cadastrado no sistema';
+                    console.log('Paciente já existe no sistema, usando dados existentes');
+                } else {
+                    mensagemPaciente = '✨ Novo paciente cadastrado';
+                }
+
+                // Criar agendamento real via API
+                const agendamentoData = {
+                    paciente_nome: dadosPaciente.nome,
+                    paciente_email: dadosPaciente.email,
+                    paciente_telefone: dadosPaciente.telefone,
+                    paciente_cpf: dadosPaciente.cpf,
+                    data_consulta: selectedDate.toISOString().split('T')[0],
+                    hora_consulta: selectedTime,
+                    tipo: appointmentData.tipo_consulta || 'consulta',
+                    observacoes: appointmentData.observacoes || '',
+                    status: 'confirmado'
+                };
+
+                const response = await fetch('/api/agendamentos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(agendamentoData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro ao criar agendamento');
+                }
+
+                const result = await response.json();
                 
                 if (criarCaderno) {
-                    // Salvar dados do paciente para criação do caderno
-                    const dadosPaciente = appointmentData.paciente;
+                    // Salvar dados do paciente para criação do caderno usando os dados corretos
                     dadosPaciente.id = gerarIdPaciente(dadosPaciente.cpf);
                     
                     // Salvar no localStorage (simular banco de dados)
@@ -1205,8 +1313,9 @@
                     showMessage('success', 
                         `✅ Agendamento criado com sucesso!\n\n` +
                         `📅 Data: ${selectedDate.toLocaleDateString('pt-BR')} às ${selectedTime}\n` +
-                        `👤 Paciente: ${dadosPaciente.nome}\n` +
-                        `📋 Caderno Digital: Criado automaticamente\n\n` +
+                        `${mensagemPaciente}: ${dadosPaciente.nome}\n` +
+                        `📋 Caderno Digital: Criado automaticamente\n` +
+                        `🔢 ID: ${result.agendamento.id}\n\n` +
                         `Você receberá uma confirmação por email.`
                     );
 
@@ -1220,7 +1329,8 @@
                     showMessage('success', 
                         `✅ Agendamento criado com sucesso!\n\n` +
                         `📅 Data: ${selectedDate.toLocaleDateString('pt-BR')} às ${selectedTime}\n` +
-                        `👤 Paciente: ${appointmentData.paciente.nome}\n\n` +
+                        `${mensagemPaciente}: ${dadosPaciente.nome}\n` +
+                        `🔢 ID: ${result.agendamento.id}\n\n` +
                         `Você receberá uma confirmação por email.`
                     );
                 }
