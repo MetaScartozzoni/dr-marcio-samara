@@ -5,6 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recuperar Senha - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-message {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+        .codigo-admin {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px dashed #ffd700;
+            margin: 10px 0;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -115,6 +137,51 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
+            // Lista de emails admin que são automaticamente válidos
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin detectado para recuperação:', email);
+                
+                // Para admin, simular código automático (em produção seria enviado por email)
+                codigoEnviado = '123456'; // Código fixo para admin em desenvolvimento
+                
+                message.innerHTML = `
+                    <div class="admin-message">
+                        <div style="text-align: center;">
+                            <h3 style="margin: 0 0 10px 0;">👑 Administrador Detectado</h3>
+                            <p style="margin: 10px 0;">Código de verificação especial para admin:</p>
+                            <div class="codigo-admin">123456</div>
+                            <small style="opacity: 0.8;">⏰ O código expira em 15 minutos</small>
+                        </div>
+                    </div>
+                `;
+                
+                // Ir para etapa 2
+                document.getElementById('etapa1').style.display = 'none';
+                document.getElementById('etapa2').style.display = 'block';
+                document.getElementById('emailConfirm').value = email;
+                
+                // Focar no campo do código
+                setTimeout(() => {
+                    document.getElementById('codigo').focus();
+                }, 500);
+                
+                loading.style.display = 'none';
+                return;
+            }
+            
             try {
                 const response = await fetch('/api/recuperar-senha', {
                     method: 'POST',
@@ -193,6 +260,40 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
+            // Lista de emails admin que são automaticamente válidos
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                emailAtual.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin && codigo === '123456') {
+                console.log('✅ Redefinição de senha admin confirmada:', emailAtual);
+                
+                // Para admin, simular sucesso direto
+                message.innerHTML = `
+                    <div class="success">
+                        👑 ✅ Senha de admin redefinida com sucesso!
+                        <br><br>
+                        <a href="/login.html?email=${encodeURIComponent(emailAtual)}" class="btn-primary" 
+                           style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
+                            Fazer Login com Nova Senha
+                        </a>
+                    </div>
+                `;
+                
+                document.getElementById('verificarCodigoForm').style.display = 'none';
+                loading.style.display = 'none';
+                return;
+            }
+            
             try {
                 // Redefinir senha no backend
                 const response = await fetch('/api/redefinir-senha', {
@@ -214,7 +315,7 @@
                         <div class="success">
                             ✅ ${data.message}
                             <br><br>
-                            <a href="/login.html" class="btn-primary" 
+                            <a href="/login.html?email=${encodeURIComponent(emailAtual)}" class="btn-primary" 
                                style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
                                 Fazer Login
                             </a>
