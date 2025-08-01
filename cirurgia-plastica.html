@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha de Cirurgia Plástica - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .medical-form {
             background: white;
@@ -172,15 +171,15 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-user-md"></i> Ficha de Cirurgia Plástica</h1>
+            <h1> Ficha de Cirurgia Plástica</h1>
             <p>Avaliação completa e orçamento especializado</p>
             
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn-secondary" onclick="window.location.href='gestao.html'">
-                    <i class="fas fa-arrow-left"></i> Voltar
+                     Voltar
                 </button>
                 <button class="btn-primary" onclick="window.location.href='gestao-financeira.html'">
-                    <i class="fas fa-chart-line"></i> Financeiro
+                     Financeiro
                 </button>
             </div>
         </div>
@@ -195,23 +194,23 @@
             </div>
             
             <button class="btn-secondary" onclick="clearForm()">
-                <i class="fas fa-plus"></i> Novo Paciente
+                 Novo Paciente
             </button>
         </div>
 
         <!-- Navegação por Tabs -->
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dados-pessoais')">
-                <i class="fas fa-user"></i> Dados Pessoais
+                 Dados Pessoais
             </button>
             <button class="nav-tab" onclick="showTab('avaliacao-medica')">
-                <i class="fas fa-stethoscope"></i> Avaliação Médica
+                 Avaliação Médica
             </button>
             <button class="nav-tab" onclick="showTab('procedimentos')">
-                <i class="fas fa-surgical-scalpel"></i> Procedimentos
+                 Procedimentos
             </button>
             <button class="nav-tab" onclick="showTab('orcamento')">
-                <i class="fas fa-calculator"></i> Orçamento
+                 Orçamento
             </button>
         </div>
 
@@ -219,7 +218,7 @@
         <div id="dados-pessoais" class="tab-content active">
             <form id="fichaForm" class="medical-form">
                 <div class="form-section">
-                    <h3><i class="fas fa-user"></i> Informações Pessoais</h3>
+                    <h3> Informações Pessoais</h3>
                     
                     <div class="form-row">
                         <div class="input-group">
@@ -279,7 +278,7 @@
         <div id="avaliacao-medica" class="tab-content">
             <div class="medical-form">
                 <div class="form-section">
-                    <h3><i class="fas fa-stethoscope"></i> Avaliação Clínica</h3>
+                    <h3> Avaliação Clínica</h3>
                     
                     <div class="input-group-full">
                         <label>Queixa Principal *</label>
@@ -344,7 +343,7 @@
         <div id="procedimentos" class="tab-content">
             <div class="medical-form">
                 <div class="form-section">
-                    <h3><i class="fas fa-surgical-scalpel"></i> Seleção de Procedimentos</h3>
+                    <h3> Seleção de Procedimentos</h3>
                     
                     <div class="procedure-config">
                         <h4>Procedimentos Disponíveis</h4>
@@ -361,10 +360,10 @@
         <div id="orcamento" class="tab-content">
             <div class="medical-form">
                 <div class="form-section">
-                    <h3><i class="fas fa-calculator"></i> Resumo Financeiro</h3>
+                    <h3> Resumo Financeiro</h3>
                     
                     <div class="financial-summary">
-                        <h4><i class="fas fa-dollar-sign"></i> Detalhamento de Custos</h4>
+                        <h4> Detalhamento de Custos</h4>
                         <div class="financial-grid">
                             <div class="financial-item">
                                 <div class="label">Equipe Médica</div>
@@ -412,13 +411,13 @@
         <!-- Botões de Ação -->
         <div class="btn-group">
             <button type="button" class="btn-secondary" onclick="saveDraft()">
-                <i class="fas fa-save"></i> Salvar Rascunho
+                 Salvar Rascunho
             </button>
             <button type="button" class="btn-primary" onclick="generateBudget()">
-                <i class="fas fa-file-pdf"></i> Gerar Orçamento
+                 Gerar Orçamento
             </button>
             <button type="button" class="btn-success" onclick="sendBudget()">
-                <i class="fas fa-paper-plane"></i> Enviar Orçamento
+                 Enviar Orçamento
             </button>
         </div>
     </div>
@@ -535,7 +534,7 @@
                     <div>
                         <span style="font-weight: bold;">${formatCurrency(calculateProcedureTotal(proc))}</span>
                         <button class="btn-small btn-primary" onclick="addProcedure(${proc.id})" style="margin-left: 10px;">
-                            <i class="fas fa-plus"></i>
+                            
                         </button>
                     </div>
                 </div>
@@ -577,7 +576,7 @@
                     <div>
                         <span style="font-weight: bold;">${formatCurrency(calculateProcedureTotal(proc))}</span>
                         <button class="btn-small btn-danger" onclick="removeProcedure(${proc.id})" style="margin-left: 10px;">
-                            <i class="fas fa-times"></i>
+                            
                         </button>
                     </div>
                 </div>

@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -323,48 +322,48 @@
         <div id="patient-section" class="hidden">
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-calendar-alt"></i></span>Meus Agendamentos</h3>
+                    <h3><span class="icon"></span>Meus Agendamentos</h3>
                     <p>Visualize e gerencie seus agendamentos médicos.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="verAgendamentos()"><i class="fas fa-calendar-check"></i> Ver Agendamentos</a>
-                        <a href="#" class="action-btn" onclick="agendarConsulta()"><i class="fas fa-plus-circle"></i> Agendar Consulta</a>
+                        <a href="#" class="action-btn" onclick="verAgendamentos()"> Ver Agendamentos</a>
+                        <a href="#" class="action-btn" onclick="agendarConsulta()"> Agendar Consulta</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-file-medical"></i></span>Meus Exames</h3>
+                    <h3><span class="icon"></span>Meus Exames</h3>
                     <p>Acesse resultados de exames e relatórios médicos.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Resultados')"><i class="fas fa-vial"></i> Ver Resultados</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Histórico Médico')"><i class="fas fa-history"></i> Histórico</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Resultados')"> Ver Resultados</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Histórico Médico')"> Histórico</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-pills"></i></span>Receitas</h3>
+                    <h3><span class="icon"></span>Receitas</h3>
                     <p>Consulte suas receitas médicas ativas.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Receitas')"><i class="fas fa-prescription-bottle"></i> Ver Receitas</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Renovar Receita')"><i class="fas fa-redo"></i> Renovar Receita</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Receitas')"> Ver Receitas</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Renovar Receita')"> Renovar Receita</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-video"></i></span>Teleconsulta</h3>
+                    <h3><span class="icon"></span>Teleconsulta</h3>
                     <p>Consultas virtuais com Dr. Marcio via videochamada.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="entrarVideochamada()"><i class="fas fa-video"></i> Entrar na Consulta</a>
-                        <a href="#" class="action-btn" onclick="window.open('videochamada.html', '_blank')"><i class="fas fa-hospital"></i> Sala Dedicada</a>
-                        <a href="#" class="action-btn" onclick="agendarTeleconsulta()"><i class="fas fa-calendar-plus"></i> Agendar Video</a>
+                        <a href="#" class="action-btn" onclick="entrarVideochamada()"> Entrar na Consulta</a>
+                        <a href="#" class="action-btn" onclick="window.open('videochamada.html', '_blank')"> Sala Dedicada</a>
+                        <a href="#" class="action-btn" onclick="agendarTeleconsulta()"> Agendar Video</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-user-circle"></i></span>Meu Perfil</h3>
+                    <h3><span class="icon"></span>Meu Perfil</h3>
                     <p>Atualize suas informações pessoais e contato.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="editarPerfil()"><i class="fas fa-edit"></i> Editar Perfil</a>
-                        <a href="#" class="action-btn" onclick="alterarSenha()"><i class="fas fa-lock"></i> Alterar Senha</a>
+                        <a href="#" class="action-btn" onclick="editarPerfil()"> Editar Perfil</a>
+                        <a href="#" class="action-btn" onclick="alterarSenha()"> Alterar Senha</a>
                     </div>
                 </div>
             </div>
@@ -374,69 +373,69 @@
         <div id="staff-section" class="hidden">
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-route"></i></span>Jornada de Pacientes</h3>
+                    <h3><span class="icon"></span>Jornada de Pacientes</h3>
                     <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
                     <div class="quick-actions">
-                        <a href="/quadro-evolutivo.html" class="action-btn"><i class="fas fa-chart-area"></i> Ver Quadro</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"><i class="fas fa-file-alt"></i> Relatório</a>
+                        <a href="/quadro-evolutivo.html" class="action-btn"> Ver Quadro</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"> Relatório</a>
                         <!-- Botão especial para Gestão da Jornada -->
                         <a href="/jornada-paciente.html" class="action-btn btn-jornada-especial">
-                            <i class="fas fa-route"></i> 🔥 Jornada Especial
+                             🔥 Jornada Especial
                         </a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-book-medical"></i></span>Caderno Digital</h3>
+                    <h3><span class="icon"></span>Caderno Digital</h3>
                     <p>Documentação médica com anotações e fotos evolutivas.</p>
                     <div class="quick-actions">
-                        <a href="/caderno-digital.html" class="action-btn"><i class="fas fa-book-open"></i> Abrir Caderno</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"><i class="fas fa-folder-open"></i> Documentos</a>
+                        <a href="/caderno-digital.html" class="action-btn"> Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"> Documentos</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-calendar-day"></i></span>Agenda do Dia</h3>
+                    <h3><span class="icon"></span>Agenda do Dia</h3>
                     <p>Consulte a agenda de consultas do dia.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-eye"></i> Ver Agenda</a>
-                        <a href="#" class="action-btn"><i class="fas fa-plus"></i> Marcar Consulta</a>
+                        <a href="#" class="action-btn"> Ver Agenda</a>
+                        <a href="#" class="action-btn"> Marcar Consulta</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-users"></i></span>Pacientes</h3>
+                    <h3><span class="icon"></span>Pacientes</h3>
                     <p>Gerencie cadastro e informações dos pacientes.</p>
                     <div class="quick-actions">
-                        <a href="/gestao.html" class="action-btn"><i class="fas fa-tasks"></i> Gestão Completa</a>
-                        <a href="#" class="action-btn"><i class="fas fa-user-plus"></i> Novo Paciente</a>
+                        <a href="/gestao.html" class="action-btn"> Gestão Completa</a>
+                        <a href="#" class="action-btn"> Novo Paciente</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-chart-bar"></i></span>Relatórios</h3>
+                    <h3><span class="icon"></span>Relatórios</h3>
                     <p>Acesse relatórios e estatísticas do consultório.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-file-chart-line"></i> Relatórios</a>
-                        <a href="#" class="action-btn"><i class="fas fa-dollar-sign"></i> Financeiro</a>
+                        <a href="#" class="action-btn"> Relatórios</a>
+                        <a href="#" class="action-btn"> Financeiro</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-video"></i></span>Videochamadas</h3>
+                    <h3><span class="icon"></span>Videochamadas</h3>
                     <p>Consultas virtuais com pacientes via Whereby.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn" onclick="abrirVideochamada()"><i class="fas fa-play-circle"></i> Iniciar Consulta</a>
-                        <a href="#" class="action-btn" onclick="agendarVideochamada()"><i class="fas fa-calendar-plus"></i> Agendar Video</a>
+                        <a href="#" class="action-btn" onclick="abrirVideochamada()"> Iniciar Consulta</a>
+                        <a href="#" class="action-btn" onclick="agendarVideochamada()"> Agendar Video</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-cog"></i></span>Configurações</h3>
+                    <h3><span class="icon"></span>Configurações</h3>
                     <p>Configurações do sistema e preferências.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-sliders-h"></i> Configurar</a>
-                        <a href="#" class="action-btn"><i class="fas fa-save"></i> Backup</a>
+                        <a href="#" class="action-btn"> Configurar</a>
+                        <a href="#" class="action-btn"> Backup</a>
                     </div>
                 </div>
             </div>
@@ -465,67 +464,67 @@
             
             <div class="dashboard-grid">
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-route"></i></span>Jornada de Pacientes</h3>
+                    <h3><span class="icon"></span>Jornada de Pacientes</h3>
                     <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
                     <div class="quick-actions">
-                        <a href="/quadro-evolutivo.html" class="action-btn"><i class="fas fa-chart-area"></i> Ver Quadro</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"><i class="fas fa-file-alt"></i> Relatório</a>
+                        <a href="/quadro-evolutivo.html" class="action-btn"> Ver Quadro</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"> Relatório</a>
                         <!-- Botão especial para Gestão da Jornada -->
                         <a href="/jornada-paciente.html" class="action-btn btn-jornada-especial">
-                            <i class="fas fa-route"></i> 🔥 Jornada Especial
+                             🔥 Jornada Especial
                         </a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-book-medical"></i></span>Caderno Digital</h3>
+                    <h3><span class="icon"></span>Caderno Digital</h3>
                     <p>Documentação médica com anotações e fotos evolutivas.</p>
                     <div class="quick-actions">
-                        <a href="/caderno-digital.html" class="action-btn"><i class="fas fa-book-open"></i> Abrir Caderno</a>
-                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"><i class="fas fa-folder-open"></i> Documentos</a>
+                        <a href="/caderno-digital.html" class="action-btn"> Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"> Documentos</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-user-md"></i></span>Área Médica</h3>
+                    <h3><span class="icon"></span>Área Médica</h3>
                     <p>Ferramentas médicas e prontuários eletrônicos.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-notes-medical"></i> Prontuários</a>
-                        <a href="#" class="action-btn"><i class="fas fa-prescription"></i> Prescrições</a>
-                        <a href="#" class="action-btn"><i class="fas fa-file-medical-alt"></i> Laudos</a>
+                        <a href="#" class="action-btn"> Prontuários</a>
+                        <a href="#" class="action-btn"> Prescrições</a>
+                        <a href="#" class="action-btn"> Laudos</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card" id="gestao-usuarios-card">
                     <div id="notification-badge" class="notification-badge" style="display: none;">0</div>
-                    <h3><span class="icon"><i class="fas fa-hospital"></i></span>Gestão Clínica</h3>
+                    <h3><span class="icon"></span>Gestão Clínica</h3>
                     <p>Administração geral do consultório e gestão de pacientes.</p>
                     <div class="quick-actions">
-                        <a href="/gestao" class="action-btn"><i class="fas fa-tasks"></i> Gestão de Pacientes</a>
+                        <a href="/gestao" class="action-btn"> Gestão de Pacientes</a>
                         <a href="/admin.html" class="action-btn" id="gerenciar-usuarios-btn">
-                            <i class="fas fa-users-cog"></i> Gerenciar Usuários
+                             Gerenciar Usuários
                             <span id="pending-count" style="display: none; background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-left: 5px;">0</span>
                         </a>
-                        <a href="#" class="action-btn"><i class="fas fa-chart-pie"></i> Relatórios</a>
+                        <a href="#" class="action-btn"> Relatórios</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-analytics"></i></span>Analytics</h3>
+                    <h3><span class="icon"></span>Analytics</h3>
                     <p>Relatórios avançados e análises.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-tachometer-alt"></i> Dashboard Completo</a>
-                        <a href="#" class="action-btn"><i class="fas fa-download"></i> Exportar Dados</a>
+                        <a href="#" class="action-btn"> Dashboard Completo</a>
+                        <a href="#" class="action-btn"> Exportar Dados</a>
                     </div>
                 </div>
                 
                 <div class="dashboard-card">
-                    <h3><span class="icon"><i class="fas fa-cogs"></i></span>Administração</h3>
+                    <h3><span class="icon"></span>Administração</h3>
                     <p>Configurações avançadas do sistema.</p>
                     <div class="quick-actions">
-                        <a href="#" class="action-btn"><i class="fas fa-users"></i> Usuários</a>
-                        <a href="#" class="action-btn"><i class="fas fa-shield-alt"></i> Permissões</a>
-                        <a href="#" class="action-btn"><i class="fas fa-server"></i> Sistema</a>
+                        <a href="#" class="action-btn"> Usuários</a>
+                        <a href="#" class="action-btn"> Permissões</a>
+                        <a href="#" class="action-btn"> Sistema</a>
                     </div>
                 </div>
             </div>
@@ -574,24 +573,24 @@
             
             if (userInfo.tipo === 'admin') {
                 navLinks.innerHTML = `
-                    <a href="/prontuarios.html" class="nav-link"><i class="fas fa-folder-medical"></i> Prontuários</a>
-                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
-                    <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão Orçamentos</a>
-                    <a href="/admin.html" class="nav-link"><i class="fas fa-users-cog"></i> Usuários</a>
-                    <a href="/configuracoes-sistema.html" class="nav-link"><i class="fas fa-cogs"></i> Configurações</a>
-                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                    <a href="/prontuarios.html" class="nav-link"> Prontuários</a>
+                    <a href="/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="/gestao.html" class="nav-link"> Gestão Orçamentos</a>
+                    <a href="/admin.html" class="nav-link"> Usuários</a>
+                    <a href="/configuracoes-sistema.html" class="nav-link"> Configurações</a>
+                    <a href="/" class="nav-link"> Portal</a>
                 `;
             } else if (userInfo.tipo === 'funcionario') {
                 navLinks.innerHTML = `
-                    <a href="/prontuarios.html" class="nav-link"><i class="fas fa-folder-medical"></i> Prontuários</a>
-                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
-                    <a href="/gestao.html" class="nav-link"><i class="fas fa-chart-bar"></i> Gestão Orçamentos</a>
-                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                    <a href="/prontuarios.html" class="nav-link"> Prontuários</a>
+                    <a href="/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="/gestao.html" class="nav-link"> Gestão Orçamentos</a>
+                    <a href="/" class="nav-link"> Portal</a>
                 `;
             } else {
                 navLinks.innerHTML = `
-                    <a href="/agendar.html" class="nav-link"><i class="fas fa-calendar-plus"></i> Agendar</a>
-                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Portal</a>
+                    <a href="/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="/" class="nav-link"> Portal</a>
                 `;
             }
             

@@ -12,16 +12,16 @@
     <div class="dashboard-container">
         <!-- Sistema de Gestão de Orçamentos Pós-Consulta -->
         <header class="dashboard-header">
-            <h1><i class="fas fa-file-invoice-dollar"></i> Gestão de Pacientes Pós-Consulta - Portal Dr. Marcio</h1>
+            <h1> Gestão de Pacientes Pós-Consulta - Portal Dr. Marcio</h1>
             <div class="header-actions">
-                <button onclick="voltarDashboard()" class="btn-back"><i class="fas fa-arrow-left"></i> Voltar ao Dashboard</button>
-                <button onclick="atualizarDados()" class="btn-refresh"><i class="fas fa-sync-alt"></i> Atualizar</button>
-                <button onclick="exportarDados()" class="btn-export"><i class="fas fa-download"></i> Exportar</button>
+                <button onclick="voltarDashboard()" class="btn-back"> Voltar ao Dashboard</button>
+                <button onclick="atualizarDados()" class="btn-refresh"> Atualizar</button>
+                <button onclick="exportarDados()" class="btn-export"> Exportar</button>
             </div>
         </header>
 
         <div class="filters-section">
-            <h2><i class="fas fa-filter"></i> Filtros de Orçamentos</h2>
+            <h2> Filtros de Orçamentos</h2>
             <div class="filters-grid">
                 <div class="filter-group">
                     <label for="filtroId">ID Paciente:</label>
@@ -58,41 +58,41 @@
                 </div>
                 
                 <div class="filter-actions">
-                    <button onclick="aplicarFiltros()" class="btn-primary"><i class="fas fa-filter"></i> Aplicar Filtros</button>
-                    <button onclick="limparFiltros()" class="btn-secondary"><i class="fas fa-eraser"></i> Limpar</button>
+                    <button onclick="aplicarFiltros()" class="btn-primary"> Aplicar Filtros</button>
+                    <button onclick="limparFiltros()" class="btn-secondary"> Limpar</button>
                 </div>
             </div>
         </div>
 
         <div class="stats-section">
             <div class="stat-card">
-                <h3><i class="fas fa-file-invoice"></i> Total de Orçamentos</h3>
+                <h3> Total de Orçamentos</h3>
                 <div class="stat-number" id="totalOrcamentos">0</div>
             </div>
             
             <div class="stat-card">
-                <h3><i class="fas fa-clock"></i> Orçamentos Pendentes</h3>
+                <h3> Orçamentos Pendentes</h3>
                 <div class="stat-number" id="orcamentosPendentes">0</div>
             </div>
             
             <div class="stat-card">
-                <h3><i class="fas fa-check-circle"></i> Orçamentos Aceitos</h3>
+                <h3> Orçamentos Aceitos</h3>
                 <div class="stat-number" id="orcamentosAceitos">0</div>
             </div>
             
             <div class="stat-card">
-                <h3><i class="fas fa-dollar-sign"></i> Valor Total Pendente</h3>
+                <h3> Valor Total Pendente</h3>
                 <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
             </div>
         </div>
 
         <div class="table-section">
             <div class="table-header">
-                <h2><i class="fas fa-file-invoice-dollar"></i> Gestão de Orçamentos Pós-Consulta</h2>
+                <h2> Gestão de Orçamentos Pós-Consulta</h2>
                 <div class="header-buttons">
-                    <button onclick="adicionarOrcamento()" class="btn-add"><i class="fas fa-file-plus"></i> Novo Orçamento</button>
-                    <button onclick="abrirAgendamentoRapido()" class="btn-calendar"><i class="fas fa-calendar-plus"></i> Agendamento Rápido</button>
-                    <button onclick="exportarOrcamentos()" class="btn-export"><i class="fas fa-file-excel"></i> Exportar Excel</button>
+                    <button onclick="adicionarOrcamento()" class="btn-add"> Novo Orçamento</button>
+                    <button onclick="abrirAgendamentoRapido()" class="btn-calendar"> Agendamento Rápido</button>
+                    <button onclick="exportarOrcamentos()" class="btn-export"> Exportar Excel</button>
                 </div>
             </div>
             
@@ -128,7 +128,7 @@
     <div id="modalNovoOrcamento" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3><i class="fas fa-file-plus"></i> Novo Orçamento Pós-Consulta</h3>
+                <h3> Novo Orçamento Pós-Consulta</h3>
                 <span class="close" onclick="fecharModalOrcamento()">&times;</span>
             </div>
             
@@ -219,10 +219,10 @@
                     
                     <div class="modal-actions">
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Salvar Orçamento
+                             Salvar Orçamento
                         </button>
                         <button type="button" onclick="fecharModalOrcamento()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                     </div>
                 </form>
@@ -234,7 +234,7 @@
     <div id="modalAcoesOrcamento" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3><i class="fas fa-file-invoice-dollar"></i> Ações do Orçamento</h3>
+                <h3> Ações do Orçamento</h3>
                 <span class="close" onclick="fecharModalAcoes()">&times;</span>
             </div>
             
@@ -251,33 +251,33 @@
                 
                 <div class="acoes-grid">
                     <button onclick="gerarPDFOrcamento()" class="btn-action">
-                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                         Gerar PDF
                     </button>
                     
                     <button onclick="imprimirOrcamento()" class="btn-action">
-                        <i class="fas fa-print"></i> Imprimir
+                         Imprimir
                     </button>
                     
                     <button onclick="copiarOrcamento()" class="btn-action">
-                        <i class="fas fa-copy"></i> Copiar Texto
+                         Copiar Texto
                     </button>
                     
                     <button onclick="enviarPorEmail()" class="btn-action">
-                        <i class="fas fa-envelope"></i> Enviar por Email
+                         Enviar por Email
                     </button>
                     
                     <button onclick="marcarComoAceito()" class="btn-action success">
-                        <i class="fas fa-check"></i> Marcar Aceito
+                         Marcar Aceito
                     </button>
                     
                     <button onclick="editarOrcamento()" class="btn-action">
-                        <i class="fas fa-edit"></i> Editar
+                         Editar
                     </button>
                 </div>
                 
                 <div class="modal-actions">
                     <button type="button" onclick="fecharModalAcoes()" class="btn-secondary">
-                        <i class="fas fa-times"></i> Fechar
+                         Fechar
                     </button>
                 </div>
             </div>
@@ -288,7 +288,7 @@
     <div id="modalAgendamentoRapido" class="modal" style="display: none;">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3><i class="fas fa-calendar-plus"></i> Agendamento Rápido</h3>
+                <h3> Agendamento Rápido</h3>
                 <span class="close" onclick="fecharModalAgendamento()">&times;</span>
             </div>
             
@@ -347,13 +347,13 @@
                     
                     <div class="modal-actions">
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-calendar-check"></i> Agendar
+                             Agendar
                         </button>
                         <button type="button" onclick="fecharModalAgendamento()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                         <button type="button" onclick="abrirCalendarioCompleto()" class="btn-calendar">
-                            <i class="fas fa-calendar"></i> Calendário Completo
+                             Calendário Completo
                         </button>
                     </div>
                 </form>

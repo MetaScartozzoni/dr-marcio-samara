@@ -6,7 +6,6 @@
     <title>Gestão de Prontuários - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="card-unificado.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="card-unificado.js"></script>
     <style>
         .prontuarios-container {
@@ -461,11 +460,11 @@
 <body>
     <div class="prontuarios-container">
         <div class="prontuarios-header">
-            <h1><i class="fas fa-folder-medical"></i> Gestão de Prontuários</h1>
+            <h1> Gestão de Prontuários</h1>
             <p>Sistema de busca e organização de prontuários médicos</p>
             <div style="margin-top: 20px;">
                 <button onclick="voltarDashboard()" class="btn-voltar-dashboard">
-                    <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                     Voltar ao Dashboard
                 </button>
             </div>
         </div>
@@ -473,9 +472,9 @@
         <!-- Seção de Busca -->
         <div class="busca-section">
             <div class="busca-header">
-                <h2><i class="fas fa-search"></i> Buscar Prontuário</h2>
+                <h2> Buscar Prontuário</h2>
                 <button onclick="abrirModalNovoProntuario()" class="btn-novo-prontuario">
-                    <i class="fas fa-folder-plus"></i> Novo Prontuário
+                     Novo Prontuário
                 </button>
             </div>
             
@@ -491,7 +490,7 @@
                 </div>
                 
                 <button onclick="limparBusca()" class="btn-buscar" style="background: #dc3545;">
-                    <i class="fas fa-eraser"></i> Limpar
+                     Limpar
                 </button>
             </div>
         </div>
@@ -499,7 +498,7 @@
         <!-- Lista de Prontuários -->
         <div class="prontuarios-lista">
             <div class="lista-header">
-                <h2><i class="fas fa-list"></i> Prontuários Encontrados</h2>
+                <h2> Prontuários Encontrados</h2>
                 <div class="total-prontuarios" id="totalProntuarios">0 prontuários</div>
             </div>
 
@@ -509,7 +508,7 @@
         </div>
 
         <div id="loading" class="loading" style="display: none;">
-            <i class="fas fa-spinner"></i>
+            
             <p>Carregando prontuários...</p>
         </div>
     </div>
@@ -518,7 +517,7 @@
     <div id="modalNovoProntuario" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-folder-plus"></i> Novo Prontuário</h2>
+                <h2> Novo Prontuário</h2>
                 <button class="modal-close" onclick="fecharModalNovoProntuario()">&times;</button>
             </div>
             
@@ -553,10 +552,10 @@
                     
                     <div class="modal-actions">
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Criar Prontuário
+                             Criar Prontuário
                         </button>
                         <button type="button" onclick="fecharModalNovoProntuario()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                     </div>
                 </form>
@@ -710,11 +709,11 @@
             if (prontuariosFiltrados.length === 0) {
                 grid.innerHTML = `
                     <div class="estado-vazio" style="grid-column: 1 / -1;">
-                        <i class="fas fa-folder-open"></i>
+                        
                         <h3>Nenhum prontuário encontrado</h3>
                         <p>Tente ajustar os termos de busca ou crie um novo prontuário</p>
                         <button onclick="abrirModalNovoProntuario()" class="btn-primary">
-                            <i class="fas fa-folder-plus"></i> Criar Primeiro Prontuário
+                             Criar Primeiro Prontuário
                         </button>
                     </div>
                 `;

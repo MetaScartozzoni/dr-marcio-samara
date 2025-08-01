@@ -154,7 +154,7 @@
     <div class="header-video">
         <h1>📹 Videochamada Dr. Marcio</h1>
         <a href="dashboard.html" class="btn-voltar">
-            <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+             Voltar ao Dashboard
         </a>
     </div>
     
@@ -174,16 +174,16 @@
         
         <div class="controls">
             <button class="control-btn" onclick="toggleFullscreen()">
-                <i class="fas fa-expand"></i> Tela Cheia
+                 Tela Cheia
             </button>
             <button class="control-btn warning" onclick="testConnection()">
-                <i class="fas fa-wifi"></i> Testar Conexão
+                 Testar Conexão
             </button>
             <button class="control-btn" onclick="refreshVideo()">
-                <i class="fas fa-sync"></i> Atualizar
+                 Atualizar
             </button>
             <button class="control-btn danger" onclick="endCall()">
-                <i class="fas fa-phone-slash"></i> Encerrar
+                 Encerrar
             </button>
         </div>
     </div>
@@ -227,11 +227,11 @@
         function testConnection() {
             const btn = event.target.closest('.control-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
+            btn.innerHTML = ' Testando...';
             
             // Simular teste de conexão
             setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Conexão OK';
+                btn.innerHTML = ' Conexão OK';
                 btn.style.background = '#2ecc71';
                 
                 setTimeout(() => {
@@ -248,7 +248,7 @@
             // Feedback visual
             const btn = event.target.closest('.control-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+            btn.innerHTML = ' Atualizando...';
             
             setTimeout(() => {
                 btn.innerHTML = originalText;

@@ -6,7 +6,6 @@
     <title>Aguardando Autorização - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta http-equiv="refresh" content="30">
 </head>
 <body>
@@ -14,7 +13,7 @@
         <div class="status-container">
             <div class="header-section">
                 <div class="logo">
-                    <i class="fas fa-clock"></i>
+                    
                     <h1>Aguardando Autorização</h1>
                 </div>
                 <p class="subtitle">Sua conta foi criada com sucesso!</p>
@@ -23,7 +22,7 @@
             <div class="status-card">
                 <div class="status-icon">
                     <div class="icon-container">
-                        <i class="fas fa-hourglass-half"></i>
+                        
                         <div class="pulse-ring"></div>
                     </div>
                 </div>
@@ -38,7 +37,7 @@
                     <div class="timeline">
                         <div class="timeline-item completed">
                             <div class="timeline-icon">
-                                <i class="fas fa-check"></i>
+                                
                             </div>
                             <div class="timeline-content">
                                 <h4>Cadastro Realizado</h4>
@@ -48,7 +47,7 @@
                         
                         <div class="timeline-item completed">
                             <div class="timeline-icon">
-                                <i class="fas fa-check"></i>
+                                
                             </div>
                             <div class="timeline-content">
                                 <h4>Email Verificado</h4>
@@ -58,7 +57,7 @@
                         
                         <div class="timeline-item completed">
                             <div class="timeline-icon">
-                                <i class="fas fa-check"></i>
+                                
                             </div>
                             <div class="timeline-content">
                                 <h4>Senha Criada</h4>
@@ -68,7 +67,7 @@
                         
                         <div class="timeline-item current">
                             <div class="timeline-icon">
-                                <i class="fas fa-clock"></i>
+                                
                             </div>
                             <div class="timeline-content">
                                 <h4>Aguardando Autorização</h4>
@@ -78,7 +77,7 @@
                         
                         <div class="timeline-item">
                             <div class="timeline-icon">
-                                <i class="fas fa-user-check"></i>
+                                
                             </div>
                             <div class="timeline-content">
                                 <h4>Conta Autorizada</h4>
@@ -92,7 +91,7 @@
             <div class="info-cards">
                 <div class="info-card">
                     <div class="card-icon">
-                        <i class="fas fa-bell"></i>
+                        
                     </div>
                     <div class="card-content">
                         <h4>Notificação Automática</h4>
@@ -102,7 +101,7 @@
                 
                 <div class="info-card">
                     <div class="card-icon">
-                        <i class="fas fa-shield-alt"></i>
+                        
                     </div>
                     <div class="card-content">
                         <h4>Processo Seguro</h4>
@@ -112,7 +111,7 @@
                 
                 <div class="info-card">
                     <div class="card-icon">
-                        <i class="fas fa-headset"></i>
+                        
                     </div>
                     <div class="card-content">
                         <h4>Suporte Disponível</h4>
@@ -123,18 +122,18 @@
             
             <div class="action-section">
                 <div class="refresh-info">
-                    <i class="fas fa-sync-alt"></i>
+                    
                     <span>Esta página será atualizada automaticamente a cada 30 segundos</span>
                 </div>
                 
                 <div class="action-buttons">
                     <button id="btnVerificarStatus" class="btn-primary">
-                        <i class="fas fa-sync"></i>
+                        
                         Verificar Status
                     </button>
                     
                     <button id="btnTentarLogin" class="btn-secondary">
-                        <i class="fas fa-sign-in-alt"></i>
+                        
                         Tentar Login
                     </button>
                 </div>
@@ -146,23 +145,23 @@
                 <h3>Precisa de Ajuda?</h3>
                 <div class="contact-options">
                     <a href="tel:11999999999" class="contact-option">
-                        <i class="fas fa-phone"></i>
+                        
                         <span>(11) 99999-9999</span>
                     </a>
                     
                     <a href="mailto:contato@drmarcio.com.br" class="contact-option">
-                        <i class="fas fa-envelope"></i>
+                        
                         <span>contato@drmarcio.com.br</span>
                     </a>
                     
                     <a href="https://wa.me/5511999999999" class="contact-option" target="_blank">
-                        <i class="fab fa-whatsapp"></i>
+                        
                         <span>WhatsApp</span>
                     </a>
                 </div>
                 
                 <p class="contact-note">
-                    <i class="fas fa-info-circle"></i>
+                    
                     Horário de atendimento: Segunda a Sexta, 8h às 18h
                 </p>
             </div>
@@ -197,7 +196,7 @@
             async verificarStatus(showMessage = true) {
                 if (showMessage) {
                     this.btnVerificarStatus.disabled = true;
-                    this.btnVerificarStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                    this.btnVerificarStatus.innerHTML = ' Verificando...';
                 }
 
                 try {
@@ -254,7 +253,7 @@
                 } finally {
                     if (showMessage) {
                         this.btnVerificarStatus.disabled = false;
-                        this.btnVerificarStatus.innerHTML = '<i class="fas fa-sync"></i> Verificar Status';
+                        this.btnVerificarStatus.innerHTML = ' Verificar Status';
                     }
                 }
             }
@@ -272,7 +271,7 @@
             showMessage(text, type = 'info') {
                 this.statusMessage.className = `message ${type}`;
                 this.statusMessage.innerHTML = `
-                    <i class="fas ${this.getIconForType(type)}"></i>
+                    
                     <span>${text}</span>
                 `;
                 this.statusMessage.style.display = 'block';

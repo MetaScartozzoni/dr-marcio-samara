@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jornada do Paciente - Portal Dr. Marcio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/card-unificado.css">
     <style>
         * {
@@ -561,12 +560,12 @@
         <div class="header fade-in">
             <div class="header-content">
                 <div class="header-left">
-                    <h1><i class="fas fa-route"></i> Jornada do Paciente</h1>
+                    <h1> Jornada do Paciente</h1>
                     <p>Sistema completo de gestão, prazos e acompanhamento médico</p>
                 </div>
                 <div class="header-right">
                     <a href="dashboard.html" class="btn-voltar">
-                        <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+                         Voltar ao Dashboard
                     </a>
                 </div>
             </div>
@@ -579,11 +578,11 @@
                 Sistema Online - Monitoramento Ativo
             </div>
             <div class="status-indicator">
-                <i class="fas fa-clock"></i>
+                
                 Última verificação: <span id="ultimaVerificacao">--:--</span>
             </div>
             <div class="status-indicator">
-                <i class="fas fa-bell"></i>
+                
                 <span id="totalNotificacoes">0</span> notificações pendentes
             </div>
         </div>
@@ -591,7 +590,7 @@
         <!-- Estatísticas -->
         <div class="stats-section fade-in">
             <h3 style="margin-bottom: 25px; color: #2c3e50; font-weight: 700;">
-                <i class="fas fa-chart-bar"></i> Estatísticas da Jornada
+                 Estatísticas da Jornada
             </h3>
             <div class="stats-grid">
                 <div class="stat-card">
@@ -616,29 +615,29 @@
         <!-- Toolbar de Controles -->
         <div class="toolbar slide-in">
             <button class="btn-config" onclick="abrirConfiguracaoJornada()">
-                <i class="fas fa-cog"></i> Configurar Prazos
+                 Configurar Prazos
             </button>
             <button class="btn-notificacoes" onclick="abrirPainelNotificacoes()">
-                <i class="fas fa-bell"></i> Painel Notificações
+                 Painel Notificações
             </button>
             <button class="btn-verificar" onclick="executarVerificacaoPrazos()">
-                <i class="fas fa-clock"></i> Verificar Prazos
+                 Verificar Prazos
             </button>
             <button onclick="adicionarNovoPaciente()">
-                <i class="fas fa-user-plus"></i> Novo Paciente
+                 Novo Paciente
             </button>
             <button onclick="exportarRelatorio()">
-                <i class="fas fa-file-export"></i> Exportar Relatório
+                 Exportar Relatório
             </button>
             <button onclick="atualizarDados()">
-                <i class="fas fa-sync"></i> Atualizar
+                 Atualizar
             </button>
         </div>
 
         <!-- Grid de Cards da Jornada -->
         <div id="cardsJornadaPacientes" class="cards-container">
             <div class="loading">
-                <i class="fas fa-spinner"></i>
+                
                 <div>Carregando jornadas dos pacientes...</div>
             </div>
         </div>
@@ -836,8 +835,8 @@
                     <div class="card-header-jornada">
                         <div class="paciente-info-jornada">
                             <h4>${jornada.paciente.nome}</h4>
-                            <p><i class="fas fa-phone"></i> ${jornada.paciente.telefone}</p>
-                            <p><i class="fas fa-envelope"></i> ${jornada.paciente.email}</p>
+                            <p> ${jornada.paciente.telefone}</p>
+                            <p> ${jornada.paciente.email}</p>
                         </div>
                         <div class="status-jornada ${jornada.etapaAtual}">
                             ${statusTexto}
@@ -848,13 +847,13 @@
                         <div class="prazo-label">Próxima Ação:</div>
                         <div class="prazo-tempo ${classPrioridade}">${jornada.proximaAcao}</div>
                         <div style="margin-top: 5px; font-size: 11px; color: #666;">
-                            <i class="fas fa-clock"></i> ${tempoRestante}
+                             ${tempoRestante}
                         </div>
                     </div>
 
                     ${jornada.observacoes ? `
                         <div class="observacoes-jornada">
-                            <h6><i class="fas fa-sticky-note"></i> Observações Importantes:</h6>
+                            <h6> Observações Importantes:</h6>
                             <p>${jornada.observacoes}</p>
                         </div>
                     ` : ''}
@@ -906,41 +905,41 @@
             const acoes = {
                 'confirmar-consulta': `
                     <button class="btn-acao confirmar" onclick="confirmarConsulta(${jornada.id})">
-                        <i class="fas fa-check"></i> Confirmar
+                         Confirmar
                     </button>
                     <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
-                        <i class="fas fa-history"></i> Histórico
+                         Histórico
                     </button>
                 `,
                 'enviar-orcamento': `
                     <button class="btn-acao enviar" onclick="enviarOrcamento(${jornada.id})">
-                        <i class="fas fa-paper-plane"></i> Enviar
+                         Enviar
                     </button>
                     <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
-                        <i class="fas fa-history"></i> Histórico
+                         Histórico
                     </button>
                 `,
                 'acompanhar-resposta': `
                     <button class="btn-acao acompanhar" onclick="acompanharResposta(${jornada.id})">
-                        <i class="fas fa-eye"></i> Acompanhar
+                         Acompanhar
                     </button>
                     <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
-                        <i class="fas fa-history"></i> Histórico
+                         Histórico
                     </button>
                 `,
                 'agendar-cirurgia': `
                     <button class="btn-acao agendar" onclick="agendarCirurgia(${jornada.id})">
-                        <i class="fas fa-calendar-plus"></i> Agendar
+                         Agendar
                     </button>
                     <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
-                        <i class="fas fa-history"></i> Histórico
+                         Histórico
                     </button>
                 `
             };
             
             return acoes[jornada.etapaAtual] || `
                 <button class="btn-acao historico" onclick="verHistorico(${jornada.id})">
-                    <i class="fas fa-history"></i> Histórico
+                     Histórico
                 </button>
             `;
         }

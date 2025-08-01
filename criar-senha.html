@@ -6,32 +6,31 @@
     <title>Criar Senha - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="form-container">
             <div class="header-section">
                 <div class="logo">
-                    <i class="fas fa-key"></i>
+                    
                     <h1>Criar Senha</h1>
                 </div>
                 <p class="subtitle">Crie uma senha segura para sua conta</p>
                 <div class="progress-steps">
                     <div class="step completed">
-                        <i class="fas fa-envelope"></i>
+                        
                         <span>Email</span>
                     </div>
                     <div class="step completed">
-                        <i class="fas fa-check"></i>
+                        
                         <span>Verificação</span>
                     </div>
                     <div class="step active">
-                        <i class="fas fa-key"></i>
+                        
                         <span>Senha</span>
                     </div>
                     <div class="step">
-                        <i class="fas fa-clock"></i>
+                        
                         <span>Autorização</span>
                     </div>
                 </div>
@@ -40,7 +39,7 @@
             <form id="criarSenhaForm" class="auth-form">
                 <div class="input-group">
                     <label for="email">
-                        <i class="fas fa-envelope"></i>
+                        
                         Email
                     </label>
                     <input type="email" id="email" name="email" readonly>
@@ -48,7 +47,7 @@
                 
                 <div class="input-group">
                     <label for="senha">
-                        <i class="fas fa-lock"></i>
+                        
                         Nova Senha *
                     </label>
                     <div class="password-input-container">
@@ -56,7 +55,7 @@
                                placeholder="Digite sua senha"
                                minlength="6">
                         <button type="button" class="toggle-password" data-target="senha">
-                            <i class="fas fa-eye"></i>
+                            
                         </button>
                     </div>
                     <div class="password-strength">
@@ -70,7 +69,7 @@
                 
                 <div class="input-group">
                     <label for="confirmarSenha">
-                        <i class="fas fa-lock-open"></i>
+                        
                         Confirmar Senha *
                     </label>
                     <div class="password-input-container">
@@ -78,42 +77,42 @@
                                placeholder="Confirme sua senha"
                                minlength="6">
                         <button type="button" class="toggle-password" data-target="confirmarSenha">
-                            <i class="fas fa-eye"></i>
+                            
                         </button>
                     </div>
                     <div class="input-feedback"></div>
                 </div>
                 
                 <div class="password-requirements">
-                    <h4><i class="fas fa-shield-alt"></i> Requisitos da Senha:</h4>
+                    <h4> Requisitos da Senha:</h4>
                     <ul>
                         <li id="req-length">
-                            <i class="fas fa-times"></i>
+                            
                             Pelo menos 6 caracteres
                         </li>
                         <li id="req-letter">
-                            <i class="fas fa-times"></i>
+                            
                             Pelo menos uma letra
                         </li>
                         <li id="req-number">
-                            <i class="fas fa-times"></i>
+                            
                             Pelo menos um número
                         </li>
                         <li id="req-match">
-                            <i class="fas fa-times"></i>
+                            
                             Senhas coincidem
                         </li>
                     </ul>
                 </div>
                 
                 <button type="submit" class="btn-primary" id="btnCriarSenha">
-                    <i class="fas fa-save"></i>
+                    
                     Finalizar Cadastro
                 </button>
             </form>
             
             <div id="loading" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i>
+                
                 Criando conta...
             </div>
             
@@ -121,7 +120,7 @@
             
             <div class="next-steps">
                 <div class="info-box">
-                    <i class="fas fa-info-circle"></i>
+                    
                     <div>
                         <h4>Próximos Passos:</h4>
                         <ol>
@@ -137,7 +136,7 @@
             <div class="auth-links">
                 <p>
                     <a href="login.html" class="link">
-                        <i class="fas fa-sign-in-alt"></i>
+                        
                         Já tem uma conta autorizada? Fazer login
                     </a>
                 </p>
@@ -390,16 +389,16 @@
                 this.btnCriarSenha.disabled = show;
                 
                 if (show) {
-                    this.btnCriarSenha.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+                    this.btnCriarSenha.innerHTML = ' Criando...';
                 } else {
-                    this.btnCriarSenha.innerHTML = '<i class="fas fa-save"></i> Finalizar Cadastro';
+                    this.btnCriarSenha.innerHTML = ' Finalizar Cadastro';
                 }
             }
 
             showSuccess(message) {
                 this.message.className = 'message success';
                 this.message.innerHTML = `
-                    <i class="fas fa-check-circle"></i>
+                    
                     <div>
                         <strong>Cadastro Concluído!</strong>
                         <p>${message}</p>
@@ -412,7 +411,7 @@
             showError(message) {
                 this.message.className = 'message error';
                 this.message.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
+                    
                     <div>
                         <strong>Erro!</strong>
                         <p>${message}</p>

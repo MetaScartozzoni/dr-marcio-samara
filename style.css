@@ -1,3 +1,6 @@
+/* Importação de fontes e reset */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -5,12 +8,80 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* ==============================================
+   EFEITOS BLUR GLOBAIS PARA CARDS
+   ============================================== */
+
+/* Container base para qualquer grid de cards */
+.cards-container, .stats-grid, .cards-grid, .grid-container {
+    position: relative;
+}
+
+/* Efeito blur quando hover em container de cards */
+.cards-container:hover .card:not(:hover),
+.cards-container:hover .status-card:not(:hover),
+.cards-container:hover .redirect-card:not(:hover),
+.cards-container:hover .paciente-card:not(:hover) {
+    filter: blur(3px);
+    opacity: 0.6;
+    transform: scale(0.96);
+}
+
+/* Cards base com transições suaves */
+.card, .status-card, .redirect-card, .paciente-card, .setup-card, .consent-card {
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efeito hover aprimorado para todos os cards */
+.card:hover, .status-card:hover, .redirect-card:hover, .paciente-card:hover, .setup-card:hover, .consent-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+    filter: blur(0px) !important;
+    opacity: 1 !important;
+    z-index: 10;
+}
+
+/* Efeito shimmer global para cards */
+.card::after, .status-card::after, .redirect-card::after, .paciente-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.card:hover::after, .status-card:hover::after, .redirect-card:hover::after, .paciente-card:hover::after {
+    animation: globalShimmer 0.8s ease-in-out;
+}
+
+@keyframes globalShimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
 }
 
 .container {

@@ -2,7 +2,7 @@
 /* Arquivo: card-unificado.css */
 
 /* ==============================================
-   CARD UNIFICADO BASE
+   CARD UNIFICADO BASE COM EFEITOS BLUR
    ============================================== */
 
 .card-paciente.unified {
@@ -11,15 +11,65 @@
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     border-left: 5px solid var(--status-color);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Container para efeito blur entre cards */
+.cards-container {
+    position: relative;
+}
+
+.cards-container:hover .card-paciente.unified:not(:hover) {
+    filter: blur(3px);
+    opacity: 0.7;
+    transform: scale(0.95);
 }
 
 .card-paciente.unified:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    filter: blur(0px) !important;
+    opacity: 1 !important;
+    z-index: 10;
+    border-left-width: 8px;
+}
+
+/* Efeito de brilho no hover */
+.card-paciente.unified::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.card-paciente.unified:hover::after {
+    animation: shimmer 0.8s ease-in-out;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
 }
 
 .card-paciente.unified::before {
@@ -31,6 +81,13 @@
     height: 3px;
     background: linear-gradient(90deg, var(--status-color), transparent);
     opacity: 0.3;
+    transition: all 0.3s ease;
+}
+
+.card-paciente.unified:hover::before {
+    height: 5px;
+    opacity: 0.8;
+    background: linear-gradient(90deg, var(--status-color), var(--status-color-light, #667eea));
 }
 
 /* ==============================================

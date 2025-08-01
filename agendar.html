@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar Consulta - Portal Dr. Marcio</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @keyframes slideIn {
             from {
@@ -629,20 +628,20 @@
     <div class="container">
         <div class="header">
             <button class="btn-voltar" onclick="voltarDashboard()">
-                <i class="fas fa-arrow-left"></i> Voltar
+                 Voltar
             </button>
-            <h1><i class="fas fa-calendar-check"></i> Sistema de Agendamento</h1>
+            <h1> Sistema de Agendamento</h1>
             <p>Agende suas consultas e procedimentos de forma rápida e prática</p>
         </div>
 
         <div class="toolbar">
             <div class="calendar-nav">
                 <button class="nav-btn" onclick="previousMonth()">
-                    <i class="fas fa-chevron-left"></i> Anterior
+                     Anterior
                 </button>
                 <span class="month-year" id="currentMonth">Carregando...</span>
                 <button class="nav-btn" onclick="nextMonth()">
-                    Próximo <i class="fas fa-chevron-right"></i>
+                    Próximo 
                 </button>
             </div>
             
@@ -686,7 +685,7 @@
             <!-- Grade do calendário -->
             <div class="calendar-grid" id="calendarGrid">
                 <div class="loading" style="grid-column: 1 / -1;">
-                    <i class="fas fa-spinner fa-spin"></i> Carregando calendário...
+                     Carregando calendário...
                 </div>
             </div>
 
@@ -750,7 +749,7 @@
                     <!-- Seção de dados do paciente -->
                     <div class="form-section">
                         <h4 style="color: #2c3e50; margin: 20px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">
-                            <i class="fas fa-user"></i> Dados do Paciente
+                             Dados do Paciente
                         </h4>
                         
                         <div class="form-row">
@@ -783,7 +782,7 @@
                         <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                             <input type="checkbox" id="criarCadernoAutomatico" name="criarCadernoAutomatico" checked>
                             <span style="color: #2c3e50;">
-                                <i class="fas fa-book-medical"></i> 
+                                 
                                 Criar Caderno Digital automaticamente após o agendamento
                             </span>
                         </label>
@@ -1603,16 +1602,16 @@
                 <div style="display: flex; gap: 10px;">
                     <button onclick="preencherDadosExistentes(${JSON.stringify(paciente).replace(/"/g, '&quot;')}); removerNotificacaoPaciente();" 
                             style="background: #28a745; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px;">
-                        <i class="fas fa-check"></i> Usar Dados
+                         Usar Dados
                     </button>
                     <button onclick="removerNotificacaoPaciente()" 
                             style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px;">
-                        <i class="fas fa-times"></i> Fechar
+                         Fechar
                     </button>
                 </div>
                 <button onclick="abrirCadernoExistente(${JSON.stringify(paciente).replace(/"/g, '&quot;')})" 
                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 12px; width: 100%; margin-top: 10px;">
-                    <i class="fas fa-book-medical"></i> Abrir Caderno Digital
+                     Abrir Caderno Digital
                 </button>
             `;
             

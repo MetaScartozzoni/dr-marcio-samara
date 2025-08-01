@@ -6,19 +6,18 @@
     <title>Verificar Email - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="form-container">
             <div class="header-section">
                 <div class="logo">
-                    <i class="fas fa-envelope-circle-check"></i>
+                    
                     <h1>Verificar Email</h1>
                 </div>
                 <p class="subtitle">Insira o código de 6 dígitos enviado para seu email</p>
                 <div class="email-info">
-                    <i class="fas fa-envelope"></i>
+                    
                     <span id="emailDisplay"></span>
                 </div>
             </div>
@@ -26,7 +25,7 @@
             <form id="verificarCodigoForm" class="auth-form">
                 <div class="codigo-section">
                     <label for="codigo">
-                        <i class="fas fa-key"></i>
+                        
                         Código de Verificação
                     </label>
                     <div class="codigo-input-container">
@@ -40,7 +39,7 @@
                                pattern="[0-9]{6}"
                                required>
                         <div class="codigo-timer">
-                            <i class="fas fa-clock"></i>
+                            
                             <span id="timer">5:00</span>
                         </div>
                     </div>
@@ -49,26 +48,26 @@
                 
                 <div class="action-buttons">
                     <button type="submit" class="btn-primary" id="btnVerificar">
-                        <i class="fas fa-check-circle"></i>
+                        
                         Verificar Código
                     </button>
                     
                     <button type="button" class="btn-secondary" id="btnReenviar">
-                        <i class="fas fa-redo"></i>
+                        
                         Reenviar Código
                     </button>
                 </div>
             </form>
             
             <div id="loading" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i>
+                
                 Verificando código...
             </div>
             
             <div id="message" class="message"></div>
             
             <div class="info-box">
-                <i class="fas fa-info-circle"></i>
+                
                 <div>
                     <h4>Não recebeu o código?</h4>
                     <ul>
@@ -83,13 +82,13 @@
             <div class="auth-links">
                 <p>
                     <a href="cadastro-funcionario.html" class="link">
-                        <i class="fas fa-arrow-left"></i>
+                        
                         Voltar ao cadastro
                     </a>
                 </p>
                 <p>
                     <a href="login.html" class="link">
-                        <i class="fas fa-sign-in-alt"></i>
+                        
                         Já tem conta? Fazer login
                     </a>
                 </p>
@@ -209,7 +208,7 @@
 
             async reenviarCodigo() {
                 this.btnReenviar.disabled = true;
-                this.btnReenviar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reenviando...';
+                this.btnReenviar.innerHTML = ' Reenviando...';
 
                 try {
                     const response = await fetch('/api/auth/reenviar-codigo', {
@@ -238,7 +237,7 @@
                     this.showError('Erro de conexão. Tente novamente.');
                 } finally {
                     this.btnReenviar.disabled = false;
-                    this.btnReenviar.innerHTML = '<i class="fas fa-redo"></i> Reenviar Código';
+                    this.btnReenviar.innerHTML = ' Reenviar Código';
                 }
             }
 
@@ -286,16 +285,16 @@
                 this.btnVerificar.disabled = show;
                 
                 if (show) {
-                    this.btnVerificar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+                    this.btnVerificar.innerHTML = ' Verificando...';
                 } else {
-                    this.btnVerificar.innerHTML = '<i class="fas fa-check-circle"></i> Verificar Código';
+                    this.btnVerificar.innerHTML = ' Verificar Código';
                 }
             }
 
             showSuccess(message) {
                 this.message.className = 'message success';
                 this.message.innerHTML = `
-                    <i class="fas fa-check-circle"></i>
+                    
                     <div>
                         <strong>Sucesso!</strong>
                         <p>${message}</p>
@@ -308,7 +307,7 @@
             showError(message) {
                 this.message.className = 'message error';
                 this.message.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
+                    
                     <div>
                         <strong>Erro!</strong>
                         <p>${message}</p>
@@ -320,7 +319,7 @@
             showWarning(message) {
                 this.message.className = 'message warning';
                 this.message.innerHTML = `
-                    <i class="fas fa-clock"></i>
+                    
                     <div>
                         <strong>Atenção!</strong>
                         <p>${message}</p>

@@ -1158,7 +1158,7 @@
             
             // Preencher informações do paciente no modal
             document.getElementById('pacienteInfoEvolucao').innerHTML = `
-                <h4><i class="fas fa-user"></i> ${paciente.nome}</h4>
+                <h4> ${paciente.nome}</h4>
                 <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
                 <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
             `;
@@ -1181,7 +1181,7 @@
             
             // Preencher informações do paciente no modal
             document.getElementById('pacienteInfoDetalhes').innerHTML = `
-                <h4><i class="fas fa-user"></i> ${paciente.nome}</h4>
+                <h4> ${paciente.nome}</h4>
                 <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
                 <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
             `;
@@ -1369,7 +1369,7 @@
     <div id="modalEvolucao" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-notes-medical"></i> Nova Evolução Médica</h2>
+                <h2> Nova Evolução Médica</h2>
                 <button class="close-btn" onclick="fecharModal('modalEvolucao')">&times;</button>
             </div>
             <div class="modal-body">
@@ -1405,10 +1405,10 @@
 
                 <div class="modal-actions">
                     <button class="btn-modal btn-primary" onclick="salvarEvolucao()">
-                        <i class="fas fa-save"></i> Salvar Evolução
+                         Salvar Evolução
                     </button>
                     <button class="btn-modal btn-success" onclick="salvarEAbrirCaderno()">
-                        <i class="fas fa-book-medical"></i> Salvar e Abrir Caderno
+                         Salvar e Abrir Caderno
                     </button>
                     <button class="btn-modal btn-secondary" onclick="fecharModal('modalEvolucao')">
                         Cancelar
@@ -1422,7 +1422,7 @@
     <div id="modalDetalhes" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-comments"></i> Comunicação Interna</h2>
+                <h2> Comunicação Interna</h2>
                 <button class="close-btn" onclick="fecharModal('modalDetalhes')">&times;</button>
             </div>
             <div class="modal-body">
@@ -1432,10 +1432,10 @@
 
                 <div style="display: flex; gap: 15px; margin-bottom: 20px;">
                     <button class="btn-modal btn-primary" onclick="mostrarNovaComunicacao()">
-                        <i class="fas fa-plus"></i> Nova Comunicação
+                         Nova Comunicação
                     </button>
                     <button class="btn-modal btn-success" onclick="mostrarHistorico()">
-                        <i class="fas fa-history"></i> Histórico
+                         Histórico
                     </button>
                 </div>
 
@@ -1480,7 +1480,7 @@
 
                     <div class="modal-actions">
                         <button class="btn-modal btn-primary" onclick="salvarComunicacao()">
-                            <i class="fas fa-paper-plane"></i> Enviar
+                             Enviar
                         </button>
                         <button class="btn-modal btn-secondary" onclick="cancelarComunicacao()">
                             Cancelar

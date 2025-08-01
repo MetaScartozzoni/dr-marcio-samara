@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caderno Digital do Paciente - Dr. Marcio Scartozzoni</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="effects.css">
     <style>
         * {
             margin: 0;
@@ -598,6 +598,175 @@
         .btn-download:hover {
             background: #229954;
             transform: translateY(-2px);
+        }
+
+        /* Estilos para os botões de ação do orçamento */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            flex-wrap: wrap;
+        }
+
+        .form-actions .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .form-actions .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .form-actions .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+        }
+
+        .form-actions .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .form-actions .btn-success:hover {
+            background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        .form-actions .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .form-actions .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62 0%, #3d4248 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Responsividade para botões */
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions .btn {
+                flex: none;
+                width: 100%;
+            }
+        }
+
+        /* ==============================================
+           EFEITOS BLUR PARA CADERNO DIGITAL
+           ============================================== */
+
+        /* Container para documentos */
+        .document-library:hover .document-item:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.6;
+            transform: scale(0.96);
+        }
+
+        .document-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .document-item:hover {
+            transform: translateY(-5px) scale(1.02) !important;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeitos para marcos principais */
+        #marcosPrincipais:hover .marco-item:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.7;
+            transform: scale(0.96);
+        }
+
+        .marco-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .marco-item:hover {
+            transform: translateY(-6px) scale(1.03) !important;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeitos para agendamentos recentes */
+        #agendamentosRecentes:hover .agendamento-recente:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.7;
+            transform: scale(0.96);
+        }
+
+        .agendamento-recente {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .agendamento-recente:hover {
+            transform: translateY(-4px) scale(1.02) !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeito shimmer para elementos do caderno */
+        .document-item::after, .marco-item::after, .agendamento-recente::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .document-item:hover::after, .marco-item:hover::after, .agendamento-recente:hover::after {
+            animation: cadernoShimmer 0.8s ease-in-out;
+        }
+
+        @keyframes cadernoShimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
         }
 
         .document-info h4 {
@@ -2044,12 +2213,12 @@
             <div class="header-content">
                 <div class="header-left">
                     <button class="btn-voltar" onclick="voltarProntuarios()">
-                        <i class="fas fa-arrow-left"></i> Voltar aos Prontuários
+                         Voltar aos Prontuários
                     </button>
                 </div>
                 
                 <div class="header-center">
-                    <h1><i class="fas fa-book-medical"></i> Caderno Digital do Paciente</h1>
+                    <h1> Caderno Digital do Paciente</h1>
                     <p>Sistema integrado de documentação médica especializada</p>
                 </div>
                 
@@ -2070,7 +2239,7 @@
         <div class="toolbar">
             <div class="toolbar-left">
                 <button onclick="editarDadosPaciente()" style="background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%);">
-                    <i class="fas fa-user-edit"></i> Editar Dados
+                     Editar Dados
                 </button>
                 
                 <input type="date" id="dataFiltro" placeholder="Filtrar por data" style="
@@ -2085,33 +2254,33 @@
                 ">
                 
                 <button onclick="novoDocumento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
-                    <i class="fas fa-plus"></i> Novo Documento
+                     Novo Documento
                 </button>
                 
                 <button onclick="sincronizar()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                    <i class="fas fa-sync"></i> Sincronizar
+                     Sincronizar
                 </button>
             </div>
 
             <!-- Ferramentas de Desenho e Edição -->
             <div class="drawing-tools">
                 <button class="tool-btn ruler-tool" onclick="toggleRuler()" title="Régua de Medidas">
-                    <i class="fas fa-ruler"></i>
+                    
                 </button>
                 <button class="tool-btn" onclick="toggleDrawing()" title="Desenhar/Rabiscar">
-                    <i class="fas fa-pencil-alt"></i>
+                    
                 </button>
                 <button class="tool-btn" onclick="toggleEraser()" title="Borracha">
-                    <i class="fas fa-eraser"></i>
+                    
                 </button>
                 <button class="tool-btn" onclick="openPhotoEditor()" title="Editor de Fotos">
-                    <i class="fas fa-image"></i>
+                    
                 </button>
                 <button class="tool-btn" onclick="addTextBox()" title="Adicionar Texto">
-                    <i class="fas fa-font"></i>
+                    
                 </button>
                 <button class="tool-btn" onclick="clearCanvas()" title="Limpar Desenhos">
-                    <i class="fas fa-trash"></i>
+                    
                 </button>
             </div>
         </div>
@@ -2119,43 +2288,43 @@
         <div class="main-content">
             <div class="sidebar">
                 <!-- Seção de Ações Rápidas - MOVIDA PARA O TOPO -->
-                <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                <h3> Ações Rápidas</h3>
                 <div class="acoes-rapidas" style="margin-bottom: 30px;">
                     <button onclick="abrirFichaAtendimento()" class="btn-acao" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); margin-bottom: 10px;">
-                        <i class="fas fa-clipboard-check"></i> Ficha de Atendimento
+                         Ficha de Atendimento
                     </button>
                     
                     <button onclick="abrirEvolucao()" class="btn-acao" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); margin-bottom: 10px;">
-                        <i class="fas fa-chart-line"></i> Evolução Paciente
+                         Evolução Paciente
                     </button>
                     
                     <button onclick="abrirDocumento('orcamento')" class="btn-acao" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); margin-bottom: 10px;">
-                        <i class="fas fa-calculator"></i> Orçamento
+                         Orçamento
                     </button>
                     
                     <button onclick="gerarReceita()" class="btn-acao" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-bottom: 10px;">
-                        <i class="fas fa-prescription"></i> Gerar Receita
+                         Gerar Receita
                     </button>
                     
                     <button onclick="gerarExames()" class="btn-acao" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); margin-bottom: 10px;">
-                        <i class="fas fa-vial"></i> Gerar Exames
+                         Gerar Exames
                     </button>
                     
                     <button onclick="agendarConsultaPaciente()" class="btn-acao" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); margin-bottom: 10px;">
-                        <i class="fas fa-calendar-plus"></i> Agendar Consulta
+                         Agendar Consulta
                     </button>
                     
                     <button onclick="capturarFoto()" class="btn-acao" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); margin-bottom: 10px;">
-                        <i class="fas fa-camera"></i> Tirar Foto
+                         Tirar Foto
                     </button>
                 </div>
                 
-                <h3><i class="fas fa-folder"></i> Documentos</h3>
+                <h3> Documentos</h3>
                 <ul class="document-list" style="margin-bottom: 30px;">
                     <li class="document-item active" onclick="abrirDocumento('orcamento')">
                         <div class="document-header">
                             <div class="document-icon orcamento">
-                                <i class="fas fa-calculator"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Orçamento Cirúrgico</h4>
@@ -2167,7 +2336,7 @@
                     <li class="document-item" onclick="abrirDocumento('cadastro')">
                         <div class="document-header">
                             <div class="document-icon cadastro">
-                                <i class="fas fa-user-plus"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Dados do Paciente</h4>
@@ -2179,7 +2348,7 @@
                     <li class="document-item" onclick="abrirDocumento('jornada')">
                         <div class="document-header">
                             <div class="document-icon jornada">
-                                <i class="fas fa-route"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Caderno de Jornada</h4>
@@ -2191,7 +2360,7 @@
                     <li class="document-item" onclick="abrirDocumento('acompanhamento')">
                         <div class="document-header">
                             <div class="document-icon acompanhamento">
-                                <i class="fas fa-heartbeat"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Acompanhamento</h4>
@@ -2203,7 +2372,7 @@
                     <li class="document-item" onclick="abrirDocumento('receita')">
                         <div class="document-header">
                             <div class="document-icon receita">
-                                <i class="fas fa-prescription-bottle-alt"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Receitas</h4>
@@ -2215,7 +2384,7 @@
                     <li class="document-item" onclick="abrirDocumento('exames')">
                         <div class="document-header">
                             <div class="document-icon exames">
-                                <i class="fas fa-vials"></i>
+                                
                             </div>
                             <div class="document-info">
                                 <h4>Pedido de Exames</h4>
@@ -2226,14 +2395,14 @@
                 </ul>
                 
                 <!-- Seção de Histórico de Agendamentos - MOVIDA PARA BAIXO -->
-                <h3><i class="fas fa-calendar-alt"></i> Histórico & Marcos</h3>
+                <h3> Histórico & Marcos</h3>
                 <div class="historico-container">
                     <div class="marcos-principais" id="marcosPrincipais">
                         <!-- Marcos serão carregados aqui -->
                     </div>
                     <div class="agendamentos-recentes">
                         <h4 style="color: #6c757d; font-size: 14px; margin: 15px 0 10px 0;">
-                            <i class="fas fa-clock"></i> Consultas Recentes
+                             Consultas Recentes
                         </h4>
                         <div id="agendamentosRecentes">
                             <!-- Agendamentos serão carregados aqui -->
@@ -2245,7 +2414,7 @@
             <div class="canvas-area">
                 <!-- Placeholder inicial -->
                 <div class="canvas-placeholder" id="placeholder">
-                    <i class="fas fa-book-open"></i>
+                    
                     <h3>Selecione um documento para começar</h3>
                     <p>Escolha um tipo de documento no menu lateral</p>
                 </div>
@@ -2253,7 +2422,7 @@
                 <!-- Formulário de Orçamento -->
                 <div class="document-form" id="orcamento-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-calculator"></i> Orçamento Cirúrgico</h3>
+                        <h3> Orçamento Cirúrgico</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome Completo</label>
@@ -2309,12 +2478,24 @@
                             <label>Modelo de Orçamento</label>
                             <div class="document-actions">
                                 <button type="button" onclick="visualizarOrcamentoModelo()" class="btn-modelo">
-                                    <i class="fas fa-file-pdf"></i> Ver Modelo PDF
+                                     Ver Modelo PDF
                                 </button>
                                 <button type="button" onclick="baixarOrcamentoModelo()" class="btn-download">
-                                    <i class="fas fa-download"></i> Baixar Modelo
+                                     Baixar Modelo
                                 </button>
                             </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" onclick="gerarOrcamento()" class="btn btn-primary">
+                                 Gerar Orçamento
+                            </button>
+                            <button type="button" onclick="enviarParaGestao()" class="btn btn-success">
+                                 Enviar para Gestão
+                            </button>
+                            <button type="button" onclick="salvarRascunho()" class="btn btn-secondary">
+                                 Salvar Rascunho
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -2322,7 +2503,7 @@
                 <!-- Formulário de Cadastro -->
                 <div class="document-form" id="cadastro-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-user-plus"></i> Dados do Paciente</h3>
+                        <h3> Dados do Paciente</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Nome Completo</label>
@@ -2360,23 +2541,23 @@
                 <!-- Caderno de Jornada -->
                 <div class="document-form" id="jornada-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-route"></i> Caderno de Jornada - Acompanhamento Evolutivo</h3>
+                        <h3> Caderno de Jornada - Acompanhamento Evolutivo</h3>
                         
                         <div class="annotation-tools">
                             <button class="tool-btn active" onclick="selecionarFerramenta('texto')">
-                                <i class="fas fa-font"></i> Texto
+                                 Texto
                             </button>
                             <button class="tool-btn" onclick="selecionarFerramenta('desenho')">
-                                <i class="fas fa-pencil-alt"></i> Desenho
+                                 Desenho
                             </button>
                             <button class="tool-btn" onclick="selecionarFerramenta('regua')">
-                                <i class="fas fa-ruler"></i> Régua
+                                 Régua
                             </button>
                             <button class="tool-btn" onclick="selecionarFerramenta('marca')">
-                                <i class="fas fa-highlighter"></i> Marcador
+                                 Marcador
                             </button>
                             <button class="tool-btn" onclick="selecionarFerramenta('foto')">
-                                <i class="fas fa-camera"></i> Foto
+                                 Foto
                             </button>
                         </div>
                         
@@ -2384,7 +2565,7 @@
                             <h4>Timeline de Evolução</h4>
                             <div class="timeline-item">
                                 <div class="timeline-marker">
-                                    <i class="fas fa-plus"></i>
+                                    
                                 </div>
                                 <div class="timeline-content">
                                     <div class="timeline-date">29/07/2025 - 10:30</div>
@@ -2395,7 +2576,7 @@
                             
                             <div class="timeline-item">
                                 <div class="timeline-marker">
-                                    <i class="fas fa-stethoscope"></i>
+                                    
                                 </div>
                                 <div class="timeline-content">
                                     <div class="timeline-date">02/08/2025 - 14:00</div>
@@ -2409,12 +2590,12 @@
                             <label>Nova Evolução</label>
                             <textarea id="nova-evolucao" rows="4" placeholder="Descreva a evolução do paciente..."></textarea>
                             <button type="button" onclick="adicionarEvolucao()" style="margin-top: 10px; background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
-                                <i class="fas fa-plus"></i> Adicionar Evolução
+                                 Adicionar Evolução
                             </button>
                         </div>
                         
                         <div class="photo-upload" onclick="document.getElementById('foto-input').click()">
-                            <i class="fas fa-camera"></i>
+                            
                             <h4>Capturar ou Adicionar Foto</h4>
                             <p>Clique para capturar uma foto ou selecionar da galeria</p>
                             <input type="file" id="foto-input" accept="image/*" style="display: none;" onchange="adicionarFoto(this)">
@@ -2429,7 +2610,7 @@
                 <!-- Outros formulários similares para acompanhamento, receita, exames -->
                 <div class="document-form" id="acompanhamento-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-heartbeat"></i> Formulário de Acompanhamento</h3>
+                        <h3> Formulário de Acompanhamento</h3>
                         <div class="form-grid">
                             <div class="form-group">
                                 <label>Data da Consulta</label>
@@ -2453,7 +2634,7 @@
 
                 <div class="document-form" id="receita-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-prescription-bottle-alt"></i> Receita Médica</h3>
+                        <h3> Receita Médica</h3>
                         <div class="form-group">
                             <label>Medicamentos Prescritos</label>
                             <textarea id="receita-medicamentos" rows="6" placeholder="1. Medicamento - Posologia - Duração&#10;2. Medicamento - Posologia - Duração"></textarea>
@@ -2467,7 +2648,7 @@
 
                 <div class="document-form" id="exames-form">
                     <div class="form-section">
-                        <h3><i class="fas fa-vials"></i> Pedido de Exames</h3>
+                        <h3> Pedido de Exames</h3>
                         <div class="form-group">
                             <label>Exames Solicitados</label>
                             <textarea id="exames-lista" rows="6" placeholder="Liste os exames solicitados:&#10;- Hemograma completo&#10;- Glicemia de jejum&#10;- etc."></textarea>
@@ -2482,7 +2663,7 @@
         </div>
 
         <button class="save-btn" onclick="salvarDocumento()">
-            <i class="fas fa-save"></i> Salvar Documento
+             Salvar Documento
         </button>
     </div>
 
@@ -2490,7 +2671,7 @@
     <div id="modal-receita" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 900px; width: 90%;">
             <div class="modal-header">
-                <h2><i class="fas fa-prescription"></i> Gerar Receita Médica</h2>
+                <h2> Gerar Receita Médica</h2>
                 <button onclick="fecharModal('modal-receita')" class="btn-close">×</button>
             </div>
             
@@ -2529,16 +2710,16 @@
             
             <div class="modal-footer">
                 <button onclick="assinarDigitalmente('receita')" class="btn-primary" style="background: #28a745;">
-                    <i class="fas fa-signature"></i> Assinar Digitalmente (VIDAAS)
+                     Assinar Digitalmente (VIDAAS)
                 </button>
                 <button onclick="gerarPDFReceita()" class="btn-primary" style="background: #dc3545;">
-                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                     Gerar PDF
                 </button>
                 <button onclick="imprimirReceita()" class="btn-primary" style="background: #6f42c1;">
-                    <i class="fas fa-print"></i> Imprimir
+                     Imprimir
                 </button>
                 <button onclick="enviarPorEmail('receita')" class="btn-secondary">
-                    <i class="fas fa-envelope"></i> Enviar por Email
+                     Enviar por Email
                 </button>
             </div>
         </div>
@@ -2548,7 +2729,7 @@
     <div id="modal-exames" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 900px; width: 90%;">
             <div class="modal-header">
-                <h2><i class="fas fa-vial"></i> Gerar Solicitação de Exames</h2>
+                <h2> Gerar Solicitação de Exames</h2>
                 <button onclick="fecharModal('modal-exames')" class="btn-close">×</button>
             </div>
             
@@ -2595,16 +2776,16 @@
             
             <div class="modal-footer">
                 <button onclick="assinarDigitalmente('exames')" class="btn-primary" style="background: #28a745;">
-                    <i class="fas fa-signature"></i> Assinar Digitalmente (VIDAAS)
+                     Assinar Digitalmente (VIDAAS)
                 </button>
                 <button onclick="gerarPDFExames()" class="btn-primary" style="background: #dc3545;">
-                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                     Gerar PDF
                 </button>
                 <button onclick="imprimirExames()" class="btn-primary" style="background: #6f42c1;">
-                    <i class="fas fa-print"></i> Imprimir
+                     Imprimir
                 </button>
                 <button onclick="enviarPorEmail('exames')" class="btn-secondary">
-                    <i class="fas fa-envelope"></i> Enviar por Email
+                     Enviar por Email
                 </button>
             </div>
         </div>
@@ -2685,13 +2866,13 @@
                     <div class="photo-overlay">
                         <div class="photo-actions">
                             <button onclick="editarFoto(${foto.id})" title="Editar">
-                                <i class="fas fa-edit"></i>
+                                
                             </button>
                             <button onclick="adicionarAnotacao(${foto.id})" title="Anotar">
-                                <i class="fas fa-pencil-alt"></i>
+                                
                             </button>
                             <button onclick="removerFoto(${foto.id})" title="Remover">
-                                <i class="fas fa-trash"></i>
+                                
                             </button>
                         </div>
                     </div>
@@ -2747,7 +2928,7 @@
                 novaEvolucao.className = 'timeline-item';
                 novaEvolucao.innerHTML = `
                     <div class="timeline-marker">
-                        <i class="fas fa-notes-medical"></i>
+                        
                     </div>
                     <div class="timeline-content">
                         <div class="timeline-date">${new Date().toLocaleString('pt-BR')}</div>
@@ -3261,6 +3442,241 @@ Dr. Marcio Scartozzoni`;
             document.body.removeChild(link);
         }
 
+        // Funções de gerenciamento de orçamentos
+        function gerarOrcamento() {
+            const dadosOrcamento = coletarDadosOrcamento();
+            
+            if (!validarDadosOrcamento(dadosOrcamento)) {
+                return;
+            }
+
+            // Calcular valores
+            const orcamentoCalculado = calcularOrcamento(dadosOrcamento);
+            
+            // Gerar PDF
+            gerarPDFOrcamento(orcamentoCalculado);
+            
+            // Mostrar confirmação
+            alert('✅ Orçamento gerado com sucesso!\n\nO arquivo PDF foi baixado automaticamente.');
+        }
+
+        function enviarParaGestao() {
+            const dadosOrcamento = coletarDadosOrcamento();
+            
+            if (!validarDadosOrcamento(dadosOrcamento)) {
+                return;
+            }
+
+            // Calcular valores
+            const orcamentoCalculado = calcularOrcamento(dadosOrcamento);
+            
+            // Adicionar timestamp e ID
+            orcamentoCalculado.id = 'ORC-' + Date.now();
+            orcamentoCalculado.dataGeracao = new Date().toISOString();
+            orcamentoCalculado.status = 'pendente';
+            orcamentoCalculado.prazoValidade = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(); // 30 dias
+            
+            // Salvar no localStorage para a gestão
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosGestao') || '[]');
+            orcamentos.push(orcamentoCalculado);
+            localStorage.setItem('orcamentosGestao', JSON.stringify(orcamentos));
+            
+            // Confirmar envio
+            const resposta = confirm('✅ Orçamento enviado para a Gestão!\n\n🔍 Deseja abrir a página de Gestão de Orçamentos para acompanhar?');
+            
+            if (resposta) {
+                // Salvar dados do paciente para contexto
+                localStorage.setItem('pacienteSelecionado', JSON.stringify({
+                    nome: dadosOrcamento.nome,
+                    orcamentoId: orcamentoCalculado.id
+                }));
+                window.open('/gestao.html', '_blank');
+            }
+        }
+
+        function salvarRascunho() {
+            const dadosOrcamento = coletarDadosOrcamento();
+            
+            // Salvar rascunho
+            const rascunhos = JSON.parse(localStorage.getItem('rascunhosOrcamento') || '[]');
+            rascunhos.push({
+                ...dadosOrcamento,
+                id: 'RASCUNHO-' + Date.now(),
+                dataSalvo: new Date().toISOString()
+            });
+            localStorage.setItem('rascunhosOrcamento', JSON.stringify(rascunhos));
+            
+            alert('💾 Rascunho salvo com sucesso!');
+        }
+
+        function coletarDadosOrcamento() {
+            return {
+                nome: document.getElementById('orcamento-nome').value,
+                cirurgia: document.getElementById('orcamento-cirurgia').value,
+                valorClinica: parseFloat(document.getElementById('orcamento-valor-clinica').value) || 0,
+                valorHospital: parseFloat(document.getElementById('orcamento-valor-hospital').value) || 0,
+                formaPagamento: document.querySelector('input[name="pagamento"]:checked')?.value || '',
+                hospital: document.getElementById('orcamento-hospital').value,
+                observacoes: document.getElementById('orcamento-obs').value,
+                pacienteCpf: pacienteAtual ? pacienteAtual.cpf : null
+            };
+        }
+
+        function validarDadosOrcamento(dados) {
+            if (!dados.nome.trim()) {
+                alert('⚠️ Por favor, informe o nome do paciente.');
+                document.getElementById('orcamento-nome').focus();
+                return false;
+            }
+            
+            if (!dados.cirurgia.trim()) {
+                alert('⚠️ Por favor, informe o tipo de cirurgia.');
+                document.getElementById('orcamento-cirurgia').focus();
+                return false;
+            }
+            
+            if (dados.valorClinica <= 0) {
+                alert('⚠️ Por favor, informe o valor da clínica.');
+                document.getElementById('orcamento-valor-clinica').focus();
+                return false;
+            }
+            
+            if (!dados.formaPagamento) {
+                alert('⚠️ Por favor, selecione a forma de pagamento.');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function calcularOrcamento(dados) {
+            let valorTotal = dados.valorClinica + dados.valorHospital;
+            let valorFinal = valorTotal;
+            let descricaoFormaPagamento = '';
+            
+            switch (dados.formaPagamento) {
+                case 'vista':
+                    valorFinal = valorTotal * 0.97; // 3% desconto
+                    descricaoFormaPagamento = 'À vista (3% desconto)';
+                    break;
+                case '3x':
+                    valorFinal = valorTotal * 1.05; // 5% acréscimo
+                    descricaoFormaPagamento = 'Parcelado em 3x (5% acréscimo)';
+                    break;
+                case '10x':
+                    valorFinal = valorTotal * 1.10; // 10% acréscimo
+                    descricaoFormaPagamento = 'Parcelado em 10x (10% acréscimo)';
+                    break;
+            }
+            
+            return {
+                ...dados,
+                valorTotal: valorTotal,
+                valorFinal: valorFinal,
+                descricaoFormaPagamento: descricaoFormaPagamento,
+                valorParcela: dados.formaPagamento !== 'vista' ? 
+                    valorFinal / (dados.formaPagamento === '3x' ? 3 : 10) : null
+            };
+        }
+
+        function gerarPDFOrcamento(orcamento) {
+            // Criar um documento HTML temporário para gerar PDF
+            const conteudoPDF = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Orçamento - ${orcamento.nome}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; }
+                        .header { text-align: center; margin-bottom: 30px; }
+                        .logo { font-size: 24px; font-weight: bold; color: #2c3e50; }
+                        .subtitle { color: #7f8c8d; }
+                        .content { margin: 20px 0; }
+                        .section { margin: 20px 0; }
+                        .label { font-weight: bold; }
+                        .value { margin-left: 10px; }
+                        .total { font-size: 18px; font-weight: bold; color: #27ae60; }
+                        .footer { margin-top: 40px; font-size: 12px; color: #7f8c8d; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="logo">Dr. Marcio Scartozzoni</div>
+                        <div class="subtitle">Cirurgia Plástica</div>
+                        <div class="subtitle">Orçamento Cirúrgico</div>
+                    </div>
+                    
+                    <div class="content">
+                        <div class="section">
+                            <span class="label">Paciente:</span>
+                            <span class="value">${orcamento.nome}</span>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label">Procedimento:</span>
+                            <span class="value">${orcamento.cirurgia}</span>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label">Hospital:</span>
+                            <span class="value">${orcamento.hospital}</span>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label">Valor Clínica:</span>
+                            <span class="value">R$ ${orcamento.valorClinica.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label">Valor Hospital:</span>
+                            <span class="value">R$ ${orcamento.valorHospital.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        
+                        <div class="section">
+                            <span class="label">Forma de Pagamento:</span>
+                            <span class="value">${orcamento.descricaoFormaPagamento}</span>
+                        </div>
+                        
+                        <div class="section total">
+                            <span class="label">Valor Total:</span>
+                            <span class="value">R$ ${orcamento.valorFinal.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        
+                        ${orcamento.valorParcela ? `
+                        <div class="section">
+                            <span class="label">Valor da Parcela:</span>
+                            <span class="value">R$ ${orcamento.valorParcela.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        ` : ''}
+                        
+                        ${orcamento.observacoes ? `
+                        <div class="section">
+                            <span class="label">Observações:</span>
+                            <div class="value">${orcamento.observacoes}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Este orçamento tem validade de 30 dias.</p>
+                        <p>Data de emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Abrir em nova janela para impressão/salvamento como PDF
+            const novaJanela = window.open('', '_blank');
+            novaJanela.document.write(conteudoPDF);
+            novaJanela.document.close();
+            
+            // Aguardar um pouco e disparar a impressão
+            setTimeout(() => {
+                novaJanela.print();
+            }, 1000);
+        }
+
         // Carregar pacientes ao inicializar
         // Verificação de autenticação
         function checkAuth() {
@@ -3286,6 +3702,62 @@ Dr. Marcio Scartozzoni`;
             
             return true;
         }
+
+        // Objeto CadernoDigital para gerenciar funcionalidades
+        const cadernoDigital = {
+            fotos: [],
+            
+            inicializar: function() {
+                console.log('📝 Inicializando Caderno Digital...');
+                this.setupEventListeners();
+                this.carregarDados();
+            },
+            
+            setupEventListeners: function() {
+                console.log('🔧 Configurando event listeners...');
+                // Event listeners já estão configurados individualmente nas funções
+                // Esta função está aqui para manter compatibilidade
+            },
+            
+            carregarDados: function() {
+                console.log('📊 Carregando dados do caderno...');
+                // Carregar dados salvos se existirem
+                const dadosSalvos = localStorage.getItem('cadernoDigital');
+                if (dadosSalvos) {
+                    try {
+                        const dados = JSON.parse(dadosSalvos);
+                        this.fotos = dados.fotos || [];
+                    } catch (error) {
+                        console.error('Erro ao carregar dados:', error);
+                    }
+                }
+            },
+            
+            capturarFoto: function() {
+                console.log('📸 Capturando foto...');
+                // Implementação de captura de foto
+            },
+            
+            ativarFerramenta: function(ferramenta) {
+                console.log('🛠️ Ativando ferramenta:', ferramenta);
+                currentTool = ferramenta;
+            },
+            
+            exportarPDF: function() {
+                console.log('📄 Exportando PDF...');
+                // Implementação de exportação
+            },
+            
+            sincronizarDados: function() {
+                console.log('🔄 Sincronizando dados...');
+                // Implementação de sincronização
+            },
+            
+            renderizarGaleria: function() {
+                console.log('🖼️ Renderizando galeria...');
+                // Implementação de renderização da galeria
+            }
+        };
 
         window.onload = function() {
             // Verificar autorização primeiro
@@ -3343,7 +3815,7 @@ Dr. Marcio Scartozzoni`;
             infoDiv.innerHTML = `
                 <div style="background: #e8f5e8; border: 2px solid #27ae60; border-radius: 8px; padding: 15px; margin: 10px 0; color: #2c3e50;">
                     <h4 style="margin: 0 0 10px 0; color: #27ae60;">
-                        <i class="fas fa-user-check"></i> Paciente da Gestão
+                         Paciente da Gestão
                     </h4>
                     <p style="margin: 5px 0;"><strong>Nome:</strong> ${dadosPaciente.nome}</p>
                     <p style="margin: 5px 0;"><strong>ID:</strong> ${dadosPaciente.id}</p>
@@ -3424,7 +3896,7 @@ Dr. Marcio Scartozzoni`;
                         align-items: center;
                     ">
                         <div>
-                            <h2><i class="fas fa-chart-line"></i> Quadro de Evolução</h2>
+                            <h2> Quadro de Evolução</h2>
                             <p id="pacienteEvolucaoNome" style="opacity: 0.9; margin-top: 5px;">Carregando...</p>
                         </div>
                         <button onclick="fecharQuadroEvolucao()" style="
@@ -3454,14 +3926,14 @@ Dr. Marcio Scartozzoni`;
                             overflow-y: auto;
                         ">
                             <h3 style="margin-bottom: 20px; color: #2c3e50;">
-                                <i class="fas fa-tasks"></i> Status Geral
+                                 Status Geral
                             </h3>
                             <div id="statusCards">
                                 <!-- Cards de status serão carregados aqui -->
                             </div>
                             
                             <h3 style="margin: 30px 0 20px 0; color: #2c3e50;">
-                                <i class="fas fa-bell"></i> Notificações
+                                 Notificações
                             </h3>
                             <div id="notificacoesLista">
                                 <!-- Notificações serão carregadas aqui -->
@@ -3479,7 +3951,7 @@ Dr. Marcio Scartozzoni`;
                                 align-items: center;
                                 margin-bottom: 20px;
                             ">
-                                <h3><i class="fas fa-clipboard-list"></i> Cards de Evolução</h3>
+                                <h3> Cards de Evolução</h3>
                                 <button onclick="adicionarNovoCard()" style="
                                     background: #28a745;
                                     color: white;
@@ -3488,7 +3960,7 @@ Dr. Marcio Scartozzoni`;
                                     border-radius: 8px;
                                     cursor: pointer;
                                 ">
-                                    <i class="fas fa-plus"></i> Novo Card
+                                     Novo Card
                                 </button>
                             </div>
                             
@@ -3699,7 +4171,7 @@ Dr. Marcio Scartozzoni`;
                     
                     ${diasRestantes !== null ? `
                         <div class="card-prazo ${diasRestantes <= 1 ? 'urgente' : ''}">
-                            <i class="fas fa-calendar-alt"></i>
+                            
                             ${diasRestantes <= 0 ? 'Vencido!' : 
                               diasRestantes === 1 ? 'Vence hoje!' : 
                               `${diasRestantes} dias restantes`}
@@ -3707,7 +4179,7 @@ Dr. Marcio Scartozzoni`;
                     ` : ''}
                     
                     <div class="card-tarefas">
-                        <h5><i class="fas fa-tasks"></i> Tarefas (${card.tarefas.filter(t => t.concluido).length}/${card.tarefas.length})</h5>
+                        <h5> Tarefas (${card.tarefas.filter(t => t.concluido).length}/${card.tarefas.length})</h5>
                         <ul>
                             ${card.tarefas.map((tarefa, index) => `
                                 <li class="${tarefa.concluido ? 'concluido' : ''}">
@@ -3726,13 +4198,13 @@ Dr. Marcio Scartozzoni`;
                     
                     <div class="card-actions">
                         <button onclick="editarCard('${card.id}')" class="btn-edit">
-                            <i class="fas fa-edit"></i> Editar
+                             Editar
                         </button>
                         <button onclick="duplicarCard('${card.id}')" class="btn-duplicate">
-                            <i class="fas fa-copy"></i> Duplicar
+                             Duplicar
                         </button>
                         <button onclick="removerCard('${card.id}')" class="btn-remove">
-                            <i class="fas fa-trash"></i> Remover
+                             Remover
                         </button>
                     </div>
                 </div>
@@ -3892,7 +4364,7 @@ Dr. Marcio Scartozzoni`;
             
             container.innerHTML = `
                 <div class="status-card success">
-                    <div class="status-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="status-icon"></div>
                     <div class="status-info">
                         <h4>${statusCount['sem-pendencias']}</h4>
                         <p>Sem Pendências</p>
@@ -3900,7 +4372,7 @@ Dr. Marcio Scartozzoni`;
                 </div>
                 
                 <div class="status-card warning">
-                    <div class="status-icon"><i class="fas fa-clock"></i></div>
+                    <div class="status-icon"></div>
                     <div class="status-info">
                         <h4>${statusCount['aguardando']}</h4>
                         <p>Aguardando</p>
@@ -3908,7 +4380,7 @@ Dr. Marcio Scartozzoni`;
                 </div>
                 
                 <div class="status-card danger">
-                    <div class="status-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="status-icon"></div>
                     <div class="status-info">
                         <h4>${statusCount['pendente']}</h4>
                         <p>Pendente</p>
@@ -3964,7 +4436,7 @@ Dr. Marcio Scartozzoni`;
                 <div class="notification ${notif.tipo}">
                     <div class="notification-text">${notif.texto}</div>
                     <button onclick="focarCard('${notif.card.id}')" class="notification-action">
-                        <i class="fas fa-eye"></i>
+                        
                     </button>
                 </div>
             `).join('');
@@ -4102,7 +4574,7 @@ Dr. Marcio Scartozzoni`;
             
             fichaForm.innerHTML = `
                 <div class="form-section">
-                    <h3><i class="fas fa-clipboard-check"></i> Ficha de Atendimento</h3>
+                    <h3> Ficha de Atendimento</h3>
                     
                     <div class="form-grid">
                         <div class="form-group">
@@ -4198,13 +4670,13 @@ Dr. Marcio Scartozzoni`;
                     
                     <div class="form-actions">
                         <button type="button" onclick="salvarFichaAtendimento()" class="btn-primary">
-                            <i class="fas fa-save"></i> Salvar Ficha
+                             Salvar Ficha
                         </button>
                         <button type="button" onclick="imprimirFichaAtendimento()" class="btn-secondary">
-                            <i class="fas fa-print"></i> Imprimir
+                             Imprimir
                         </button>
                         <button type="button" onclick="limparFichaAtendimento()" class="btn-secondary">
-                            <i class="fas fa-eraser"></i> Limpar
+                             Limpar
                         </button>
                     </div>
                 </div>
@@ -4513,13 +4985,13 @@ Dr. Marcio Scartozzoni`;
     <div id="modalEvolucao" class="modal-evolucao">
         <div class="modal-content-evolucao">
             <div class="modal-header-evolucao">
-                <h2><i class="fas fa-chart-line"></i> Evolução do Paciente</h2>
+                <h2> Evolução do Paciente</h2>
                 <button class="modal-close" onclick="fecharModalEvolucao()">&times;</button>
             </div>
             
             <div class="modal-body-evolucao">
                 <button class="btn-nova-evolucao" onclick="adicionarEvolucao()">
-                    <i class="fas fa-plus"></i> Adicionar Nova Evolução
+                     Adicionar Nova Evolução
                 </button>
                 
                 <div class="timeline-evolucao" id="timelineEvolucao">
@@ -4533,7 +5005,7 @@ Dr. Marcio Scartozzoni`;
     <div id="modalFicha" class="modal-ficha">
         <div class="modal-content-ficha">
             <div class="modal-header-ficha">
-                <h2><i class="fas fa-clipboard-check"></i> Ficha de Atendimento - Cirurgia Plástica</h2>
+                <h2> Ficha de Atendimento - Cirurgia Plástica</h2>
                 <button class="modal-close" onclick="fecharModalFicha()">&times;</button>
             </div>
             
@@ -4542,7 +5014,7 @@ Dr. Marcio Scartozzoni`;
                     <div class="ficha-sections">
                         <!-- Dados do Paciente -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-user"></i> Dados do Paciente</h3>
+                            <h3> Dados do Paciente</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="pacienteNome">Nome Completo:</label>
@@ -4574,7 +5046,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Motivo da Consulta -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-stethoscope"></i> Motivo da Consulta</h3>
+                            <h3> Motivo da Consulta</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="procedimentoDesejado">Procedimento Desejado:</label>
@@ -4605,7 +5077,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- História Médica -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-notes-medical"></i> História Médica</h3>
+                            <h3> História Médica</h3>
                             
                             <div class="form-group-ficha">
                                 <label>Cirurgias Anteriores:</label>
@@ -4647,7 +5119,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Exame Físico -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-search"></i> Exame Físico</h3>
+                            <h3> Exame Físico</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="peso">Peso (kg):</label>
@@ -4672,7 +5144,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Avaliação Psicológica -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-brain"></i> Avaliação Psicológica</h3>
+                            <h3> Avaliação Psicológica</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="motivacao">Motivação para Cirurgia:</label>
@@ -4714,7 +5186,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Planejamento Cirúrgico -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-drafting-compass"></i> Planejamento Cirúrgico</h3>
+                            <h3> Planejamento Cirúrgico</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="tecnica-proposta">Técnica Proposta:</label>
@@ -4750,7 +5222,7 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Orçamento -->
                         <div class="ficha-section">
-                            <h3><i class="fas fa-calculator"></i> Orçamento</h3>
+                            <h3> Orçamento</h3>
                             
                             <div class="form-group-ficha">
                                 <label for="valor-honorarios">Honorários Médicos (R$):</label>
@@ -4775,31 +5247,31 @@ Dr. Marcio Scartozzoni`;
 
                         <!-- Fotos Pré-operatórias -->
                         <div class="fotos-section">
-                            <h3><i class="fas fa-camera"></i> Fotos Pré-operatórias</h3>
+                            <h3> Fotos Pré-operatórias</h3>
                             
                             <div class="fotos-grid">
                                 <div class="foto-slot" onclick="adicionarFoto('frente')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Foto Frontal</span>
                                 </div>
                                 <div class="foto-slot" onclick="adicionarFoto('perfil-dir')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Perfil Direito</span>
                                 </div>
                                 <div class="foto-slot" onclick="adicionarFoto('perfil-esq')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Perfil Esquerdo</span>
                                 </div>
                                 <div class="foto-slot" onclick="adicionarFoto('lateral')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Lateral</span>
                                 </div>
                                 <div class="foto-slot" onclick="adicionarFoto('detalhe1')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Detalhe 1</span>
                                 </div>
                                 <div class="foto-slot" onclick="adicionarFoto('detalhe2')">
-                                    <i class="fas fa-camera"></i>
+                                    
                                     <span>Detalhe 2</span>
                                 </div>
                             </div>
@@ -4808,13 +5280,13 @@ Dr. Marcio Scartozzoni`;
                     
                     <div style="display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e9ecef;">
                         <button type="button" class="btn-secondary" onclick="fecharModalFicha()">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                         <button type="button" class="btn-primary" onclick="salvarFichaAtendimento()">
-                            <i class="fas fa-save"></i> Salvar Ficha
+                             Salvar Ficha
                         </button>
                         <button type="button" class="btn-primary" onclick="gerarPDFFicha()">
-                            <i class="fas fa-file-pdf"></i> Gerar PDF
+                             Gerar PDF
                         </button>
                     </div>
                 </form>
@@ -4826,7 +5298,7 @@ Dr. Marcio Scartozzoni`;
     <div id="modalEdicaoPaciente" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-user-edit"></i> Editar Dados do Paciente</h2>
+                <h2> Editar Dados do Paciente</h2>
                 <button class="modal-close" onclick="fecharModalEdicaoPaciente()">&times;</button>
             </div>
             
@@ -4861,10 +5333,10 @@ Dr. Marcio Scartozzoni`;
                     
                     <div class="modal-actions">
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-save"></i> Salvar Alterações
+                             Salvar Alterações
                         </button>
                         <button type="button" onclick="fecharModalEdicaoPaciente()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                     </div>
                 </form>
@@ -4876,7 +5348,7 @@ Dr. Marcio Scartozzoni`;
     <div id="modalEdicaoMarco" class="modal-overlay" style="display: none;">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h2><i class="fas fa-calendar-edit"></i> Editar Marco</h2>
+                <h2> Editar Marco</h2>
                 <button class="modal-close" onclick="fecharModalMarco()">&times;</button>
             </div>
             <div class="modal-body">
@@ -4907,10 +5379,10 @@ Dr. Marcio Scartozzoni`;
                     
                     <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit" class="btn-primary" style="flex: 1;">
-                            <i class="fas fa-save"></i> Salvar Marco
+                             Salvar Marco
                         </button>
                         <button type="button" onclick="fecharModalMarco()" class="btn-secondary">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                     </div>
                 </form>
@@ -5084,7 +5556,7 @@ Dr. Marcio Scartozzoni`;
                         <span class="marco-tipo">${marco.nome}</span>
                         <span class="marco-status ${marco.status}">${getStatusTexto(marco.status)}</span>
                         <button class="btn-edit-marco" onclick="editarMarco(${index})" title="Editar marco">
-                            <i class="fas fa-edit"></i>
+                            
                         </button>
                     </div>
                     <div class="marco-data">${formatarDataCompleta(marco.data)}</div>
@@ -5100,17 +5572,21 @@ Dr. Marcio Scartozzoni`;
                 return;
             }
             
-            container.innerHTML = agendamentos.slice(-5).reverse().map((agendamento, index) => `
+            container.innerHTML = agendamentos.slice(-5).reverse().map((agendamento, index) => {
+                // Garantir que a data seja um objeto Date
+                const dataObj = agendamento.data instanceof Date ? agendamento.data : new Date(agendamento.data);
+                return `
                 <div class="agendamento-recente">
-                    <div class="agendamento-info" onclick="abrirEvolucaoData('${agendamento.data.toISOString()}')">
+                    <div class="agendamento-info" onclick="abrirEvolucaoData('${dataObj.toISOString()}')">
                         <div class="agendamento-data">${formatarDataCompleta(agendamento.data)}</div>
                         <div class="agendamento-tipo">${agendamento.tipo}</div>
                     </div>
                     <button class="btn-edit-agendamento" onclick="editarAgendamento(${index})" title="Editar agendamento">
-                        <i class="fas fa-edit"></i>
+                        
                     </button>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function getStatusTexto(status) {
@@ -5139,7 +5615,9 @@ Dr. Marcio Scartozzoni`;
             
             const novoNome = prompt('Nome do Marco:', marco.nome);
             if (novoNome !== null && novoNome.trim() !== '') {
-                const novaData = prompt('Nova Data (YYYY-MM-DD):', marco.data.toISOString().split('T')[0]);
+                // Garantir que a data seja um objeto Date
+                const dataObj = marco.data instanceof Date ? marco.data : new Date(marco.data);
+                const novaData = prompt('Nova Data (YYYY-MM-DD):', dataObj.toISOString().split('T')[0]);
                 if (novaData !== null) {
                     const novoStatus = prompt('Status (realizado/agendado/cancelado):', marco.status);
                     if (novoStatus !== null) {
@@ -5167,7 +5645,9 @@ Dr. Marcio Scartozzoni`;
             
             const novoTipo = prompt('Tipo do Agendamento:', agendamento.tipo);
             if (novoTipo !== null && novoTipo.trim() !== '') {
-                const novaData = prompt('Nova Data (YYYY-MM-DD):', agendamento.data.toISOString().split('T')[0]);
+                // Garantir que a data seja um objeto Date
+                const dataObj = agendamento.data instanceof Date ? agendamento.data : new Date(agendamento.data);
+                const novaData = prompt('Nova Data (YYYY-MM-DD):', dataObj.toISOString().split('T')[0]);
                 if (novaData !== null) {
                     // Atualizar agendamento
                     agendamento.tipo = novoTipo.trim();
@@ -5473,6 +5953,9 @@ Dr. Marcio Scartozzoni`;
             }
         });
     </script>
+
+    <!-- Sistema de Efeitos Visuais -->
+    <script src="visual-effects.js"></script>
 
 </body>
 </html>

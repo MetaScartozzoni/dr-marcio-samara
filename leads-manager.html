@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciamento de Leads - Dr. Marcio Scartozzoni</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="card-unificado.css" rel="stylesheet">
     <style>
         body {
@@ -439,16 +438,16 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1><i class="fas fa-users"></i> Gerenciamento de Leads</h1>
+            <h1> Gerenciamento de Leads</h1>
             <div class="header-actions">
                 <a href="gestao.html" class="btn btn-primary">
-                    <i class="fas fa-arrow-left"></i> Voltar
+                     Voltar
                 </a>
                 <button class="btn btn-success" onclick="exportarLeads()">
-                    <i class="fas fa-download"></i> Exportar
+                     Exportar
                 </button>
                 <button class="btn btn-warning" onclick="atualizarDados()">
-                    <i class="fas fa-sync"></i> Atualizar
+                     Atualizar
                 </button>
             </div>
         </div>
@@ -522,10 +521,10 @@
             </div>
             <div style="text-align: center;">
                 <button class="btn btn-primary" onclick="aplicarFiltros()">
-                    <i class="fas fa-filter"></i> Aplicar Filtros
+                     Aplicar Filtros
                 </button>
                 <button class="btn" onclick="limparFiltros()" style="background: #6c757d; color: white;">
-                    <i class="fas fa-times"></i> Limpar
+                     Limpar
                 </button>
             </div>
         </div>
@@ -537,10 +536,10 @@
             </div>
             <div class="toggle-buttons">
                 <button class="toggle-btn active" onclick="alternarVisualizacao('cards')">
-                    <i class="fas fa-th"></i> Cards
+                     Cards
                 </button>
                 <button class="toggle-btn" onclick="alternarVisualizacao('table')">
-                    <i class="fas fa-list"></i> Tabela
+                     Tabela
                 </button>
             </div>
         </div>
@@ -826,26 +825,26 @@
                 
                 <div class="lead-info">
                     <div class="lead-info-item">
-                        <i class="fas fa-phone"></i>
+                        
                         <span>${lead.telefone}</span>
                     </div>
                     ${lead.email ? `
                         <div class="lead-info-item">
-                            <i class="fas fa-envelope"></i>
+                            
                             <span>${lead.email}</span>
                         </div>
                     ` : ''}
                     <div class="lead-info-item">
-                        <i class="fas fa-heart"></i>
+                        
                         <span class="procedimento-badge">${lead.procedimento}</span>
                     </div>
                     <div class="lead-info-item">
-                        <i class="fas fa-tag"></i>
+                        
                         <span>${lead.origem}</span>
                     </div>
                     ${lead.idade ? `
                         <div class="lead-info-item">
-                            <i class="fas fa-calendar"></i>
+                            
                             <span>${lead.idade}</span>
                         </div>
                     ` : ''}
@@ -853,18 +852,18 @@
                 
                 <div class="lead-footer">
                     <div class="lead-date">
-                        <i class="fas fa-clock"></i>
+                        
                         ${dataFormatada} às ${horaFormatada}
                     </div>
                     <div class="lead-actions">
                         <button class="action-btn btn-primary" onclick="verDetalhes('${lead.protocolo}')" title="Ver detalhes">
-                            <i class="fas fa-eye"></i>
+                            
                         </button>
                         <button class="action-btn btn-success" onclick="contatarLead('${lead.telefone}', '${lead.nome}', '${lead.procedimento}')" title="Contatar">
-                            <i class="fab fa-whatsapp"></i>
+                            
                         </button>
                         <button class="action-btn btn-warning" onclick="alterarStatus('${lead.protocolo}')" title="Alterar status">
-                            <i class="fas fa-edit"></i>
+                            
                         </button>
                     </div>
                 </div>
@@ -906,13 +905,13 @@
                 <td>
                     <div class="lead-actions">
                         <button class="action-btn btn-primary" onclick="verDetalhes('${lead.protocolo}')" title="Ver detalhes">
-                            <i class="fas fa-eye"></i>
+                            
                         </button>
                         <button class="action-btn btn-success" onclick="contatarLead('${lead.telefone}', '${lead.nome}', '${lead.procedimento}')" title="Contatar">
-                            <i class="fab fa-whatsapp"></i>
+                            
                         </button>
                         <button class="action-btn btn-warning" onclick="alterarStatus('${lead.protocolo}')" title="Alterar status">
-                            <i class="fas fa-edit"></i>
+                            
                         </button>
                     </div>
                 </td>
@@ -960,13 +959,13 @@
                 
                 <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
                     <button class="btn btn-success" onclick="contatarLead('${lead.telefone}', '${lead.nome}', '${lead.procedimento}')">
-                        <i class="fab fa-whatsapp"></i> Contatar via WhatsApp
+                         Contatar via WhatsApp
                     </button>
                     <button class="btn btn-warning" onclick="alterarStatus('${lead.protocolo}')">
-                        <i class="fas fa-edit"></i> Alterar Status
+                         Alterar Status
                     </button>
                     <button class="btn btn-primary" onclick="converterEmPaciente('${lead.protocolo}')">
-                        <i class="fas fa-user-plus"></i> Converter em Paciente
+                         Converter em Paciente
                     </button>
                 </div>
             `;

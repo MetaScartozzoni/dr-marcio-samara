@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão Financeira - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .financial-dashboard {
             display: grid;
@@ -160,32 +159,32 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-chart-line"></i> Gestão Financeira</h1>
+            <h1> Gestão Financeira</h1>
             <p>Controle completo das finanças da clínica</p>
         </div>
 
         <!-- Dashboard Financeiro -->
         <div class="financial-dashboard" id="dashboard">
             <div class="financial-card">
-                <h3><i class="fas fa-arrow-up"></i> Receitas do Mês</h3>
+                <h3> Receitas do Mês</h3>
                 <div class="value" id="receitasMes">R$ 0,00</div>
                 <small id="receitasDetalhes">0 contas</small>
             </div>
             
             <div class="financial-card">
-                <h3><i class="fas fa-arrow-down"></i> Despesas do Mês</h3>
+                <h3> Despesas do Mês</h3>
                 <div class="value" id="despesasMes">R$ 0,00</div>
                 <small id="despesasDetalhes">0 contas</small>
             </div>
             
             <div class="financial-card">
-                <h3><i class="fas fa-exclamation-triangle"></i> Contas Vencidas</h3>
+                <h3> Contas Vencidas</h3>
                 <div class="value" id="contasVencidas">R$ 0,00</div>
                 <small id="vencidasDetalhes">0 contas</small>
             </div>
             
             <div class="financial-card">
-                <h3><i class="fas fa-wallet"></i> Saldo Líquido</h3>
+                <h3> Saldo Líquido</h3>
                 <div class="value" id="saldoLiquido">R$ 0,00</div>
                 <small>Receitas - Despesas</small>
             </div>
@@ -194,20 +193,20 @@
         <!-- Tabs de Navegação -->
         <div class="tabs">
             <div class="tab active" onclick="showTab('procedimentos')">
-                <i class="fas fa-cog"></i> Configuração de Procedimentos
+                 Configuração de Procedimentos
             </div>
             <div class="tab" onclick="showTab('receber')">
-                <i class="fas fa-arrow-up"></i> Contas a Receber
+                 Contas a Receber
             </div>
             <div class="tab" onclick="showTab('pagar')">
-                <i class="fas fa-arrow-down"></i> Contas a Pagar
+                 Contas a Pagar
             </div>
         </div>
 
         <!-- Tab: Configuração de Procedimentos -->
         <div class="tab-content active" id="procedimentos">
             <div class="procedure-form">
-                <h3><i class="fas fa-plus"></i> Novo Procedimento</h3>
+                <h3> Novo Procedimento</h3>
                 <form id="procedureForm">
                     <div class="form-row">
                         <div class="input-group">
@@ -283,7 +282,7 @@
                     </div>
                     
                     <button type="submit" class="btn-primary">
-                        <i class="fas fa-save"></i> Salvar Procedimento
+                         Salvar Procedimento
                     </button>
                 </form>
             </div>
@@ -311,9 +310,9 @@
         <div class="tab-content" id="receber">
             <div class="accounts-table">
                 <div style="padding: 20px; background: #f8f9fa; display: flex; justify-content: between; align-items: center;">
-                    <h3><i class="fas fa-arrow-up"></i> Contas a Receber</h3>
+                    <h3> Contas a Receber</h3>
                     <button class="btn-primary" onclick="openReceberModal()">
-                        <i class="fas fa-plus"></i> Nova Conta
+                         Nova Conta
                     </button>
                 </div>
                 <table>
@@ -340,9 +339,9 @@
         <div class="tab-content" id="pagar">
             <div class="accounts-table">
                 <div style="padding: 20px; background: #f8f9fa; display: flex; justify-content: between; align-items: center;">
-                    <h3><i class="fas fa-arrow-down"></i> Contas a Pagar</h3>
+                    <h3> Contas a Pagar</h3>
                     <button class="btn-primary" onclick="openPagarModal()">
-                        <i class="fas fa-plus"></i> Nova Conta
+                         Nova Conta
                     </button>
                 </div>
                 <table>
@@ -444,10 +443,10 @@
                             <td>${formatCurrency(calculateTotal(proc))}</td>
                             <td>
                                 <button class="btn-small btn-primary" onclick="editProcedure(${proc.id})">
-                                    <i class="fas fa-edit"></i>
+                                    
                                 </button>
                                 <button class="btn-small btn-secondary" onclick="manageAdditionals(${proc.id})">
-                                    <i class="fas fa-plus"></i> Adicionais
+                                     Adicionais
                                 </button>
                             </td>
                         </tr>
@@ -525,7 +524,7 @@
                             `).join('')}
                         </div>
                         <button class="btn-primary" onclick="addNewAdditional()">
-                            <i class="fas fa-plus"></i> Adicionar
+                             Adicionar
                         </button>
                     </div>
                     
@@ -541,7 +540,7 @@
                             `).join('')}
                         </div>
                         <button class="btn-primary" onclick="addNewAccessory()">
-                            <i class="fas fa-plus"></i> Adicionar
+                             Adicionar
                         </button>
                     </div>
                 `;
@@ -574,7 +573,7 @@
                             <td>
                                 ${conta.status === 'pendente' ? `
                                     <button class="btn-small btn-primary" onclick="registerPayment(${conta.id}, 'receber')">
-                                        <i class="fas fa-money-bill"></i> Pagar
+                                         Pagar
                                     </button>
                                 ` : ''}
                             </td>
@@ -605,7 +604,7 @@
                             <td>
                                 ${conta.status === 'pendente' ? `
                                     <button class="btn-small btn-primary" onclick="registerPayment(${conta.id}, 'pagar')">
-                                        <i class="fas fa-check"></i> Pagar
+                                         Pagar
                                     </button>
                                 ` : ''}
                             </td>

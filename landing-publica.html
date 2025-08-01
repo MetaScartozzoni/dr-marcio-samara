@@ -23,7 +23,6 @@
     <meta name="twitter:description" content="Agende sua consulta gratuita com especialista em cirurgia plástica">
     
     <!-- Fonts -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -377,24 +376,24 @@
             <form id="leadForm">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="nome"><i class="fas fa-user"></i> Nome Completo *</label>
+                        <label for="nome"> Nome Completo *</label>
                         <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
                     </div>
                     
                     <div class="form-group">
-                        <label for="telefone"><i class="fas fa-phone"></i> WhatsApp *</label>
+                        <label for="telefone"> WhatsApp *</label>
                         <input type="tel" id="telefone" name="telefone" required placeholder="(11) 99999-9999">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <label for="email"> Email</label>
                         <input type="email" id="email" name="email" placeholder="seu@email.com">
                     </div>
                     
                     <div class="form-group">
-                        <label for="idade"><i class="fas fa-calendar"></i> Idade</label>
+                        <label for="idade"> Idade</label>
                         <select id="idade" name="idade">
                             <option value="">Selecione sua idade</option>
                             <option value="18-25">18 a 25 anos</option>
@@ -407,7 +406,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="procedimento"><i class="fas fa-heart"></i> Procedimento de Interesse *</label>
+                    <label for="procedimento"> Procedimento de Interesse *</label>
                     <select id="procedimento" name="procedimento" required>
                         <option value="">Selecione o procedimento</option>
                         <option value="Rinoplastia">Rinoplastia (Nariz)</option>
@@ -424,12 +423,12 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="observacoes"><i class="fas fa-comment"></i> Observações</label>
+                    <label for="observacoes"> Observações</label>
                     <textarea id="observacoes" name="observacoes" rows="3" placeholder="Conte-nos mais sobre seus objetivos..."></textarea>
                 </div>
                 
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-calendar-check"></i> AGENDAR CONSULTA GRATUITA
+                     AGENDAR CONSULTA GRATUITA
                 </button>
             </form>
             
@@ -445,7 +444,7 @@
         <div class="benefits">
             <div class="benefit animate-in">
                 <div class="benefit-icon">
-                    <i class="fas fa-user-md"></i>
+                    
                 </div>
                 <h3>Especialista Renomado</h3>
                 <p>Mais de 15 anos de experiência em cirurgia plástica com centenas de procedimentos realizados com excelência.</p>
@@ -453,7 +452,7 @@
             
             <div class="benefit animate-in">
                 <div class="benefit-icon">
-                    <i class="fas fa-shield-alt"></i>
+                    
                 </div>
                 <h3>Segurança Total</h3>
                 <p>Clínica com infraestrutura completa e protocolos rigorosos de segurança para seu bem-estar.</p>
@@ -461,7 +460,7 @@
             
             <div class="benefit animate-in">
                 <div class="benefit-icon">
-                    <i class="fas fa-star"></i>
+                    
                 </div>
                 <h3>Resultados Naturais</h3>
                 <p>Técnicas avançadas que priorizam resultados naturais e harmoniosos, respeitando sua individualidade.</p>
@@ -472,9 +471,9 @@
     <!-- Rodapé -->
     <div class="footer">
         <div class="social-links">
-            <a href="#" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
-            <a href="#" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="#" target="_blank" title="Instagram"></a>
+            <a href="#" target="_blank" title="Facebook"></a>
+            <a href="#" target="_blank" title="WhatsApp"></a>
         </div>
         <p>&copy; 2025 Dr. Marcio Scartozzoni - Todos os direitos reservados</p>
     </div>
@@ -545,7 +544,7 @@
                 if (data.success) {
                     message.className = 'message success';
                     message.innerHTML = `
-                        <i class="fas fa-check-circle"></i> 
+                         
                         <strong>Sucesso!</strong> Sua solicitação foi enviada. 
                         <br>Entraremos em contato via WhatsApp em até 2 horas.
                         <br><br>
@@ -565,14 +564,14 @@
                 } else {
                     message.className = 'message error';
                     message.innerHTML = `
-                        <i class="fas fa-exclamation-triangle"></i> 
+                         
                         <strong>Erro:</strong> ${data.message}
                     `;
                 }
             } catch (error) {
                 message.className = 'message error';
                 message.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i> 
+                     
                     <strong>Erro:</strong> Falha na conexão. Tente novamente.
                 `;
             } finally {

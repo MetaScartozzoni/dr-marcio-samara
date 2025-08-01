@@ -6,7 +6,6 @@
     <title>Configurações do Sistema - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -15,7 +14,7 @@
             <div class="header-content">
                 <div class="logo-section">
                     <div class="logo">
-                        <i class="fas fa-cogs"></i>
+                        
                         <h1>Portal Dr. Marcio</h1>
                     </div>
                     <span class="user-role">Configurações do Sistema</span>
@@ -23,11 +22,11 @@
                 
                 <div class="header-actions">
                     <button class="btn-secondary" onclick="window.location.href='dashboard.html'">
-                        <i class="fas fa-arrow-left"></i>
+                        
                         Voltar ao Dashboard
                     </button>
                     <button class="btn-primary" id="saveConfig">
-                        <i class="fas fa-save"></i>
+                        
                         Salvar Configurações
                     </button>
                 </div>
@@ -39,7 +38,7 @@
             <!-- Status Geral -->
             <div class="config-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-info-circle"></i> Status Geral do Sistema</h2>
+                    <h2> Status Geral do Sistema</h2>
                 </div>
                 <div class="status-grid" id="statusGrid">
                     <!-- Status será carregado aqui -->
@@ -49,7 +48,7 @@
             <!-- Configuração de Serviços -->
             <div class="config-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-server"></i> Serviços</h2>
+                    <h2> Serviços</h2>
                     <p>Habilite ou desabilite os serviços conforme necessário</p>
                 </div>
                 
@@ -58,7 +57,7 @@
                     <!-- Coluna Esquerda: Comunicação -->
                     <div class="services-column">
                         <h3 class="column-title">
-                            <i class="fas fa-comments"></i>
+                            
                             Comunicação
                         </h3>
                         <div class="services-grid">
@@ -66,7 +65,7 @@
                             <div class="service-card">
                                 <div class="service-header">
                                     <div class="service-icon email">
-                                        <i class="fas fa-envelope"></i>
+                                        
                                     </div>
                                     <div class="service-info">
                                         <h3>Email</h3>
@@ -84,11 +83,11 @@
                                 </div>
                                 <div class="service-actions">
                                     <button class="btn-config" onclick="configureService('email')">
-                                        <i class="fas fa-cog"></i>
+                                        
                                         Configurar
                                     </button>
                                     <button class="btn-test" onclick="testService('email')">
-                                        <i class="fas fa-vial"></i>
+                                        
                                         Testar
                                     </button>
                                 </div>
@@ -98,7 +97,7 @@
                             <div class="service-card">
                                 <div class="service-header">
                                     <div class="service-icon sms">
-                                        <i class="fas fa-sms"></i>
+                                        
                                     </div>
                                     <div class="service-info">
                                         <h3>SMS</h3>
@@ -116,11 +115,11 @@
                                 </div>
                                 <div class="service-actions">
                                     <button class="btn-config" onclick="configureService('sms')">
-                                        <i class="fas fa-cog"></i>
+                                        
                                         Configurar
                                     </button>
                                     <button class="btn-test" onclick="testService('sms')">
-                                        <i class="fas fa-vial"></i>
+                                        
                                         Testar
                                     </button>
                                 </div>
@@ -130,7 +129,7 @@
                             <div class="service-card">
                                 <div class="service-header">
                                     <div class="service-icon whatsapp">
-                                        <i class="fab fa-whatsapp"></i>
+                                        
                                     </div>
                                     <div class="service-info">
                                         <h3>WhatsApp</h3>
@@ -148,11 +147,11 @@
                                 </div>
                                 <div class="service-actions">
                                     <button class="btn-config" onclick="configureService('whatsapp')">
-                                        <i class="fas fa-cog"></i>
+                                        
                                         Configurar
                                     </button>
                                     <button class="btn-test" onclick="testService('whatsapp')">
-                                        <i class="fas fa-vial"></i>
+                                        
                                         Testar
                                     </button>
                                 </div>
@@ -163,7 +162,7 @@
                     <!-- Coluna Direita: Financeiro -->
                     <div class="services-column">
                         <h3 class="column-title">
-                            <i class="fas fa-credit-card"></i>
+                            
                             Financeiro
                         </h3>
                         <div class="services-grid">
@@ -171,7 +170,7 @@
                             <div class="service-card">
                                 <div class="service-header">
                                     <div class="service-icon payments">
-                                        <i class="fas fa-credit-card"></i>
+                                        
                                     </div>
                                     <div class="service-info">
                                         <h3>Pagamentos</h3>
@@ -191,25 +190,25 @@
                                     <div class="provider-option">
                                         <label>
                                             <input type="checkbox" id="stripe-enabled">
-                                            <i class="fab fa-stripe"></i>
+                                            
                                             Stripe
                                         </label>
                                     </div>
                                     <div class="provider-option">
                                         <label>
                                             <input type="checkbox" id="pagseguro-enabled">
-                                            <i class="fas fa-money-check"></i>
+                                            
                                             PagSeguro
                                         </label>
                                     </div>
                                 </div>
                                 <div class="service-actions">
                                     <button class="btn-config" onclick="configureService('payments')">
-                                        <i class="fas fa-cog"></i>
+                                        
                                         Configurar
                                     </button>
                                     <button class="btn-test" onclick="testService('payments')">
-                                        <i class="fas fa-vial"></i>
+                                        
                                         Testar
                                     </button>
                                 </div>
@@ -222,7 +221,7 @@
             <!-- Funcionalidades -->
             <div class="config-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-puzzle-piece"></i> Funcionalidades</h2>
+                    <h2> Funcionalidades</h2>
                     <p>Ative ou desative funcionalidades do sistema</p>
                 </div>
                 
@@ -232,7 +231,7 @@
                             <input type="checkbox" id="feature-lgpd">
                             <div class="feature-content">
                                 <div class="feature-icon">
-                                    <i class="fas fa-shield-alt"></i>
+                                    
                                 </div>
                                 <div class="feature-info">
                                     <h4>LGPD</h4>
@@ -247,7 +246,7 @@
                             <input type="checkbox" id="feature-billing">
                             <div class="feature-content">
                                 <div class="feature-icon">
-                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    
                                 </div>
                                 <div class="feature-info">
                                     <h4>Faturamento</h4>
@@ -262,7 +261,7 @@
                             <input type="checkbox" id="feature-reports">
                             <div class="feature-content">
                                 <div class="feature-icon">
-                                    <i class="fas fa-chart-bar"></i>
+                                    
                                 </div>
                                 <div class="feature-info">
                                     <h4>Relatórios</h4>
@@ -277,7 +276,7 @@
             <!-- Ambiente -->
             <div class="config-section">
                 <div class="section-header">
-                    <h2><i class="fas fa-flask"></i> Ambiente</h2>
+                    <h2> Ambiente</h2>
                     <p>Configurações do ambiente de execução</p>
                 </div>
                 
@@ -400,7 +399,7 @@
                     html += `
                         <div class="status-item ${statusClass}">
                             <div class="status-icon">
-                                <i class="fas ${this.getServiceIcon(serviceName)}"></i>
+                                
                             </div>
                             <div class="status-info">
                                 <h4>${this.getServiceName(serviceName)}</h4>
@@ -568,9 +567,9 @@
                 const messageEl = document.createElement('div');
                 messageEl.className = `message ${type}`;
                 messageEl.innerHTML = `
-                    <i class="fas ${this.getIconForType(type)}"></i>
+                    
                     <span>${text}</span>
-                    <button class="message-close"><i class="fas fa-times"></i></button>
+                    <button class="message-close"></button>
                 `;
 
                 document.getElementById('messageContainer').appendChild(messageEl);

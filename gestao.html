@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="gestao-style.css">
     <link rel="stylesheet" href="card-unificado.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="effects.css">
     
     <!-- Meta tags para SEO e acessibilidade -->
     <meta name="description" content="Sistema de gestão de orçamentos e pacientes - Dr. Marcio Scartozzoni">
@@ -19,7 +19,9 @@
     <!-- Preload recursos críticos -->
     <link rel="preload" href="gestao-script.js" as="script">
     <link rel="preload" href="config-api-integration.js" as="script">
+    <link rel="preload" href="visual-effects.js" as="script">
     <script src="card-unificado.js"></script>
+    <script src="visual-effects.js"></script>
     <style>
         /* Estilos para alternância de visualização */
         .section-header {
@@ -72,6 +74,140 @@
             gap: 20px;
             padding: 20px 0;
         }
+
+        /* Efeitos blur e hover para stat-cards */
+        .stats-grid {
+            position: relative;
+        }
+
+        .stats-grid:hover .stat-card:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.05) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeito de brilho nos stat-cards */
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .stat-card:hover::after {
+            animation: statCardShimmer 0.8s ease-in-out;
+        }
+
+        @keyframes statCardShimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Efeito blur para cards de orçamento */
+        .cards-grid {
+            position: relative;
+        }
+
+        .cards-grid:hover .card-paciente:not(:hover) {
+            filter: blur(3px);
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .cards-grid .card-paciente {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .cards-grid .card-paciente:hover {
+            transform: translateY(-10px) scale(1.03) !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Estilos para alertas de prazo */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-dismissible .btn-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 1.25rem 1rem;
+            color: inherit;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .alert-dismissible .btn-close:hover {
+            opacity: 0.75;
+        }
+        
+        /* Melhorias nos botões de ação */
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .actions-bar .btn {
+            flex: 1;
+            min-width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -80,33 +216,33 @@
         <div class="container">
             <div class="header-content">
                 <h1 class="header-title">
-                    <i class="fas fa-calculator" aria-hidden="true"></i>
+                    
                     Gestão de Orçamentos
                 </h1>
                 
                 <div class="header-actions">
                     <button onclick="window.location.href='gestao-financeira.html'" class="btn btn-success btn-sm" title="Gestão Financeira">
-                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        
                         Financeiro
                     </button>
                     
                     <button onclick="abrirLeadsManager()" class="btn btn-warning btn-sm" title="Gerenciar Leads">
-                        <i class="fas fa-users" aria-hidden="true"></i>
+                        
                         Leads
                     </button>
                     
                     <button onclick="abrirAgendamentoRapido()" class="btn btn-info btn-sm" title="Agendamento Rápido">
-                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                        
                         <span class="sr-only">Agendamento Rápido</span>
                     </button>
                     
                     <button onclick="voltarDashboard()" class="btn btn-secondary btn-sm" title="Voltar ao Dashboard">
-                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        
                         Dashboard
                     </button>
                     
                     <button onclick="AuthManager.logout()" class="btn btn-danger btn-sm" title="Sair do Sistema">
-                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                        
                         <span class="sr-only">Sair</span>
                     </button>
                 </div>
@@ -120,15 +256,15 @@
             <!-- Navegação por Tabs -->
             <nav class="tab-navigation" role="tablist">
                 <button class="tab-button active" id="tab-orcamentos" role="tab" aria-selected="true" aria-controls="panel-orcamentos">
-                    <i class="fas fa-calculator"></i>
+                    
                     Gestão de Orçamentos
                 </button>
                 <button class="tab-button" id="tab-pacientes" role="tab" aria-selected="false" aria-controls="panel-pacientes">
-                    <i class="fas fa-users"></i>
+                    
                     Gestão de Pacientes
                 </button>
                 <button class="tab-button" id="tab-cirurgia" role="tab" aria-selected="false" aria-controls="panel-cirurgia" onclick="window.location.href='cirurgia-plastica.html'">
-                    <i class="fas fa-user-md"></i>
+                    
                     Cirurgia Plástica
                 </button>
             </nav>
@@ -142,7 +278,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-calculator" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="totalOrcamentos">0</div>
@@ -152,7 +288,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon warning">
-                                <i class="fas fa-clock" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="orcamentosPendentes">0</div>
@@ -162,7 +298,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon success">
-                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="orcamentosAceitos">0</div>
@@ -172,7 +308,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon info">
-                                <i class="fas fa-dollar-sign" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
@@ -221,7 +357,7 @@
                         
                         <div class="filter-actions">
                             <button onclick="limparFiltros()" class="btn btn-secondary" title="Limpar todos os filtros">
-                                <i class="fas fa-eraser" aria-hidden="true"></i>
+                                
                                 Limpar
                             </button>
                         </div>
@@ -235,18 +371,23 @@
                 
                 <div class="actions-bar">
                     <button onclick="adicionarOrcamento()" class="btn btn-primary">
-                        <i class="fas fa-plus" aria-hidden="true"></i>
+                        
                         Novo Orçamento
                     </button>
                     
-                    <button onclick="exportarDados()" class="btn btn-info">
-                        <i class="fas fa-download" aria-hidden="true"></i>
-                        Exportar CSV
+                    <button onclick="exportarOrcamentos()" class="btn btn-info">
+                        
+                        Exportar Orçamentos
                     </button>
                     
                     <button onclick="carregarDados()" class="btn btn-secondary" title="Atualizar dados">
-                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        
                         Atualizar
+                    </button>
+                    
+                    <button onclick="verificarPrazosValidade()" class="btn btn-warning" title="Verificar prazos de validade">
+                        
+                        Verificar Prazos
                     </button>
                 </div>
             </section>
@@ -259,11 +400,11 @@
                     <!-- Botões de visualização -->
                     <div class="view-toggle">
                         <button id="btnVisualizacaoTabela" onclick="alternarVisualizacao('tabela')" class="btn btn-sm btn-outline-primary active" title="Visualização em Tabela">
-                            <i class="fas fa-table"></i>
+                            
                             Tabela
                         </button>
                         <button id="btnVisualizacaoCards" onclick="alternarVisualizacao('cards')" class="btn btn-sm btn-outline-primary" title="Visualização em Cards">
-                            <i class="fas fa-th-large"></i>
+                            
                             Cards
                         </button>
                     </div>
@@ -308,12 +449,12 @@
     </main>
 
     <!-- Modal Novo Orçamento - Melhorado -->
-    <div id="modalNovoOrcamento" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+    <div id="modalNovoOrcamento" class="modal" role="dialog" aria-labelledby="modal-title" >
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-title" class="modal-title">Novo Orçamento</h3>
                 <button onclick="fecharModalOrcamento()" class="close" aria-label="Fechar modal">
-                    <span aria-hidden="true">&times;</span>
+                    <span >&times;</span>
                 </button>
             </div>
             
@@ -414,7 +555,7 @@
             <div class="modal-footer">
                 <button type="button" onclick="fecharModalOrcamento()" class="btn btn-secondary">Cancelar</button>
                 <button type="submit" form="formNovoOrcamento" class="btn btn-primary">
-                    <i class="fas fa-save" aria-hidden="true"></i>
+                    
                     Salvar Orçamento
                 </button>
             </div>
@@ -422,12 +563,12 @@
     </div>
 
     <!-- Modal Ações do Orçamento - Melhorado -->
-    <div id="modalAcoesOrcamento" class="modal" role="dialog" aria-labelledby="modal-acoes-title" aria-hidden="true">
+    <div id="modalAcoesOrcamento" class="modal" role="dialog" aria-labelledby="modal-acoes-title" >
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modal-acoes-title" class="modal-title">Ações do Orçamento</h3>
                 <button onclick="fecharModalAcoes()" class="close" aria-label="Fechar modal">
-                    <span aria-hidden="true">&times;</span>
+                    <span >&times;</span>
                 </button>
             </div>
             
@@ -460,32 +601,32 @@
                 
                 <div class="acoes-grid">
                     <button onclick="gerarPDFOrcamento()" class="btn btn-primary btn-action">
-                        <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                        
                         Gerar PDF
                     </button>
                     
                     <button onclick="enviarPorEmail()" class="btn btn-info btn-action">
-                        <i class="fas fa-envelope" aria-hidden="true"></i>
+                        
                         Enviar Email
                     </button>
                     
                     <button onclick="copiarOrcamento()" class="btn btn-secondary btn-action">
-                        <i class="fas fa-copy" aria-hidden="true"></i>
+                        
                         Copiar Texto
                     </button>
                     
                     <button onclick="imprimirOrcamento()" class="btn btn-secondary btn-action">
-                        <i class="fas fa-print" aria-hidden="true"></i>
+                        
                         Imprimir
                     </button>
                     
                     <button onclick="marcarComoAceito()" class="btn btn-success btn-action">
-                        <i class="fas fa-check" aria-hidden="true"></i>
+                        
                         Marcar como Aceito
                     </button>
                     
                     <button onclick="editarOrcamento()" class="btn btn-warning btn-action">
-                        <i class="fas fa-edit" aria-hidden="true"></i>
+                        
                         Editar
                     </button>
                 </div>
@@ -506,7 +647,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-users" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="totalPacientes">0</div>
@@ -516,7 +657,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon info">
-                                <i class="fas fa-user-plus" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="pacientesNovos">0</div>
@@ -526,7 +667,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon success">
-                                <i class="fas fa-user-check" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="pacientesAtivos">0</div>
@@ -536,7 +677,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon warning">
-                                <i class="fas fa-calendar-check" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="consultasAgendadas">0</div>
@@ -548,7 +689,7 @@
 
                 <!-- Filtros para Pacientes -->
                 <section class="filters-section">
-                    <h2><i class="fas fa-filter"></i> Filtros de Pacientes</h2>
+                    <h2> Filtros de Pacientes</h2>
                     
                     <div class="filters-grid">
                         <div class="filter-group">
@@ -583,20 +724,20 @@
                     
                     <div class="filters-actions">
                         <button onclick="filtrarPacientes()" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Filtrar
+                             Filtrar
                         </button>
                         <button onclick="limparFiltrosPacientes()" class="btn btn-secondary">
-                            <i class="fas fa-eraser"></i> Limpar
+                             Limpar
                         </button>
                         <button onclick="adicionarPaciente()" class="btn btn-success">
-                            <i class="fas fa-user-plus"></i> Novo Paciente
+                             Novo Paciente
                         </button>
                     </div>
                 </section>
 
                 <!-- Tabela de Pacientes -->
                 <section class="table-section">
-                    <h2><i class="fas fa-users"></i> Lista de Pacientes</h2>
+                    <h2> Lista de Pacientes</h2>
                     
                     <div class="table-container">
                         <table class="table">
@@ -628,7 +769,7 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-icon">
-                                <i class="fas fa-file-alt" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="totalLogs">0</div>
@@ -638,7 +779,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon warning">
-                                <i class="fas fa-clock" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="logs24h">0</div>
@@ -648,7 +789,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon info">
-                                <i class="fas fa-users" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="usuariosAtivos">0</div>
@@ -658,7 +799,7 @@
                         
                         <div class="stat-card">
                             <div class="stat-icon success">
-                                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                
                             </div>
                             <div class="stat-content">
                                 <div class="stat-number" id="atividadeMedia">0</div>
@@ -670,7 +811,7 @@
 
                 <!-- Filtros para Logs -->
                 <section class="filters-section">
-                    <h2><i class="fas fa-filter"></i> Filtros de Logs</h2>
+                    <h2> Filtros de Logs</h2>
                     
                     <div class="filters-grid">
                         <div class="filter-group">
@@ -708,23 +849,23 @@
                     
                     <div class="filters-actions">
                         <button onclick="filtrarLogs()" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Filtrar
+                             Filtrar
                         </button>
                         <button onclick="limparFiltrosLogs()" class="btn btn-secondary">
-                            <i class="fas fa-eraser"></i> Limpar
+                             Limpar
                         </button>
                         <button onclick="exportarLogs()" class="btn btn-info">
-                            <i class="fas fa-download"></i> Exportar
+                             Exportar
                         </button>
                         <button onclick="atualizarLogsAutomatico()" class="btn btn-success" id="btnAutoRefresh">
-                            <i class="fas fa-sync"></i> Auto-Atualizar
+                             Auto-Atualizar
                         </button>
                     </div>
                 </section>
 
                 <!-- Tabela de Logs -->
                 <section class="table-section">
-                    <h2><i class="fas fa-list"></i> Logs do Sistema</h2>
+                    <h2> Logs do Sistema</h2>
                     
                     <div class="table-container">
                         <table class="table">
@@ -763,22 +904,22 @@
                 
                 <div class="modal-actions">
                     <button onclick="editarPaciente()" class="btn btn-primary btn-action">
-                        <i class="fas fa-edit" aria-hidden="true"></i>
+                        
                         Editar Dados
                     </button>
                     
                     <button onclick="verHistoricoPaciente()" class="btn btn-info btn-action">
-                        <i class="fas fa-history" aria-hidden="true"></i>
+                        
                         Ver Histórico
                     </button>
                     
                     <button onclick="gerenciarAcesso()" class="btn btn-warning btn-action">
-                        <i class="fas fa-key" aria-hidden="true"></i>
+                        
                         Gerenciar Acesso
                     </button>
                     
                     <button onclick="agendarConsulta()" class="btn btn-success btn-action">
-                        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+                        
                         Agendar Consulta
                     </button>
                 </div>
@@ -838,11 +979,11 @@
             if (orcamentosData.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-                        <i class="fas fa-receipt" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                        
                         <h3>Nenhum orçamento encontrado</h3>
                         <p>Adicione um novo orçamento para começar</p>
                         <button onclick="adicionarOrcamento()" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> Novo Orçamento
+                             Novo Orçamento
                         </button>
                     </div>
                 `;
@@ -918,7 +1059,222 @@
             
             // Sistema pronto
             console.log('🚀 Todas as dependências carregadas com sucesso');
+            
+            // Carregar orçamentos do Caderno Digital
+            carregarOrcamentosCadernoDigital();
+            
+            // Adicionar efeitos de fade-in
+            adicionarEfeitosFadeIn();
         });
+
+        // Função para adicionar efeitos de fade-in
+        function adicionarEfeitosFadeIn() {
+            // Adicionar classe fade-in aos stat-cards
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.classList.add('fade-in');
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Adicionar classe fade-in aos cards de orçamento
+            setTimeout(() => {
+                document.querySelectorAll('.card-paciente').forEach((card, index) => {
+                    card.classList.add('fade-in');
+                    card.style.animationDelay = `${index * 0.1}s`;
+                });
+            }, 500);
+        }
+
+        // Funções para gestão de orçamentos do Caderno Digital
+        function carregarOrcamentosCadernoDigital() {
+            const orcamentosCaderno = JSON.parse(localStorage.getItem('orcamentosGestao') || '[]');
+            
+            if (orcamentosCaderno.length > 0) {
+                console.log(`📊 ${orcamentosCaderno.length} orçamento(s) encontrado(s) do Caderno Digital`);
+                
+                // Integrar com dados existentes
+                integrarOrcamentosCaderno(orcamentosCaderno);
+                
+                // Atualizar estatísticas
+                atualizarEstatisticas();
+                
+                // Verificar prazos
+                verificarPrazosValidade();
+            }
+        }
+
+        function integrarOrcamentosCaderno(orcamentosCaderno) {
+            // Converter formato do Caderno Digital para formato da Gestão
+            const orcamentosConvertidos = orcamentosCaderno.map(orcamento => ({
+                id: orcamento.id,
+                paciente_nome: orcamento.nome,
+                telefone: orcamento.telefone || '(11) 99999-0000',
+                email: orcamento.email || 'contato@clinica.com',
+                procedimento_principal: orcamento.cirurgia,
+                valor_total: orcamento.valorFinal,
+                status_orcamento: orcamento.status === 'pendente' ? 'Pendente' : orcamento.status,
+                status_pagamento: 'Aguardando',
+                data_orcamento: new Date(orcamento.dataGeracao).toISOString().split('T')[0],
+                validade: new Date(orcamento.prazoValidade).toISOString().split('T')[0],
+                data_consulta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 dias
+                observacoes: orcamento.observacoes || '',
+                hospital: orcamento.hospital,
+                forma_pagamento: orcamento.descricaoFormaPagamento,
+                valor_parcela: orcamento.valorParcela,
+                origem: 'caderno-digital'
+            }));
+
+            // Mesclar com orçamentos existentes
+            const orcamentosExistentes = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            const todosOrcamentos = [...orcamentosExistentes, ...orcamentosConvertidos];
+            
+            // Remover duplicatas (baseado no ID)
+            const orcamentosUnicos = todosOrcamentos.filter((orcamento, index, array) => 
+                array.findIndex(item => item.id === orcamento.id) === index
+            );
+            
+            // Salvar dados mesclados
+            localStorage.setItem('orcamentosData', JSON.stringify(orcamentosUnicos));
+            
+            // Limpar orçamentos do Caderno Digital (já foram integrados)
+            localStorage.removeItem('orcamentosGestao');
+            
+            console.log(`✅ ${orcamentosConvertidos.length} orçamento(s) integrado(s) com sucesso`);
+        }
+
+        function verificarPrazosValidade() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            const hoje = new Date();
+            
+            let vencendoEm3Dias = 0;
+            let vencidos = 0;
+            
+            orcamentos.forEach(orcamento => {
+                const dataValidade = new Date(orcamento.validade);
+                const diasRestantes = Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+                
+                if (diasRestantes < 0) {
+                    vencidos++;
+                    // Atualizar status se vencido
+                    if (orcamento.status_orcamento !== 'Vencido') {
+                        orcamento.status_orcamento = 'Vencido';
+                    }
+                } else if (diasRestantes <= 3 && orcamento.status_orcamento === 'Pendente') {
+                    vencendoEm3Dias++;
+                }
+            });
+            
+            // Salvar alterações de status
+            localStorage.setItem('orcamentosData', JSON.stringify(orcamentos));
+            
+            // Mostrar alertas se necessário
+            if (vencidos > 0) {
+                mostrarAlertaPrazos(`⚠️ ${vencidos} orçamento(s) vencido(s)!`, 'error');
+            }
+            
+            if (vencendoEm3Dias > 0) {
+                mostrarAlertaPrazos(`⏰ ${vencendoEm3Dias} orçamento(s) vencem em 3 dias!`, 'warning');
+            }
+        }
+
+        function mostrarAlertaPrazos(mensagem, tipo) {
+            // Criar elemento de alerta
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alerta.style.position = 'fixed';
+            alerta.style.top = '20px';
+            alerta.style.right = '20px';
+            alerta.style.zIndex = '9999';
+            alerta.style.maxWidth = '400px';
+            
+            alerta.innerHTML = `
+                ${mensagem}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            document.body.appendChild(alerta);
+            
+            // Auto-remover após 10 segundos
+            setTimeout(() => {
+                if (alerta.parentElement) {
+                    alerta.remove();
+                }
+            }, 10000);
+        }
+
+        function atualizarEstatisticas() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            
+            const total = orcamentos.length;
+            const pendentes = orcamentos.filter(o => o.status_orcamento === 'Pendente').length;
+            const aceitos = orcamentos.filter(o => o.status_orcamento === 'Aceito').length;
+            const valorTotalPendente = orcamentos
+                .filter(o => o.status_orcamento === 'Pendente')
+                .reduce((sum, o) => sum + parseFloat(o.valor_total || 0), 0);
+            
+            // Atualizar elementos da interface
+            const elementoTotal = document.getElementById('totalOrcamentos');
+            const elementoPendentes = document.getElementById('orcamentosPendentes');
+            const elementoAceitos = document.getElementById('orcamentosAceitos');
+            const elementoValorTotal = document.getElementById('valorTotalPendente');
+            
+            if (elementoTotal) elementoTotal.textContent = total;
+            if (elementoPendentes) elementoPendentes.textContent = pendentes;
+            if (elementoAceitos) elementoAceitos.textContent = aceitos;
+            if (elementoValorTotal) {
+                elementoValorTotal.textContent = `R$ ${valorTotalPendente.toFixed(2).replace('.', ',')}`;
+            }
+        }
+
+        function adicionarOrcamento() {
+            // Abrir modal ou redirecionar para criação de orçamento
+            const resposta = confirm('🔗 Deseja criar um novo orçamento?\n\n✅ SIM - Abrir Caderno Digital\n❌ NÃO - Criar aqui mesmo');
+            
+            if (resposta) {
+                // Abrir Caderno Digital
+                window.open('/caderno-digital.html', '_blank');
+            } else {
+                // Implementar modal de criação local (futuro)
+                alert('📝 Funcionalidade de criação local será implementada em breve.\n\nPor enquanto, use o Caderno Digital para criar orçamentos.');
+            }
+        }
+
+        function exportarOrcamentos() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            
+            if (orcamentos.length === 0) {
+                alert('⚠️ Nenhum orçamento para exportar.');
+                return;
+            }
+            
+            // Criar CSV
+            const csvContent = [
+                'ID,Paciente,Procedimento,Valor,Status,Data Orçamento,Validade,Hospital,Forma Pagamento',
+                ...orcamentos.map(o => [
+                    o.id,
+                    o.paciente_nome,
+                    o.procedimento_principal,
+                    o.valor_total,
+                    o.status_orcamento,
+                    o.data_orcamento,
+                    o.validade,
+                    o.hospital || '',
+                    o.forma_pagamento || ''
+                ].join(','))
+            ].join('\n');
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `orcamentos_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            alert('📊 Relatório de orçamentos exportado com sucesso!');
+        }
         
         // Função para abrir gerenciamento de leads
         function abrirLeadsManager() {

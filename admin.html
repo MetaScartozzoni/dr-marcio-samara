@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Administrativo Completo - Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="effects.css">
     <style>
         .admin-container {
             max-width: 1920px; /* Aumentar largura máxima */
@@ -1397,16 +1397,16 @@
     <div class="admin-container">
         <div class="admin-header">
             <a href="/dashboard" class="btn-voltar">
-                <i class="fas fa-arrow-left"></i>
+                
                 Voltar ao Dashboard
             </a>
-            <h1><i class="fas fa-users-cog"></i> Portal Administrativo Completo</h1>
+            <h1> Portal Administrativo Completo</h1>
             <p>Central de Administração - Funcionários, Jornada de Pacientes e Cadastros</p>
         </div>
 
         <!-- 📑 SEÇÃO 1: Gestão de Funcionários -->
         <div class="section-title">
-            <h2><i class="fas fa-users"></i> SEÇÃO 1: Gestão de Funcionários</h2>
+            <h2> SEÇÃO 1: Gestão de Funcionários</h2>
             <p>Cadastro, controle e gerenciamento de funcionários e sistema de crachás</p>
         </div>
 
@@ -1415,9 +1415,9 @@
                 <!-- Área de Cadastro de Funcionário -->
         <div class="cadastro-funcionario-section">
             <div class="section-header">
-                <h2><i class="fas fa-user-plus"></i> Cadastro de Funcionário</h2>
+                <h2> Cadastro de Funcionário</h2>
                 <button class="btn-toggle" onclick="toggleCadastroForm()">
-                    <i class="fas fa-plus"></i> Novo Funcionário
+                     Novo Funcionário
                 </button>
             </div>
             
@@ -1427,12 +1427,12 @@
                         <!-- Área da Foto -->
                         <div class="foto-section">
                             <div class="foto-preview" id="fotoPreview">
-                                <i class="fas fa-camera"></i>
+                                
                                 <span>Adicionar Foto</span>
                                 <input type="file" id="fotoFuncionario" accept="image/*" onchange="previewFoto()">
                             </div>
                             <button type="button" class="btn-foto" onclick="document.getElementById('fotoFuncionario').click()">
-                                <i class="fas fa-upload"></i> Selecionar Foto
+                                 Selecionar Foto
                             </button>
                         </div>
 
@@ -1440,7 +1440,7 @@
                         <div class="form-detalhado">
                             <!-- Dados Pessoais -->
                             <div class="dados-pessoais">
-                                <h3><i class="fas fa-user"></i> Dados Pessoais</h3>
+                                <h3> Dados Pessoais</h3>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <label for="nomeCompleto">Nome Completo:</label>
@@ -1466,7 +1466,7 @@
 
                             <!-- Dados Profissionais -->
                             <div class="dados-profissionais">
-                                <h3><i class="fas fa-briefcase"></i> Dados Profissionais</h3>
+                                <h3> Dados Profissionais</h3>
                                 <div class="form-row">
                                     <div class="form-col">
                                         <label for="perfilFuncionario">Perfil/Cargo:</label>
@@ -1508,7 +1508,7 @@
 
                             <!-- Permissões -->
                             <div class="permissoes-cadastro">
-                                <h3><i class="fas fa-shield-alt"></i> Permissões do Cargo</h3>
+                                <h3> Permissões do Cargo</h3>
                                 <div id="permissoesCadastro" class="permissoes-preview">
                                     <span style="color: #666;">Selecione um cargo para ver as permissões</span>
                                 </div>
@@ -1518,10 +1518,10 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn-secondary" onclick="cancelarCadastro()">
-                            <i class="fas fa-times"></i> Cancelar
+                             Cancelar
                         </button>
                         <button type="submit" class="btn-primary">
-                            <i class="fas fa-user-plus"></i> Cadastrar Funcionário
+                             Cadastrar Funcionário
                         </button>
                     </div>
                 </form>
@@ -1531,7 +1531,7 @@
         <!-- Quadro de Funcionários (Crachás) -->
         <div class="funcionarios-section">
             <div class="section-header">
-                <h2><i class="fas fa-id-card"></i> Quadro de Funcionários</h2>
+                <h2> Quadro de Funcionários</h2>
                 <div class="filtros-cracha">
                     <select id="filtroCargo" onchange="filtrarFuncionarios()">
                         <option value="">Todos os Cargos</option>
@@ -1548,7 +1548,7 @@
                 </div>
             </div>
 
-            <div id="funcionariosGrid" class="funcionarios-grid">
+            <div id="funcionariosGrid" class="funcionarios-grid cards-container">
                 <!-- Crachás serão carregados dinamicamente -->
                 <div class="loading">Carregando funcionários...</div>
             </div>
@@ -1557,14 +1557,14 @@
             <div class="section-sistema">
                 <!-- Status do Sistema em Tempo Real -->
                 <div class="section-title">
-                    <h2><i class="fas fa-heartbeat"></i> Status do Sistema</h2>
+                    <h2> Status do Sistema</h2>
                     <p>Informações em tempo real do banco de dados e funcionalidades</p>
                 </div>
 
                 <div class="system-status-section">
-                    <div class="status-grid">
+                    <div class="status-grid cards-container">
                         <div class="status-card">
-                            <h4><i class="fas fa-database"></i> Banco de Dados</h4>
+                            <h4> Banco de Dados</h4>
                             <div id="db-status" class="status-indicator">
                                 <span class="status-dot loading"></span>
                                 <span>Verificando...</span>
@@ -1577,7 +1577,7 @@
 
         <!-- 📑 SEÇÃO 2: Gestão da Jornada do Paciente -->
         <div class="section-title">
-            <h2><i class="fas fa-route"></i> SEÇÃO 2: Gestão da Jornada do Paciente</h2>
+            <h2> SEÇÃO 2: Gestão da Jornada do Paciente</h2>
             <p>Sistema completo de prazos, notificações e acompanhamento - FUNCIONALIDADE PERFEITA</p>
         </div>
 
@@ -1585,21 +1585,21 @@
         <div class="jornada-paciente-redirect">
             <div class="redirect-card">
                 <div class="redirect-icon">
-                    <i class="fas fa-route"></i>
+                    
                 </div>
                 <div class="redirect-content">
                     <h3>Sistema de Jornada do Paciente</h3>
                     <p>Acesse o sistema completo de gestão da jornada, com prazos, notificações e acompanhamento detalhado de cada paciente.</p>
                     <div class="redirect-features">
-                        <span><i class="fas fa-check"></i> Gestão de prazos</span>
-                        <span><i class="fas fa-check"></i> Notificações automáticas</span>
-                        <span><i class="fas fa-check"></i> Acompanhamento completo</span>
-                        <span><i class="fas fa-check"></i> Relatórios detalhados</span>
+                        <span> Gestão de prazos</span>
+                        <span> Notificações automáticas</span>
+                        <span> Acompanhamento completo</span>
+                        <span> Relatórios detalhados</span>
                     </div>
                 </div>
                 <div class="redirect-action">
                     <a href="jornada-paciente.html" class="btn-access-jornada">
-                        <i class="fas fa-external-link-alt"></i>
+                        
                         Acessar Sistema
                     </a>
                     <div class="redirect-stats">
@@ -1620,14 +1620,14 @@
 
         <!-- � SEÇÃO: Status do Sistema em Tempo Real -->
         <div class="section-title">
-            <h2><i class="fas fa-heartbeat"></i> Status do Sistema</h2>
+            <h2> Status do Sistema</h2>
             <p>Informações em tempo real do banco de dados e funcionalidades</p>
         </div>
 
         <div class="system-status-section">
-            <div class="status-grid">
+            <div class="status-grid cards-container">
                 <div class="status-card">
-                    <h4><i class="fas fa-database"></i> Banco de Dados</h4>
+                    <h4> Banco de Dados</h4>
                     <div id="db-status" class="status-indicator">
                         <span class="status-dot loading"></span>
                         <span>Verificando...</span>
@@ -1636,19 +1636,19 @@
                 </div>
                 
                 <div class="status-card">
-                    <h4><i class="fas fa-users"></i> Funcionários</h4>
+                    <h4> Funcionários</h4>
                     <div id="funcionarios-count" class="big-number">-</div>
                     <small>Funcionários ativos</small>
                 </div>
                 
                 <div class="status-card">
-                    <h4><i class="fas fa-cog"></i> Configurações</h4>
+                    <h4> Configurações</h4>
                     <div id="configs-count" class="big-number">-</div>
                     <small>Configurações salvas</small>
                 </div>
                 
                 <div class="status-card">
-                    <h4><i class="fas fa-file-alt"></i> Logs Hoje</h4>
+                    <h4> Logs Hoje</h4>
                     <div id="logs-count" class="big-number">-</div>
                     <small>Atividades registradas</small>
                 </div>
@@ -1656,13 +1656,13 @@
             
             <div class="quick-tests">
                 <button class="btn-test" onclick="testarConexaoBanco()">
-                    <i class="fas fa-database"></i> Testar Banco
+                     Testar Banco
                 </button>
                 <button class="btn-test" onclick="verificarPrazosJornada()">
-                    <i class="fas fa-clock"></i> Verificar Prazos
+                     Verificar Prazos
                 </button>
                 <button class="btn-test" onclick="testarNotificacoes()">
-                    <i class="fas fa-bell"></i> Testar Notificações
+                     Testar Notificações
                 </button>
             </div>
             
@@ -1675,14 +1675,14 @@
 
         <!-- 📑 SEÇÃO 3: Cadastros Externos Aguardando -->
         <div class="section-title">
-            <h2><i class="fas fa-user-clock"></i> SEÇÃO 3: Cadastros Externos Aguardando</h2>
+            <h2> SEÇÃO 3: Cadastros Externos Aguardando</h2>
             <p>Usuários que se cadastraram pelo site e aguardam classificação como pacientes</p>
         </div>
 
         <!-- Usuários Externos Aguardando (Pacientes) -->
         <div class="pacientes-pendentes-section">
             <div class="section-header">
-                <h2><i class="fas fa-users"></i> Cadastros Externos Aguardando</h2>
+                <h2> Cadastros Externos Aguardando</h2>
                 <small style="opacity: 0.8;">Usuários que se cadastraram pelo site (serão classificados como pacientes)</small>
             </div>
 
@@ -1701,16 +1701,16 @@
         <div class="modal-content-configuracao">
             <div class="config-tabs">
                 <div class="config-tab active" onclick="abrirAbaConfig('prazos')">
-                    <i class="fas fa-clock"></i> Prazos Automáticos
+                     Prazos Automáticos
                 </div>
                 <div class="config-tab" onclick="abrirAbaConfig('notificacoes')">
-                    <i class="fas fa-bell"></i> Notificações
+                     Notificações
                 </div>
                 <div class="config-tab" onclick="abrirAbaConfig('templates')">
-                    <i class="fas fa-envelope"></i> Templates
+                     Templates
                 </div>
                 <div class="config-tab" onclick="abrirAbaConfig('automacao')">
-                    <i class="fas fa-robot"></i> Automação
+                     Automação
                 </div>
             </div>
 
@@ -1718,7 +1718,7 @@
                 <!-- Configuração de Prazos -->
                 <div id="configPrazos" class="config-section active">
                     <div class="modal-header-expandido">
-                        <h2><i class="fas fa-clock"></i> Configuração de Prazos Automáticos</h2>
+                        <h2> Configuração de Prazos Automáticos</h2>
                         <button class="modal-close" onclick="fecharModalConfiguracao()">&times;</button>
                     </div>
 
@@ -1808,10 +1808,10 @@
 
                     <div class="form-actions">
                         <button class="btn-primary" onclick="salvarConfiguracoesPrazos()">
-                            <i class="fas fa-save"></i> Salvar Configurações
+                             Salvar Configurações
                         </button>
                         <button class="btn-secondary" onclick="restaurarPadrao()">
-                            <i class="fas fa-undo"></i> Restaurar Padrão
+                             Restaurar Padrão
                         </button>
                     </div>
                 </div>
@@ -1819,7 +1819,7 @@
                 <!-- Configuração de Notificações -->
                 <div id="configNotificacoes" class="config-section">
                     <div class="modal-header-expandido">
-                        <h2><i class="fas fa-bell"></i> Configuração de Notificações</h2>
+                        <h2> Configuração de Notificações</h2>
                     </div>
 
                     <div class="prazo-configuracao">
@@ -1880,7 +1880,7 @@
                 <!-- Templates de Mensagens -->
                 <div id="configTemplates" class="config-section">
                     <div class="modal-header-expandido">
-                        <h2><i class="fas fa-envelope"></i> Templates de Mensagens</h2>
+                        <h2> Templates de Mensagens</h2>
                     </div>
 
                     <div class="prazo-configuracao">
@@ -1930,7 +1930,7 @@ Dr. Marcio Scartozzoni
                 <!-- Automação -->
                 <div id="configAutomacao" class="config-section">
                     <div class="modal-header-expandido">
-                        <h2><i class="fas fa-robot"></i> Configuração de Automação</h2>
+                        <h2> Configuração de Automação</h2>
                     </div>
 
                     <div class="prazo-configuracao">
@@ -1993,7 +1993,7 @@ Dr. Marcio Scartozzoni
     <div id="modalPainelNotificacoes" class="modal-configuracao">
         <div class="modal-content-configuracao">
             <div class="modal-header-expandido">
-                <h2><i class="fas fa-bell"></i> Painel de Notificações e Controle</h2>
+                <h2> Painel de Notificações e Controle</h2>
                 <button class="modal-close" onclick="fecharModalNotificacoes()">&times;</button>
             </div>
             
@@ -2001,7 +2001,7 @@ Dr. Marcio Scartozzoni
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; justify-content: center; max-width: 1200px; margin: 0 auto;">
                     <!-- Notificações Pendentes -->
                     <div>
-                        <h3><i class="fas fa-clock"></i> Notificações Pendentes</h3>
+                        <h3> Notificações Pendentes</h3>
                         <div id="notificacoesPendentes" style="max-height: 400px; overflow-y: auto;">
                             <!-- Lista de notificações -->
                         </div>
@@ -2009,7 +2009,7 @@ Dr. Marcio Scartozzoni
 
                     <!-- Log de Envios -->
                     <div>
-                        <h3><i class="fas fa-history"></i> Log de Envios</h3>
+                        <h3> Log de Envios</h3>
                         <div id="logEnvios" style="max-height: 400px; overflow-y: auto;">
                             <!-- Log de envios -->
                         </div>
@@ -2018,10 +2018,10 @@ Dr. Marcio Scartozzoni
 
                 <div class="form-actions" style="margin-top: 30px;">
                     <button class="btn-primary" onclick="enviarTodasNotificacoes()">
-                        <i class="fas fa-paper-plane"></i> Enviar Todas
+                         Enviar Todas
                     </button>
                     <button class="btn-secondary" onclick="limparLog()">
-                        <i class="fas fa-trash"></i> Limpar Log
+                         Limpar Log
                     </button>
                 </div>
             </div>
@@ -2032,7 +2032,7 @@ Dr. Marcio Scartozzoni
     <div id="modalFuncionario" class="modal-overlay" style="display: none;">
         <div class="modal-content-expandido">
             <div class="modal-header-expandido">
-                <h2><i class="fas fa-id-card"></i> Detalhes do Funcionário</h2>
+                <h2> Detalhes do Funcionário</h2>
                 <button class="modal-close" onclick="fecharModalFuncionario()">&times;</button>
             </div>
             
@@ -2041,16 +2041,16 @@ Dr. Marcio Scartozzoni
                     <div class="funcionario-foto-grande">
                         <img id="modalFoto" src="" alt="Foto do funcionário" style="display: none;">
                         <div id="modalFotoPlaceholder" style="width: 150px; height: 150px; background: #f0f0f0; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
-                            <i class="fas fa-user" style="font-size: 48px; color: #667eea;"></i>
+                            
                         </div>
                         <button class="btn-foto" style="margin-top: 15px;" onclick="alterarFoto()">
-                            <i class="fas fa-camera"></i> Alterar Foto
+                             Alterar Foto
                         </button>
                     </div>
 
                     <div class="funcionario-dados">
                         <div class="dados-grupo">
-                            <h4><i class="fas fa-user"></i> Dados Pessoais</h4>
+                            <h4> Dados Pessoais</h4>
                             <div class="dados-item">
                                 <strong>Nome:</strong> <span id="modalNome">-</span>
                             </div>
@@ -2066,7 +2066,7 @@ Dr. Marcio Scartozzoni
                         </div>
 
                         <div class="dados-grupo">
-                            <h4><i class="fas fa-briefcase"></i> Dados Profissionais</h4>
+                            <h4> Dados Profissionais</h4>
                             <div class="dados-item">
                                 <strong>Cargo:</strong> <span id="modalCargo">-</span>
                             </div>
@@ -2085,7 +2085,7 @@ Dr. Marcio Scartozzoni
                         </div>
 
                         <div class="dados-grupo" style="grid-column: 1 / -1;">
-                            <h4><i class="fas fa-shield-alt"></i> Permissões Atuais</h4>
+                            <h4> Permissões Atuais</h4>
                             <div id="modalPermissoes" class="permissoes-preview">
                                 <!-- Permissões serão carregadas -->
                             </div>
@@ -2095,13 +2095,13 @@ Dr. Marcio Scartozzoni
 
                 <div class="form-actions">
                     <button class="btn-secondary" onclick="editarFuncionario()">
-                        <i class="fas fa-edit"></i> Editar
+                         Editar
                     </button>
                     <button class="btn-primary" onclick="alterarPermissoes()">
-                        <i class="fas fa-shield-alt"></i> Alterar Permissões
+                         Alterar Permissões
                     </button>
                     <button class="btn-secondary" onclick="fecharModalFuncionario()">
-                        <i class="fas fa-times"></i> Fechar
+                         Fechar
                     </button>
                 </div>
             </div>
@@ -2314,8 +2314,8 @@ Dr. Marcio Scartozzoni
             
             const btn = document.querySelector('.btn-toggle');
             btn.innerHTML = isVisible ? 
-                '<i class="fas fa-plus"></i> Novo Funcionário' : 
-                '<i class="fas fa-minus"></i> Fechar Formulário';
+                ' Novo Funcionário' : 
+                ' Fechar Formulário';
         }
 
         // Preview da foto
@@ -2356,7 +2356,7 @@ Dr. Marcio Scartozzoni
         function cancelarCadastro() {
             document.getElementById('formCadastroFuncionario').reset();
             document.getElementById('fotoPreview').innerHTML = `
-                <i class="fas fa-camera"></i>
+                
                 <span>Adicionar Foto</span>
                 <input type="file" id="fotoFuncionario" accept="image/*" onchange="previewFoto()">
             `;
@@ -2476,7 +2476,7 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
                         <div class="cracha-foto">
                             ${func.foto ? 
                                 `<img src="${func.foto}" alt="${func.nome}">` : 
-                                '<i class="fas fa-user"></i>'
+                                ''
                             }
                         </div>
                         <div class="cracha-info">
@@ -2485,9 +2485,9 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
                         </div>
                     </div>
                     <div class="cracha-detalhes">
-                        <div><i class="fas fa-envelope"></i> ${func.email}</div>
-                        <div><i class="fas fa-building"></i> ${func.setor}</div>
-                        ${func.registro ? `<div><i class="fas fa-id-badge"></i> ${func.registro}</div>` : ''}
+                        <div> ${func.email}</div>
+                        <div> ${func.setor}</div>
+                        ${func.registro ? `<div> ${func.registro}</div>` : ''}
                     </div>
                     <div class="cracha-permissoes">
                         ${func.permissoes.slice(0, 3).map(perm => 
@@ -2617,7 +2617,7 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
                         <small>${new Date(notif.timestamp).toLocaleString('pt-BR')}</small>
                     </div>
                     <button onclick="enviarNotificacaoManual(${notif.id})" class="btn-acao-jornada enviar">
-                        <i class="fas fa-paper-plane"></i>
+                        
                     </button>
                 </div>
             `).join('');
@@ -2750,18 +2750,18 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
                             <div class="paciente-header">
                                 <div class="paciente-info">
                                     <h4>${usuario.nome}</h4>
-                                    <p><i class="fas fa-envelope"></i> ${usuario.email}</p>
-                                    <p><i class="fas fa-phone"></i> ${usuario.telefone || 'Não informado'}</p>
-                                    <p><i class="fas fa-user-tag"></i> Tipo: ${usuario.tipo}</p>
-                                    <p><i class="fas fa-calendar"></i> ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</p>
-                                    <p><i class="fas fa-clock"></i> Status: ${usuario.status_aprovacao}</p>
+                                    <p> ${usuario.email}</p>
+                                    <p> ${usuario.telefone || 'Não informado'}</p>
+                                    <p> Tipo: ${usuario.tipo}</p>
+                                    <p> ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</p>
+                                    <p> Status: ${usuario.status_aprovacao}</p>
                                 </div>
                                 <div class="paciente-actions">
                                     <button class="btn-aprovar-paciente" onclick="aprovarUsuario('${usuario.email}')">
-                                        <i class="fas fa-check"></i> Aprovar
+                                         Aprovar
                                     </button>
                                     <button class="btn-rejeitar-paciente" onclick="rejeitarUsuario('${usuario.email}')" style="background: #dc3545; margin-top: 5px;">
-                                        <i class="fas fa-times"></i> Rejeitar
+                                         Rejeitar
                                     </button>
                                 </div>
                             </div>
@@ -2991,7 +2991,7 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
         async function testarConexaoBanco() {
             const resultDiv = document.getElementById('test-results');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando conexão...';
+            resultDiv.innerHTML = ' Testando conexão...';
             
             try {
                 const response = await fetch('/api/system/database-info');
@@ -3021,7 +3021,7 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
         async function verificarPrazosJornada() {
             const resultDiv = document.getElementById('test-results');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando prazos...';
+            resultDiv.innerHTML = ' Verificando prazos...';
             
             try {
                 const [prazosResponse, verificacaoResponse] = await Promise.all([
@@ -3061,7 +3061,7 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
         async function testarNotificacoes() {
             const resultDiv = document.getElementById('test-results');
             resultDiv.style.display = 'block';
-            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando notificações...';
+            resultDiv.innerHTML = ' Testando notificações...';
             
             try {
                 const response = await fetch('/api/jornada/gerar-notificacoes', {
@@ -3089,5 +3089,8 @@ O funcionário deve acessar o sistema e criar sua senha usando o código forneci
             }
         }
     </script>
+    
+    <!-- Sistema de Efeitos Visuais -->
+    <script src="visual-effects.js"></script>
 </body>
 </html>

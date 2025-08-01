@@ -1,0 +1,257 @@
+/* ==============================================
+   EFEITOS VISUAIS AVANÇADOS - BLUR & HOVER
+   Arquivo: effects.css
+   ============================================== */
+
+/* ==============================================
+   EFEITOS GLOBAIS DE BLUR E HOVER
+   ============================================== */
+
+/* Melhoria na performance das animações */
+* {
+    will-change: auto;
+}
+
+.card, .status-card, .redirect-card, .paciente-card, .setup-card, 
+.consent-card, .document-item, .marco-item, .agendamento-recente,
+.stat-card, .card-paciente {
+    will-change: transform, filter, opacity;
+}
+
+/* Container base para efeitos blur */
+.blur-container, .cards-container, .stats-grid, .cards-grid, 
+.grid-container, .document-library, #marcosPrincipais, 
+#agendamentosRecentes, .status-grid, .funcionarios-grid {
+    position: relative;
+}
+
+/* Efeito blur universal */
+.blur-container:hover > *:not(:hover),
+.cards-container:hover > *:not(:hover),
+.stats-grid:hover > *:not(:hover),
+.cards-grid:hover > *:not(:hover),
+.document-library:hover > *:not(:hover),
+#marcosPrincipais:hover > *:not(:hover),
+#agendamentosRecentes:hover > *:not(:hover),
+.status-grid:hover > *:not(:hover),
+.funcionarios-grid:hover > *:not(:hover) {
+    filter: blur(3px) brightness(0.7);
+    opacity: 0.6;
+    transform: scale(0.96);
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Reset do blur no hover */
+.blur-container *:hover,
+.cards-container *:hover,
+.stats-grid *:hover,
+.cards-grid *:hover,
+.document-library *:hover,
+#marcosPrincipais *:hover,
+#agendamentosRecentes *:hover,
+.status-grid *:hover,
+.funcionarios-grid *:hover {
+    filter: blur(0px) brightness(1) !important;
+    opacity: 1 !important;
+    transform: translateY(-8px) scale(1.03) !important;
+    z-index: 10;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+}
+
+/* ==============================================
+   EFEITOS DE SHIMMER UNIVERSAIS
+   ============================================== */
+
+/* Shimmer base para todos os elementos interativos */
+.card, .status-card, .redirect-card, .paciente-card, .setup-card,
+.consent-card, .document-item, .marco-item, .agendamento-recente,
+.stat-card, .card-paciente {
+    position: relative;
+    overflow: hidden;
+}
+
+.card::after, .status-card::after, .redirect-card::after, 
+.paciente-card::after, .setup-card::after, .consent-card::after,
+.document-item::after, .marco-item::after, .agendamento-recente::after,
+.stat-card::after, .card-paciente::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg, 
+        transparent, 
+        rgba(255,255,255,0.15), 
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.card:hover::after, .status-card:hover::after, .redirect-card:hover::after,
+.paciente-card:hover::after, .setup-card:hover::after, .consent-card:hover::after,
+.document-item:hover::after, .marco-item:hover::after, .agendamento-recente:hover::after,
+.stat-card:hover::after, .card-paciente:hover::after {
+    animation: universalShimmer 0.8s ease-in-out;
+}
+
+@keyframes universalShimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+        opacity: 0;
+    }
+}
+
+/* ==============================================
+   EFEITOS DE PULSE PARA ELEMENTOS ATIVOS
+   ============================================== */
+
+.pulse-active {
+    animation: softPulse 2s ease-in-out infinite;
+}
+
+@keyframes softPulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+    }
+}
+
+/* ==============================================
+   EFEITOS DE ENTRADA (FADE IN)
+   ============================================== */
+
+.fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade in com delay para múltiplos elementos */
+.fade-in-delay-1 { animation-delay: 0.1s; }
+.fade-in-delay-2 { animation-delay: 0.2s; }
+.fade-in-delay-3 { animation-delay: 0.3s; }
+.fade-in-delay-4 { animation-delay: 0.4s; }
+
+/* ==============================================
+   EFEITOS DE GLASSMORPHISM
+   ============================================== */
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.glass-effect:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+}
+
+/* ==============================================
+   EFEITOS DE LOADING/SKELETON
+   ============================================== */
+
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+}
+
+@keyframes skeletonLoading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ==============================================
+   RESPONSIVIDADE DOS EFEITOS
+   ============================================== */
+
+/* Reduzir efeitos em dispositivos móveis para performance */
+@media (max-width: 768px) {
+    .blur-container:hover > *:not(:hover),
+    .cards-container:hover > *:not(:hover),
+    .stats-grid:hover > *:not(:hover) {
+        filter: blur(1px) brightness(0.8);
+        transform: scale(0.98);
+    }
+    
+    .card:hover, .status-card:hover, .document-item:hover {
+        transform: translateY(-4px) scale(1.01) !important;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+}
+
+/* Desabilitar efeitos complexos em dispositivos com pouca capacidade */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .blur-container:hover > *:not(:hover),
+    .cards-container:hover > *:not(:hover) {
+        filter: none;
+        opacity: 0.8;
+        transform: none;
+    }
+}
+
+/* ==============================================
+   UTILITÁRIOS PARA DESENVOLVEDORES
+   ============================================== */
+
+/* Classe para desabilitar temporariamente efeitos */
+.no-effects * {
+    filter: none !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Classe para debug de containers */
+.debug-blur-container {
+    outline: 2px dashed rgba(255, 0, 0, 0.5);
+}
+
+.debug-blur-container::before {
+    content: 'BLUR CONTAINER';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 10px;
+    color: red;
+    background: white;
+    padding: 2px 4px;
+    z-index: 1000;
+}
