@@ -138,6 +138,26 @@
 
         // Verificar se o email realmente precisa definir senha
         async function verificarStatusEmail(email) {
+            // Lista de emails admin que são automaticamente válidos
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin detectado:', email);
+                // Email admin - permitir definir senha automaticamente
+                return;
+            }
+            
             try {
                 const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
                     method: 'GET',
@@ -243,8 +263,63 @@
             loading.style.display = 'block';
             message.innerHTML = '<div class="info">Verificando permissões...</div>';
             
+            // Lista de emails admin que são automaticamente válidos
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin confirmado para criação de senha:', email);
+                message.innerHTML = '<div class="info">👑 Admin detectado. Definindo senha...</div>';
+                
+                // Prosseguir direto para criação de senha para admin
+                try {
+                    const response = await fetch('/api/auth/criar-senha', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            email: email,
+                            senha: senha 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('📥 Resposta admin:', data);
+                    
+                    if (data.sucesso || response.ok) {
+                        document.getElementById('senhaForm').style.display = 'none';
+                        sucesso.style.display = 'block';
+                        
+                        // Redirecionar para login após 3 segundos
+                        setTimeout(() => {
+                            window.location.href = '/login.html?email=' + encodeURIComponent(email);
+                        }, 3000);
+                    } else {
+                        const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
+                        message.innerHTML = '<div class="error">Erro admin: ' + errorMessage + '</div>';
+                    }
+                } catch (error) {
+                    console.error('❌ Erro admin:', error);
+                    message.innerHTML = '<div class="error">Erro ao definir senha admin. Tente novamente.</div>';
+                } finally {
+                    loading.style.display = 'none';
+                }
+                return;
+            }
+            
             try {
-                // Dupla verificação antes de permitir criação de senha
+                // Dupla verificação antes de permitir criação de senha (para não-admin)
                 const statusResponse = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
                     method: 'GET',
                     headers: {

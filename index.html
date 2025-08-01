@@ -40,6 +40,36 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
+            // Lista de emails admin que são automaticamente válidos
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin detectado:', email);
+                message.innerHTML = '<div class="success">👑 Admin detectado! Redirecionando para definir senha...</div>';
+                
+                // Admin sempre pode definir senha
+                localStorage.setItem('tempEmail', email);
+                localStorage.setItem('emailVerificado', 'true');
+                localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                
+                setTimeout(() => {
+                    window.location.href = '/senha.html?email=' + encodeURIComponent(email);
+                }, 1500);
+                loading.style.display = 'none';
+                return;
+            }
+            
             try {
                 const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
                     method: 'GET',
