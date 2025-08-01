@@ -41,12 +41,11 @@
             message.innerHTML = '';
             
             try {
-                const response = await fetch('/api/verificar-email', {
-                    method: 'POST',
+                const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email })
+                    }
                 });
                 
                 const data = await response.json();

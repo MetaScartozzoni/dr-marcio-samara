@@ -856,6 +856,43 @@ app.post('/api/auth/autorizar-funcionario', (req, res) => {
     }
 });
 
+// Rota para verificar status do funcionário
+app.get('/api/auth/status-funcionario/:email', (req, res) => {
+    try {
+        const { email } = req.params;
+        
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (!funcionario) {
+            return res.json({ 
+                sucesso: false,
+                existe: false,
+                message: 'Funcionário não encontrado'
+            });
+        }
+        
+        res.json({ 
+            sucesso: true,
+            existe: true,
+            funcionario: {
+                email: funcionario.email,
+                nome: funcionario.nome,
+                status: funcionario.status,
+                tipo: funcionario.tipo,
+                cargo: funcionario.cargo
+            },
+            aprovado: funcionario.status === 'ativo',
+            aguardandoAprovacao: funcionario.status === 'aguardando_autorizacao'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao verificar status:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log('\n========================================');
