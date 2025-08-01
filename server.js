@@ -354,7 +354,7 @@ app.post('/api/criar-senha', async (req, res) => {
         const { email, senha } = req.body;
         
         // Verificar se usuário existe
-        const checkQuery = 'SELECT user_id FROM usuarios WHERE email = $1';
+        const checkQuery = 'SELECT id FROM usuarios WHERE email = $1';
         const checkResult = await pool.query(checkQuery, [email]);
         
         if (checkResult.rows.length === 0) {
@@ -431,11 +431,201 @@ app.post('/api/login', async (req, res) => {
         res.json({ 
             sucesso: true, 
             role: usuario.role,
-            full_name: usuario.full_name 
+            full_name: usuario.full_name,
+            redirectUrl: getRedirectUrl(usuario.role) // Adicionar URL de redirecionamento
         });
     } catch (error) {
         console.error('Erro ao fazer login:', error);
         res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// Função para determinar URL de redirecionamento baseado no role
+function getRedirectUrl(role) {
+    const redirectMap = {
+        'admin': '/admin',
+        'staff': '/dashboard-funcionario', 
+        'medico': '/dashboard',
+        'recepcionista': '/dashboard-funcionario',
+        'patient': '/dashboard',
+        'funcionario': '/dashboard-funcionario'
+    };
+    
+    return redirectMap[role] || '/dashboard';
+}
+
+// API específica para obter URL de redirecionamento
+app.post('/api/get-redirect', async (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ erro: 'Email é obrigatório' });
+        }
+        
+        // Buscar role do usuário
+        const query = 'SELECT tipo as role, nome FROM usuarios WHERE email = $1';
+        const result = await pool.query(query, [email]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ erro: 'Usuário não encontrado' });
+        }
+        
+        const usuario = result.rows[0];
+        const redirectUrl = getRedirectUrl(usuario.role);
+        
+        res.json({
+            sucesso: true,
+            role: usuario.role,
+            nome: usuario.nome,
+            redirectUrl: redirectUrl,
+            pages: {
+                admin: '/admin',
+                staff: '/dashboard-funcionario',
+                medico: '/dashboard', 
+                recepcionista: '/dashboard-funcionario',
+                patient: '/dashboard',
+                funcionario: '/dashboard-funcionario'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Erro ao obter redirecionamento:', error);
+        res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// Middleware para verificar autenticação e redirecionamento
+app.get('/api/check-auth', async (req, res) => {
+    try {
+        const { email } = req.query;
+        
+        if (!email) {
+            return res.json({ 
+                authenticated: false,
+                redirectUrl: '/login',
+                message: 'Email não fornecido'
+            });
+        }
+        
+        // Verificar se usuário existe e está aprovado
+        const query = `
+            SELECT email, tipo as role, nome, autorizado, status_aprovacao, password_hash
+            FROM usuarios WHERE email = $1
+        `;
+        const result = await pool.query(query, [email]);
+        
+        if (result.rows.length === 0) {
+            return res.json({ 
+                authenticated: false,
+                redirectUrl: '/login',
+                message: 'Usuário não encontrado'
+            });
+        }
+        
+        const usuario = result.rows[0];
+        
+        // Verificar se está aprovado
+        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+            return res.json({ 
+                authenticated: false,
+                redirectUrl: '/aguardando-autorizacao',
+                message: 'Usuário aguardando aprovação',
+                status: usuario.status_aprovacao
+            });
+        }
+        
+        // Verificar se tem senha criada
+        if (!usuario.password_hash) {
+            return res.json({ 
+                authenticated: false,
+                redirectUrl: '/criar-senha',
+                message: 'Usuário precisa criar senha',
+                email: email
+            });
+        }
+        
+        // Usuário autenticado - retornar redirecionamento
+        const redirectUrl = getRedirectUrl(usuario.role);
+        
+        res.json({ 
+            authenticated: true,
+            redirectUrl: redirectUrl,
+            user: {
+                email: usuario.email,
+                nome: usuario.nome,
+                role: usuario.role
+            },
+            message: 'Usuário autenticado com sucesso'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        res.status(500).json({ 
+            authenticated: false,
+            redirectUrl: '/login',
+            message: 'Erro interno do servidor' 
+        });
+    }
+});
+
+// API para validar sessão e obter dados do usuário
+app.post('/api/validate-session', async (req, res) => {
+    try {
+        const { email, sessionToken } = req.body;
+        
+        if (!email) {
+            return res.status(401).json({ 
+                valid: false,
+                redirectUrl: '/login',
+                message: 'Sessão inválida'
+            });
+        }
+        
+        // Buscar dados do usuário
+        const query = `
+            SELECT email, tipo as role, nome, autorizado, status_aprovacao
+            FROM usuarios WHERE email = $1
+        `;
+        const result = await pool.query(query, [email]);
+        
+        if (result.rows.length === 0) {
+            return res.status(401).json({ 
+                valid: false,
+                redirectUrl: '/login',
+                message: 'Usuário não encontrado'
+            });
+        }
+        
+        const usuario = result.rows[0];
+        
+        // Verificar se ainda está aprovado
+        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+            return res.status(403).json({ 
+                valid: false,
+                redirectUrl: '/aguardando-autorizacao',
+                message: 'Acesso revogado'
+            });
+        }
+        
+        res.json({ 
+            valid: true,
+            user: {
+                email: usuario.email,
+                nome: usuario.nome,
+                role: usuario.role
+            },
+            redirectUrl: getRedirectUrl(usuario.role),
+            message: 'Sessão válida'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao validar sessão:', error);
+        res.status(500).json({ 
+            valid: false,
+            redirectUrl: '/login',
+            message: 'Erro interno do servidor' 
+        });
     }
 });
 
@@ -1208,6 +1398,22 @@ app.get('/senha', (req, res) => {
 
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/dashboard-funcionario', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard-funcionario.html'));
+});
+
+app.get('/dashboard-admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.get('/dashboard-medico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+app.get('/dashboard-recepcionista', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard-funcionario.html'));
 });
 
 app.get('/admin', (req, res) => {
