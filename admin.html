@@ -1063,6 +1063,26 @@
             font-weight: 600;
         }
 
+        .btn-rejeitar-paciente {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .btn-aprovar-paciente:hover {
+            background: #218838;
+        }
+
+        .btn-rejeitar-paciente:hover {
+            background: #c82333;
+        }
+
         /* Otimizações para Desktop */
         @media (min-width: 1200px) {
             .admin-container {
@@ -2303,7 +2323,7 @@ Dr. Marcio Scartozzoni
         }
 
         // Submeter cadastro de funcionário
-        document.getElementById('formCadastroFuncionario').addEventListener('submit', function(e) {
+        document.getElementById('formCadastroFuncionario').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = {
@@ -2319,32 +2339,70 @@ Dr. Marcio Scartozzoni
                 salario: document.getElementById('salario').value
             };
             
-            // Gerar senha provisória
-            const senhaProvisoria = gerarSenhaProvisoria();
-            
-            // Simular cadastro
-            alert(`✅ Funcionário cadastrado com sucesso!
-
-📧 Email de acesso enviado para: ${formData.email}
-
-🔐 Dados de acesso:
-   Email: ${formData.email}
-   Senha: ${senhaProvisoria}
-
-O funcionário receberá as credenciais por email e poderá alterar a senha no primeiro acesso.`);
-            
-            // Adicionar à lista (simulação)
-            const novoFuncionario = {
-                id: Date.now(),
-                ...formData,
-                foto: null,
-                status: 'ativo',
-                permissoes: getPermissoesPorCargo(formData.cargo)
+            // Mapear cargo para tipo de usuário
+            const tipoMap = {
+                'administrativo': 'staff',
+                'atendimento': 'recepcionista',
+                'medico': 'medico'
             };
             
-            funcionarios.push(novoFuncionario);
-            carregarFuncionarios();
-            cancelarCadastro();
+            const dadosCadastro = {
+                email: formData.email,
+                nome: formData.nome,
+                telefone: formData.telefone,
+                tipo: tipoMap[formData.cargo] || 'funcionario'
+            };
+            
+            try {
+                // Enviar para API de cadastro
+                const response = await fetch('/api/cadastrar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosCadastro)
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    // Auto-aprovar funcionários cadastrados pelo admin
+                    const approveResponse = await fetch('/api/aprovar-usuario', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: formData.email,
+                            aprovadorEmail: 'admin@drmarcio.com'
+                        })
+                    });
+                    
+                    const approveData = await approveResponse.json();
+                    
+                    if (approveData.sucesso) {
+                        alert(`✅ Funcionário cadastrado e aprovado com sucesso!
+
+📧 Email: ${formData.email}
+👤 Nome: ${formData.nome}
+🏢 Cargo: ${formData.cargo}
+🔐 Código de Acesso: ${approveData.codigoAcesso}
+
+O funcionário deve acessar o sistema e criar sua senha usando o código fornecido.`);
+                        
+                        // Recarregar lista de funcionários
+                        carregarFuncionarios();
+                        cancelarCadastro();
+                    } else {
+                        alert('❌ Erro ao aprovar funcionário: ' + (approveData.message || approveData.erro));
+                    }
+                } else {
+                    alert('❌ Erro ao cadastrar funcionário: ' + (data.message || data.erro));
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar funcionário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
         });
 
         // Gerar senha provisória
@@ -2635,42 +2693,114 @@ O funcionário receberá as credenciais por email e poderá alterar a senha no p
         }
 
         // Carregar pacientes pendentes
-        function carregarPacientesPendentes() {
+        async function carregarPacientesPendentes() {
             const grid = document.getElementById('pacientesPendentes');
             
-            if (pacientesPendentes.length === 0) {
-                pacientesPendentes = [...pacientesExemplo];
-            }
-            
-            grid.innerHTML = pacientesPendentes.map(paciente => `
-                <div class="paciente-card">
-                    <div class="paciente-header">
-                        <div class="paciente-info">
-                            <h4>${paciente.nome}</h4>
-                            <p><i class="fas fa-envelope"></i> ${paciente.email}</p>
-                            <p><i class="fas fa-phone"></i> ${paciente.telefone}</p>
-                            <p><i class="fas fa-calendar"></i> ${new Date(paciente.dataCadastro).toLocaleDateString('pt-BR')}</p>
+            try {
+                grid.innerHTML = '<div class="loading">Carregando usuários pendentes...</div>';
+                
+                // Buscar usuários pendentes na API
+                const response = await fetch('/api/usuarios-pendentes');
+                const data = await response.json();
+                
+                if (data.sucesso && data.usuarios.length > 0) {
+                    grid.innerHTML = data.usuarios.map(usuario => `
+                        <div class="paciente-card">
+                            <div class="paciente-header">
+                                <div class="paciente-info">
+                                    <h4>${usuario.nome}</h4>
+                                    <p><i class="fas fa-envelope"></i> ${usuario.email}</p>
+                                    <p><i class="fas fa-phone"></i> ${usuario.telefone || 'Não informado'}</p>
+                                    <p><i class="fas fa-user-tag"></i> Tipo: ${usuario.tipo}</p>
+                                    <p><i class="fas fa-calendar"></i> ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</p>
+                                    <p><i class="fas fa-clock"></i> Status: ${usuario.status_aprovacao}</p>
+                                </div>
+                                <div class="paciente-actions">
+                                    <button class="btn-aprovar-paciente" onclick="aprovarUsuario('${usuario.email}')">
+                                        <i class="fas fa-check"></i> Aprovar
+                                    </button>
+                                    <button class="btn-rejeitar-paciente" onclick="rejeitarUsuario('${usuario.email}')" style="background: #dc3545; margin-top: 5px;">
+                                        <i class="fas fa-times"></i> Rejeitar
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="btn-aprovar-paciente" onclick="aprovarPaciente(${paciente.id})">
-                            <i class="fas fa-check"></i> Aprovar
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<div class="empty-state">✅ Nenhum usuário pendente de aprovação</div>';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar usuários pendentes:', error);
+                grid.innerHTML = '<div class="error">❌ Erro ao carregar usuários pendentes</div>';
+            }
         }
 
         // Aprovar paciente
-        function aprovarPaciente(id) {
-            const paciente = pacientesPendentes.find(p => p.id === id);
-            if (!paciente) return;
+        // Aprovar usuário
+        async function aprovarUsuario(email) {
+            if (!confirm(`Aprovar usuário com email "${email}"?`)) return;
             
-            if (confirm(`Aprovar "${paciente.nome}" como paciente?`)) {
-                // Remover da lista
-                pacientesPendentes = pacientesPendentes.filter(p => p.id !== id);
-                carregarPacientesPendentes();
+            try {
+                const response = await fetch('/api/aprovar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        aprovadorEmail: 'admin@drmarcio.com'
+                    })
+                });
                 
-                alert(`✅ Paciente "${paciente.nome}" aprovado com sucesso!`);
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    alert(`✅ Usuário aprovado com sucesso!\n\nCódigo de acesso: ${data.codigoAcesso}`);
+                    carregarPacientesPendentes(); // Recarregar lista
+                } else {
+                    alert('❌ Erro ao aprovar usuário: ' + (data.message || data.erro));
+                }
+            } catch (error) {
+                console.error('Erro ao aprovar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
             }
+        }
+        
+        // Rejeitar usuário
+        async function rejeitarUsuario(email) {
+            const motivo = prompt(`Motivo da rejeição para "${email}":`);
+            if (!motivo) return;
+            
+            try {
+                const response = await fetch('/api/rejeitar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        motivo: motivo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.sucesso) {
+                    alert(`✅ Usuário rejeitado.`);
+                    carregarPacientesPendentes(); // Recarregar lista
+                } else {
+                    alert('❌ Erro ao rejeitar usuário: ' + (data.message || data.erro));
+                }
+            } catch (error) {
+                console.error('Erro ao rejeitar usuário:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
+
+        // Função legada - manter para compatibilidade
+        function aprovarPaciente(id) {
+            console.log('Função legada aprovarPaciente chamada com ID:', id);
+            alert('Esta função foi substituída pelas novas funções de aprovação.');
         }
 
         // Obter texto do cargo
