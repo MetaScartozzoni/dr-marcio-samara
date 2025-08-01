@@ -98,8 +98,14 @@
                         // Login bem-sucedido
                         this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
                         
+                        // Preparar dados do usuário para localStorage
+                        const userData = {
+                            ...resultado.usuario,
+                            autorizado: true // Admin sempre autorizado
+                        };
+                        
                         // Salvar dados do usuário
-                        localStorage.setItem('userInfo', JSON.stringify(resultado.usuario));
+                        localStorage.setItem('userInfo', JSON.stringify(userData));
                         
                         // Redirecionar para o dashboard correto
                         setTimeout(() => {
