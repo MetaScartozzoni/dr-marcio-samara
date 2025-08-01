@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #bee5eb;
+        }
+        .admin-success {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+        .tipo-usuario {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .tipo-admin { background: #ffd700; color: #333; }
+        .tipo-funcionario { background: #17a2b8; color: white; }
+        .tipo-paciente { background: #28a745; color: white; }
+    </style>
     <!-- VERSAO ATUALIZADA COM TIPO DE USUARIO - 28/07/2025 -->
 </head>
 <body>
@@ -109,65 +138,216 @@
         document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const email = document.getElementById('email').value;
+            const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
+            const cpf = document.getElementById('cpf').value;
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmar_senha').value;
-            
-            // Validar senhas
-            if (senha !== confirmarSenha) {
-                document.getElementById('message').innerHTML = '<div class="error">As senhas não coincidem!</div>';
-                return;
-            }
-            
-            const formData = {
-                nome: document.getElementById('nome').value,
-                email: document.getElementById('email').value,
-                telefone: document.getElementById('telefone').value,
-                cpf: document.getElementById('cpf').value,
-                senha: senha
-            };
-            
-            console.log('📝 Enviando dados:', formData);
             
             const loading = document.getElementById('loading');
             const message = document.getElementById('message');
             
+            // Validar senhas
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem!</div>';
+                return;
+            }
+            
+            if (senha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres!</div>';
+                return;
+            }
+            
             loading.style.display = 'block';
-            message.innerHTML = '';
+            message.innerHTML = '<div class="info">Verificando email nas tabelas...</div>';
+            
+            // Lista de emails admin
+            const emailsAdmin = [
+                'admin@drmarcio.com',
+                'admin@drmarcio.com.br',
+                'admin@mscartozzoni.com.br',
+                'marcioscartozzoni@gmail.com',
+                'scartozzoni@hotmail.com'
+            ];
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
             
             try {
-                const response = await fetch('/api/cadastrar', {
-                    method: 'POST',
+                // Primeiro: Verificar se email já existe no sistema
+                const statusResponse = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
+                    }
                 });
                 
-                const data = await response.json();
-                console.log('📥 Resposta recebida:', data);
+                const statusData = await statusResponse.json();
                 
-                if (data.sucesso) {
-                    message.innerHTML = '<div class="success">' + data.message + '</div>';
+                if (statusResponse.ok && statusData.existe) {
+                    // Email já existe no sistema
+                    if (statusData.temSenha) {
+                        message.innerHTML = `
+                            <div class="error">
+                                Email já cadastrado com senha definida.
+                                <br><br>
+                                <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-primary" 
+                                   style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                    Fazer Login
+                                </a>
+                            </div>
+                        `;
+                        loading.style.display = 'none';
+                        return;
+                    } else {
+                        // Existe mas sem senha - redirecionar para definir senha
+                        message.innerHTML = `
+                            <div class="info">
+                                Email já cadastrado. Redirecionando para definir senha...
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            window.location.href = `/senha.html?email=${encodeURIComponent(email)}`;
+                        }, 2000);
+                        loading.style.display = 'none';
+                        return;
+                    }
+                }
+                
+                // Email não existe - fazer cadastro
+                if (isEmailAdmin) {
+                    // ADMIN: Cadastro automático e ativação imediata
+                    message.innerHTML = '<div class="info">👑 Admin detectado. Criando conta automaticamente...</div>';
                     
-                    // Se houver dados do usuário, salvá-los para auto-login
-                    if (data.user) {
-                        localStorage.setItem('userInfo', JSON.stringify(data.user));
+                    const adminData = {
+                        nome: nome || 'Administrador',
+                        email: email,
+                        telefone: telefone || '',
+                        cpf: cpf || '',
+                        senha: senha,
+                        tipo: 'admin',
+                        status: 'ativo' // Admin já ativo
+                    };
+                    
+                    const response = await fetch('/api/cadastrar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(adminData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.sucesso || response.ok) {
+                        message.innerHTML = `
+                            <div class="success">
+                                👑 Conta de administrador criada com sucesso!
+                                <br><br>
+                                Redirecionando para login...
+                            </div>
+                        `;
+                        
+                        setTimeout(() => {
+                            window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                        }, 2000);
+                    } else {
+                        message.innerHTML = '<div class="error">Erro ao criar conta admin: ' + (data.message || data.erro) + '</div>';
                     }
                     
-                    setTimeout(() => {
-                        // Redirecionar para aprovação ou login
-                        if (data.autorizado) {
-                            window.location.href = '/criar-senha?email=' + encodeURIComponent(formData.email);
-                        } else {
-                            window.location.href = '/aguardando-autorizacao';
-                        }
-                    }, 2000);
                 } else {
-                    message.innerHTML = '<div class="error">' + (data.message || data.erro) + '</div>';
+                    // PACIENTE/FUNCIONÁRIO: Cadastro normal com aprovação
+                    message.innerHTML = '<div class="info">Criando cadastro para aprovação...</div>';
+                    
+                    // Determinar tipo baseado no domínio do email ou outros critérios
+                    let tipoUsuario = 'paciente'; // Padrão
+                    
+                    // Se email for de domínio médico/hospitalar, pode ser funcionário
+                    const dominiosMedicos = ['@hospital', '@clinica', '@medico', '@drmarcio'];
+                    const isEmailMedico = dominiosMedicos.some(dominio => email.toLowerCase().includes(dominio));
+                    
+                    if (isEmailMedico) {
+                        tipoUsuario = 'funcionario';
+                    }
+                    
+                    const userData = {
+                        nome: nome,
+                        email: email,
+                        telefone: telefone || '',
+                        cpf: cpf || '',
+                        senha: senha,
+                        tipo: tipoUsuario,
+                        status: 'pendente' // Aguarda aprovação
+                    };
+                    
+                    const response = await fetch('/api/cadastrar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.sucesso || response.ok) {
+                        if (tipoUsuario === 'funcionario') {
+                            message.innerHTML = `
+                                <div class="success">
+                                    ✅ Cadastro de funcionário realizado!
+                                    <br><br>
+                                    <strong>Seu cadastro será processado internamente.</strong>
+                                    <br>
+                                    Aguarde aprovação do administrador.
+                                    <br><br>
+                                    <a href="/index.html" class="btn-primary" 
+                                       style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                        Voltar ao Início
+                                    </a>
+                                </div>
+                            `;
+                        } else {
+                            message.innerHTML = `
+                                <div class="success">
+                                    ✅ Cadastro de paciente realizado!
+                                    <br><br>
+                                    <strong>Aguarde aprovação do administrador.</strong>
+                                    <br>
+                                    Você receberá uma confirmação por email.
+                                    <br><br>
+                                    <a href="/index.html" class="btn-primary" 
+                                       style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                        Voltar ao Início
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        message.innerHTML = '<div class="error">Erro ao cadastrar: ' + (data.message || data.erro) + '</div>';
+                    }
                 }
+                
             } catch (error) {
-                console.error('❌ Erro:', error);
-                message.innerHTML = '<div class="error">Erro ao cadastrar. Tente novamente.</div>';
+                console.error('❌ Erro no cadastro:', error);
+                
+                if (isEmailAdmin) {
+                    // Para admin, permitir cadastro mesmo com erro na API
+                    message.innerHTML = `
+                        <div class="success">
+                            👑 Admin detectado. Processando cadastro offline...
+                            <br><br>
+                            <a href="/senha.html?email=${encodeURIComponent(email)}" class="btn-primary" 
+                               style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
+                                Definir Senha
+                            </a>
+                        </div>
+                    `;
+                } else {
+                    message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+                }
             } finally {
                 loading.style.display = 'none';
             }
