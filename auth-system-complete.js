@@ -581,6 +581,50 @@ class AuthSystemComplete {
         }
     }
 
+    async verificarStatusFuncionario(email) {
+        try {
+            const funcionarios = await this.lerPlanilha('Funcionarios');
+            const funcionario = funcionarios.find(f => f.email === email);
+            
+            if (!funcionario) {
+                return { 
+                    existe: false,
+                    temSenha: false,
+                    aprovado: false,
+                    status: 'nao_encontrado'
+                };
+            }
+
+            // Verificar se tem senha (hash_senha não vazio)
+            const temSenha = funcionario.hash_senha && funcionario.hash_senha.trim() !== '';
+            
+            // Verificar se está aprovado (status = 'ativo')
+            const aprovado = funcionario.status === 'ativo';
+
+            return { 
+                existe: true,
+                temSenha: temSenha,
+                aprovado: aprovado,
+                status: funcionario.status,
+                usuario: {
+                    nome: funcionario.nome,
+                    email: funcionario.email,
+                    tipo: funcionario.tipo || 'funcionario'
+                }
+            };
+
+        } catch (error) {
+            console.error('Erro ao verificar status do funcionário:', error);
+            return { 
+                existe: false,
+                temSenha: false,
+                aprovado: false,
+                status: 'erro',
+                erro: 'Erro interno do servidor'
+            };
+        }
+    }
+
     // ==================== UTILITÁRIOS ====================
 
     gerarCodigoVerificacao() {
