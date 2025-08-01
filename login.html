@@ -94,21 +94,21 @@
 
                     const resultado = await response.json();
 
-                    if (resultado.success) {
+                    if (resultado.sucesso) {
                         // Login bem-sucedido
                         this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
                         
                         // Salvar dados do usuário
-                        localStorage.setItem('userInfo', JSON.stringify(resultado.user));
+                        localStorage.setItem('userInfo', JSON.stringify(resultado.usuario));
                         
                         // Redirecionar para o dashboard correto
                         setTimeout(() => {
-                            window.location.href = resultado.redirect || '/dashboard.html';
+                            window.location.href = resultado.redirectUrl || '/dashboard.html';
                         }, 1500);
                         
                     } else {
                         // Mostrar erro do servidor
-                        this.showMessage(resultado.message || 'Erro no login. Tente novamente.', 'error');
+                        this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
                     }
 
                 } catch (error) {
