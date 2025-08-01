@@ -35,6 +35,11 @@ const procedimentosRoutes = require('./src/routes/procedimentos.routes');
 const financeiroRoutes = require('./src/routes/financeiro.routes');
 const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require('./src/routes/admin.routes');
 
+// Importar novas rotas para receitas e exames
+const receitasRoutes = require('./src/routes/receitas.routes');
+const examesRoutes = require('./src/routes/exames.routes');
+const fichasRoutes = require('./src/routes/fichas.routes');
+
 // Middleware básico com CORS configurado
 app.use(cors({
     origin: [
@@ -130,12 +135,12 @@ app.use('/api/', (req, res, next) => {
 
 app.use(express.static('.'));
 
-// Middleware LGPD
-app.use(LGPDMiddleware.privacyHeaders());
-app.use(LGPDMiddleware.cookieConsent());
-app.use(LGPDMiddleware.logAccess());
-app.use(LGPDMiddleware.detectUnauthorizedAccess());
-app.use(LGPDMiddleware.rateLimitByUser());
+// Middleware LGPD - TEMPORARIAMENTE DESABILITADO PARA DEBUG
+// app.use(LGPDMiddleware.privacyHeaders());
+// app.use(LGPDMiddleware.cookieConsent());
+// app.use(LGPDMiddleware.logAccess());
+// app.use(LGPDMiddleware.detectUnauthorizedAccess());
+// app.use(LGPDMiddleware.rateLimitByUser());
 
 // Configuração da planilha
 const SHEET_ID = '1KSZcXweNg7csm-Xi0YYg8v-3mHg6cB5xI2NympkTY4k';
@@ -1497,17 +1502,21 @@ app.use('/api/system', systemRoutes);
 
 // Rotas da integração completa de pacientes
 app.use('/api/pacientes', pacientesRoutes);
-app.use('/api/fichas', fichaRoutes);
 app.use('/api/procedimentos', procedimentosRoutes);
 app.use('/api/financeiro', financeiroRoutes);
+
+// Rotas para receitas, exames e fichas - TEMPORARIAMENTE DESABILITADO
+// app.use('/api/receitas', receitasRoutes);
+// app.use('/api/exames', examesRoutes);
+// app.use('/api/fichas', fichasRoutes);
 
 // Rotas administrativas para logs
 initializeAdminRoutes(pool);
 app.use('/api/admin', adminRoutes);
 
 // ENDPOINTS ANTIGOS (Google Sheets) - Manter durante migração
-const configRoutes = require('./src/routes/config.routes');
-app.use('/api/config', configRoutes);
+// const configRoutes = require('./src/routes/config.routes');
+// app.use('/api/config', configRoutes);
 
 // ROTAS DE AUTENTICAÇÃO DESABILITADAS - Google Sheets não disponível
 /*

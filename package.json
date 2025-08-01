@@ -2,11 +2,13 @@
   "name": "portal-dr-marcio",
   "version": "1.0.0",
   "description": "Portal médico completo com SendGrid e Twilio",
-  "main": "server.js",
+  "main": "server-integrado.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "build": "echo 'Build completed successfully'"
+    "start": "node server-integrado.js",
+    "dev": "node server-integrado.js",
+    "build": "echo 'Build completed successfully'",
+    "integrado": "node server-integrado.js",
+    "caderno": "node server-caderno-mock.js"
   },
   "engines": {
     "node": ">=18.0.0",

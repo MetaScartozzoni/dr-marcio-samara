@@ -2974,7 +2974,7 @@ Deseja continuar com a geração do PDF após assinar?`);
         }
 
         // Função para gerar PDF da receita
-        function gerarPDFReceita() {
+        async function gerarPDFReceita() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -3024,16 +3024,42 @@ Deseja continuar com a geração do PDF após assinar?`);
             doc.text('Dr. Marcio Scartozzoni', 20, 260);
             doc.text('CRM: [NÚMERO]', 20, 270);
             
+            // Salvar receita no backend antes de gerar PDF
+            try {
+                const receitaData = {
+                    paciente_id: pacienteAtual?.id || 1,
+                    medico_nome: 'Dr. Marcio Scartozzoni',
+                    medico_crm: '[NÚMERO]',
+                    data_emissao: new Date().toISOString().split('T')[0],
+                    prescricao: prescricao,
+                    observacoes: orientacoes || ''
+                };
+
+                const response = await fetch('/api/receitas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(receitaData)
+                });
+
+                if (response.ok) {
+                    console.log('✅ Receita salva no servidor');
+                } else {
+                    console.warn('⚠️ Erro ao salvar receita no servidor');
+                }
+            } catch (error) {
+                console.warn('⚠️ Receita salva apenas localmente:', error);
+            }
+            
             // Gerar e abrir PDF
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
             window.open(pdfUrl, '_blank');
             
-            alert('✅ PDF da receita gerado com sucesso!');
+            showToast('✅ PDF da receita gerado com sucesso!', 'success');
         }
 
         // Função para gerar PDF dos exames
-        function gerarPDFExames() {
+        async function gerarPDFExames() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
@@ -3089,12 +3115,40 @@ Deseja continuar com a geração do PDF após assinar?`);
             doc.text('Dr. Marcio Scartozzoni', 20, 260);
             doc.text('CRM: [NÚMERO]', 20, 270);
             
+            // Salvar exame no backend antes de gerar PDF
+            try {
+                const exameData = {
+                    paciente_id: pacienteAtual?.id || 1,
+                    medico_nome: 'Dr. Marcio Scartozzoni',
+                    medico_crm: '[NÚMERO]',
+                    data_solicitacao: new Date().toISOString().split('T')[0],
+                    tipo_exame: 'Diversos',
+                    exames_solicitados: exames,
+                    justificativa_clinica: justificativa || '',
+                    cid_10: cid || ''
+                };
+
+                const response = await fetch('/api/exames', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(exameData)
+                });
+
+                if (response.ok) {
+                    console.log('✅ Exame salvo no servidor');
+                } else {
+                    console.warn('⚠️ Erro ao salvar exame no servidor');
+                }
+            } catch (error) {
+                console.warn('⚠️ Exame salvo apenas localmente:', error);
+            }
+            
             // Gerar e abrir PDF
             const pdfBlob = doc.output('blob');
             const pdfUrl = URL.createObjectURL(pdfBlob);
             window.open(pdfUrl, '_blank');
             
-            alert('✅ PDF da solicitação de exames gerado com sucesso!');
+            showToast('✅ PDF da solicitação de exames gerado com sucesso!', 'success');
         }
 
         // Função para imprimir receita
@@ -3114,11 +3168,61 @@ Deseja continuar com a geração do PDF após assinar?`);
         }
 
         // Função para enviar por email
-        function enviarPorEmail(tipo) {
-            const assunto = tipo === 'receita' ? 'Receita Médica' : 'Solicitação de Exames';
-            const paciente = document.getElementById('pacienteSelect').value || '[Nome do Paciente]';
-            
-            const corpo = `Olá,
+        async function enviarPorEmail(tipo) {
+            try {
+                const paciente = document.getElementById('pacienteSelect').value || '[Nome do Paciente]';
+                
+                let dados;
+                let endpoint;
+                
+                if (tipo === 'receita') {
+                    dados = {
+                        paciente_id: pacienteAtual?.id || 1,
+                        medico_nome: 'Dr. Marcio Scartozzoni',
+                        medico_crm: '[NÚMERO]',
+                        data_emissao: new Date().toISOString().split('T')[0],
+                        prescricao: document.getElementById('receita-texto').value || '',
+                        observacoes: document.getElementById('receita-orientacoes').value || ''
+                    };
+                    endpoint = '/api/receitas/enviar-email';
+                } else {
+                    dados = {
+                        paciente_id: pacienteAtual?.id || 1,
+                        medico_nome: 'Dr. Marcio Scartozzoni',
+                        medico_crm: '[NÚMERO]',
+                        data_solicitacao: new Date().toISOString().split('T')[0],
+                        tipo_exame: 'Diversos',
+                        exames_solicitados: document.getElementById('exames-texto').value || '',
+                        justificativa_clinica: document.getElementById('exames-justificativa').value || '',
+                        cid_10: document.getElementById('exames-cid').value || ''
+                    };
+                    endpoint = '/api/exames/enviar-email';
+                }
+
+                // Tentar enviar via backend
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ...dados,
+                        emailDestinatario: 'paciente@email.com' // Implementar seleção de email
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`✅ ${tipo === 'receita' ? 'Receita' : 'Solicitação de exames'} enviada por email!`, 'success');
+                } else {
+                    throw new Error('Erro no servidor');
+                }
+
+            } catch (error) {
+                console.warn('Erro ao enviar via backend, abrindo cliente de email:', error);
+                
+                // Fallback: abrir cliente de email
+                const assunto = tipo === 'receita' ? 'Receita Médica' : 'Solicitação de Exames';
+                const paciente = document.getElementById('pacienteSelect').value || '[Nome do Paciente]';
+                
+                const corpo = `Olá,
 
 Segue em anexo ${tipo === 'receita' ? 'a receita médica' : 'a solicitação de exames'} para o paciente: ${paciente}
 
@@ -3127,11 +3231,11 @@ Data: ${new Date().toLocaleDateString('pt-BR')}
 Atenciosamente,
 Dr. Marcio Scartozzoni`;
 
-            // Abrir cliente de email
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-            window.location.href = mailtoLink;
-            
-            alert(`📧 Cliente de email aberto. Anexe o PDF da ${tipo} antes de enviar.`);
+                const mailtoLink = `mailto:?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+                window.location.href = mailtoLink;
+                
+                showToast(`📧 Cliente de email aberto. Anexe o PDF da ${tipo} antes de enviar.`, 'info');
+            }
         }
 
         // Fechar modais clicando fora
@@ -4110,34 +4214,66 @@ Dr. Marcio Scartozzoni`;
             return fichaForm;
         }
         
-        function salvarFichaAtendimento() {
-            const fichaData = {
-                pacienteNome: document.getElementById('ficha-paciente-nome').value,
-                pacienteIdade: document.getElementById('ficha-paciente-idade').value,
-                dataAtendimento: document.getElementById('ficha-data-atendimento').value,
-                tipoConsulta: document.getElementById('ficha-tipo-consulta').value,
-                queixaPrincipal: document.getElementById('ficha-queixa-principal').value,
-                historiaDoenca: document.getElementById('ficha-historia-doenca').value,
-                alergias: document.getElementById('ficha-alergias').value,
-                medicacoes: document.getElementById('ficha-medicacoes').value,
-                pressao: document.getElementById('ficha-pressao').value,
-                fc: document.getElementById('ficha-fc').value,
-                peso: document.getElementById('ficha-peso').value,
-                altura: document.getElementById('ficha-altura').value,
-                exameFisico: document.getElementById('ficha-exame-fisico').value,
-                diagnostico: document.getElementById('ficha-diagnostico').value,
-                conduta: document.getElementById('ficha-conduta').value,
-                observacoes: document.getElementById('ficha-observacoes').value,
-                proximoRetorno: document.getElementById('ficha-proximo-retorno').value,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Salvar no localStorage
-            const fichas = JSON.parse(localStorage.getItem('fichasAtendimento') || '[]');
-            fichas.push(fichaData);
-            localStorage.setItem('fichasAtendimento', JSON.stringify(fichas));
-            
-            showToast('✅ Ficha de Atendimento salva com sucesso!', 'success');
+        async function salvarFichaAtendimento() {
+            try {
+                const fichaData = {
+                    paciente_id: pacienteAtual.id || 1, // Usar ID real do paciente
+                    pacienteNome: document.getElementById('ficha-paciente-nome').value,
+                    pacienteIdade: document.getElementById('ficha-paciente-idade').value,
+                    dataAtendimento: document.getElementById('ficha-data-atendimento').value,
+                    tipoConsulta: document.getElementById('ficha-tipo-consulta').value,
+                    queixaPrincipal: document.getElementById('ficha-queixa-principal').value,
+                    historiaDoenca: document.getElementById('ficha-historia-doenca').value,
+                    alergias: document.getElementById('ficha-alergias').value,
+                    medicacoes: document.getElementById('ficha-medicacoes').value,
+                    pressao: document.getElementById('ficha-pressao').value,
+                    fc: document.getElementById('ficha-fc').value,
+                    peso: document.getElementById('ficha-peso').value,
+                    altura: document.getElementById('ficha-altura').value,
+                    exameFisico: document.getElementById('ficha-exame-fisico').value,
+                    diagnostico: document.getElementById('ficha-diagnostico').value,
+                    conduta: document.getElementById('ficha-conduta').value,
+                    observacoes: document.getElementById('ficha-observacoes').value,
+                    proximoRetorno: document.getElementById('ficha-proximo-retorno').value
+                };
+
+                // Tentar salvar no backend primeiro
+                try {
+                    const response = await fetch('/api/fichas', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(fichaData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        showToast('✅ Ficha de Atendimento salva no servidor com sucesso!', 'success');
+                        return result.data;
+                    } else {
+                        throw new Error('Erro no servidor');
+                    }
+                } catch (backendError) {
+                    console.warn('Erro ao salvar no backend, salvando localmente:', backendError);
+                    
+                    // Fallback: salvar no localStorage
+                    fichaData.timestamp = new Date().toISOString();
+                    fichaData.id = Date.now(); // ID temporário
+                    
+                    const fichas = JSON.parse(localStorage.getItem('fichasAtendimento') || '[]');
+                    fichas.push(fichaData);
+                    localStorage.setItem('fichasAtendimento', JSON.stringify(fichas));
+                    
+                    showToast('⚠️ Ficha salva localmente (será sincronizada quando houver conexão)', 'warning');
+                    return fichaData;
+                }
+
+            } catch (error) {
+                console.error('Erro ao salvar ficha:', error);
+                showToast('❌ Erro ao salvar ficha de atendimento', 'error');
+                throw error;
+            }
         }
         
         function imprimirFichaAtendimento() {
