@@ -108,7 +108,7 @@
             message.innerHTML = '';
             
             try {
-                const response = await fetch('/api/cadastro', {
+                const response = await fetch('/api/cadastrar', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -119,7 +119,7 @@
                 const data = await response.json();
                 console.log('📥 Resposta recebida:', data);
                 
-                if (data.success) {
+                if (data.sucesso) {
                     message.innerHTML = '<div class="success">' + data.message + '</div>';
                     
                     // Se houver dados do usuário, salvá-los para auto-login
@@ -128,11 +128,15 @@
                     }
                     
                     setTimeout(() => {
-                        // Usar o redirect definido pelo servidor
-                        window.location.href = data.redirect || '/login.html';
+                        // Redirecionar para aprovação ou login
+                        if (data.autorizado) {
+                            window.location.href = '/criar-senha?email=' + encodeURIComponent(formData.email);
+                        } else {
+                            window.location.href = '/aguardando-autorizacao';
+                        }
                     }, 2000);
                 } else {
-                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                    message.innerHTML = '<div class="error">' + (data.message || data.erro) + '</div>';
                 }
             } catch (error) {
                 console.error('❌ Erro:', error);
