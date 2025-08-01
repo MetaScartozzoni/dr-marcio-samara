@@ -254,6 +254,81 @@
             border-bottom: 2px solid #dee2e6;
         }
 
+        /* Estilos para os botões de ação rápida */
+        .acoes-rapidas {
+            margin-bottom: 30px;
+        }
+
+        .btn-acao {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-acao i {
+            font-size: 16px;
+        }
+
+        /* Estilos para botões de edição dos cards */
+        .btn-edit-marco, .btn-edit-agendamento {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .btn-edit-marco:hover, .btn-edit-agendamento:hover {
+            background: #5a6268;
+            transform: scale(1.1);
+        }
+
+        .marco-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agendamento-recente {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+
+        .agendamento-recente:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateX(3px);
+        }
+
+        .agendamento-info {
+            flex: 1;
+            cursor: pointer;
+        }
+
         .document-list {
             list-style: none;
         }
@@ -1745,24 +1820,40 @@
 
         <div class="main-content">
             <div class="sidebar">
-                <!-- Seção de Histórico de Agendamentos -->
-                <h3><i class="fas fa-calendar-alt"></i> Histórico & Marcos</h3>
-                <div class="historico-container">
-                    <div class="marcos-principais" id="marcosPrincipais">
-                        <!-- Marcos serão carregados aqui -->
-                    </div>
-                    <div class="agendamentos-recentes">
-                        <h4 style="color: #6c757d; font-size: 14px; margin: 15px 0 10px 0;">
-                            <i class="fas fa-clock"></i> Consultas Recentes
-                        </h4>
-                        <div id="agendamentosRecentes">
-                            <!-- Agendamentos serão carregados aqui -->
-                        </div>
-                    </div>
+                <!-- Seção de Ações Rápidas - MOVIDA PARA O TOPO -->
+                <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                <div class="acoes-rapidas" style="margin-bottom: 30px;">
+                    <button onclick="abrirFichaAtendimento()" class="btn-acao" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); margin-bottom: 10px;">
+                        <i class="fas fa-clipboard-check"></i> Ficha de Atendimento
+                    </button>
+                    
+                    <button onclick="abrirEvolucao()" class="btn-acao" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); margin-bottom: 10px;">
+                        <i class="fas fa-chart-line"></i> Evolução Paciente
+                    </button>
+                    
+                    <button onclick="abrirDocumento('orcamento')" class="btn-acao" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); margin-bottom: 10px;">
+                        <i class="fas fa-calculator"></i> Orçamento
+                    </button>
+                    
+                    <button onclick="gerarReceita()" class="btn-acao" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-bottom: 10px;">
+                        <i class="fas fa-prescription"></i> Gerar Receita
+                    </button>
+                    
+                    <button onclick="gerarExames()" class="btn-acao" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); margin-bottom: 10px;">
+                        <i class="fas fa-vial"></i> Gerar Exames
+                    </button>
+                    
+                    <button onclick="agendarConsultaPaciente()" class="btn-acao" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); margin-bottom: 10px;">
+                        <i class="fas fa-calendar-plus"></i> Agendar Consulta
+                    </button>
+                    
+                    <button onclick="capturarFoto()" class="btn-acao" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); margin-bottom: 10px;">
+                        <i class="fas fa-camera"></i> Tirar Foto
+                    </button>
                 </div>
                 
-                <h3 style="margin-top: 30px;"><i class="fas fa-folder"></i> Documentos</h3>
-                <ul class="document-list">
+                <h3><i class="fas fa-folder"></i> Documentos</h3>
+                <ul class="document-list" style="margin-bottom: 30px;">
                     <li class="document-item active" onclick="abrirDocumento('orcamento')">
                         <div class="document-header">
                             <div class="document-icon orcamento">
@@ -1835,6 +1926,22 @@
                         </div>
                     </li>
                 </ul>
+                
+                <!-- Seção de Histórico de Agendamentos - MOVIDA PARA BAIXO -->
+                <h3><i class="fas fa-calendar-alt"></i> Histórico & Marcos</h3>
+                <div class="historico-container">
+                    <div class="marcos-principais" id="marcosPrincipais">
+                        <!-- Marcos serão carregados aqui -->
+                    </div>
+                    <div class="agendamentos-recentes">
+                        <h4 style="color: #6c757d; font-size: 14px; margin: 15px 0 10px 0;">
+                            <i class="fas fa-clock"></i> Consultas Recentes
+                        </h4>
+                        <div id="agendamentosRecentes">
+                            <!-- Agendamentos serão carregados aqui -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="canvas-area">
@@ -3550,16 +3657,34 @@ Dr. Marcio Scartozzoni`;
         // ============ FUNÇÕES FICHA DE ATENDIMENTO ============
         
         function abrirFichaAtendimento() {
-            const paciente = document.getElementById('pacienteSelect').value;
-            if (!paciente) {
-                alert('⚠️ Selecione um paciente primeiro!');
-                return;
+            // Limpar formulários anteriores
+            document.querySelectorAll('.document-form').forEach(form => {
+                form.style.display = 'none';
+            });
+            
+            // Esconder placeholder
+            document.getElementById('placeholder').style.display = 'none';
+            
+            // Criar formulário da Ficha de Atendimento
+            let fichaForm = document.getElementById('ficha-atendimento-form');
+            if (!fichaForm) {
+                fichaForm = criarFormularioFichaAtendimento();
             }
             
-            document.getElementById('modalFicha').classList.add('active');
+            fichaForm.style.display = 'block';
             
-            // Pré-preencher nome do paciente
-            document.getElementById('pacienteNome').value = paciente;
+            // Marcar item ativo na sidebar
+            document.querySelectorAll('.document-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Pré-preencher dados do paciente se disponível
+            if (pacienteAtual) {
+                document.getElementById('ficha-paciente-nome').value = pacienteAtual.nome || '';
+                document.getElementById('ficha-paciente-idade').value = calcularIdade(pacienteAtual.dataNascimento) || '';
+                document.getElementById('ficha-data-atendimento').value = new Date().toISOString().split('T')[0];
+            }
+        }
             
             // Configurar listeners para cálculo automático
             configurarCalculoIMC();
@@ -3568,6 +3693,214 @@ Dr. Marcio Scartozzoni`;
         
         function fecharModalFicha() {
             document.getElementById('modalFicha').classList.remove('active');
+        }
+        
+        function criarFormularioFichaAtendimento() {
+            const canvasArea = document.querySelector('.canvas-area');
+            
+            const fichaForm = document.createElement('div');
+            fichaForm.id = 'ficha-atendimento-form';
+            fichaForm.className = 'document-form';
+            fichaForm.style.display = 'none';
+            
+            fichaForm.innerHTML = `
+                <div class="form-section">
+                    <h3><i class="fas fa-clipboard-check"></i> Ficha de Atendimento</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nome do Paciente</label>
+                            <input type="text" id="ficha-paciente-nome" placeholder="Nome completo">
+                        </div>
+                        <div class="form-group">
+                            <label>Idade</label>
+                            <input type="number" id="ficha-paciente-idade" placeholder="Idade">
+                        </div>
+                        <div class="form-group">
+                            <label>Data do Atendimento</label>
+                            <input type="date" id="ficha-data-atendimento">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Consulta</label>
+                            <select id="ficha-tipo-consulta">
+                                <option value="primeira-consulta">Primeira Consulta</option>
+                                <option value="retorno">Retorno</option>
+                                <option value="urgencia">Urgência</option>
+                                <option value="pos-operatorio">Pós-operatório</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <h4>Anamnese</h4>
+                    <div class="form-group">
+                        <label>Queixa Principal</label>
+                        <textarea id="ficha-queixa-principal" rows="3" placeholder="Descreva a queixa principal do paciente"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>História da Doença Atual</label>
+                        <textarea id="ficha-historia-doenca" rows="4" placeholder="História detalhada da doença atual"></textarea>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Alergias</label>
+                            <input type="text" id="ficha-alergias" placeholder="Medicamentos, alimentos, etc.">
+                        </div>
+                        <div class="form-group">
+                            <label>Medicações em Uso</label>
+                            <input type="text" id="ficha-medicacoes" placeholder="Medicamentos atuais">
+                        </div>
+                    </div>
+                    
+                    <h4>Exame Físico</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Pressão Arterial (mmHg)</label>
+                            <input type="text" id="ficha-pressao" placeholder="120/80">
+                        </div>
+                        <div class="form-group">
+                            <label>Frequência Cardíaca (bpm)</label>
+                            <input type="number" id="ficha-fc" placeholder="72">
+                        </div>
+                        <div class="form-group">
+                            <label>Peso (kg)</label>
+                            <input type="number" id="ficha-peso" step="0.1" placeholder="70.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Altura (cm)</label>
+                            <input type="number" id="ficha-altura" placeholder="170">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Exame Físico Detalhado</label>
+                        <textarea id="ficha-exame-fisico" rows="4" placeholder="Descrição detalhada do exame físico"></textarea>
+                    </div>
+                    
+                    <h4>Avaliação e Conduta</h4>
+                    <div class="form-group">
+                        <label>Hipótese Diagnóstica</label>
+                        <textarea id="ficha-diagnostico" rows="2" placeholder="Hipóteses diagnósticas"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Conduta Terapêutica</label>
+                        <textarea id="ficha-conduta" rows="3" placeholder="Prescrições, orientações, exames solicitados"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Observações Gerais</label>
+                        <textarea id="ficha-observacoes" rows="2" placeholder="Observações adicionais"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Próximo Retorno</label>
+                        <input type="date" id="ficha-proximo-retorno">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="salvarFichaAtendimento()" class="btn-primary">
+                            <i class="fas fa-save"></i> Salvar Ficha
+                        </button>
+                        <button type="button" onclick="imprimirFichaAtendimento()" class="btn-secondary">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                        <button type="button" onclick="limparFichaAtendimento()" class="btn-secondary">
+                            <i class="fas fa-eraser"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            canvasArea.appendChild(fichaForm);
+            return fichaForm;
+        }
+        
+        function salvarFichaAtendimento() {
+            const fichaData = {
+                pacienteNome: document.getElementById('ficha-paciente-nome').value,
+                pacienteIdade: document.getElementById('ficha-paciente-idade').value,
+                dataAtendimento: document.getElementById('ficha-data-atendimento').value,
+                tipoConsulta: document.getElementById('ficha-tipo-consulta').value,
+                queixaPrincipal: document.getElementById('ficha-queixa-principal').value,
+                historiaDoenca: document.getElementById('ficha-historia-doenca').value,
+                alergias: document.getElementById('ficha-alergias').value,
+                medicacoes: document.getElementById('ficha-medicacoes').value,
+                pressao: document.getElementById('ficha-pressao').value,
+                fc: document.getElementById('ficha-fc').value,
+                peso: document.getElementById('ficha-peso').value,
+                altura: document.getElementById('ficha-altura').value,
+                exameFisico: document.getElementById('ficha-exame-fisico').value,
+                diagnostico: document.getElementById('ficha-diagnostico').value,
+                conduta: document.getElementById('ficha-conduta').value,
+                observacoes: document.getElementById('ficha-observacoes').value,
+                proximoRetorno: document.getElementById('ficha-proximo-retorno').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Salvar no localStorage
+            const fichas = JSON.parse(localStorage.getItem('fichasAtendimento') || '[]');
+            fichas.push(fichaData);
+            localStorage.setItem('fichasAtendimento', JSON.stringify(fichas));
+            
+            showToast('✅ Ficha de Atendimento salva com sucesso!', 'success');
+        }
+        
+        function imprimirFichaAtendimento() {
+            window.print();
+        }
+        
+        function limparFichaAtendimento() {
+            if (confirm('Tem certeza que deseja limpar todos os campos da ficha?')) {
+                document.getElementById('ficha-atendimento-form').querySelectorAll('input, textarea, select').forEach(field => {
+                    if (field.type !== 'date' || field.id !== 'ficha-data-atendimento') {
+                        field.value = '';
+                    }
+                });
+                showToast('📝 Ficha limpa!', 'info');
+            }
+        }
+        
+        function showToast(message, type = 'info') {
+            // Criar elemento de toast se não existir
+            let toast = document.getElementById('toast-notification');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-notification';
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    color: white;
+                    font-weight: 600;
+                    z-index: 9999;
+                    transform: translateX(400px);
+                    transition: transform 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            // Definir cor baseada no tipo
+            const colors = {
+                'success': '#28a745',
+                'error': '#dc3545',
+                'info': '#17a2b8',
+                'warning': '#ffc107'
+            };
+            
+            toast.style.backgroundColor = colors[type] || colors.info;
+            toast.textContent = message;
+            
+            // Mostrar toast
+            toast.style.transform = 'translateX(0)';
+            
+            // Esconder após 3 segundos
+            setTimeout(() => {
+                toast.style.transform = 'translateX(400px)';
+            }, 3000);
         }
         
         function configurarCalculoIMC() {
@@ -4315,12 +4648,15 @@ Dr. Marcio Scartozzoni`;
         function renderizarMarcosPrincipais(marcos) {
             const container = document.getElementById('marcosPrincipais');
             
-            container.innerHTML = marcos.map(marco => `
-                <div class="marco-item ${marco.tipo}" onclick="editarMarco('${marco.tipo}')">
+            container.innerHTML = marcos.map((marco, index) => `
+                <div class="marco-item ${marco.tipo}">
                     <div class="marco-header">
                         <i class="${marco.icone}"></i>
                         <span class="marco-tipo">${marco.nome}</span>
                         <span class="marco-status ${marco.status}">${getStatusTexto(marco.status)}</span>
+                        <button class="btn-edit-marco" onclick="editarMarco(${index})" title="Editar marco">
+                            <i class="fas fa-edit"></i>
+                        </button>
                     </div>
                     <div class="marco-data">${formatarDataCompleta(marco.data)}</div>
                 </div>
@@ -4335,10 +4671,15 @@ Dr. Marcio Scartozzoni`;
                 return;
             }
             
-            container.innerHTML = agendamentos.slice(-5).reverse().map(agendamento => `
-                <div class="agendamento-recente" onclick="abrirEvolucaoData('${agendamento.data.toISOString()}')">
-                    <div class="agendamento-data">${formatarDataCompleta(agendamento.data)}</div>
-                    <div class="agendamento-tipo">${agendamento.tipo}</div>
+            container.innerHTML = agendamentos.slice(-5).reverse().map((agendamento, index) => `
+                <div class="agendamento-recente">
+                    <div class="agendamento-info" onclick="abrirEvolucaoData('${agendamento.data.toISOString()}')">
+                        <div class="agendamento-data">${formatarDataCompleta(agendamento.data)}</div>
+                        <div class="agendamento-tipo">${agendamento.tipo}</div>
+                    </div>
+                    <button class="btn-edit-agendamento" onclick="editarAgendamento(${index})" title="Editar agendamento">
+                        <i class="fas fa-edit"></i>
+                    </button>
                 </div>
             `).join('');
         }
@@ -4362,26 +4703,57 @@ Dr. Marcio Scartozzoni`;
             });
         }
 
-        function editarMarco(tipo) {
-            // Abrir modal para editar marco
-            const nomes = {
-                'primeira-consulta': 'Primeira Consulta',
-                'retorno': 'Consulta de Retorno',
-                'cirurgia': 'Data da Cirurgia',
-                'primeiro-retorno': '1º Retorno Pós-Cirúrgico',
-                'proximo-retorno': 'Próximo Retorno',
-                'alta': 'Alta Médica'
-            };
-            
+        function editarMarco(index) {
             // Buscar dados atuais do marco
             const historico = obterHistoricoPaciente(pacienteAtual.cpf);
-            const marco = historico.marcos.find(m => m.tipo === tipo);
+            const marco = historico.marcos[index];
             
-            // Preencher modal
-            document.getElementById('editMarcoTipo').value = nomes[tipo];
-            document.getElementById('editMarcoData').value = marco.data.toISOString().split('T')[0];
-            document.getElementById('editMarcoStatus').value = marco.status;
-            document.getElementById('editMarcoObservacoes').value = marco.observacoes || '';
+            const novoNome = prompt('Nome do Marco:', marco.nome);
+            if (novoNome !== null && novoNome.trim() !== '') {
+                const novaData = prompt('Nova Data (YYYY-MM-DD):', marco.data.toISOString().split('T')[0]);
+                if (novaData !== null) {
+                    const novoStatus = prompt('Status (realizado/agendado/cancelado):', marco.status);
+                    if (novoStatus !== null) {
+                        // Atualizar marco
+                        marco.nome = novoNome.trim();
+                        marco.data = new Date(novaData);
+                        marco.status = novoStatus;
+                        
+                        // Salvar alterações
+                        salvarHistoricoPaciente(pacienteAtual.cpf, historico);
+                        
+                        // Re-renderizar
+                        renderizarMarcosPrincipais(historico.marcos);
+                        
+                        showToast('✅ Marco atualizado com sucesso!', 'success');
+                    }
+                }
+            }
+        }
+
+        function editarAgendamento(index) {
+            // Buscar dados atuais do agendamento
+            const historico = obterHistoricoPaciente(pacienteAtual.cpf);
+            const agendamento = historico.agendamentos[index];
+            
+            const novoTipo = prompt('Tipo do Agendamento:', agendamento.tipo);
+            if (novoTipo !== null && novoTipo.trim() !== '') {
+                const novaData = prompt('Nova Data (YYYY-MM-DD):', agendamento.data.toISOString().split('T')[0]);
+                if (novaData !== null) {
+                    // Atualizar agendamento
+                    agendamento.tipo = novoTipo.trim();
+                    agendamento.data = new Date(novaData);
+                    
+                    // Salvar alterações
+                    salvarHistoricoPaciente(pacienteAtual.cpf, historico);
+                    
+                    // Re-renderizar
+                    renderizarAgendamentosRecentes(historico.agendamentos);
+                    
+                    showToast('✅ Agendamento atualizado com sucesso!', 'success');
+                }
+            }
+        }
             
             // Salvar tipo atual para uso no submit
             document.getElementById('formEdicaoMarco').setAttribute('data-tipo', tipo);
