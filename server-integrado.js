@@ -148,7 +148,7 @@ let exames = [
 
 // === 1. CADASTRO DE PACIENTES ===
 app.get('/api/pacientes', (req, res) => {
-    console.log('👥 Listando pacientes...');
+    console.log('Listando pacientes...');
     res.json({
         success: true,
         data: pacientes,
@@ -157,7 +157,7 @@ app.get('/api/pacientes', (req, res) => {
 });
 
 app.post('/api/pacientes', (req, res) => {
-    console.log('👤 Cadastrando novo paciente...');
+    console.log('Cadastrando novo paciente...');
     const novoPaciente = {
         id: pacientes.length + 1,
         ...req.body,
@@ -200,9 +200,8 @@ app.get('/api/pacientes/:id', (req, res) => {
     });
 });
 
-// === 2. AGENDAMENTOS ===
 app.get('/api/agendamentos', (req, res) => {
-    console.log('📅 Listando agendamentos...');
+    console.log('Listando agendamentos...');
     res.json({
         success: true,
         data: agendamentos,
@@ -211,7 +210,7 @@ app.get('/api/agendamentos', (req, res) => {
 });
 
 app.post('/api/agendamentos', (req, res) => {
-    console.log('📅 Criando novo agendamento...');
+    console.log('Criando novo agendamento...');
     const novoAgendamento = {
         id: agendamentos.length + 1,
         ...req.body,
@@ -230,7 +229,7 @@ app.post('/api/agendamentos', (req, res) => {
 
 // === 3. FICHAS DE ATENDIMENTO ===
 app.get('/api/fichas', (req, res) => {
-    console.log('📝 Listando fichas de atendimento...');
+    console.log('Listando fichas de atendimento...');
     res.json({
         success: true,
         data: fichas,
@@ -239,7 +238,7 @@ app.get('/api/fichas', (req, res) => {
 });
 
 app.post('/api/fichas', (req, res) => {
-    console.log('📝 Criando nova ficha de atendimento...');
+    console.log('Criando nova ficha de atendimento...');
     
     // Vincular com agendamento se fornecido
     let agendamento_relacionado = null;
@@ -267,9 +266,9 @@ app.post('/api/fichas', (req, res) => {
     });
 });
 
-// === 4. ORÇAMENTOS ===
+// === 4. ORCAMENTOS ===
 app.get('/api/orcamentos', (req, res) => {
-    console.log('💰 Listando orçamentos...');
+    console.log('Listando orcamentos...');
     res.json({
         success: true,
         data: orcamentos,
@@ -278,7 +277,7 @@ app.get('/api/orcamentos', (req, res) => {
 });
 
 app.post('/api/orcamentos', (req, res) => {
-    console.log('💰 Criando novo orçamento...');
+    console.log('Criando novo orcamento...');
     
     const proximoNumero = `ORC-2025-${String(orcamentos.length + 1).padStart(3, '0')}`;
     
@@ -294,14 +293,14 @@ app.post('/api/orcamentos', (req, res) => {
     
     res.status(201).json({
         success: true,
-        message: 'Orçamento criado com sucesso',
+        message: 'Orcamento criado com sucesso',
         data: novoOrcamento
     });
 });
 
-// === 5. RECEITAS (PRONTUÁRIO) ===
+// === 5. RECEITAS (PRONTUARIO) ===
 app.get('/api/receitas', (req, res) => {
-    console.log('💊 Listando receitas...');
+    console.log('Listando receitas...');
     res.json({
         success: true,
         data: receitas,
@@ -310,7 +309,7 @@ app.get('/api/receitas', (req, res) => {
 });
 
 app.post('/api/receitas', (req, res) => {
-    console.log('💊 Criando nova receita...');
+    console.log('Criando nova receita...');
     const novaReceita = {
         id: receitas.length + 1,
         ...req.body,
@@ -326,9 +325,9 @@ app.post('/api/receitas', (req, res) => {
     });
 });
 
-// === 6. EXAMES (PRONTUÁRIO) ===
+// === 6. EXAMES (PRONTUARIO) ===
 app.get('/api/exames', (req, res) => {
-    console.log('🔬 Listando exames...');
+    console.log('Listando exames...');
     res.json({
         success: true,
         data: exames,
@@ -337,7 +336,7 @@ app.get('/api/exames', (req, res) => {
 });
 
 app.post('/api/exames', (req, res) => {
-    console.log('🔬 Criando nova solicitação de exame...');
+    console.log('Criando nova solicitacao de exame...');
     const novoExame = {
         id: exames.length + 1,
         ...req.body,
@@ -348,7 +347,7 @@ app.post('/api/exames', (req, res) => {
     
     res.status(201).json({
         success: true,
-        message: 'Solicitação de exame criada com sucesso',
+        message: 'Solicitacao de exame criada com sucesso',
         data: novoExame
     });
 });
@@ -428,7 +427,7 @@ app.get('/api/status', (req, res) => {
         message: 'Sistema Integrado Dr. Marcio Scartozzoni',
         timestamp: new Date().toISOString(),
         mode: 'Desenvolvimento com dados mock integrados',
-        fluxo: 'Cadastro → Agendamento → Ficha → Orçamento → Prontuário',
+        fluxo: 'Cadastro -> Agendamento -> Ficha -> Orcamento -> Prontuario',
         estatisticas: {
             pacientes: pacientes.length,
             agendamentos: agendamentos.length,
@@ -463,7 +462,7 @@ app.get('/', (req, res) => {
 
 // Middleware de erro
 app.use((error, req, res, next) => {
-    console.error('❌ Erro no servidor:', error);
+    console.error('Erro no servidor:', error);
     res.status(500).json({ 
         error: 'Erro interno do servidor',
         message: error.message 
@@ -472,34 +471,34 @@ app.use((error, req, res, next) => {
 
 // Iniciar servidor
 app.listen(PORT, () => {
-    console.log('\n🚀 ==========================================');
-    console.log(`🏥 SISTEMA INTEGRADO - Dr. Marcio Scartozzoni`);
-    console.log('🚀 ==========================================');
-    console.log(`📍 Servidor rodando na porta ${PORT}`);
-    console.log(`🌐 Dashboard: http://localhost:${PORT}/dashboard`);
-    console.log(`📝 Caderno: http://localhost:${PORT}/caderno-digital`);
-    console.log(`📊 API Status: http://localhost:${PORT}/api/status`);
-    console.log('\n📋 FLUXO INTEGRADO:');
-    console.log('1️⃣  Cadastro de Pacientes');
-    console.log('2️⃣  Agendamento de Consultas');
-    console.log('3️⃣  Ficha de Atendimento');
-    console.log('4️⃣  Geração de Orçamento');
-    console.log('5️⃣  Prontuário (Receitas/Exames)');
-    console.log('\n📈 DADOS ATUAIS:');
-    console.log(`👥 Pacientes: ${pacientes.length}`);
-    console.log(`📅 Agendamentos: ${agendamentos.length}`);
-    console.log(`📝 Fichas: ${fichas.length}`);
-    console.log(`💰 Orçamentos: ${orcamentos.length}`);
-    console.log(`💊 Receitas: ${receitas.length}`);
-    console.log(`🔬 Exames: ${exames.length}`);
-    console.log('==========================================\n');
+    console.log('\n========================================');
+    console.log('SISTEMA INTEGRADO - Dr. Marcio Scartozzoni');
+    console.log('========================================');
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Dashboard: http://localhost:${PORT}/dashboard`);
+    console.log(`Caderno: http://localhost:${PORT}/caderno-digital`);
+    console.log(`API Status: http://localhost:${PORT}/api/status`);
+    console.log('\nFLUXO INTEGRADO:');
+    console.log('1. Cadastro de Pacientes');
+    console.log('2. Agendamento de Consultas');
+    console.log('3. Ficha de Atendimento');
+    console.log('4. Geracao de Orcamento');
+    console.log('5. Prontuario (Receitas/Exames)');
+    console.log('\nDADOS ATUAIS:');
+    console.log(`Pacientes: ${pacientes.length}`);
+    console.log(`Agendamentos: ${agendamentos.length}`);
+    console.log(`Fichas: ${fichas.length}`);
+    console.log(`Orcamentos: ${orcamentos.length}`);
+    console.log(`Receitas: ${receitas.length}`);
+    console.log(`Exames: ${exames.length}`);
+    console.log('========================================\n');
 });
 
 // Tratamento de erros
 process.on('uncaughtException', (error) => {
-    console.error('❌ Erro não capturado:', error);
+    console.error('Erro nao capturado:', error);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Promessa rejeitada:', reason);
+    console.error('Promessa rejeitada:', reason);
 });

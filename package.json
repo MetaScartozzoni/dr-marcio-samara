@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server-integrado.js",
     "dev": "node server-integrado.js",
+    "simple": "node server-simple.js",
     "build": "echo 'Build completed successfully'",
     "integrado": "node server-integrado.js",
     "caderno": "node server-caderno-mock.js"
