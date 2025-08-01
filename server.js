@@ -429,10 +429,17 @@ app.post('/api/login', async (req, res) => {
         console.log('Login bem-sucedido para:', email, 'Role:', usuario.role); // Debug
         
         res.json({ 
+            success: true, 
             sucesso: true, 
             role: usuario.role,
             full_name: usuario.full_name,
-            redirectUrl: getRedirectUrl(usuario.role) // Adicionar URL de redirecionamento
+            redirect: getRedirectUrl(usuario.role), // Frontend espera 'redirect'
+            redirectUrl: getRedirectUrl(usuario.role), // Manter compatibilidade
+            user: {
+                email: usuario.email,
+                role: usuario.role,
+                full_name: usuario.full_name
+            }
         });
     } catch (error) {
         console.error('Erro ao fazer login:', error);
