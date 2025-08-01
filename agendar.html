@@ -809,7 +809,35 @@
 
         // Função para voltar ao dashboard
         function voltarDashboard() {
-            window.location.href = '/dashboard.html';
+            // Verificar o tipo de usuário e redirecionar para o dashboard apropriado
+            console.log('Redirecionando usuário:', userInfo);
+            
+            if (userInfo && userInfo.role) {
+                switch (userInfo.role) {
+                    case 'admin':
+                        console.log('Redirecionando admin para: /admin.html');
+                        window.location.href = '/admin.html';
+                        break;
+                    case 'medico':
+                        console.log('Redirecionando médico para: /dashboard-funcionario.html');
+                        window.location.href = '/dashboard-funcionario.html';
+                        break;
+                    case 'recepcionista':
+                    case 'secretaria':
+                        console.log('Redirecionando funcionário para: /dashboard-funcionario.html');
+                        window.location.href = '/dashboard-funcionario.html';
+                        break;
+                    case 'paciente':
+                    default:
+                        console.log('Redirecionando paciente para: /dashboard.html');
+                        window.location.href = '/dashboard.html';
+                        break;
+                }
+            } else {
+                console.log('Sem informações do usuário, redirecionando para dashboard padrão');
+                // Fallback para dashboard padrão se não houver informações do usuário
+                window.location.href = '/dashboard.html';
+            }
         }
 
         // Função para ir para uma data específica
