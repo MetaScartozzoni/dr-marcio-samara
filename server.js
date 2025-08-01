@@ -258,7 +258,37 @@ app.post('/api/verificar-email', async (req, res) => {
 // Cadastrar novo usuário (PostgreSQL only) - COM SISTEMA DE APROVAÇÃO
 app.post('/api/cadastrar', async (req, res) => {
     try {
-        const { email, full_name, telefone, tipo } = req.body;
+        const { email, nome, full_name, telefone, tipo, perfil } = req.body;
+        
+        // Usar nome ou full_name (compatibilidade)
+        const nomeUsuario = nome || full_name;
+        
+        if (!nomeUsuario || !email) {
+            return res.status(400).json({ erro: 'Nome e email são obrigatórios' });
+        }
+        
+        // 🎯 AUTO-DETECÇÃO DE ADMIN POR EMAIL
+        const emailsAdmin = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com',
+            'marcio@scartozzoni.com'
+        ];
+        
+        const isAdmin = emailsAdmin.some(adminEmail => 
+            email.toLowerCase() === adminEmail.toLowerCase()
+        );
+        
+        // Definir tipo baseado no email ou parâmetro
+        let tipoUsuario = tipo || perfil || 'patient';
+        let statusAprovacao = 'pendente';
+        let autorizado = false;
+        
+        if (isAdmin) {
+            tipoUsuario = 'admin';
+            statusAprovacao = 'aprovado';
+            autorizado = true;
+            console.log(`🎯 ADMIN DETECTADO: ${email} - Auto-aprovado`);
+        }
         
         // Verificar se email já existe
         const checkQuery = 'SELECT email FROM usuarios WHERE email = $1';
@@ -274,22 +304,23 @@ app.post('/api/cadastrar', async (req, res) => {
         // Inserir novo usuário com status pendente
         const insertQuery = `
             INSERT INTO usuarios (
-                email, nome, telefone, tipo, password_hash, autorizado,
+                email, nome, telefone, tipo, senha, password_hash, autorizado,
                 email_verificado, status_aprovacao, codigo_verificacao, 
                 data_ultimo_codigo, created_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             RETURNING id
         `;
         
         const values = [
             email, 
-            full_name, 
+            nomeUsuario, 
             telefone || null, 
-            tipo || 'patient',
-            '', // password_hash vazio
-            false, // não autorizado
+            tipoUsuario,
+            'TEMP_PASSWORD', // senha temporária (será alterada na verificação)
+            '', // password_hash vazio (será criado na verificação)
+            autorizado, // usar variável para autorização
             false, // email não verificado
-            'pendente', // status aprovação
+            statusAprovacao, // usar variável para status
             codigoVerificacao,
             new Date(),
             new Date()
@@ -297,12 +328,18 @@ app.post('/api/cadastrar', async (req, res) => {
         
         const result = await pool.query(insertQuery, values);
         
-        console.log(`📝 Usuário cadastrado (pendente): ${email} - Código: ${codigoVerificacao}`);
+        console.log(`📝 Usuário cadastrado (${statusAprovacao}): ${email} - Código: ${codigoVerificacao}`);
+        
+        const responseMessage = isAdmin 
+            ? 'Cadastro de administrador realizado com sucesso! Acesso liberado.'
+            : 'Cadastro realizado com sucesso. Aguardando aprovação do administrador.';
         
         res.json({ 
             sucesso: true, 
-            message: 'Cadastro realizado com sucesso. Aguardando aprovação do administrador.',
-            status: 'pendente',
+            message: responseMessage,
+            status: statusAprovacao,
+            tipo: tipoUsuario,
+            autorizado: autorizado,
             codigo: codigoVerificacao // Em produção, enviar por email
         });
     } catch (error) {
@@ -355,7 +392,7 @@ app.post('/api/login', async (req, res) => {
         
         if (result.rows.length === 0) {
             console.log('Usuário não encontrado:', email); // Debug
-            return res.status(404).json({ erro: 'Usuário não encontrado' });
+            return res.status(401).json({ erro: 'Credenciais inválidas' });
         }
         
         const usuario = result.rows[0];
