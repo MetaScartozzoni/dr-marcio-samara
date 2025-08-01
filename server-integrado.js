@@ -469,6 +469,393 @@ app.use((error, req, res, next) => {
     });
 });
 
+// ==========================================
+// SISTEMA DE AUTENTICACAO (SIMULADO)
+// ==========================================
+
+// Dados simulados de funcionários e códigos de verificação
+let funcionarios = [
+    {
+        email: 'admin@drmarcio.com',
+        nome: 'Admin Sistema',
+        status: 'ativo',
+        tipo: 'admin',
+        cargo: 'Administrador',
+        codigo_verificacao: '',
+        senha_hash: '$2b$10$hashadmin',
+        created_at: new Date().toISOString()
+    }
+];
+
+let codigosVerificacao = new Map();
+
+// Função para gerar código de verificação
+function gerarCodigoVerificacao() {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Função para simular envio de email
+function simularEnvioEmail(email, codigo) {
+    console.log(`[EMAIL] Codigo ${codigo} enviado para ${email}`);
+    return true;
+}
+
+// Rotas de autenticação
+app.post('/api/auth/cadastrar-funcionario', (req, res) => {
+    try {
+        const { email, nome, cargo } = req.body;
+        
+        if (!email || !nome) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email e nome são obrigatórios' 
+            });
+        }
+        
+        // Verificar se funcionário já existe
+        const funcionarioExistente = funcionarios.find(f => f.email === email);
+        if (funcionarioExistente) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Funcionário já cadastrado com este email' 
+            });
+        }
+        
+        // Gerar código de verificação
+        const codigo = gerarCodigoVerificacao();
+        const expiracao = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
+        
+        // Armazenar código temporariamente
+        codigosVerificacao.set(email, {
+            codigo: codigo,
+            expiracao: expiracao,
+            tentativas: 0
+        });
+        
+        // Criar funcionário pendente
+        const novoFuncionario = {
+            email: email,
+            nome: nome,
+            status: 'aguardando_verificacao',
+            tipo: 'funcionario',
+            cargo: cargo || 'Funcionário',
+            codigo_verificacao: codigo,
+            senha_hash: '',
+            created_at: new Date().toISOString()
+        };
+        
+        funcionarios.push(novoFuncionario);
+        
+        // Simular envio de email
+        simularEnvioEmail(email, codigo);
+        
+        res.json({ 
+            sucesso: true,
+            message: 'Funcionário cadastrado! Código de verificação enviado por email.',
+            redirectUrl: `verificar-email.html?email=${encodeURIComponent(email)}`
+        });
+        
+    } catch (error) {
+        console.error('Erro ao cadastrar funcionário:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+app.post('/api/auth/verificar-codigo', (req, res) => {
+    try {
+        const { email, codigo } = req.body;
+        
+        if (!email || !codigo) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email e código são obrigatórios' 
+            });
+        }
+        
+        // Verificar se existe código para este email
+        const dadosCodigo = codigosVerificacao.get(email);
+        if (!dadosCodigo) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Código não encontrado. Solicite um novo código.' 
+            });
+        }
+        
+        // Verificar se código expirou
+        if (new Date() > dadosCodigo.expiracao) {
+            codigosVerificacao.delete(email);
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Código expirado. Solicite um novo código.' 
+            });
+        }
+        
+        // Verificar tentativas
+        if (dadosCodigo.tentativas >= 3) {
+            codigosVerificacao.delete(email);
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Muitas tentativas. Solicite um novo código.' 
+            });
+        }
+        
+        // Verificar código
+        if (dadosCodigo.codigo !== codigo) {
+            dadosCodigo.tentativas++;
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: `Código incorreto. Tentativas restantes: ${3 - dadosCodigo.tentativas}` 
+            });
+        }
+        
+        // Código correto - atualizar status do funcionário
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (funcionario) {
+            funcionario.status = 'verificado';
+            funcionario.codigo_verificacao = '';
+        }
+        
+        // Remover código usado
+        codigosVerificacao.delete(email);
+        
+        res.json({ 
+            sucesso: true,
+            message: 'Email verificado com sucesso! Agora crie sua senha.'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao verificar código:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+app.post('/api/auth/reenviar-codigo', (req, res) => {
+    try {
+        const { email } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email é obrigatório' 
+            });
+        }
+        
+        // Verificar se funcionário existe
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (!funcionario) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Funcionário não encontrado' 
+            });
+        }
+        
+        // Gerar novo código
+        const codigo = gerarCodigoVerificacao();
+        const expiracao = new Date(Date.now() + 5 * 60 * 1000);
+        
+        // Atualizar código
+        codigosVerificacao.set(email, {
+            codigo: codigo,
+            expiracao: expiracao,
+            tentativas: 0
+        });
+        
+        funcionario.codigo_verificacao = codigo;
+        
+        // Simular envio de email
+        simularEnvioEmail(email, codigo);
+        
+        res.json({ 
+            sucesso: true,
+            message: 'Novo código enviado para seu email!'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao reenviar código:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+app.post('/api/auth/criar-senha', (req, res) => {
+    try {
+        const { email, senha } = req.body;
+        
+        if (!email || !senha) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email e senha são obrigatórios' 
+            });
+        }
+        
+        if (senha.length < 6) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Senha deve ter pelo menos 6 caracteres' 
+            });
+        }
+        
+        // Verificar se funcionário existe e está verificado
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (!funcionario) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Funcionário não encontrado' 
+            });
+        }
+        
+        if (funcionario.status !== 'verificado') {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email ainda não foi verificado' 
+            });
+        }
+        
+        // Simular hash da senha (em produção usar bcrypt)
+        funcionario.senha_hash = `$2b$10$hash_${senha}`;
+        funcionario.status = 'aguardando_autorizacao';
+        
+        res.json({ 
+            sucesso: true,
+            message: 'Senha criada com sucesso! Aguarde aprovação do administrador.',
+            redirectUrl: 'aguardando-autorizacao.html'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao criar senha:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+app.post('/api/auth/login', (req, res) => {
+    try {
+        const { email, senha } = req.body;
+        
+        if (!email || !senha) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email e senha são obrigatórios' 
+            });
+        }
+        
+        // Verificar funcionário
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (!funcionario) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email ou senha incorretos' 
+            });
+        }
+        
+        // Verificar status
+        if (funcionario.status !== 'ativo') {
+            let mensagem = 'Conta não ativa';
+            if (funcionario.status === 'aguardando_verificacao') {
+                mensagem = 'Email ainda não foi verificado';
+            } else if (funcionario.status === 'aguardando_autorizacao') {
+                mensagem = 'Conta aguardando aprovação do administrador';
+            }
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: mensagem 
+            });
+        }
+        
+        // Simular verificação de senha
+        const senhaCorreta = funcionario.senha_hash.includes(senha) || 
+                            (email === 'admin@drmarcio.com' && senha === 'admin123');
+        
+        if (!senhaCorreta) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Email ou senha incorretos' 
+            });
+        }
+        
+        // Login bem-sucedido
+        res.json({ 
+            sucesso: true,
+            message: 'Login realizado com sucesso!',
+            usuario: {
+                email: funcionario.email,
+                nome: funcionario.nome,
+                tipo: funcionario.tipo,
+                cargo: funcionario.cargo
+            },
+            redirectUrl: funcionario.tipo === 'admin' ? 'admin.html' : 'dashboard-funcionario.html'
+        });
+        
+    } catch (error) {
+        console.error('Erro no login:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Rota para listar funcionários pendentes (admin)
+app.get('/api/auth/funcionarios-pendentes', (req, res) => {
+    try {
+        const pendentes = funcionarios.filter(f => f.status === 'aguardando_autorizacao');
+        res.json({ 
+            sucesso: true,
+            funcionarios: pendentes 
+        });
+    } catch (error) {
+        console.error('Erro ao listar funcionários pendentes:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
+// Rota para autorizar funcionário (admin)
+app.post('/api/auth/autorizar-funcionario', (req, res) => {
+    try {
+        const { email, aprovado, motivo } = req.body;
+        
+        const funcionario = funcionarios.find(f => f.email === email);
+        if (!funcionario) {
+            return res.status(400).json({ 
+                sucesso: false,
+                erro: 'Funcionário não encontrado' 
+            });
+        }
+        
+        if (aprovado) {
+            funcionario.status = 'ativo';
+        } else {
+            funcionario.status = 'rejeitado';
+            funcionario.motivo_rejeicao = motivo;
+        }
+        
+        res.json({ 
+            sucesso: true,
+            message: aprovado ? 'Funcionário aprovado com sucesso!' : 'Funcionário rejeitado.'
+        });
+        
+    } catch (error) {
+        console.error('Erro ao autorizar funcionário:', error);
+        res.status(500).json({ 
+            sucesso: false,
+            erro: 'Erro interno do servidor'
+        });
+    }
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log('\n========================================');
