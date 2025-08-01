@@ -9,28 +9,13 @@
 <body>
     <div class="container">
         <div class="form-container">
-            <h1>Finalizar Cadastro</h1>
-            <p>Complete seus dados e crie uma senha para acessar o sistema</p>
+            <h1>Definir Senha</h1>
+            <p>Complete seu acesso criando uma senha para o sistema</p>
             
             <form id="senhaForm">
                 <div class="input-group">
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required readonly>
-                </div>
-                
-                <div class="input-group">
-                    <label for="nome">Nome Completo:</label>
-                    <input type="text" id="nome" name="nome" required>
-                </div>
-                
-                <div class="input-group">
-                    <label for="telefone">Telefone (opcional):</label>
-                    <input type="tel" id="telefone" name="telefone">
-                </div>
-                
-                <div class="input-group">
-                    <label for="cpf">CPF (opcional):</label>
-                    <input type="text" id="cpf" name="cpf">
                 </div>
                 
                 <div class="input-group">
@@ -43,17 +28,17 @@
                     <input type="password" id="confirmarSenha" name="confirmarSenha" required minlength="6">
                 </div>
                 
-                <button type="submit" class="btn-primary">Finalizar Cadastro</button>
+                <button type="submit" class="btn-primary">Definir Senha</button>
             </form>
             
             <div id="loading" class="loading" style="display: none;">
-                Finalizando cadastro...
+                Definindo senha...
             </div>
             
             <div id="message" class="message"></div>
             
             <div id="sucesso" style="display: none;" class="success-container">
-                <div class="success">Cadastro realizado com sucesso!</div>
+                <div class="success">Senha definida com sucesso!</div>
                 <button onclick="window.location.href='/login.html'" class="btn-primary">
                     Ir para Login
                 </button>
@@ -89,21 +74,12 @@
             e.preventDefault();
             
             const email = document.getElementById('email').value;
-            const nome = document.getElementById('nome').value;
-            const telefone = document.getElementById('telefone').value;
-            const cpf = document.getElementById('cpf').value;
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmarSenha').value;
             
             const loading = document.getElementById('loading');
             const message = document.getElementById('message');
             const sucesso = document.getElementById('sucesso');
-            
-            // Validar campos obrigatórios
-            if (!nome.trim()) {
-                message.innerHTML = '<div class="error">Nome é obrigatório</div>';
-                return;
-            }
             
             // Validar senhas
             if (senha !== confirmarSenha) {
@@ -120,16 +96,13 @@
             message.innerHTML = '';
             
             try {
-                const response = await fetch('/api/cadastro', {
+                const response = await fetch('/api/auth/criar-senha', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
-                        nome: nome,
                         email: email,
-                        telefone: telefone,
-                        cpf: cpf,
                         senha: senha 
                     })
                 });
@@ -137,33 +110,34 @@
                 const data = await response.json();
                 console.log('📥 Resposta:', data);
                 
-                if (data.success) {
+                if (data.sucesso || response.ok) {
                     document.getElementById('senhaForm').style.display = 'none';
                     sucesso.style.display = 'block';
                     
                     // Redirecionar para login após 3 segundos
                     setTimeout(() => {
-                        window.location.href = '/login.html';
+                        window.location.href = '/login.html?email=' + encodeURIComponent(email);
                     }, 3000);
                 } else {
                     // Se email já cadastrado, mostrar link para login
-                    if (data.message && data.message.toLowerCase().includes('já cadastrado')) {
+                    const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
+                    if (errorMessage.toLowerCase().includes('já cadastrado') || errorMessage.toLowerCase().includes('já existe')) {
                         message.innerHTML = `
                             <div class="error">
-                                ${data.message}
+                                ${errorMessage}
                                 <br><br>
-                                <a href="/login.html" class="btn-secondary" style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-secondary" style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
                                     Fazer Login
                                 </a>
                             </div>
                         `;
                     } else {
-                        message.innerHTML = '<div class="error">' + data.message + '</div>';
+                        message.innerHTML = '<div class="error">' + errorMessage + '</div>';
                     }
                 }
             } catch (error) {
                 console.error('❌ Erro:', error);
-                message.innerHTML = '<div class="error">Erro ao finalizar cadastro. Tente novamente.</div>';
+                message.innerHTML = '<div class="error">Erro ao definir senha. Tente novamente.</div>';
             } finally {
                 loading.style.display = 'none';
             }
