@@ -66,15 +66,21 @@
                         if (data.temSenha) {
                             // Email já cadastrado e tem senha - ir para login
                             localStorage.setItem('tempEmail', email);
+                            localStorage.setItem('emailVerificado', 'true');
+                            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
                             window.location.href = '/login.html?email=' + encodeURIComponent(email);
                         } else {
                             // Email cadastrado mas precisa criar senha
                             localStorage.setItem('tempEmail', email);
+                            localStorage.setItem('emailVerificado', 'true');
+                            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
                             window.location.href = '/senha.html?email=' + encodeURIComponent(email);
                         }
                     } else {
                         // Email não cadastrado - ir para cadastro
                         localStorage.setItem('tempEmail', email);
+                        localStorage.setItem('emailVerificado', 'true');
+                        localStorage.setItem('verificacaoTimestamp', Date.now().toString());
                         window.location.href = '/cadastro.html?email=' + encodeURIComponent(email);
                     }
                 } else {

@@ -66,17 +66,44 @@
             const emailFromUrl = urlParams.get('email');
             const emailFromStorage = localStorage.getItem('tempEmail');
             
+            // Verificar se passou pela verificação recente (últimos 5 minutos)
+            const emailVerificado = localStorage.getItem('emailVerificado');
+            const verificacaoTimestamp = localStorage.getItem('verificacaoTimestamp');
+            const agora = Date.now();
+            const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+            
+            const verificacaoRecente = verificacaoTimestamp && 
+                                     (agora - parseInt(verificacaoTimestamp)) < cincoMinutos;
+            
+            if (!emailVerificado || !verificacaoRecente) {
+                alert('Acesso não autorizado. Faça a verificação de email primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                localStorage.removeItem('tempEmail');
+                window.location.href = '/index.html';
+                return;
+            }
+            
             const emailInput = document.getElementById('email');
             
             if (emailFromUrl) {
                 emailInput.value = emailFromUrl;
                 emailInput.readOnly = true; // Tornar readonly para não alterar
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
             } else if (emailFromStorage) {
                 emailInput.value = emailFromStorage;
                 emailInput.readOnly = true; // Tornar readonly para não alterar
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+            } else {
+                alert('Email não encontrado. Faça a verificação primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                window.location.href = '/index.html';
+                return;
             }
+            
+            // Limpar tokens após uso
+            localStorage.removeItem('emailVerificado');
+            localStorage.removeItem('verificacaoTimestamp');
+            localStorage.removeItem('tempEmail');
         };
         
         document.getElementById('cadastroForm').addEventListener('submit', async (e) => {

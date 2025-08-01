@@ -53,22 +53,92 @@
             const emailFromUrl = urlParams.get('email');
             const emailFromStorage = localStorage.getItem('tempEmail');
             
+            // Verificar se passou pela verificação recente (últimos 5 minutos)
+            const emailVerificado = localStorage.getItem('emailVerificado');
+            const verificacaoTimestamp = localStorage.getItem('verificacaoTimestamp');
+            const agora = Date.now();
+            const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+            
+            const verificacaoRecente = verificacaoTimestamp && 
+                                     (agora - parseInt(verificacaoTimestamp)) < cincoMinutos;
+            
+            if (!emailVerificado || !verificacaoRecente) {
+                alert('Acesso não autorizado. Faça a verificação de email primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                localStorage.removeItem('tempEmail');
+                window.location.href = '/index.html';
+                return;
+            }
+            
             const emailInput = document.getElementById('email');
             
+            // Verificar se email foi fornecido por fonte válida
             if (emailFromUrl) {
                 emailInput.value = emailFromUrl;
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+                
+                // Verificar se este email realmente precisa definir senha
+                verificarStatusEmail(emailFromUrl);
             } else if (emailFromStorage) {
                 emailInput.value = emailFromStorage;
-                localStorage.removeItem('tempEmail'); // Limpar storage temporário
+                
+                // Verificar se este email realmente precisa definir senha
+                verificarStatusEmail(emailFromStorage);
+            } else {
+                // Sem email válido - redirecionar para verificação
+                alert('Email não encontrado. Faça a verificação primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                window.location.href = '/index.html';
+                return;
             }
             
-            // Se ainda não tem email, redirecionar para login
-            if (!emailInput.value) {
-                alert('Sessão expirada. Faça login novamente.');
-                window.location.href = '/login';
-            }
+            // Limpar tokens após uso
+            localStorage.removeItem('emailVerificado');
+            localStorage.removeItem('verificacaoTimestamp');
+            localStorage.removeItem('tempEmail');
         };
+
+        // Verificar se o email realmente precisa definir senha
+        async function verificarStatusEmail(email) {
+            try {
+                const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.existe) {
+                    if (data.temSenha) {
+                        // Já tem senha - deveria ir para login
+                        alert('Você já possui uma senha. Redirecionando para o login.');
+                        window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                        return;
+                    }
+                    
+                    if (!data.aprovado) {
+                        // Não aprovado ainda
+                        alert('Sua conta ainda não foi aprovada pelo administrador.');
+                        window.location.href = '/index.html';
+                        return;
+                    }
+                    
+                    // OK - pode definir senha
+                } else {
+                    // Email não existe
+                    alert('Email não encontrado. Faça o cadastro primeiro.');
+                    window.location.href = '/index.html';
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+                alert('Erro ao verificar dados. Tente novamente.');
+                window.location.href = '/index.html';
+            }
+        }
         
         document.getElementById('senhaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
