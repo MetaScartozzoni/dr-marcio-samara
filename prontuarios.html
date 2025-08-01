@@ -781,55 +781,126 @@
             document.getElementById('formNovoProntuario').reset();
         }
 
-        function criarNovoProntuario() {
+        async function criarNovoProntuario() {
             const nome = document.getElementById('nomePaciente').value;
             const cpf = document.getElementById('cpfPaciente').value;
             const dataNascimento = document.getElementById('dataNascimento').value;
             const telefone = document.getElementById('telefonePaciente').value;
             const email = document.getElementById('emailPaciente').value;
 
-            // Verificar se CPF já existe
-            const cpfNumerico = cpf.replace(/\D/g, '');
-            const cpfExiste = prontuarios.find(p => p.cpf.replace(/\D/g, '') === cpfNumerico);
-            
-            if (cpfExiste) {
-                alert('❌ Já existe um prontuário com este CPF!');
+            // Validações básicas
+            if (!nome || !cpf || !dataNascimento || !telefone) {
+                alert('❌ Preencha todos os campos obrigatórios!');
                 return;
             }
 
-            const novoProntuario = {
-                id: 'PRON' + String(prontuarios.length + 1).padStart(3, '0'),
-                nome: nome,
-                cpf: cpf,
-                dataNascimento: dataNascimento,
-                telefone: telefone,
-                email: email,
-                dataCriacao: new Date().toISOString().split('T')[0],
-                ultimaConsulta: null,
-                totalConsultas: 0,
-                status: 'Ativo'
-            };
+            try {
+                // Verificar se CPF já existe na API
+                const checkResponse = await fetch(`/api/pacientes/check-cpf`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ cpf: cpf.replace(/\D/g, '') })
+                });
 
-            prontuarios.push(novoProntuario);
-            
-            // Salvar dados do paciente no localStorage para uso no caderno
-            const dadosPaciente = {
-                id: novoProntuario.id,
-                nome: nome,
-                cpf: cpf,
-                dataNascimento: dataNascimento,
-                telefone: telefone,
-                email: email
-            };
-            localStorage.setItem('pacienteAtual', JSON.stringify(dadosPaciente));
+                if (checkResponse.ok) {
+                    const checkData = await checkResponse.json();
+                    if (checkData.exists) {
+                        alert('❌ Já existe um paciente com este CPF!');
+                        return;
+                    }
+                }
 
-            alert('✅ Prontuário criado com sucesso!');
-            fecharModalNovoProntuario();
-            buscarProntuarios();
+                // Criar novo paciente na API
+                const response = await fetch('/api/pacientes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome: nome,
+                        cpf: cpf.replace(/\D/g, ''),
+                        data_nascimento: dataNascimento,
+                        telefone: telefone.replace(/\D/g, ''),
+                        email: email || null,
+                        status: 'ativo'
+                    })
+                });
 
-            // Perguntar se quer abrir o caderno
-            if (confirm('Deseja abrir o caderno digital deste paciente?')) {
-                abrirCadernoDigital(novoProntuario.id);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Salvar dados do paciente no localStorage para uso no caderno
+                    const dadosPaciente = {
+                        id: data.paciente?.id || `PRON${Date.now()}`,
+                        nome: nome,
+                        cpf: cpf,
+                        dataNascimento: dataNascimento,
+                        telefone: telefone,
+                        email: email
+                    };
+                    localStorage.setItem('pacienteAtual', JSON.stringify(dadosPaciente));
+
+                    alert('✅ Prontuário criado com sucesso!');
+                    fecharModalNovoProntuario();
+                    buscarProntuarios();
+
+                    // Perguntar se quer abrir o caderno
+                    if (confirm('Deseja abrir o caderno digital deste paciente?')) {
+                        abrirCadernoDigital(dadosPaciente.id);
+                    }
+                } else {
+                    const errorData = await response.json();
+                    alert('❌ Erro ao criar prontuário: ' + (errorData.message || 'Erro desconhecido'));
+                }
+
+            } catch (error) {
+                console.error('Erro ao criar prontuário:', error);
+                
+                // Fallback para modo offline (dados locais)
+                const cpfNumerico = cpf.replace(/\D/g, '');
+                const cpfExiste = prontuarios.find(p => p.cpf.replace(/\D/g, '') === cpfNumerico);
+                
+                if (cpfExiste) {
+                    alert('❌ Já existe um prontuário com este CPF!');
+                    return;
+                }
+
+                const novoProntuario = {
+                    id: 'PRON' + String(prontuarios.length + 1).padStart(3, '0'),
+                    nome: nome,
+                    cpf: cpf,
+                    dataNascimento: dataNascimento,
+                    telefone: telefone,
+                    email: email,
+                    dataCriacao: new Date().toISOString().split('T')[0],
+                    ultimaConsulta: null,
+                    totalConsultas: 0,
+                    status: 'Ativo'
+                };
+
+                prontuarios.push(novoProntuario);
+                
+                // Salvar dados do paciente no localStorage para uso no caderno
+                const dadosPaciente = {
+                    id: novoProntuario.id,
+                    nome: nome,
+                    cpf: cpf,
+                    dataNascimento: dataNascimento,
+                    telefone: telefone,
+                    email: email
+                };
+                localStorage.setItem('pacienteAtual', JSON.stringify(dadosPaciente));
+
+                alert('✅ Prontuário criado com sucesso! (Modo offline)');
+                fecharModalNovoProntuario();
+                buscarProntuarios();
+
+                // Perguntar se quer abrir o caderno
+                if (confirm('Deseja abrir o caderno digital deste paciente?')) {
+                    abrirCadernoDigital(novoProntuario.id);
+                }
             }
         }
 
@@ -872,7 +943,7 @@
         }
 
         function voltarDashboard() {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/dashboard';
         }
 
         // Funções utilitárias
