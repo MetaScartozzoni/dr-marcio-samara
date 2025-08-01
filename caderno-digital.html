@@ -141,11 +141,6 @@
 
         .header-right {
             text-align: right;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 15px;
         }
 
         /* Ferramentas de Desenho e Edição */
@@ -296,9 +291,15 @@
             padding: 20px 30px;
             border-bottom: 2px solid #e9ecef;
             display: flex;
-            gap: 15px;
+            justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .toolbar select, .toolbar input {
@@ -507,9 +508,21 @@
 
         .document-item.active {
             border: 2px solid #ff6b9d;
-            background: linear-gradient(135deg, rgba(142, 68, 173, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(142, 68, 173, 0.9) 0%, rgba(255, 107, 157, 0.8) 100%);
             box-shadow: 0 0 25px rgba(255, 107, 157, 0.3), 0 0 50px rgba(142, 68, 173, 0.2);
             animation: neonPulse 2s infinite;
+            color: white;
+        }
+
+        .document-item.active .document-info h4,
+        .document-item.active .document-info p {
+            color: white !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .document-item.active .document-icon {
+            background: rgba(255,255,255,0.2) !important;
+            border: 2px solid rgba(255,255,255,0.3);
         }
 
         @keyframes neonPulse {
@@ -1742,48 +1755,107 @@
 
         .modal-content-ficha {
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
             width: 100%;
             max-width: 1400px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 30px 60px rgba(142, 68, 173, 0.4), 0 0 100px rgba(255, 107, 157, 0.2);
+            border: 3px solid transparent;
+            background-image: linear-gradient(white, white), linear-gradient(135deg, #8e44ad, #ff6b9d, #9b59b6);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            font-family: 'Georgia', 'Times New Roman', serif;
         }
 
         .modal-header-ficha {
             background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
             color: white;
-            padding: 25px 30px;
-            border-radius: 15px 15px 0 0;
+            padding: 30px 35px;
+            border-radius: 17px 17px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 5px 20px rgba(142, 68, 173, 0.3);
+        }
+
+        .modal-header-ficha h2 {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
         }
 
         .modal-body-ficha {
-            padding: 30px;
+            padding: 40px;
+            font-size: 16px;
+            line-height: 1.7;
         }
 
         .ficha-sections {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 35px;
         }
 
         .ficha-section {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 4px solid #8e44ad;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 30px;
+            border-radius: 18px;
+            border-left: 6px solid #8e44ad;
+            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.1);
+            border: 2px solid rgba(142, 68, 173, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ficha-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(142, 68, 173, 0.15);
+            border-color: rgba(142, 68, 173, 0.2);
         }
 
         .ficha-section h3 {
             color: #8e44ad;
-            margin-bottom: 20px;
-            font-size: 1.2em;
+            margin-bottom: 25px;
+            font-size: 1.4em;
             font-weight: 700;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e9ecef;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 0.3px;
+        }
+
+        .ficha-section label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .ficha-section input,
+        .ficha-section textarea,
+        .ficha-section select {
+            font-size: 15px;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .ficha-section input:focus,
+        .ficha-section textarea:focus,
+        .ficha-section select:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 15px rgba(142, 68, 173, 0.2);
+            outline: none;
+            background: white;
         }
 
         .form-group-ficha {
@@ -1887,23 +1959,27 @@
         }
 
         .modal-close {
-            background: none;
-            border: none;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
             color: white;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            padding: 5px;
+            padding: 8px;
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
         }
 
         .modal-close:hover {
             background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
 
         .btn-nova-evolucao {
@@ -1978,28 +2054,6 @@
                 </div>
                 
                 <div class="header-right">
-                    <!-- Ferramentas de Desenho e Edição -->
-                    <div class="drawing-tools">
-                        <button class="tool-btn ruler-tool" onclick="toggleRuler()" title="Régua de Medidas">
-                            <i class="fas fa-ruler"></i>
-                        </button>
-                        <button class="tool-btn" onclick="toggleDrawing()" title="Desenhar/Rabiscar">
-                            <i class="fas fa-pencil-alt"></i>
-                        </button>
-                        <button class="tool-btn" onclick="toggleEraser()" title="Borracha">
-                            <i class="fas fa-eraser"></i>
-                        </button>
-                        <button class="tool-btn" onclick="openPhotoEditor()" title="Editor de Fotos">
-                            <i class="fas fa-image"></i>
-                        </button>
-                        <button class="tool-btn" onclick="addTextBox()" title="Adicionar Texto">
-                            <i class="fas fa-font"></i>
-                        </button>
-                        <button class="tool-btn" onclick="clearCanvas()" title="Limpar Desenhos">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-
                     <div class="paciente-info" id="pacienteInfoHeader">
                         <div class="prontuario-id" id="prontuarioId">PRON001</div>
                         <h3 id="nomePacienteHeader">Selecione um paciente</h3>
@@ -2014,28 +2068,52 @@
         </div>
 
         <div class="toolbar">
-            <button onclick="editarDadosPaciente()" style="background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%);">
-                <i class="fas fa-user-edit"></i> Editar Dados
-            </button>
-            
-            <input type="date" id="dataFiltro" placeholder="Filtrar por data" style="
-                padding: 12px 15px;
-                border: 2px solid #8e44ad;
-                border-radius: 10px;
-                background: rgba(255,255,255,0.9);
-                font-weight: 500;
-                color: #2c3e50;
-                outline: none;
-                transition: all 0.3s ease;
-            ">
-            
-            <button onclick="novoDocumento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
-                <i class="fas fa-plus"></i> Novo Documento
-            </button>
-            
-            <button onclick="sincronizar()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
-                <i class="fas fa-sync"></i> Sincronizar
-            </button>
+            <div class="toolbar-left">
+                <button onclick="editarDadosPaciente()" style="background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%);">
+                    <i class="fas fa-user-edit"></i> Editar Dados
+                </button>
+                
+                <input type="date" id="dataFiltro" placeholder="Filtrar por data" style="
+                    padding: 12px 15px;
+                    border: 2px solid #8e44ad;
+                    border-radius: 10px;
+                    background: rgba(255,255,255,0.9);
+                    font-weight: 500;
+                    color: #2c3e50;
+                    outline: none;
+                    transition: all 0.3s ease;
+                ">
+                
+                <button onclick="novoDocumento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+                    <i class="fas fa-plus"></i> Novo Documento
+                </button>
+                
+                <button onclick="sincronizar()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                    <i class="fas fa-sync"></i> Sincronizar
+                </button>
+            </div>
+
+            <!-- Ferramentas de Desenho e Edição -->
+            <div class="drawing-tools">
+                <button class="tool-btn ruler-tool" onclick="toggleRuler()" title="Régua de Medidas">
+                    <i class="fas fa-ruler"></i>
+                </button>
+                <button class="tool-btn" onclick="toggleDrawing()" title="Desenhar/Rabiscar">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+                <button class="tool-btn" onclick="toggleEraser()" title="Borracha">
+                    <i class="fas fa-eraser"></i>
+                </button>
+                <button class="tool-btn" onclick="openPhotoEditor()" title="Editor de Fotos">
+                    <i class="fas fa-image"></i>
+                </button>
+                <button class="tool-btn" onclick="addTextBox()" title="Adicionar Texto">
+                    <i class="fas fa-font"></i>
+                </button>
+                <button class="tool-btn" onclick="clearCanvas()" title="Limpar Desenhos">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
         </div>
 
         <div class="main-content">
