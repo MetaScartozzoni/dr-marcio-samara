@@ -3685,11 +3685,6 @@ Dr. Marcio Scartozzoni`;
                 document.getElementById('ficha-data-atendimento').value = new Date().toISOString().split('T')[0];
             }
         }
-            
-            // Configurar listeners para cálculo automático
-            configurarCalculoIMC();
-            configurarCalculoOrcamento();
-        }
         
         function fecharModalFicha() {
             document.getElementById('modalFicha').classList.remove('active');
@@ -4753,13 +4748,6 @@ Dr. Marcio Scartozzoni`;
                     showToast('✅ Agendamento atualizado com sucesso!', 'success');
                 }
             }
-        }
-            
-            // Salvar tipo atual para uso no submit
-            document.getElementById('formEdicaoMarco').setAttribute('data-tipo', tipo);
-            
-            // Mostrar modal
-            document.getElementById('modalEdicaoMarco').style.display = 'flex';
         }
 
         function fecharModalMarco() {
