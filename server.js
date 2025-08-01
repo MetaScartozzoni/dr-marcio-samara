@@ -35,14 +35,99 @@ const procedimentosRoutes = require('./src/routes/procedimentos.routes');
 const financeiroRoutes = require('./src/routes/financeiro.routes');
 const { router: adminRoutes, initializeRoutes: initializeAdminRoutes } = require('./src/routes/admin.routes');
 
-// Middleware básico
-app.use(cors());
-app.use(express.json());
+// Middleware básico com CORS configurado
+app.use(cors({
+    origin: [
+        'https://portal-dr-marcio-production.up.railway.app',
+        'https://drmarcioscartozzoni.com',
+        'http://localhost:3000',
+        process.env.FRONTEND_URL
+    ].filter(Boolean),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+        'Origin',
+        'X-Requested-With',
+        'Content-Type',
+        'Accept',
+        'Authorization',
+        'Cache-Control',
+        'X-Auth-Token'
+    ],
+    exposedHeaders: ['X-Auth-Token'],
+    maxAge: 86400 // 24 horas
+}));
 
-// MIDDLEWARE DE SETUP - DEVE VIR ANTES DOS OUTROS
-app.use(checkSystemSetup);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Middleware estático após verificação de setup
+// Middleware de segurança adicional
+app.use((req, res, next) => {
+    // Headers de segurança
+    res.header('X-Content-Type-Options', 'nosniff');
+    res.header('X-Frame-Options', 'DENY');
+    res.header('X-XSS-Protection', '1; mode=block');
+    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // Headers específicos para APIs
+    if (req.path.startsWith('/api/')) {
+        res.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.header('Pragma', 'no-cache');
+        res.header('Expires', '0');
+    }
+    
+    next();
+});
+
+// MIDDLEWARE DE SETUP - TEMPORARIAMENTE DESABILITADO
+// app.use(checkSystemSetup);
+
+// Middleware de logging detalhado
+app.use((req, res, next) => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] ${req.method} ${req.url} - Origin: ${req.headers.origin || 'N/A'} - User-Agent: ${req.headers['user-agent'] || 'N/A'}`);
+    
+    // Log específico para requests problemáticos
+    if (req.headers['user-agent'] && req.headers['user-agent'].includes('provisional')) {
+        console.log('🚨 PROVISIONAL HEADERS DETECTED:', {
+            url: req.url,
+            headers: req.headers,
+            method: req.method
+        });
+    }
+    
+    next();
+});
+
+// Rate limiting simples para APIs
+const requestCounts = new Map();
+app.use('/api/', (req, res, next) => {
+    const clientIP = req.ip || req.connection.remoteAddress || 'unknown';
+    const now = Date.now();
+    const windowMs = 60000; // 1 minuto
+    const maxRequests = 100; // máximo 100 requests por minuto
+    
+    if (!requestCounts.has(clientIP)) {
+        requestCounts.set(clientIP, { count: 1, resetTime: now + windowMs });
+    } else {
+        const clientData = requestCounts.get(clientIP);
+        if (now > clientData.resetTime) {
+            requestCounts.set(clientIP, { count: 1, resetTime: now + windowMs });
+        } else {
+            clientData.count++;
+            if (clientData.count > maxRequests) {
+                console.log(`🚨 Rate limit exceeded for IP: ${clientIP}`);
+                return res.status(429).json({ 
+                    error: 'Too many requests',
+                    retryAfter: Math.ceil((clientData.resetTime - now) / 1000)
+                });
+            }
+        }
+    }
+    
+    next();
+});
+
 app.use(express.static('.'));
 
 // Middleware LGPD
@@ -128,20 +213,38 @@ async function initSheet() {
     }
 }
 
-// Verificar se email existe (PostgreSQL only)
+// Verificar se email existe (PostgreSQL only) - COM SISTEMA DE APROVAÇÃO
 app.post('/api/verificar-email', async (req, res) => {
     try {
         const { email } = req.body;
         
-        const query = 'SELECT email, password_hash, role FROM usuarios WHERE email = $1';
+        const query = `
+            SELECT email, password_hash, tipo as role, autorizado, 
+                   email_verificado, status_aprovacao, codigo_verificacao 
+            FROM usuarios WHERE email = $1
+        `;
         const result = await pool.query(query, [email]);
         
         if (result.rows.length > 0) {
             const usuario = result.rows[0];
+            
+            // Verificar se está aprovado
+            if (usuario.autorizado !== true || usuario.status_aprovacao !== 'aprovado') {
+                return res.json({ 
+                    existe: true,
+                    aprovado: false,
+                    status: usuario.status_aprovacao || 'pendente',
+                    message: 'Usuário aguardando aprovação do administrador'
+                });
+            }
+            
+            // Se aprovado, verificar se tem senha
             res.json({ 
-                existe: true, 
+                existe: true,
+                aprovado: true,
                 temSenha: !!usuario.password_hash,
-                role: usuario.role 
+                emailVerificado: !!usuario.email_verificado,
+                role: usuario.role || 'patient'
             });
         } else {
             res.json({ existe: false });
@@ -152,10 +255,10 @@ app.post('/api/verificar-email', async (req, res) => {
     }
 });
 
-// Cadastrar novo usuário (PostgreSQL only)
+// Cadastrar novo usuário (PostgreSQL only) - COM SISTEMA DE APROVAÇÃO
 app.post('/api/cadastrar', async (req, res) => {
     try {
-        const { email, full_name, telefone, role } = req.body;
+        const { email, full_name, telefone, tipo } = req.body;
         
         // Verificar se email já existe
         const checkQuery = 'SELECT email FROM usuarios WHERE email = $1';
@@ -165,29 +268,43 @@ app.post('/api/cadastrar', async (req, res) => {
             return res.status(400).json({ erro: 'Email já cadastrado' });
         }
         
-        // Gerar user_id único
-        const user_id = 'USR_' + Date.now();
+        // Gerar código de verificação
+        const codigoVerificacao = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // Definir role (padrão patient se não especificado)
-        const userRole = role || 'patient';
-        
-        // Inserir novo usuário
+        // Inserir novo usuário com status pendente
         const insertQuery = `
             INSERT INTO usuarios (
-                email, full_name, telefone, role, user_id, status, 
-                autorizado, last_login, password_hash, data_criacao, observacoes
+                email, nome, telefone, tipo, password_hash, autorizado,
+                email_verificado, status_aprovacao, codigo_verificacao, 
+                data_ultimo_codigo, created_at
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-            RETURNING user_id
+            RETURNING id
         `;
         
         const values = [
-            email, full_name, telefone, userRole, user_id, 'ativo',
-            'nao', null, '', new Date().toISOString(), 'Cadastro via webapp'
+            email, 
+            full_name, 
+            telefone || null, 
+            tipo || 'patient',
+            '', // password_hash vazio
+            false, // não autorizado
+            false, // email não verificado
+            'pendente', // status aprovação
+            codigoVerificacao,
+            new Date(),
+            new Date()
         ];
         
         const result = await pool.query(insertQuery, values);
         
-        res.json({ sucesso: true, message: 'Usuário cadastrado com sucesso', role: userRole });
+        console.log(`📝 Usuário cadastrado (pendente): ${email} - Código: ${codigoVerificacao}`);
+        
+        res.json({ 
+            sucesso: true, 
+            message: 'Cadastro realizado com sucesso. Aguardando aprovação do administrador.',
+            status: 'pendente',
+            codigo: codigoVerificacao // Em produção, enviar por email
+        });
     } catch (error) {
         console.error('Erro ao cadastrar:', error);
         res.status(500).json({ erro: 'Erro interno do servidor' });
@@ -229,7 +346,11 @@ app.post('/api/login', async (req, res) => {
         console.log('Tentativa de login para:', email); // Debug
         
         // Buscar usuário no PostgreSQL
-        const query = 'SELECT email, password_hash, role, full_name FROM usuarios WHERE email = $1';
+        const query = `
+            SELECT email, password_hash, tipo as role, nome as full_name, 
+                   autorizado, status_aprovacao, email_verificado 
+            FROM usuarios WHERE email = $1
+        `;
         const result = await pool.query(query, [email]);
         
         if (result.rows.length === 0) {
@@ -239,7 +360,15 @@ app.post('/api/login', async (req, res) => {
         
         const usuario = result.rows[0];
         console.log('Usuário encontrado:', email, 'Role:', usuario.role); // Debug
-        console.log('Tem senha hash?', !!usuario.password_hash); // Debug
+        
+        // Verificar se está aprovado
+        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+            console.log('Usuário não aprovado:', email); // Debug
+            return res.status(403).json({ 
+                erro: 'Usuário aguardando aprovação do administrador',
+                status: usuario.status_aprovacao || 'pendente'
+            });
+        }
         
         if (!usuario.password_hash) {
             console.log('Usuário precisa criar senha'); // Debug
@@ -257,8 +386,8 @@ app.post('/api/login', async (req, res) => {
         }
         
         // Atualizar last_login
-        const updateQuery = 'UPDATE usuarios SET last_login = $1 WHERE email = $2';
-        await pool.query(updateQuery, [new Date().toISOString(), email]);
+        const updateQuery = 'UPDATE usuarios SET updated_at = $1 WHERE email = $2';
+        await pool.query(updateQuery, [new Date(), email]);
         
         console.log('Login bem-sucedido para:', email, 'Role:', usuario.role); // Debug
         
@@ -269,6 +398,121 @@ app.post('/api/login', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao fazer login:', error);
+        res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// ==================== APIS PARA SISTEMA DE APROVAÇÃO ====================
+
+// Listar usuários pendentes de aprovação
+app.get('/api/usuarios-pendentes', async (req, res) => {
+    try {
+        const query = `
+            SELECT id, email, nome, telefone, tipo, status_aprovacao, 
+                   created_at, codigo_verificacao
+            FROM usuarios 
+            WHERE status_aprovacao = 'pendente' OR autorizado = false
+            ORDER BY created_at DESC
+        `;
+        const result = await pool.query(query);
+        
+        res.json({
+            sucesso: true,
+            usuarios: result.rows,
+            total: result.rows.length
+        });
+    } catch (error) {
+        console.error('Erro ao listar usuários pendentes:', error);
+        res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// Aprovar usuário
+app.post('/api/aprovar-usuario', async (req, res) => {
+    try {
+        const { email, aprovadorEmail } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ erro: 'Email é obrigatório' });
+        }
+        
+        // Gerar código de acesso para o usuário aprovado
+        const codigoAcesso = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Aprovar usuário
+        const updateQuery = `
+            UPDATE usuarios 
+            SET autorizado = true, 
+                status_aprovacao = 'aprovado',
+                codigo_verificacao = $1,
+                data_ultimo_codigo = $2,
+                updated_at = $3
+            WHERE email = $4
+            RETURNING nome, email
+        `;
+        
+        const result = await pool.query(updateQuery, [
+            codigoAcesso, 
+            new Date(), 
+            new Date(), 
+            email
+        ]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ erro: 'Usuário não encontrado' });
+        }
+        
+        const usuario = result.rows[0];
+        
+        console.log(`✅ Usuário aprovado: ${email} - Código: ${codigoAcesso}`);
+        
+        res.json({
+            sucesso: true,
+            message: `Usuário ${usuario.nome} aprovado com sucesso`,
+            usuario: usuario,
+            codigoAcesso: codigoAcesso // Em produção, enviar por email
+        });
+    } catch (error) {
+        console.error('Erro ao aprovar usuário:', error);
+        res.status(500).json({ erro: 'Erro interno do servidor' });
+    }
+});
+
+// Rejeitar usuário
+app.post('/api/rejeitar-usuario', async (req, res) => {
+    try {
+        const { email, motivo } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ erro: 'Email é obrigatório' });
+        }
+        
+        // Rejeitar usuário
+        const updateQuery = `
+            UPDATE usuarios 
+            SET status_aprovacao = 'rejeitado',
+                updated_at = $1
+            WHERE email = $2
+            RETURNING nome, email
+        `;
+        
+        const result = await pool.query(updateQuery, [new Date(), email]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ erro: 'Usuário não encontrado' });
+        }
+        
+        const usuario = result.rows[0];
+        
+        console.log(`❌ Usuário rejeitado: ${email} - Motivo: ${motivo || 'Não informado'}`);
+        
+        res.json({
+            sucesso: true,
+            message: `Usuário ${usuario.nome} rejeitado`,
+            usuario: usuario
+        });
+    } catch (error) {
+        console.error('Erro ao rejeitar usuário:', error);
         res.status(500).json({ erro: 'Erro interno do servidor' });
     }
 });
@@ -933,6 +1177,10 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
+app.get('/aprovacoes', (req, res) => {
+    res.sendFile(path.join(__dirname, 'aprovacoes.html'));
+});
+
 // Rota para landing page pública (pré-cadastro/leads)
 app.get('/consulta', (req, res) => {
     res.sendFile(path.join(__dirname, 'landing-publica.html'));
@@ -1020,6 +1268,11 @@ app.use('/api/config', configRoutes);
 // Health Check simples para Railway (sem depender do banco)
 app.get('/health', (req, res) => {
     res.status(200).send('OK');
+});
+
+// ROTA DE BYPASS PARA TESTE (TEMPORÁRIA)
+app.get('/bypass', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
 // Health Check detalhado para Railway

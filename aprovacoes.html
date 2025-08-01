@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Dr. Marcio - Aprovações</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .aprovacoes-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .usuario-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .usuario-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .usuario-dados h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .usuario-dados p {
+            margin: 2px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .acoes {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-aprovar {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-rejeitar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-aprovar:hover {
+            background: #218838;
+        }
+        
+        .btn-rejeitar:hover {
+            background: #c82333;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .codigo-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="aprovacoes-container">
+        <div class="header">
+            <h1>🔐 Aprovações de Usuários</h1>
+            <p>Gerencie os pedidos de acesso ao sistema</p>
+            <button onclick="carregarPendentes()" class="btn-primary">🔄 Atualizar Lista</button>
+        </div>
+        
+        <div id="loading" class="loading" style="display: none;">
+            Carregando usuários pendentes...
+        </div>
+        
+        <div id="usuarios-lista"></div>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        let usuariosPendentes = [];
+        
+        async function carregarPendentes() {
+            const loading = document.getElementById('loading');
+            const lista = document.getElementById('usuarios-lista');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            lista.innerHTML = '';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/usuarios-pendentes');
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    usuariosPendentes = data.usuarios;
+                    renderizarUsuarios();
+                } else {
+                    message.innerHTML = `<div class="error">Erro ao carregar usuários: ${data.erro || 'Erro desconhecido'}</div>`;
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao conectar com o servidor</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function renderizarUsuarios() {
+            const lista = document.getElementById('usuarios-lista');
+            
+            if (usuariosPendentes.length === 0) {
+                lista.innerHTML = `
+                    <div class="empty-state">
+                        <h3>✅ Nenhum usuário pendente</h3>
+                        <p>Todos os usuários foram processados!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            lista.innerHTML = usuariosPendentes.map(usuario => `
+                <div class="usuario-card" id="usuario-${usuario.id}">
+                    <div class="usuario-info">
+                        <div class="usuario-dados">
+                            <h3>${usuario.nome}</h3>
+                            <p><strong>Email:</strong> ${usuario.email}</p>
+                            <p><strong>Telefone:</strong> ${usuario.telefone || 'Não informado'}</p>
+                        </div>
+                        
+                        <div class="usuario-dados">
+                            <p><strong>Tipo:</strong> ${usuario.tipo || 'patient'}</p>
+                            <p><strong>Cadastro:</strong> ${new Date(usuario.created_at).toLocaleDateString('pt-BR')}</p>
+                            <p><strong>Código:</strong> ${usuario.codigo_verificacao || 'N/A'}</p>
+                        </div>
+                        
+                        <div>
+                            <span class="status-badge status-pendente">
+                                ${usuario.status_aprovacao || 'Pendente'}
+                            </span>
+                        </div>
+                        
+                        <div class="acoes">
+                            <button onclick="aprovarUsuario('${usuario.email}', '${usuario.nome}')" 
+                                    class="btn-aprovar">
+                                ✅ Aprovar
+                            </button>
+                            <button onclick="rejeitarUsuario('${usuario.email}', '${usuario.nome}')" 
+                                    class="btn-rejeitar">
+                                ❌ Rejeitar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function aprovarUsuario(email, nome) {
+            if (!confirm(`Aprovar o usuário ${nome}?`)) return;
+            
+            const message = document.getElementById('message');
+            message.innerHTML = '<div class="info">Processando aprovação...</div>';
+            
+            try {
+                const response = await fetch('/api/aprovar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: email,
+                        aprovadorEmail: 'admin@sistema.com' // Em produção, pegar do login
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    message.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Usuário aprovado com sucesso!</h4>
+                            <p><strong>Nome:</strong> ${data.usuario.nome}</p>
+                            <p><strong>Email:</strong> ${data.usuario.email}</p>
+                            <div class="codigo-info">
+                                <strong>Código de Acesso:</strong> ${data.codigoAcesso}
+                                <br><small>Envie este código para o usuário por email ou WhatsApp</small>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Remover da lista
+                    carregarPendentes();
+                } else {
+                    message.innerHTML = `<div class="error">Erro ao aprovar usuário: ${data.erro}</div>`;
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao conectar com o servidor</div>';
+            }
+        }
+        
+        async function rejeitarUsuario(email, nome) {
+            const motivo = prompt(`Por que rejeitar o usuário ${nome}?`);
+            if (!motivo) return;
+            
+            const message = document.getElementById('message');
+            message.innerHTML = '<div class="info">Processando rejeição...</div>';
+            
+            try {
+                const response = await fetch('/api/rejeitar-usuario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: email,
+                        motivo: motivo
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    message.innerHTML = `
+                        <div class="warning">
+                            <h4>❌ Usuário rejeitado</h4>
+                            <p><strong>Nome:</strong> ${data.usuario.nome}</p>
+                            <p><strong>Motivo:</strong> ${motivo}</p>
+                        </div>
+                    `;
+                    
+                    // Remover da lista
+                    carregarPendentes();
+                } else {
+                    message.innerHTML = `<div class="error">Erro ao rejeitar usuário: ${data.erro}</div>`;
+                }
+            } catch (error) {
+                message.innerHTML = '<div class="error">Erro ao conectar com o servidor</div>';
+            }
+        }
+        
+        // Carregar ao inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarPendentes();
+            
+            // Auto-refresh a cada 30 segundos
+            setInterval(carregarPendentes, 30000);
+        });
+    </script>
+</body>
+</html>

@@ -168,21 +168,18 @@ class LGPDMiddleware {
   static cookieConsent() {
     return async (req, res, next) => {
       try {
-        // Verificar se cookies existem
-        const cookies = req.cookies || {};
-        
         // Verificar preferências de cookies do usuário
         const cookiePrefs = {
-          essenciais: cookies.cookie_essenciais !== 'false',
-          funcionais: cookies.cookie_funcionais === 'true',
-          analiticos: cookies.cookie_analiticos === 'true'
+          essenciais: req.cookies.cookie_essenciais !== 'false',
+          funcionais: req.cookies.cookie_funcionais === 'true',
+          analiticos: req.cookies.cookie_analiticos === 'true'
         };
 
         // Adicionar preferências ao request para uso posterior
         req.cookiePreferences = cookiePrefs;
 
         // Se não há preferências definidas, retornar aviso
-        if (!cookies.cookie_essenciais && req.path !== '/api/lgpd/cookies') {
+        if (!req.cookies.cookie_essenciais && req.path !== '/api/lgpd/cookies') {
           res.setHeader('X-Cookie-Consent-Required', 'true');
         }
 

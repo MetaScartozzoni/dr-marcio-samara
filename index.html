@@ -51,18 +51,35 @@
                 
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok) {
                     if (data.existe) {
-                        // Email já cadastrado - redirecionar para login
-                        localStorage.setItem('tempEmail', email);
-                        window.location.href = '/login.html?email=' + encodeURIComponent(email);
+                        if (!data.aprovado) {
+                            // Usuário cadastrado mas não aprovado
+                            message.innerHTML = `<div class="warning">
+                                <h3>⏳ Aguardando Aprovação</h3>
+                                <p>Seu cadastro está sendo analisado pelo administrador.</p>
+                                <p>Status: <strong>${data.status}</strong></p>
+                                <p>Você receberá um código de acesso após a aprovação.</p>
+                            </div>`;
+                            return;
+                        }
+                        
+                        if (data.temSenha) {
+                            // Email já cadastrado e tem senha - ir para login
+                            localStorage.setItem('tempEmail', email);
+                            window.location.href = '/login?email=' + encodeURIComponent(email);
+                        } else {
+                            // Email cadastrado mas precisa criar senha
+                            localStorage.setItem('tempEmail', email);
+                            window.location.href = '/senha?email=' + encodeURIComponent(email);
+                        }
                     } else {
-                        // Email não cadastrado - redirecionar para cadastro
+                        // Email não cadastrado - ir para cadastro
                         localStorage.setItem('tempEmail', email);
-                        window.location.href = '/senha.html?email=' + encodeURIComponent(email);
+                        window.location.href = '/cadastro?email=' + encodeURIComponent(email);
                     }
                 } else {
-                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                    message.innerHTML = '<div class="error">' + (data.erro || 'Erro ao verificar email') + '</div>';
                 }
             } catch (error) {
                 message.innerHTML = '<div class="error">Erro ao verificar email. Tente novamente.</div>';
