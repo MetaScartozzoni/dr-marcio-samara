@@ -29,6 +29,7 @@
         </div>
     </div>
 
+    <script src="config-senhas-chave.js"></script>
     <script>
         document.getElementById('verificarForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -40,14 +41,8 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
-            // Lista de emails admin que são automaticamente válidos
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
+            // Usar emails admin do sistema de senhas chave
+            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -56,16 +51,54 @@
             
             if (isEmailAdmin) {
                 console.log('✅ Email admin detectado:', email);
-                message.innerHTML = '<div class="success">👑 Admin detectado! Redirecionando para definir senha...</div>';
+                message.innerHTML = '<div class="success">👑 Admin detectado! Verificando estado do sistema...</div>';
                 
-                // Admin sempre pode definir senha
-                localStorage.setItem('tempEmail', email);
-                localStorage.setItem('emailVerificado', 'true');
-                localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                // Verificar estado do admin no sistema
+                try {
+                    const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`);
+                    const data = await response.json();
+                    
+                    if (response.ok && data.existe) {
+                        const estadoUsuario = window.ConfigSenhasChave.determinarEstadoUsuario(data.usuario);
+                        
+                        // Log de acesso admin
+                        window.ConfigSenhasChave.criarLogSeguranca('admin_verificacao_email', email, {
+                            estado: estadoUsuario.estado,
+                            destino: estadoUsuario.destino
+                        });
+                        
+                        localStorage.setItem('tempEmail', email);
+                        localStorage.setItem('emailVerificado', 'true');
+                        localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                        
+                        setTimeout(() => {
+                            window.location.href = `/${estadoUsuario.destino}?email=${encodeURIComponent(email)}`;
+                        }, 1500);
+                    } else {
+                        // Admin não existe - primeiro acesso
+                        message.innerHTML = '<div class="info">👑 Primeiro acesso de admin detectado! Direcionando para cadastro...</div>';
+                        
+                        localStorage.setItem('tempEmail', email);
+                        localStorage.setItem('emailVerificado', 'true');
+                        localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                        localStorage.setItem('primeiroAdmin', 'true');
+                        
+                        setTimeout(() => {
+                            window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}&tipo=primeiro_admin`;
+                        }, 1500);
+                    }
+                } catch (error) {
+                    console.error('Erro ao verificar admin:', error);
+                    // Fallback para cadastro
+                    localStorage.setItem('tempEmail', email);
+                    localStorage.setItem('emailVerificado', 'true');
+                    localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                    
+                    setTimeout(() => {
+                        window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}`;
+                    }, 1500);
+                }
                 
-                setTimeout(() => {
-                    window.location.href = '/senha.html?email=' + encodeURIComponent(email);
-                }, 1500);
                 loading.style.display = 'none';
                 return;
             }
@@ -82,35 +115,72 @@
                 
                 if (response.ok) {
                     if (data.existe) {
-                        if (!data.aprovado) {
-                            // Usuário cadastrado mas não aprovado
-                            message.innerHTML = `<div class="warning">
-                                <h3>⏳ Aguardando Aprovação</h3>
-                                <p>Seu cadastro está sendo analisado pelo administrador.</p>
-                                <p>Status: <strong>${data.status}</strong></p>
-                                <p>Você receberá um código de acesso após a aprovação.</p>
-                            </div>`;
-                            return;
+                        // Determinar estado do usuário usando o novo sistema
+                        const estadoUsuario = window.ConfigSenhasChave.determinarEstadoUsuario(data.usuario);
+                        
+                        // Log do acesso
+                        window.ConfigSenhasChave.criarLogSeguranca('verificacao_email', email, {
+                            estado: estadoUsuario.estado,
+                            destino: estadoUsuario.destino
+                        });
+                        
+                        localStorage.setItem('tempEmail', email);
+                        localStorage.setItem('emailVerificado', 'true');
+                        localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                        
+                        // Mostrar mensagem específica baseada no estado
+                        let mensagem = '';
+                        switch (estadoUsuario.estado) {
+                            case 'aguardando_aprovacao':
+                                mensagem = `<div class="warning">
+                                    <h3>⏳ Aguardando Aprovação</h3>
+                                    <p>Seu cadastro está sendo analisado pelo administrador.</p>
+                                    <p>Status: <strong>${data.status}</strong></p>
+                                    <p>Você receberá um código de acesso após a aprovação.</p>
+                                </div>`;
+                                break;
+                                
+                            case 'renovacao_senha_necessaria':
+                                mensagem = `<div class="warning">
+                                    <h3>🔒 Renovação de Senha Obrigatória</h3>
+                                    <p>Sua senha expirou (90 dias). É necessário renovar.</p>
+                                    <p>Redirecionando para renovação...</p>
+                                </div>`;
+                                break;
+                                
+                            case 'criar_senha':
+                                mensagem = `<div class="success">
+                                    <h3>✅ Conta Aprovada</h3>
+                                    <p>Você pode criar sua senha de acesso.</p>
+                                    <p>Redirecionando...</p>
+                                </div>`;
+                                break;
+                                
+                            case 'login_disponivel':
+                                mensagem = `<div class="info">
+                                    <h3>🔑 Conta Ativa</h3>
+                                    <p>Você já possui uma senha. Redirecionando para login...</p>
+                                </div>`;
+                                break;
+                                
+                            default:
+                                mensagem = `<div class="info">Redirecionando...</div>`;
                         }
                         
-                        if (data.temSenha) {
-                            // Email já cadastrado e tem senha - ir para login
-                            localStorage.setItem('tempEmail', email);
-                            localStorage.setItem('emailVerificado', 'true');
-                            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                            window.location.href = '/login.html?email=' + encodeURIComponent(email);
-                        } else {
-                            // Email cadastrado mas precisa criar senha
-                            localStorage.setItem('tempEmail', email);
-                            localStorage.setItem('emailVerificado', 'true');
-                            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                            window.location.href = '/senha.html?email=' + encodeURIComponent(email);
-                        }
+                        message.innerHTML = mensagem;
+                        
+                        setTimeout(() => {
+                            window.location.href = `/${estadoUsuario.destino}?email=${encodeURIComponent(email)}`;
+                        }, 2000);
+                        
                     } else {
                         // Email não cadastrado - ir para cadastro
                         localStorage.setItem('tempEmail', email);
                         localStorage.setItem('emailVerificado', 'true');
                         localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                        
+                        window.ConfigSenhasChave.criarLogSeguranca('email_nao_cadastrado', email);
+                        
                         window.location.href = '/cadastro.html?email=' + encodeURIComponent(email);
                     }
                 } else {

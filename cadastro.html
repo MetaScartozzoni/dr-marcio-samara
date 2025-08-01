@@ -48,9 +48,16 @@
                     <input type="text" id="nome" name="nome" required>
                 </div>
                 
-                <div class="input-group">
+                                <div class="input-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" required readonly style="background: #f8f9fa;">
+                </div>
+                
+                <!-- Campo de Senha Chave (aparece conforme o tipo) -->
+                <div id="senhaChaveGroup" class="input-group" style="display: none;">
+                    <label for="senhaChave">Senha Chave de Acesso:</label>
+                    <input type="password" id="senhaChave" name="senhaChave" placeholder="Digite a senha chave fornecida">
+                    <small id="senhaChaveHelp" style="color: #666; font-size: 12px;"></small>
                 </div>
                 
                 <div class="input-group">
@@ -88,12 +95,16 @@
         </div>
     </div>
 
+    <script src="config-seguro.js"></script>
     <script>
+        let tipoUsuarioDetectado = null;
+        
         // Preencher email automaticamente se vier da verificação
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const emailFromUrl = urlParams.get('email');
             const emailFromStorage = localStorage.getItem('tempEmail');
+            const tipoFromUrl = urlParams.get('tipo');
             
             // Verificar se passou pela verificação recente (últimos 5 minutos)
             const emailVerificado = localStorage.getItem('emailVerificado');
@@ -114,13 +125,16 @@
             }
             
             const emailInput = document.getElementById('email');
+            let emailFinal = '';
             
             if (emailFromUrl) {
+                emailFinal = emailFromUrl;
                 emailInput.value = emailFromUrl;
-                emailInput.readOnly = true; // Tornar readonly para não alterar
+                emailInput.readOnly = true;
             } else if (emailFromStorage) {
+                emailFinal = emailFromStorage;
                 emailInput.value = emailFromStorage;
-                emailInput.readOnly = true; // Tornar readonly para não alterar
+                emailInput.readOnly = true;
             } else {
                 alert('Email não encontrado. Faça a verificação primeiro.');
                 localStorage.removeItem('emailVerificado');
@@ -129,11 +143,35 @@
                 return;
             }
             
+            // Detectar tipo de usuário e configurar interface
+            detectarTipoUsuario(emailFinal, tipoFromUrl);
+            
             // Limpar tokens após uso
             localStorage.removeItem('emailVerificado');
             localStorage.removeItem('verificacaoTimestamp');
             localStorage.removeItem('tempEmail');
         };
+        
+        function detectarTipoUsuario(email, tipoForcado = null) {
+            const emailsAdmin = window.ConfigSeguro.EMAILS_ADMIN;
+            const senhaChaveGroup = document.getElementById('senhaChaveGroup');
+            const senhaChaveHelp = document.getElementById('senhaChaveHelp');
+            
+            if (tipoForcado === 'primeiro_admin' || emailsAdmin.includes(email.toLowerCase())) {
+                tipoUsuarioDetectado = 'primeiro_admin';
+                senhaChaveGroup.style.display = 'block';
+                senhaChaveHelp.innerHTML = '🔑 Digite a senha de primeiro admin (uso único)';
+                
+                document.querySelector('h1').innerHTML = '👑 Cadastro - Primeiro Administrador';
+                document.querySelector('form p, p').innerHTML = 'Configure o primeiro acesso administrativo do sistema';
+                
+            } else {
+                // Para funcionários e pacientes, mostrar opções
+                tipoUsuarioDetectado = 'funcionario'; // Default
+                senhaChaveGroup.style.display = 'block';
+                senhaChaveHelp.innerHTML = '🔑 Digite a senha chave fornecida (funcionário ou paciente)';
+            }
+        }
         
         document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -144,13 +182,19 @@
             const cpf = document.getElementById('cpf').value;
             const senha = document.getElementById('senha').value;
             const confirmarSenha = document.getElementById('confirmar_senha').value;
+            const senhaChave = document.getElementById('senhaChave').value;
             
             const loading = document.getElementById('loading');
             const message = document.getElementById('message');
             
-            // Validar senhas
-            if (senha !== confirmarSenha) {
-                message.innerHTML = '<div class="error">As senhas não coincidem!</div>';
+            // Validações básicas
+            if (!nome.trim()) {
+                message.innerHTML = '<div class="error">Digite seu nome completo!</div>';
+                return;
+            }
+            
+            if (!senha) {
+                message.innerHTML = '<div class="error">Digite uma senha!</div>';
                 return;
             }
             
@@ -159,22 +203,39 @@
                 return;
             }
             
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem!</div>';
+                return;
+            }
+            
+            // Validar senha chave primeiro
+            if (!senhaChave) {
+                message.innerHTML = '<div class="error">Digite a senha chave de acesso!</div>';
+                return;
+            }
+            
+            // Validar senha chave usando o sistema
+            const validacaoSenha = window.ConfigSeguro.validarSenhaChave(email, senhaChave, tipoUsuarioDetectado);
+            
+            if (!validacaoSenha.valida) {
+                message.innerHTML = '<div class="error">Senha chave inválida! Verifique se você possui autorização para cadastro.</div>';
+                
+                // Log de tentativa de acesso não autorizado
+                window.ConfigSeguro.criarLogSeguranca('tentativa_senha_chave_invalida', email, {
+                    senhaChaveTentativa: senhaChave.substring(0, 3) + '***',
+                    tipoUsuario: tipoUsuarioDetectado
+                });
+                return;
+            }
+            
             loading.style.display = 'block';
-            message.innerHTML = '<div class="info">Verificando email nas tabelas...</div>';
+            message.innerHTML = '<div class="info">✅ Senha chave válida! Processando cadastro...</div>';
             
-            // Lista de emails admin
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
-            
-            // Verificar se é email admin
-            const isEmailAdmin = emailsAdmin.some(adminEmail => 
-                email.toLowerCase() === adminEmail.toLowerCase()
-            );
+            // Log de validação bem-sucedida
+            window.ConfigSeguro.criarLogSeguranca('senha_chave_valida', email, {
+                tipoSenhaChave: validacaoSenha.tipo,
+                tipoUsuario: tipoUsuarioDetectado
+            });
             
             try {
                 // Primeiro: Verificar se email já existe no sistema
@@ -217,70 +278,36 @@
                     }
                 }
                 
-                // Email não existe - fazer cadastro
-                if (isEmailAdmin) {
-                    // ADMIN: Cadastro automático e ativação imediata
-                    message.innerHTML = '<div class="info">👑 Admin detectado. Criando conta automaticamente...</div>';
+                // Email não existe - fazer cadastro baseado na senha chave
+                    let tipoUsuario = 'funcionario'; // Default
+                    let statusInicial = 'pendente_aprovacao';
                     
-                    const adminData = {
-                        nome: nome || 'Administrador',
-                        email: email,
-                        telefone: telefone || '',
-                        cpf: cpf || '',
-                        senha: senha,
-                        tipo: 'admin',
-                        status: 'ativo' // Admin já ativo
-                    };
-                    
-                    const response = await fetch('/api/cadastrar', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(adminData)
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.sucesso || response.ok) {
-                        message.innerHTML = `
-                            <div class="success">
-                                👑 Conta de administrador criada com sucesso!
-                                <br><br>
-                                Redirecionando para login...
-                            </div>
-                        `;
-                        
-                        setTimeout(() => {
-                            window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
-                        }, 2000);
-                    } else {
-                        message.innerHTML = '<div class="error">Erro ao criar conta admin: ' + (data.message || data.erro) + '</div>';
-                    }
-                    
-                } else {
-                    // PACIENTE/FUNCIONÁRIO: Cadastro normal com aprovação
-                    message.innerHTML = '<div class="info">Criando cadastro para aprovação...</div>';
-                    
-                    // Determinar tipo baseado no domínio do email ou outros critérios
-                    let tipoUsuario = 'paciente'; // Padrão
-                    
-                    // Se email for de domínio médico/hospitalar, pode ser funcionário
-                    const dominiosMedicos = ['@hospital', '@clinica', '@medico', '@drmarcio'];
-                    const isEmailMedico = dominiosMedicos.some(dominio => email.toLowerCase().includes(dominio));
-                    
-                    if (isEmailMedico) {
+                    // Determinar tipo baseado na senha chave
+                    if (validacaoSenha.tipo === 'primeiro_admin') {
+                        tipoUsuario = 'admin';
+                        statusInicial = 'ativo';
+                        message.innerHTML = '<div class="info">👑 Primeiro admin - criando conta com acesso total...</div>';
+                    } else if (validacaoSenha.tipo === 'funcionario_chave') {
                         tipoUsuario = 'funcionario';
+                        statusInicial = 'aprovado'; // Funcionário com senha chave já pode criar senha
+                        message.innerHTML = '<div class="info">👨‍💼 Funcionário autorizado - criando conta...</div>';
+                    } else if (validacaoSenha.tipo === 'paciente_chave') {
+                        tipoUsuario = 'paciente';
+                        statusInicial = 'aprovado'; // Paciente com senha chave já pode criar senha
+                        message.innerHTML = '<div class="info">👤 Paciente autorizado - criando conta...</div>';
                     }
                     
                     const userData = {
-                        nome: nome,
+                        nome: nome || 'Usuário',
                         email: email,
                         telefone: telefone || '',
                         cpf: cpf || '',
                         senha: senha,
                         tipo: tipoUsuario,
-                        status: 'pendente' // Aguarda aprovação
+                        status: statusInicial,
+                        senha_chave_usada: validacaoSenha.tipo,
+                        data_uso_senha_chave: new Date().toISOString(),
+                        requer_troca_senha: validacaoSenha.requerTrocaSenha
                     };
                     
                     const response = await fetch('/api/cadastrar', {
@@ -294,60 +321,56 @@
                     const data = await response.json();
                     
                     if (data.sucesso || response.ok) {
-                        if (tipoUsuario === 'funcionario') {
-                            message.innerHTML = `
-                                <div class="success">
-                                    ✅ Cadastro de funcionário realizado!
-                                    <br><br>
-                                    <strong>Seu cadastro será processado internamente.</strong>
-                                    <br>
-                                    Aguarde aprovação do administrador.
-                                    <br><br>
-                                    <a href="/index.html" class="btn-primary" 
-                                       style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
-                                        Voltar ao Início
-                                    </a>
-                                </div>
-                            `;
+                        // Log de cadastro bem-sucedido
+                        window.ConfigSeguro.criarLogSeguranca('cadastro_com_senha_chave', email, {
+                            tipoSenhaChave: validacaoSenha.tipo,
+                            tipoUsuario: tipoUsuario,
+                            statusInicial: statusInicial
+                        });
+                        
+                        let proximaAcao = '';
+                        let destino = '';
+                        
+                        if (tipoUsuario === 'admin') {
+                            proximaAcao = 'Agora você precisa criar sua senha de acesso pessoal.';
+                            destino = '/senha.html';
+                        } else if (statusInicial === 'aprovado') {
+                            proximaAcao = 'Agora você pode criar sua senha de acesso.';
+                            destino = '/senha.html';
                         } else {
-                            message.innerHTML = `
-                                <div class="success">
-                                    ✅ Cadastro de paciente realizado!
-                                    <br><br>
-                                    <strong>Aguarde aprovação do administrador.</strong>
-                                    <br>
-                                    Você receberá uma confirmação por email.
-                                    <br><br>
-                                    <a href="/index.html" class="btn-primary" 
-                                       style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
-                                        Voltar ao Início
-                                    </a>
-                                </div>
-                            `;
+                            proximaAcao = 'Aguarde a aprovação do administrador.';
+                            destino = '/aguardando-autorizacao.html';
                         }
+                        
+                        message.innerHTML = `
+                            <div class="success">
+                                ✅ Cadastro realizado com sucesso!
+                                <br><br>
+                                <strong>Tipo:</strong> ${tipoUsuario.charAt(0).toUpperCase() + tipoUsuario.slice(1)}
+                                <br>
+                                <strong>Status:</strong> ${statusInicial}
+                                <br><br>
+                                ${proximaAcao}
+                            </div>
+                        `;
+                        
+                        setTimeout(() => {
+                            window.location.href = `${destino}?email=${encodeURIComponent(email)}`;
+                        }, 3000);
                     } else {
-                        message.innerHTML = '<div class="error">Erro ao cadastrar: ' + (data.message || data.erro) + '</div>';
+                        message.innerHTML = '<div class="error">Erro ao criar conta: ' + (data.message || data.erro) + '</div>';
                     }
-                }
                 
             } catch (error) {
                 console.error('❌ Erro no cadastro:', error);
                 
-                if (isEmailAdmin) {
-                    // Para admin, permitir cadastro mesmo com erro na API
-                    message.innerHTML = `
-                        <div class="success">
-                            👑 Admin detectado. Processando cadastro offline...
-                            <br><br>
-                            <a href="/senha.html?email=${encodeURIComponent(email)}" class="btn-primary" 
-                               style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
-                                Definir Senha
-                            </a>
-                        </div>
-                    `;
-                } else {
-                    message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
-                }
+                // Log de erro
+                window.ConfigSeguro.criarLogSeguranca('erro_cadastro', email, {
+                    erro: error.message,
+                    tipoUsuario: tipoUsuarioDetectado
+                });
+                
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
             } finally {
                 loading.style.display = 'none';
             }

@@ -100,6 +100,7 @@
         </div>
     </div>
 
+    <script src="config-senhas-chave.js"></script>
     <script>
         let codigoEnviado = null;
         let emailAtual = null;
@@ -137,14 +138,8 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
-            // Lista de emails admin que são automaticamente válidos
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
+            // Usar emails admin do sistema de senhas chave
+            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -153,6 +148,11 @@
             
             if (isEmailAdmin) {
                 console.log('✅ Email admin detectado para recuperação:', email);
+                
+                // Log de recuperação de senha admin
+                window.ConfigSenhasChave.criarLogSeguranca('admin_recuperacao_senha', email, {
+                    metodo: 'codigo_fixo_admin'
+                });
                 
                 // Para admin, simular código automático (em produção seria enviado por email)
                 codigoEnviado = '123456'; // Código fixo para admin em desenvolvimento
@@ -253,6 +253,12 @@
             
             // Verificar código (simulação - em produção seria no backend)
             if (codigo !== codigoEnviado) {
+                // Log de tentativa de código inválido
+                window.ConfigSenhasChave.criarLogSeguranca('codigo_recuperacao_invalido', emailAtual, {
+                    codigoTentativa: codigo,
+                    codigoCorreto: codigoEnviado ? codigoEnviado.substring(0, 3) + '***' : 'unknown'
+                });
+                
                 message.innerHTML = '<div class="error">Código inválido ou expirado</div>';
                 return;
             }
@@ -260,14 +266,8 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
-            // Lista de emails admin que são automaticamente válidos
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
+            // Usar emails admin do sistema de senhas chave
+            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -277,20 +277,47 @@
             if (isEmailAdmin && codigo === '123456') {
                 console.log('✅ Redefinição de senha admin confirmada:', emailAtual);
                 
-                // Para admin, simular sucesso direto
+                // Log de redefinição de senha admin bem-sucedida
+                window.ConfigSenhasChave.criarLogSeguranca('admin_senha_redefinida', emailAtual, {
+                    metodo: 'recuperacao_senha',
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Marcar data de renovação de senha (para controle de 90 dias)
+                const dataRenovacao = new Date().toISOString();
+                localStorage.setItem('adminUltimaRenovacao', dataRenovacao);
+                
+                // Para admin, não salvar sessão automática - deve fazer login
                 message.innerHTML = `
                     <div class="success">
                         👑 ✅ Senha de admin redefinida com sucesso!
                         <br><br>
-                        <a href="/login.html?email=${encodeURIComponent(emailAtual)}" class="btn-primary" 
-                           style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
-                            Fazer Login com Nova Senha
-                        </a>
+                        <p style="margin: 10px 0;">Sua senha foi atualizada. Faça login para continuar.</p>
+                        <div style="margin: 15px 0;">
+                            <div style="width: 100%; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                                <div id="progressBar" style="width: 0%; height: 6px; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
                     </div>
                 `;
                 
                 document.getElementById('verificarCodigoForm').style.display = 'none';
                 loading.style.display = 'none';
+                
+                // Animação de progresso e redirecionamento automático
+                let progress = 0;
+                const progressBar = document.getElementById('progressBar');
+                const interval = setInterval(() => {
+                    progress += 20;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            window.location.href = `/login.html?email=${encodeURIComponent(emailAtual)}`;
+                        }, 500);
+                    }
+                }, 200);
+                
                 return;
             }
             
@@ -311,6 +338,11 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Log de redefinição de senha bem-sucedida
+                    window.ConfigSenhasChave.criarLogSeguranca('senha_redefinida_sucesso', emailAtual, {
+                        tipoUsuario: 'funcionario_ou_paciente'
+                    });
+                    
                     message.innerHTML = `
                         <div class="success">
                             ✅ ${data.message}
@@ -324,6 +356,11 @@
                     
                     document.getElementById('verificarCodigoForm').style.display = 'none';
                 } else {
+                    // Log de erro na redefinição
+                    window.ConfigSenhasChave.criarLogSeguranca('erro_redefinir_senha', emailAtual, {
+                        erro: data.message
+                    });
+                    
                     message.innerHTML = '<div class="error">' + data.message + '</div>';
                 }
                 

@@ -2,12 +2,10 @@
 const { Pool } = require('pg');
 
 // Configuração do pool de conexões PostgreSQL
+// Railway proxy não usa SSL na porta externa (27448)
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL || 'postgresql://postgres:pFYtWUlDjHNTGWJGFUluAUyImYYqBGuf@yamabiko.proxy.rlwy.net:27448/railway',
-    ssl: process.env.NODE_ENV === 'production' ? { 
-        rejectUnauthorized: false,
-        sslmode: 'require'
-    } : false,
+    ssl: false,  // Railway proxy não requer SSL
     max: process.env.NODE_ENV === 'production' ? 10 : 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,

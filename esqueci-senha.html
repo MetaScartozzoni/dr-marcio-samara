@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esqueci minha senha - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .code-input {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .code-input input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+        }
+        .code-input input:focus {
+            border-color: #007bff;
+        }
+        .code-input input.valid {
+            border-color: #28a745;
+            background-color: #f8fff8;
+        }
+        .timer {
+            text-align: center;
+            color: #666;
+            margin: 10px 0;
+        }
+        .resend-btn {
+            background: none;
+            border: none;
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .resend-btn:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            text-decoration: none;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            margin: 0 5px;
+        }
+        .step-dot.active {
+            background: #007bff;
+        }
+        .step-dot.completed {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>🔑 Recuperar Senha</h1>
+            
+            <!-- Indicador de progresso -->
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+                <div class="step-dot" id="dot3"></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <!-- Etapa 1: Solicitar email -->
+            <div class="step active" id="step1">
+                <p>Digite seu email para receber o código de recuperação</p>
+                
+                <form id="emailForm">
+                    <div class="input-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Enviar Código</button>
+                </form>
+            </div>
+            
+            <!-- Etapa 2: Verificar código -->
+            <div class="step" id="step2">
+                <p>Digite o código de 6 dígitos enviado para seu email</p>
+                <small id="emailDisplay" style="color: #666;"></small>
+                
+                <div class="code-input">
+                    <input type="text" id="code1" maxlength="1" oninput="moveToNext(this, 'code2')" onkeydown="moveToPrev(this, null, event)">
+                    <input type="text" id="code2" maxlength="1" oninput="moveToNext(this, 'code3')" onkeydown="moveToPrev(this, 'code1', event)">
+                    <input type="text" id="code3" maxlength="1" oninput="moveToNext(this, 'code4')" onkeydown="moveToPrev(this, 'code2', event)">
+                    <input type="text" id="code4" maxlength="1" oninput="moveToNext(this, 'code5')" onkeydown="moveToPrev(this, 'code3', event)">
+                    <input type="text" id="code5" maxlength="1" oninput="moveToNext(this, 'code6')" onkeydown="moveToPrev(this, 'code4', event)">
+                    <input type="text" id="code6" maxlength="1" oninput="verifyCode()" onkeydown="moveToPrev(this, 'code5', event)">
+                </div>
+                
+                <div class="timer" id="timer">
+                    Código expira em: <span id="countdown">05:00</span>
+                </div>
+                
+                <div class="text-center">
+                    <button class="resend-btn" id="resendBtn" onclick="resendCode()" disabled>
+                        Reenviar código
+                    </button>
+                </div>
+                
+                <button type="button" class="btn-primary" id="verifyBtn" onclick="verifyCode()" disabled>
+                    Verificar Código
+                </button>
+            </div>
+            
+            <!-- Etapa 3: Nova senha -->
+            <div class="step" id="step3">
+                <p>✅ Código verificado! Defina sua nova senha</p>
+                
+                <form id="passwordForm">
+                    <div class="input-group">
+                        <label for="newPassword">Nova Senha:</label>
+                        <input type="password" id="newPassword" name="newPassword" required minlength="6">
+                        <small style="color: #666;">Mínimo 6 caracteres</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirmar Nova Senha:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Atualizar Senha</button>
+                </form>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Processando...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="text-center">
+                <a href="/login.html" class="link">Voltar ao Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="config-seguro.js"></script>
+    <script>
+        let currentStep = 1;
+        let userEmail = '';
+        let recoveryToken = '';
+        let countdownTimer = null;
+        let resendTimer = null;
+        let attemptsCount = 0;
+        const maxAttempts = 3;
+        
+        // Navegação entre etapas
+        function goToStep(step) {
+            // Esconder todas as etapas
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.step-dot').forEach(d => d.classList.remove('active'));
+            
+            // Mostrar etapa atual
+            document.getElementById(`step${step}`).classList.add('active');
+            document.getElementById(`dot${step}`).classList.add('active');
+            
+            // Marcar etapas anteriores como completas
+            for (let i = 1; i < step; i++) {
+                document.getElementById(`dot${i}`).classList.add('completed');
+            }
+            
+            // Atualizar barra de progresso
+            const progress = ((step - 1) / 2) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            currentStep = step;
+        }
+        
+        // Navegação automática entre campos de código
+        function moveToNext(current, nextId) {
+            if (current.value.length === 1 && nextId) {
+                current.classList.add('valid');
+                document.getElementById(nextId).focus();
+            }
+            updateVerifyButton();
+        }
+        
+        function moveToPrev(current, prevId, event) {
+            if (event.key === 'Backspace' && current.value === '' && prevId) {
+                document.getElementById(prevId).focus();
+            }
+        }
+        
+        function updateVerifyButton() {
+            const code = getCodeValue();
+            const verifyBtn = document.getElementById('verifyBtn');
+            verifyBtn.disabled = code.length !== 6;
+        }
+        
+        function getCodeValue() {
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById(`code${i}`).value;
+            }
+            return code;
+        }
+        
+        // Timer de countdown
+        function startCountdown(minutes = 5) {
+            let timeLeft = minutes * 60;
+            const countdownElement = document.getElementById('countdown');
+            const resendBtn = document.getElementById('resendBtn');
+            
+            countdownTimer = setInterval(() => {
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                countdownElement.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownElement.textContent = '00:00';
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Código expirado - Reenviar';
+                }
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // Etapa 1: Solicitar código
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/auth/solicitar-recuperacao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    userEmail = email;
+                    document.getElementById('emailDisplay').textContent = `Código enviado para: ${email}`;
+                    
+                    // Log de solicitação
+                    window.ConfigSeguro.criarLogSeguranca('solicitacao_recuperacao_senha', email, {
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    message.innerHTML = '<div class="success">✅ Código enviado! Verifique seu email.</div>';
+                    
+                    setTimeout(() => {
+                        goToStep(2);
+                        startCountdown(5);
+                        document.getElementById('code1').focus();
+                    }, 1500);
+                    
+                } else {
+                    message.innerHTML = `<div class="error">${data.message || 'Email não encontrado no sistema.'}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao solicitar recuperação:', error);
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Verificar código
+        async function verifyCode() {
+            const code = getCodeValue();
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            if (code.length !== 6) {
+                message.innerHTML = '<div class="error">Digite o código completo de 6 dígitos.</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/auth/verificar-codigo-recuperacao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: userEmail, 
+                        codigo: code 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    recoveryToken = data.token;
+                    clearInterval(countdownTimer);
+                    
+                    // Log de verificação bem-sucedida
+                    window.ConfigSeguro.criarLogSeguranca('codigo_recuperacao_verificado', userEmail, {
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    message.innerHTML = '<div class="success">✅ Código verificado com sucesso!</div>';
+                    
+                    setTimeout(() => {
+                        goToStep(3);
+                        document.getElementById('newPassword').focus();
+                    }, 1500);
+                    
+                } else {
+                    attemptsCount++;
+                    
+                    // Log de tentativa inválida
+                    window.ConfigSeguro.criarLogSeguranca('tentativa_codigo_invalido', userEmail, {
+                        tentativa: attemptsCount,
+                        codigoTentativa: code.substring(0, 2) + '****',
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    if (attemptsCount >= maxAttempts) {
+                        message.innerHTML = '<div class="error">Muitas tentativas inválidas. Solicite um novo código.</div>';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 3000);
+                    } else {
+                        message.innerHTML = `<div class="error">Código inválido. Tentativa ${attemptsCount}/${maxAttempts}</div>`;
+                        
+                        // Limpar campos
+                        for (let i = 1; i <= 6; i++) {
+                            const input = document.getElementById(`code${i}`);
+                            input.value = '';
+                            input.classList.remove('valid');
+                        }
+                        document.getElementById('code1').focus();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erro ao verificar código:', error);
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Reenviar código
+        async function resendCode() {
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            const resendBtn = document.getElementById('resendBtn');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            resendBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/auth/solicitar-recuperacao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: userEmail, 
+                        reenvio: true 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    // Log de reenvio
+                    window.ConfigSeguro.criarLogSeguranca('reenvio_codigo_recuperacao', userEmail, {
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    message.innerHTML = '<div class="success">✅ Novo código enviado!</div>';
+                    
+                    // Resetar tentativas e timer
+                    attemptsCount = 0;
+                    clearInterval(countdownTimer);
+                    startCountdown(5);
+                    
+                    // Limpar campos
+                    for (let i = 1; i <= 6; i++) {
+                        const input = document.getElementById(`code${i}`);
+                        input.value = '';
+                        input.classList.remove('valid');
+                    }
+                    document.getElementById('code1').focus();
+                    
+                } else {
+                    message.innerHTML = `<div class="error">${data.message || 'Erro ao reenviar código.'}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao reenviar código:', error);
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Etapa 3: Atualizar senha
+        document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            // Validações
+            if (newPassword.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres.</div>';
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                message.innerHTML = '<div class="error">As senhas não coincidem.</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/auth/redefinir-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: userEmail,
+                        novaSenha: newPassword,
+                        token: recoveryToken
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.sucesso) {
+                    // Log de senha alterada
+                    window.ConfigSeguro.criarLogSeguranca('senha_redefinida', userEmail, {
+                        timestamp: new Date().toISOString(),
+                        metodo: 'recuperacao_codigo'
+                    });
+                    
+                    message.innerHTML = `
+                        <div class="success">
+                            ✅ Senha redefinida com sucesso!
+                            <br><br>
+                            Redirecionando para o login...
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        window.location.href = `/login.html?email=${encodeURIComponent(userEmail)}`;
+                    }, 3000);
+                    
+                } else {
+                    message.innerHTML = `<div class="error">${data.message || 'Erro ao redefinir senha.'}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Erro ao redefinir senha:', error);
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Permitir colagem de código
+        document.addEventListener('paste', (e) => {
+            if (currentStep === 2) {
+                const paste = e.clipboardData.getData('text');
+                if (paste.length === 6 && /^\d{6}$/.test(paste)) {
+                    for (let i = 0; i < 6; i++) {
+                        document.getElementById(`code${i + 1}`).value = paste[i];
+                        document.getElementById(`code${i + 1}`).classList.add('valid');
+                    }
+                    updateVerifyButton();
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

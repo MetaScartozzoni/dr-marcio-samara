@@ -83,6 +83,7 @@
         </div>
     </div>
 
+    <script src="config-senhas-chave.js"></script>
     <script>
         // Capturar email da URL ou localStorage
         window.onload = function() {
@@ -138,14 +139,8 @@
 
         // Verificar se o email realmente precisa definir senha
         async function verificarStatusEmail(email) {
-            // Lista de emails admin que são automaticamente válidos
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
+            // Usar emails admin do sistema de senhas chave
+            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -154,6 +149,10 @@
             
             if (isEmailAdmin) {
                 console.log('✅ Email admin detectado:', email);
+                
+                // Log de acesso à criação de senha admin
+                window.ConfigSenhasChave.criarLogSeguranca('admin_criar_senha', email);
+                
                 // Email admin - permitir definir senha automaticamente
                 return;
             }
@@ -263,14 +262,8 @@
             loading.style.display = 'block';
             message.innerHTML = '<div class="info">Verificando permissões...</div>';
             
-            // Lista de emails admin que são automaticamente válidos
-            const emailsAdmin = [
-                'admin@drmarcio.com',
-                'admin@drmarcio.com.br',
-                'admin@mscartozzoni.com.br',
-                'marcioscartozzoni@gmail.com',
-                'scartozzoni@hotmail.com'
-            ];
+            // Usar emails admin do sistema de senhas chave
+            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -279,6 +272,12 @@
             
             if (isEmailAdmin) {
                 console.log('✅ Email admin confirmado para criação de senha:', email);
+                
+                // Log de criação de senha admin
+                window.ConfigSenhasChave.criarLogSeguranca('admin_senha_criada', email, {
+                    metodo: 'criar_senha_inicial',
+                    timestamp: new Date().toISOString()
+                });
                 message.innerHTML = '<div class="info">👑 Admin detectado. Definindo senha...</div>';
                 
                 // Prosseguir direto para criação de senha para admin
@@ -298,6 +297,9 @@
                     console.log('📥 Resposta admin:', data);
                     
                     if (data.sucesso || response.ok) {
+                        // Log de sucesso na criação de senha admin
+                        window.ConfigSenhasChave.criarLogSeguranca('admin_senha_criada_sucesso', email);
+                        
                         document.getElementById('senhaForm').style.display = 'none';
                         sucesso.style.display = 'block';
                         
@@ -306,6 +308,11 @@
                             window.location.href = '/login.html?email=' + encodeURIComponent(email);
                         }, 3000);
                     } else {
+                        // Log de erro na criação de senha admin
+                        window.ConfigSenhasChave.criarLogSeguranca('erro_criar_senha_admin', email, {
+                            erro: data.message || data.error || data.erro || 'Erro desconhecido'
+                        });
+                        
                         const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
                         message.innerHTML = '<div class="error">Erro admin: ' + errorMessage + '</div>';
                     }

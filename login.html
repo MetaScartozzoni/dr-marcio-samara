@@ -27,8 +27,8 @@
             </form>
             
             <div class="forgot-password" style="text-align: center; margin: 15px 0;">
-                <a href="/recuperar-senha.html" class="link" style="color: #007bff; text-decoration: none; font-size: 14px;">
-                    Esqueceu a senha? Clique aqui
+                <a href="/esqueci-senha.html" class="link" style="color: #007bff; text-decoration: none; font-size: 14px;">
+                    🔑 Esqueceu a senha? Clique aqui
                 </a>
             </div>
             
@@ -44,6 +44,7 @@
         </div>
     </div>
 
+    <script src="config-seguro.js"></script>
     <script>
        // Preencher email automaticamente se vier da verificação
         window.onload = function() {
@@ -79,12 +80,44 @@
                     return;
                 }
 
+                // Verificar se está tentando usar senha chave no login (ERRO DE SEGURANÇA)
+                // Esta verificação agora é feita no backend de forma segura
+                
+                // Log da tentativa de login
+                window.ConfigSeguro.criarLogSeguranca('tentativa_login', email, {
+                    timestamp: new Date().toISOString()
+                });
+
                 this.showLoading(true);
                 this.clearMessage();
 
                 try {
-                    // Login principal
-                    const response = await fetch('/api/auth/login', {
+                    // Primeiro: verificar status do usuário (usando token seguro)
+                    const token = window.ConfigSeguro.gerarTokenVerificacao(email);
+                    const statusResponse = await fetch(`/secure/api/auth/status-usuario/${encodeURIComponent(token)}`);
+                    const statusData = await statusResponse.json();
+                    
+                    if (statusResponse.ok && statusData.existe) {
+                        const proximaAcao = window.ConfigSeguro.determinarProximaAcao(statusData);
+                        
+                        if (proximaAcao.acao === 'renovar_senha') {
+                            this.showMessage(`
+                                <div style="color: #856404; background: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;">
+                                    <strong>🔒 Renovação de Senha Obrigatória</strong><br>
+                                    Sua senha expirou (90 dias desde a última troca).<br>
+                                    Redirecionando para renovação...
+                                </div>
+                            `, 'warning');
+                            
+                            setTimeout(() => {
+                                window.location.href = `/recuperar-senha.html?email=${encodeURIComponent(email)}`;
+                            }, 3000);
+                            return;
+                        }
+                    }
+
+                    // Login principal usando API segura
+                    const response = await fetch('/secure/api/auth/login-seguro', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -96,12 +129,16 @@
 
                     if (resultado.sucesso) {
                         // Login bem-sucedido
+                        window.ConfigSeguro.criarLogSeguranca('login_sucesso', email, {
+                            tipoUsuario: resultado.usuario?.tipo || 'unknown'
+                        });
+                        
                         this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
                         
                         // Preparar dados do usuário para localStorage
                         const userData = {
                             ...resultado.usuario,
-                            autorizado: true // Admin sempre autorizado
+                            autorizado: true
                         };
                         
                         // Salvar dados do usuário
@@ -113,6 +150,11 @@
                         }, 1500);
                         
                     } else {
+                        // Log de tentativa de login falhada
+                        window.ConfigSeguro.criarLogSeguranca('login_falha', email, {
+                            erro: resultado.erro || 'Credenciais inválidas'
+                        });
+                        
                         // Mostrar erro do servidor
                         this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
                     }
