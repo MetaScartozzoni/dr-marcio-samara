@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Senha - Portal Dr. Marcio</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #bee5eb;
+        }
+        .verification-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .process-steps {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -128,16 +165,56 @@
                     
                     // OK - pode definir senha
                 } else {
-                    // Email não existe
-                    alert('Email não encontrado. Faça o cadastro primeiro.');
-                    window.location.href = '/index.html';
+                    // Email não existe - precisa se cadastrar primeiro
+                    mostrarMensagemCadastro(email);
                     return;
                 }
             } catch (error) {
                 console.error('Erro ao verificar status:', error);
-                alert('Erro ao verificar dados. Tente novamente.');
-                window.location.href = '/index.html';
+                mostrarMensagemCadastro(email);
             }
+        }
+
+        // Mostrar mensagem e botão para cadastro
+        function mostrarMensagemCadastro(email) {
+            document.getElementById('senhaForm').style.display = 'none';
+            
+            const container = document.querySelector('.form-container');
+            container.innerHTML = `
+                <div class="verification-container">
+                    <h1>⚠️ Email Não Cadastrado</h1>
+                    <p>O email <strong>${email}</strong> não está cadastrado no sistema.</p>
+                    <p>Você precisa fazer o cadastro primeiro antes de definir uma senha.</p>
+                    
+                    <div style="margin: 30px 0;">
+                        <button onclick="irParaCadastro('${email}')" class="btn-primary" style="margin: 10px;">
+                            📝 Fazer Cadastro
+                        </button>
+                        <button onclick="window.location.href='/index.html'" class="btn-secondary" style="margin: 10px;">
+                            🔍 Verificar Outro Email
+                        </button>
+                    </div>
+                    
+                    <div class="process-steps">
+                        <strong>📋 Processo correto:</strong><br>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            <li>Verificar email na página inicial</li>
+                            <li>Fazer cadastro se não existir</li>
+                            <li>Aguardar aprovação do administrador</li>
+                            <li>Definir senha após aprovação</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Função para ir para cadastro
+        function irParaCadastro(email) {
+            // Criar token temporário para permitir cadastro
+            localStorage.setItem('tempEmail', email);
+            localStorage.setItem('emailVerificado', 'true');
+            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+            window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}`;
         }
         
         document.getElementById('senhaForm').addEventListener('submit', async (e) => {
@@ -161,11 +238,49 @@
                 message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres</div>';
                 return;
             }
-            
+
+            // Verificar novamente o status antes de enviar
             loading.style.display = 'block';
-            message.innerHTML = '';
+            message.innerHTML = '<div class="info">Verificando permissões...</div>';
             
             try {
+                // Dupla verificação antes de permitir criação de senha
+                const statusResponse = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const statusData = await statusResponse.json();
+                
+                if (!statusResponse.ok || !statusData.existe) {
+                    message.innerHTML = '<div class="error">Email não encontrado no sistema. Faça o cadastro primeiro.</div>';
+                    loading.style.display = 'none';
+                    setTimeout(() => {
+                        mostrarMensagemCadastro(email);
+                    }, 2000);
+                    return;
+                }
+                
+                if (statusData.temSenha) {
+                    message.innerHTML = '<div class="error">Este email já possui uma senha. Redirecionando para login...</div>';
+                    loading.style.display = 'none';
+                    setTimeout(() => {
+                        window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                    }, 2000);
+                    return;
+                }
+                
+                if (!statusData.aprovado) {
+                    message.innerHTML = '<div class="error">Sua conta ainda não foi aprovada pelo administrador.</div>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                // OK - prosseguir com criação de senha
+                message.innerHTML = '<div class="info">Definindo senha...</div>';
+            
                 const response = await fetch('/api/auth/criar-senha', {
                     method: 'POST',
                     headers: {
