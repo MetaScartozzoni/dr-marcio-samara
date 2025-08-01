@@ -2228,7 +2228,7 @@ Dr. Marcio Scartozzoni
             }
 
             const user = JSON.parse(userInfo);
-            if (user.tipo !== 'admin') {
+            if (user.role !== 'admin') {
                 alert('Acesso negado. Apenas administradores podem acessar esta página.');
                 window.location.href = '/dashboard.html';
                 return;
