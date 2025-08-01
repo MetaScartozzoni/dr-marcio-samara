@@ -141,6 +141,96 @@
 
         .header-right {
             text-align: right;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        /* Ferramentas de Desenho e Edição */
+        .drawing-tools {
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tool-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+
+        .tool-btn.active {
+            background: #ff6b9d;
+            box-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+        }
+
+        /* Régua de Medidas */
+        .ruler-tool {
+            position: relative;
+        }
+
+        .ruler-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+            background: repeating-linear-gradient(
+                to right,
+                transparent 0px,
+                rgba(255, 107, 157, 0.3) 1px,
+                transparent 2px,
+                transparent 10px
+            ),
+            repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                rgba(255, 107, 157, 0.3) 1px,
+                transparent 2px,
+                transparent 10px
+            );
+            display: none;
+        }
+
+        .ruler-overlay.active {
+            display: block;
+        }
+
+        /* Canvas de Desenho */
+        .drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .drawing-canvas.active {
+            display: block;
+            pointer-events: auto;
         }
 
         .paciente-info {
@@ -242,16 +332,37 @@
         }
 
         .sidebar {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             border-right: 2px solid #e9ecef;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            opacity: 0.95;
+            z-index: 1;
+        }
+
+        .sidebar > * {
+            position: relative;
+            z-index: 2;
         }
 
         .sidebar h3 {
-            color: #2c3e50;
+            color: #ecf0f1;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #dee2e6;
+            border-bottom: 2px solid #3498db;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
         /* Estilos para os botões de ação rápida */
@@ -261,27 +372,52 @@
 
         .btn-acao {
             width: 100%;
-            padding: 12px 15px;
+            padding: 15px 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             font-size: 14px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #af7ac5 100%);
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .btn-acao::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-acao:hover::before {
+            left: 100%;
         }
 
         .btn-acao:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.4);
+            background: linear-gradient(135deg, #9b59b6 0%, #af7ac5 50%, #c39bd3 100%);
+        }
+
+        .btn-acao:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .btn-acao i {
-            font-size: 16px;
+            font-size: 18px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
         }
 
         /* Estilos para botões de edição dos cards */
@@ -334,23 +470,55 @@
         }
 
         .document-item {
-            background: white;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
             overflow: hidden;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .document-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6, #af7ac5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
         }
 
         .document-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(142, 68, 173, 0.4);
+            border-color: #ff6b9d;
+            background: rgba(255,255,255,0.98);
+        }
+
+        .document-item:hover::before {
+            opacity: 0.1;
         }
 
         .document-item.active {
-            border-left: 5px solid #667eea;
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #ff6b9d;
+            background: linear-gradient(135deg, rgba(142, 68, 173, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
+            box-shadow: 0 0 25px rgba(255, 107, 157, 0.3), 0 0 50px rgba(142, 68, 173, 0.2);
+            animation: neonPulse 2s infinite;
+        }
+
+        @keyframes neonPulse {
+            0%, 100% {
+                box-shadow: 0 0 25px rgba(255, 107, 157, 0.3), 0 0 50px rgba(142, 68, 173, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 107, 157, 0.5), 0 0 70px rgba(142, 68, 173, 0.3);
+            }
         }
 
         .document-header {
@@ -1358,6 +1526,63 @@
             box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
         }
 
+        /* Form Actions - Botões da Ficha de Atendimento */
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 3px solid #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px -20px -20px -20px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-actions button {
+            flex: 1;
+            max-width: 200px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-actions button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .form-actions button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .form-actions button:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .form-actions .btn-primary {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+        }
+
+        .form-actions .btn-secondary {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        }
+
         /* Modal Evolução do Paciente */
         .modal-evolucao {
             position: fixed;
@@ -1753,6 +1978,28 @@
                 </div>
                 
                 <div class="header-right">
+                    <!-- Ferramentas de Desenho e Edição -->
+                    <div class="drawing-tools">
+                        <button class="tool-btn ruler-tool" onclick="toggleRuler()" title="Régua de Medidas">
+                            <i class="fas fa-ruler"></i>
+                        </button>
+                        <button class="tool-btn" onclick="toggleDrawing()" title="Desenhar/Rabiscar">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+                        <button class="tool-btn" onclick="toggleEraser()" title="Borracha">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                        <button class="tool-btn" onclick="openPhotoEditor()" title="Editor de Fotos">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <button class="tool-btn" onclick="addTextBox()" title="Adicionar Texto">
+                            <i class="fas fa-font"></i>
+                        </button>
+                        <button class="tool-btn" onclick="clearCanvas()" title="Limpar Desenhos">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+
                     <div class="paciente-info" id="pacienteInfoHeader">
                         <div class="prontuario-id" id="prontuarioId">PRON001</div>
                         <h3 id="nomePacienteHeader">Selecione um paciente</h3>
@@ -1767,53 +2014,26 @@
         </div>
 
         <div class="toolbar">
-            <button onclick="editarDadosPaciente()" style="background: #fd7e14;">
-                <i class="fas fa-user-edit"></i> Editar Dados do Paciente
+            <button onclick="editarDadosPaciente()" style="background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%);">
+                <i class="fas fa-user-edit"></i> Editar Dados
             </button>
             
-            <button onclick="agendarConsultaPaciente()" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
-                <i class="fas fa-calendar-plus"></i> Agendar Consulta
-            </button>
+            <input type="date" id="dataFiltro" placeholder="Filtrar por data" style="
+                padding: 12px 15px;
+                border: 2px solid #8e44ad;
+                border-radius: 10px;
+                background: rgba(255,255,255,0.9);
+                font-weight: 500;
+                color: #2c3e50;
+                outline: none;
+                transition: all 0.3s ease;
+            ">
             
-            <input type="date" id="dataFiltro" placeholder="Filtrar por data">
-            
-            <button onclick="novoDocumento()">
+            <button onclick="novoDocumento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
                 <i class="fas fa-plus"></i> Novo Documento
             </button>
             
-            <button onclick="gerarReceita()" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
-                <i class="fas fa-prescription"></i> Gerar Receita
-            </button>
-            
-            <button onclick="gerarExames()" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);">
-                <i class="fas fa-vial"></i> Gerar Exames
-            </button>
-            
-            <button onclick="abrirEvolucao()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
-                <i class="fas fa-chart-line"></i> Evolução Paciente
-            </button>
-            
-            <button onclick="abrirFichaAtendimento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
-                <i class="fas fa-clipboard-check"></i> Ficha Atendimento
-            </button>
-            
-            <button onclick="capturarFoto()">
-                <i class="fas fa-camera"></i> Capturar Foto
-            </button>
-            
-            <button onclick="configurarNotificacoes()" style="background: linear-gradient(135deg, #6f42c1 0%, #563d7c 100%);">
-                <i class="fas fa-bell"></i> Configurar Notificações
-            </button>
-            
-            <button onclick="mostrarTarefasDoDia()" style="background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);">
-                <i class="fas fa-tasks"></i> Tarefas do Dia
-            </button>
-            
-            <button onclick="exportarPDF()">
-                <i class="fas fa-file-pdf"></i> Exportar PDF
-            </button>
-            
-            <button onclick="sincronizar()">
+            <button onclick="sincronizar()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
                 <i class="fas fa-sync"></i> Sincronizar
             </button>
         </div>
@@ -4906,6 +5126,138 @@ Dr. Marcio Scartozzoni`;
         function voltarDashboard() {
             voltarProntuarios();
         }
+    </script>
+
+    <!-- Régua de Medidas -->
+    <div class="ruler-overlay" id="rulerOverlay"></div>
+
+    <!-- Canvas de Desenho -->
+    <canvas class="drawing-canvas" id="drawingCanvas"></canvas>
+
+    <script>
+        // Ferramentas de Desenho e Edição
+        let isDrawing = false;
+        let isRulerActive = false;
+        let currentTool = 'pen';
+        let canvas, ctx;
+
+        // Inicializar Canvas
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Configurar tamanho do canvas
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Configurações do contexto
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#ff6b9d';
+        }
+
+        // Toggle Régua
+        function toggleRuler() {
+            const ruler = document.getElementById('rulerOverlay');
+            const btn = document.querySelector('.ruler-tool');
+            
+            isRulerActive = !isRulerActive;
+            ruler.classList.toggle('active');
+            btn.classList.toggle('active');
+        }
+
+        // Toggle Desenho
+        function toggleDrawing() {
+            const canvas = document.getElementById('drawingCanvas');
+            const btn = event.target.closest('.tool-btn');
+            
+            canvas.classList.toggle('active');
+            btn.classList.toggle('active');
+            
+            if (canvas.classList.contains('active')) {
+                initCanvas();
+                addDrawingListeners();
+            } else {
+                removeDrawingListeners();
+            }
+        }
+
+        // Adicionar listeners de desenho
+        function addDrawingListeners() {
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+        }
+
+        // Remover listeners de desenho
+        function removeDrawingListeners() {
+            canvas.removeEventListener('mousedown', startDrawing);
+            canvas.removeEventListener('mousemove', draw);
+            canvas.removeEventListener('mouseup', stopDrawing);
+            canvas.removeEventListener('mouseout', stopDrawing);
+        }
+
+        // Iniciar desenho
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.clientX, e.clientY);
+        }
+
+        // Desenhar
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            ctx.lineWidth = currentTool === 'eraser' ? 10 : 2;
+            ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
+            
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+        }
+
+        // Parar desenho
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        // Toggle Borracha
+        function toggleEraser() {
+            const btn = event.target.closest('.tool-btn');
+            currentTool = currentTool === 'eraser' ? 'pen' : 'eraser';
+            btn.classList.toggle('active');
+        }
+
+        // Limpar Canvas
+        function clearCanvas() {
+            if (canvas && ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Editor de Fotos (placeholder)
+        function openPhotoEditor() {
+            alert('🎨 Editor de Fotos\n\nFuncionalidades disponíveis:\n• Crop/Recorte\n• Filtros\n• Ajustes de brilho/contraste\n• Redimensionamento\n\n(Em desenvolvimento)');
+        }
+
+        // Adicionar Texto (placeholder)
+        function addTextBox() {
+            const text = prompt('Digite o texto para adicionar:');
+            if (text && canvas && ctx) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#ff6b9d';
+                ctx.fillText(text, 100, 100);
+            }
+        }
+
+        // Redimensionar canvas quando a janela mudar
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
     </script>
 
 </body>
