@@ -1,0 +1,25 @@
+# ⚙️ VARIÁVEIS DE AMBIENTE PARA RAILWAY
+# =====================================
+# Cole estas variáveis no Railway Dashboard
+# Settings > Environment Variables
+
+# === DATABASE (OBRIGATÓRIO) ===
+DATABASE_URL_PROD=postgresql://postgres:ydKZVqeDdnQVSPOsAkcKJhoTHLsOEqxu@maglev.proxy.rlwy.net:39156/railway
+
+# === PORTA (OBRIGATÓRIO) ===
+PORT=3000
+
+# === SENDGRID EMAIL (OBRIGATÓRIO) ===
+SENDGRID_API_KEY=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
+SENDGRID_FROM_EMAIL=clinica@mscartozzoni.com.br
+
+# === AMBIENTE ===
+NODE_ENV=production
+AMBIENTE=production
+
+# === SEGURANÇA ===
+JWT_SECRET=portal-dr-marcio-super-secret-2024
+
+# === RAILWAY ESPECÍFICAS ===
+PGSSL=require
+PGSSLMODE=require
