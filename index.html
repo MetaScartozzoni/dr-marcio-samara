@@ -29,8 +29,13 @@
         </div>
     </div>
 
-    <script src="config-senhas-chave.js"></script>
     <script>
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
         document.getElementById('verificarForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             

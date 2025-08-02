@@ -83,8 +83,13 @@
         </div>
     </div>
 
-    <script src="config-senhas-chave.js"></script>
     <script>
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
         // Capturar email da URL ou localStorage
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
