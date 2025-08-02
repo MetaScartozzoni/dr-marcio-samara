@@ -95,8 +95,45 @@
         </div>
     </div>
 
-    <script src="config-seguro.js"></script>
     <script>
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
+        // Senhas chave para validação (NÃO deve ficar no frontend em produção)
+        const SENHAS_CHAVE = {
+            PRIMEIRO_ADMIN: 'AdminMestre2025!',
+            FUNCIONARIO: 'FuncChave2025@',
+            PACIENTE: 'PacienteKey2025#'
+        };
+        
+        // Função para validar senha chave
+        function validarSenhaChave(email, senhaChave, tipoUsuario) {
+            const emailsAdmin = EMAILS_ADMIN;
+            const isEmailAdmin = emailsAdmin.includes(email.toLowerCase());
+            
+            if (isEmailAdmin && tipoUsuario === 'primeiro_admin') {
+                return {
+                    valida: senhaChave === SENHAS_CHAVE.PRIMEIRO_ADMIN,
+                    tipo: 'admin'
+                };
+            } else if (senhaChave === SENHAS_CHAVE.FUNCIONARIO) {
+                return {
+                    valida: true,
+                    tipo: 'funcionario'
+                };
+            } else if (senhaChave === SENHAS_CHAVE.PACIENTE) {
+                return {
+                    valida: true,
+                    tipo: 'paciente'
+                };
+            }
+            
+            return { valida: false, tipo: null };
+        }
+        
         let tipoUsuarioDetectado = null;
         
         // Preencher email automaticamente se vier da verificação
@@ -153,17 +190,20 @@
         };
         
         function detectarTipoUsuario(email, tipoForcado = null) {
-            const emailsAdmin = window.ConfigSeguro.EMAILS_ADMIN;
+            const emailsAdmin = EMAILS_ADMIN;
             const senhaChaveGroup = document.getElementById('senhaChaveGroup');
             const senhaChaveHelp = document.getElementById('senhaChaveHelp');
             
             if (tipoForcado === 'primeiro_admin' || emailsAdmin.includes(email.toLowerCase())) {
                 tipoUsuarioDetectado = 'primeiro_admin';
                 senhaChaveGroup.style.display = 'block';
-                senhaChaveHelp.innerHTML = '🔑 Digite a senha de primeiro admin (uso único)';
+                senhaChaveHelp.innerHTML = '🔑 Digite a senha de primeiro admin (uso único): <strong>AdminMestre2025!</strong>';
                 
                 document.querySelector('h1').innerHTML = '👑 Cadastro - Primeiro Administrador';
-                document.querySelector('form p, p').innerHTML = 'Configure o primeiro acesso administrativo do sistema';
+                const formDescription = document.querySelector('p');
+                if (formDescription) {
+                    formDescription.innerHTML = 'Configure o primeiro acesso administrativo do sistema';
+                }
                 
             } else {
                 // Para funcionários e pacientes, mostrar opções
@@ -215,16 +255,13 @@
             }
             
             // Validar senha chave usando o sistema
-            const validacaoSenha = window.ConfigSeguro.validarSenhaChave(email, senhaChave, tipoUsuarioDetectado);
+            const validacaoSenha = validarSenhaChave(email, senhaChave, tipoUsuarioDetectado);
             
             if (!validacaoSenha.valida) {
                 message.innerHTML = '<div class="error">Senha chave inválida! Verifique se você possui autorização para cadastro.</div>';
                 
                 // Log de tentativa de acesso não autorizado
-                window.ConfigSeguro.criarLogSeguranca('tentativa_senha_chave_invalida', email, {
-                    senhaChaveTentativa: senhaChave.substring(0, 3) + '***',
-                    tipoUsuario: tipoUsuarioDetectado
-                });
+                console.error('❌ Tentativa senha chave inválida:', email, senhaChave.substring(0, 3) + '***', tipoUsuarioDetectado);
                 return;
             }
             
@@ -232,10 +269,7 @@
             message.innerHTML = '<div class="info">✅ Senha chave válida! Processando cadastro...</div>';
             
             // Log de validação bem-sucedida
-            window.ConfigSeguro.criarLogSeguranca('senha_chave_valida', email, {
-                tipoSenhaChave: validacaoSenha.tipo,
-                tipoUsuario: tipoUsuarioDetectado
-            });
+            console.log('✅ Senha chave válida:', email, 'tipo:', validacaoSenha.tipo, 'usuário:', tipoUsuarioDetectado);
             
             try {
                 // Primeiro: Verificar se email já existe no sistema
@@ -322,11 +356,7 @@
                     
                     if (data.sucesso || response.ok) {
                         // Log de cadastro bem-sucedido
-                        window.ConfigSeguro.criarLogSeguranca('cadastro_com_senha_chave', email, {
-                            tipoSenhaChave: validacaoSenha.tipo,
-                            tipoUsuario: tipoUsuario,
-                            statusInicial: statusInicial
-                        });
+                        console.log('✅ Cadastro realizado:', email, 'tipo:', validacaoSenha.tipo, 'usuário:', tipoUsuario, 'status:', statusInicial);
                         
                         let proximaAcao = '';
                         let destino = '';
@@ -365,10 +395,7 @@
                 console.error('❌ Erro no cadastro:', error);
                 
                 // Log de erro
-                window.ConfigSeguro.criarLogSeguranca('erro_cadastro', email, {
-                    erro: error.message,
-                    tipoUsuario: tipoUsuarioDetectado
-                });
+                console.error('❌ Erro cadastro:', email, error.message, 'tipo:', tipoUsuarioDetectado);
                 
                 message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
             } finally {

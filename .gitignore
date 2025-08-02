@@ -42,6 +42,14 @@ logs
 # Arquivos temporários
 .tmp/
 temp/
+teste-*.js
+*-teste.js
+*-debug.js
+*-demo.js
+debug-*.js
+verificar-*.js
+analisar-*.js
+diagnostico-*.js
 
 # Cache
 .cache/
