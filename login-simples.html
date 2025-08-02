@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>🔐 Login Portal Dr. Marcio</h1>
+            <p>Faça login para acessar o sistema</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="marcioscartozzoni@gmail.com" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" placeholder="AdminMestre2025!" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">🚀 Entrar</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                ⏳ Fazendo login...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
+                <strong>🎯 CREDENCIAIS PARA TESTE:</strong><br>
+                Email: marcioscartozzoni@gmail.com<br>
+                Senha: AdminMestre2025!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                console.log('🔐 Tentando login:', email);
+                
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, senha })
+                });
+                
+                const data = await response.json();
+                console.log('📥 Resposta:', data);
+                
+                if (data.sucesso) {
+                    message.innerHTML = '<div style="color: green; padding: 10px; background: #d4edda; border-radius: 5px;">✅ Login realizado com sucesso!</div>';
+                    
+                    // Salvar dados do usuário
+                    localStorage.setItem('userInfo', JSON.stringify(data.usuario));
+                    
+                    // Redirecionar
+                    setTimeout(() => {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        } else if (data.usuario.tipo === 'admin') {
+                            window.location.href = '/admin.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    }, 1500);
+                } else {
+                    message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ ' + (data.message || 'Erro no login') + '</div>';
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ Erro de conexão</div>';
+            }
+            
+            loading.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Definir Senha - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>🔐 Definir Nova Senha</h1>
+            <p id="funcionario-info">Configure sua senha de acesso</p>
+            
+            <form id="senhaForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" readonly style="background: #f8f9fa;">
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Nova Senha:</label>
+                    <input type="password" id="senha" name="senha" required 
+                           placeholder="Mínimo 6 caracteres">
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirmarSenha">Confirmar Senha:</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required 
+                           placeholder="Digite a senha novamente">
+                </div>
+                
+                <button type="submit" class="btn-primary">🚀 Definir Senha</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                ⏳ Definindo senha...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 14px;">
+                <strong>🔒 REQUISITOS DA SENHA:</strong><br>
+                • Mínimo 6 caracteres<br>
+                • Recomendado: letras, números e símbolos<br>
+                • Após definir, você poderá fazer login normalmente
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let codigo = '';
+        
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            codigo = urlParams.get('codigo');
+            const email = urlParams.get('email');
+            
+            if (!codigo || !email) {
+                alert('Acesso inválido. Use o link fornecido pelo administrador.');
+                window.location.href = '/acesso-funcionario.html';
+                return;
+            }
+            
+            document.getElementById('email').value = email;
+            document.getElementById('funcionario-info').innerHTML = `Olá, <strong>${email}</strong>! Defina sua senha para acessar o sistema.`;
+        };
+        
+        document.getElementById('senhaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            // Validações
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ As senhas não coincidem</div>';
+                return;
+            }
+            
+            if (senha.length < 6) {
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ A senha deve ter pelo menos 6 caracteres</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                console.log('🔐 Definindo senha para:', email);
+                
+                const response = await fetch('/api/funcionario/definir-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ codigo, email, senha })
+                });
+                
+                const data = await response.json();
+                console.log('📥 Resposta:', data);
+                
+                if (data.sucesso) {
+                    message.innerHTML = `
+                        <div style="color: green; padding: 15px; background: #d4edda; border-radius: 5px;">
+                            ✅ ${data.message}<br>
+                            <br>Redirecionando para o login...
+                        </div>
+                    `;
+                    
+                    // Redirecionar para login
+                    setTimeout(() => {
+                        window.location.href = data.redirect + '?email=' + encodeURIComponent(email);
+                    }, 2000);
+                } else {
+                    message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ ' + (data.message || 'Erro ao definir senha') + '</div>';
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ Erro de conexão</div>';
+            }
+            
+            loading.style.display = 'none';
+        });
+        
+        // Validação em tempo real
+        document.getElementById('confirmarSenha').addEventListener('input', function() {
+            const senha = document.getElementById('senha').value;
+            const confirmar = this.value;
+            
+            if (confirmar && senha !== confirmar) {
+                this.style.borderColor = '#dc3545';
+            } else {
+                this.style.borderColor = '#28a745';
+            }
+        });
+    </script>
+</body>
+</html>
