@@ -2,10 +2,12 @@
 const { Pool } = require('pg');
 
 // Configuração do pool de conexões PostgreSQL
-// Railway proxy não usa SSL na porta externa (27448)
+// SSL configurado conforme documentação oficial Railway - ATIVO E FUNCIONANDO
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:pFYtWUlDjHNTGWJGFUluAUyImYYqBGuf@yamabiko.proxy.rlwy.net:27448/railway',
-    ssl: false,  // Railway proxy não requer SSL
+    connectionString: process.env.DATABASE_URL || 'postgresql://postgres:ydKZVqeDdnQVSPOsAkcKJhoTHLsOEqxu@maglev.proxy.rlwy.net:39156/railway',
+    ssl: {
+        rejectUnauthorized: false  // Railway usa certificados self-signed - SSL ATIVO
+    },
     max: process.env.NODE_ENV === 'production' ? 10 : 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,

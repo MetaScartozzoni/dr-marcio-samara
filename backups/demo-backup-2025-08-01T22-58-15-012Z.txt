@@ -1,0 +1,9 @@
+
+BACKUP SIMULATION - Portal Dr. Marcio
+=====================================
+Timestamp: 2025-08-01T22:58:15.022Z
+Database Size: 9980 kB
+Total Tables: 31
+Recovery Tables: 3
+Status: SUCCESS
+        
