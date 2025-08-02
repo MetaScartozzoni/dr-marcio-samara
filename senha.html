@@ -144,8 +144,8 @@
 
         // Verificar se o email realmente precisa definir senha
         async function verificarStatusEmail(email) {
-            // Usar emails admin do sistema de senhas chave
-            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -156,7 +156,7 @@
                 console.log('✅ Email admin detectado:', email);
                 
                 // Log de acesso à criação de senha admin
-                window.ConfigSenhasChave.criarLogSeguranca('admin_criar_senha', email);
+                console.log('🔐 Admin criando senha:', email);
                 
                 // Email admin - permitir definir senha automaticamente
                 return;
@@ -267,8 +267,8 @@
             loading.style.display = 'block';
             message.innerHTML = '<div class="info">Verificando permissões...</div>';
             
-            // Usar emails admin do sistema de senhas chave
-            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -279,10 +279,8 @@
                 console.log('✅ Email admin confirmado para criação de senha:', email);
                 
                 // Log de criação de senha admin
-                window.ConfigSenhasChave.criarLogSeguranca('admin_senha_criada', email, {
-                    metodo: 'criar_senha_inicial',
-                    timestamp: new Date().toISOString()
-                });
+                console.log('🔐 Admin criando senha inicial:', email, new Date().toISOString());
+                
                 message.innerHTML = '<div class="info">👑 Admin detectado. Definindo senha...</div>';
                 
                 // Prosseguir direto para criação de senha para admin
@@ -303,7 +301,7 @@
                     
                     if (data.sucesso || response.ok) {
                         // Log de sucesso na criação de senha admin
-                        window.ConfigSenhasChave.criarLogSeguranca('admin_senha_criada_sucesso', email);
+                        console.log('✅ Admin senha criada com sucesso:', email);
                         
                         document.getElementById('senhaForm').style.display = 'none';
                         sucesso.style.display = 'block';
@@ -314,11 +312,9 @@
                         }, 3000);
                     } else {
                         // Log de erro na criação de senha admin
-                        window.ConfigSenhasChave.criarLogSeguranca('erro_criar_senha_admin', email, {
-                            erro: data.message || data.error || data.erro || 'Erro desconhecido'
-                        });
-                        
                         const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
+                        console.error('❌ Erro criar senha admin:', email, errorMessage);
+                        
                         message.innerHTML = '<div class="error">Erro admin: ' + errorMessage + '</div>';
                     }
                 } catch (error) {

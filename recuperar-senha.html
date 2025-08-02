@@ -143,8 +143,8 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
-            // Usar emails admin do sistema de senhas chave
-            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -155,9 +155,7 @@
                 console.log('✅ Email admin detectado para recuperação:', email);
                 
                 // Log de recuperação de senha admin
-                window.ConfigSenhasChave.criarLogSeguranca('admin_recuperacao_senha', email, {
-                    metodo: 'codigo_fixo_admin'
-                });
+                console.log('🔐 Admin recuperando senha:', email, 'método: codigo_fixo_admin');
                 
                 // Para admin, simular código automático (em produção seria enviado por email)
                 codigoEnviado = '123456'; // Código fixo para admin em desenvolvimento
@@ -259,10 +257,7 @@
             // Verificar código (simulação - em produção seria no backend)
             if (codigo !== codigoEnviado) {
                 // Log de tentativa de código inválido
-                window.ConfigSenhasChave.criarLogSeguranca('codigo_recuperacao_invalido', emailAtual, {
-                    codigoTentativa: codigo,
-                    codigoCorreto: codigoEnviado ? codigoEnviado.substring(0, 3) + '***' : 'unknown'
-                });
+                console.error('❌ Código inválido:', emailAtual, codigo.substring(0, 3) + '***');
                 
                 message.innerHTML = '<div class="error">Código inválido ou expirado</div>';
                 return;
@@ -271,8 +266,8 @@
             loading.style.display = 'block';
             message.innerHTML = '';
             
-            // Usar emails admin do sistema de senhas chave
-            const emailsAdmin = window.ConfigSenhasChave.EMAILS_ADMIN;
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
             
             // Verificar se é email admin
             const isEmailAdmin = emailsAdmin.some(adminEmail => 
@@ -283,10 +278,7 @@
                 console.log('✅ Redefinição de senha admin confirmada:', emailAtual);
                 
                 // Log de redefinição de senha admin bem-sucedida
-                window.ConfigSenhasChave.criarLogSeguranca('admin_senha_redefinida', emailAtual, {
-                    metodo: 'recuperacao_senha',
-                    timestamp: new Date().toISOString()
-                });
+                console.log('🔐 Admin senha redefinida:', emailAtual, 'método: recuperacao_senha', new Date().toISOString());
                 
                 // Marcar data de renovação de senha (para controle de 90 dias)
                 const dataRenovacao = new Date().toISOString();
@@ -344,9 +336,7 @@
                 
                 if (data.success) {
                     // Log de redefinição de senha bem-sucedida
-                    window.ConfigSenhasChave.criarLogSeguranca('senha_redefinida_sucesso', emailAtual, {
-                        tipoUsuario: 'funcionario_ou_paciente'
-                    });
+                    console.log('✅ Senha redefinida com sucesso:', emailAtual, 'tipo: funcionario_ou_paciente');
                     
                     message.innerHTML = `
                         <div class="success">
@@ -362,9 +352,7 @@
                     document.getElementById('verificarCodigoForm').style.display = 'none';
                 } else {
                     // Log de erro na redefinição
-                    window.ConfigSenhasChave.criarLogSeguranca('erro_redefinir_senha', emailAtual, {
-                        erro: data.message
-                    });
+                    console.error('❌ Erro ao redefinir senha:', emailAtual, data.message);
                     
                     message.innerHTML = '<div class="error">' + data.message + '</div>';
                 }
