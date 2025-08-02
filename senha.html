@@ -96,50 +96,28 @@
             const emailFromUrl = urlParams.get('email');
             const emailFromStorage = localStorage.getItem('tempEmail');
             
-            // Verificar se passou pela verificação recente (últimos 5 minutos)
-            const emailVerificado = localStorage.getItem('emailVerificado');
-            const verificacaoTimestamp = localStorage.getItem('verificacaoTimestamp');
-            const agora = Date.now();
-            const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+            // MODO LOCAL - DESABILITAR VERIFICAÇÃO TEMPORARIAMENTE
+            console.log('🔧 MODO LOCAL: Verificação de email desabilitada');
             
-            const verificacaoRecente = verificacaoTimestamp && 
-                                     (agora - parseInt(verificacaoTimestamp)) < cincoMinutos;
-            
-            if (!emailVerificado || !verificacaoRecente) {
-                alert('Acesso não autorizado. Faça a verificação de email primeiro.');
-                localStorage.removeItem('emailVerificado');
-                localStorage.removeItem('verificacaoTimestamp');
-                localStorage.removeItem('tempEmail');
-                window.location.href = '/index.html';
-                return;
-            }
-            
-            const emailInput = document.getElementById('email');
-            
-            // Verificar se email foi fornecido por fonte válida
-            if (emailFromUrl) {
-                emailInput.value = emailFromUrl;
-                
-                // Verificar se este email realmente precisa definir senha
-                verificarStatusEmail(emailFromUrl);
-            } else if (emailFromStorage) {
-                emailInput.value = emailFromStorage;
-                
-                // Verificar se este email realmente precisa definir senha
-                verificarStatusEmail(emailFromStorage);
-            } else {
-                // Sem email válido - redirecionar para verificação
-                alert('Email não encontrado. Faça a verificação primeiro.');
-                localStorage.removeItem('emailVerificado');
-                localStorage.removeItem('verificacaoTimestamp');
-                window.location.href = '/index.html';
-                return;
-            }
-            
-            // Limpar tokens após uso
+            // Limpar qualquer verificação anterior
             localStorage.removeItem('emailVerificado');
             localStorage.removeItem('verificacaoTimestamp');
             localStorage.removeItem('tempEmail');
+            
+            const emailInput = document.getElementById('email');
+            
+            // MODO LOCAL - Permitir acesso direto
+            if (emailFromUrl) {
+                emailInput.value = emailFromUrl;
+                console.log('✅ Email da URL:', emailFromUrl);
+            } else if (emailFromStorage) {
+                emailInput.value = emailFromStorage;
+                console.log('✅ Email do storage:', emailFromStorage);
+            } else {
+                // Colocar email admin por padrão no modo local
+                emailInput.value = 'marcioscartozzoni@gmail.com';
+                console.log('✅ Email admin padrão definido');
+            }
         };
 
         // Verificar se o email realmente precisa definir senha

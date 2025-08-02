@@ -2289,11 +2289,18 @@ Dr. Marcio Scartozzoni
             }
 
             const user = JSON.parse(userInfo);
-            if (user.role !== 'admin') {
+            console.log('👤 Usuário verificado:', user);
+            
+            // CORREÇÃO: verificar tanto 'role' quanto 'tipo' para admin
+            const isAdmin = user.role === 'admin' || user.tipo === 'admin';
+            
+            if (!isAdmin) {
                 alert('Acesso negado. Apenas administradores podem acessar esta página.');
                 window.location.href = '/dashboard.html';
                 return;
             }
+            
+            console.log('✅ Acesso liberado para admin:', user.email);
 
             // Carregar dados
             carregarFuncionarios();

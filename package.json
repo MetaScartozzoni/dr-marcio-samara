@@ -9,7 +9,9 @@
     "simple": "node server-simple.js",
     "build": "echo 'Build completed successfully'",
     "integrado": "node server-integrado.js",
-    "caderno": "node server-caderno-mock.js"
+    "caderno": "node server-caderno-mock.js",
+    "setup:database": "node scripts/setup/instalar-sistema-definitivo.js",
+    "setup:help": "cat scripts/setup/README-instalacao.md"
   },
   "engines": {
     "node": ">=18.0.0",

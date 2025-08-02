@@ -17,10 +17,10 @@ const LGPDMiddleware = require('./src/middleware/lgpd.middleware');
 const paymentRoutes = require('./src/routes/payments.routes');
 
 // Importar sistema de autenticação completo
-const AuthSystemComplete = require('./auth-system-complete');
+const AuthSystemComplete = require('./src/auth-system-complete');
 
 // Importar sistema de recuperação de senha
-const rotasRecuperacao = require('./rotas-recuperacao-senha');
+const rotasRecuperacao = require('./src/routes/rotas-recuperacao-senha');
 
 // Importar sistema de setup
 const setupRoutes = require('./src/routes/setup.routes');
