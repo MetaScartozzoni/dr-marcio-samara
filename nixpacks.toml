@@ -2,10 +2,15 @@
 nixPkgs = ['nodejs-18_x']
 
 [phases.install]
-cmds = ['npm ci --only=production']
+cmds = [
+  'rm -f package-lock.json',
+  'npm install --only=production --no-package-lock',
+  'npm cache clean --force'
+]
 
 [start]
 cmd = 'node server.js'
 
 [variables]
 NODE_ENV = 'production'
+PORT = '3000'
