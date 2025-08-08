@@ -1,6 +1,4 @@
 const express = require('express');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -147,81 +145,52 @@ app.use(LGPDMiddleware.cookieConsent());
 // app.use(LGPDMiddleware.detectUnauthorizedAccess());
 // app.use(LGPDMiddleware.rateLimitByUser());
 
-// Configuração da planilha
-const SHEET_ID = '1KSZcXweNg7csm-Xi0YYg8v-3mHg6cB5xI2NympkTY4k';
-let doc;
+// Inicializar sistema de autenticação
+const sendGridService = require('@sendgrid/mail');
+sendGridService.setApiKey(process.env.SENDGRID_API_KEY);
+
+// Inicializar sistema de autenticação
 let authSystem; // Sistema de autenticação
 
-// Inicializar conexão com Google Sheets (DESABILITADO)
-async function initSheet() {
-    try {
-        console.log('⚠️ Google Sheets desabilitado - usando apenas PostgreSQL');
-        // Google Sheets desabilitado por configuração
-        // Sistema funcionará apenas com PostgreSQL
-        return;
-        
-        /* CÓDIGO ORIGINAL COMENTADO
-        const creds = require('./credentials.json');
-        
-        const serviceAccountAuth = new JWT({
-            email: creds.client_email,
-            key: creds.private_key,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets']
-        });
-        
-        doc = new GoogleSpreadsheet(SHEET_ID, serviceAccountAuth);
-        await doc.loadInfo();
-        console.log('Conectado ao Google Sheets');
-        */
-        
-                // Inicializar sistema de autenticação
-        const sendGridService = require('@sendgrid/mail');
-        sendGridService.setApiKey(process.env.SENDGRID_API_KEY);
-        
-        // Configurar Google Sheets service para AuthSystem
-        const googleSheetsService = {
-            spreadsheets: {
-                values: {
-                    get: async (params) => {
-                        const sheet = doc.sheetsByTitle[params.range.split('!')[0]] || doc.sheetsByIndex[0];
-                        const rows = await sheet.getRows();
-                        return {
-                            data: {
-                                values: rows.length > 0 ? [Object.keys(rows[0]._rawData), ...rows.map(row => Object.values(row._rawData))] : []
-                            }
-                        };
-                    },
-                    append: async (params) => {
-                        const sheetName = params.range.split('!')[0];
-                        const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
-                        await sheet.addRow(params.resource.values[0]);
-                        return { success: true };
-                    },
-                    update: async (params) => {
-                        const sheetName = params.range.split('!')[0];
-                        const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
-                        const rows = await sheet.getRows();
-                        const rowIndex = parseInt(params.range.match(/(\d+)/)[1]) - 2;
-                        if (rows[rowIndex]) {
-                            const headers = Object.keys(rows[0]._rawData);
-                            headers.forEach((header, index) => {
-                                rows[rowIndex][header] = params.resource.values[0][index] || '';
-                            });
-                            await rows[rowIndex].save();
-                        }
-                        return { success: true };
+// Configurar Google Sheets service para AuthSystem
+const googleSheetsService = {
+    spreadsheets: {
+        values: {
+            get: async (params) => {
+                const sheet = doc.sheetsByTitle[params.range.split('!')[0]] || doc.sheetsByIndex[0];
+                const rows = await sheet.getRows();
+                return {
+                    data: {
+                        values: rows.length > 0 ? [Object.keys(rows[0]._rawData), ...rows.map(row => Object.values(row._rawData))] : []
                     }
+                };
+            },
+            append: async (params) => {
+                const sheetName = params.range.split('!')[0];
+                const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
+                await sheet.addRow(params.resource.values[0]);
+                return { success: true };
+            },
+            update: async (params) => {
+                const sheetName = params.range.split('!')[0];
+                const sheet = doc.sheetsByTitle[sheetName] || doc.sheetsByIndex[0];
+                const rows = await sheet.getRows();
+                const rowIndex = parseInt(params.range.match(/(\d+)/)[1]) - 2;
+                if (rows[rowIndex]) {
+                    const headers = Object.keys(rows[0]._rawData);
+                    headers.forEach((header, index) => {
+                        rows[rowIndex][header] = params.resource.values[0][index] || '';
+                    });
+                    await rows[rowIndex].save();
                 }
+                return { success: true };
             }
-        };
-        
-        authSystem = new AuthSystemComplete(googleSheetsService, sendGridService);
-        console.log('Sistema de autenticação inicializado');
-        
-    } catch (error) {
-        console.error('Erro ao conectar com Google Sheets:', error);
+        }
     }
-}
+};
+
+authSystem = new AuthSystemComplete(googleSheetsService, sendGridService);
+console.log('Sistema de autenticação inicializado');
 
 // Verificar se email existe (PostgreSQL only) - COM SISTEMA DE APROVAÇÃO
 app.post('/api/verificar-email', async (req, res) => {
@@ -1381,36 +1350,6 @@ app.post('/api/atualizar-autorizacao', async (req, res) => {
         res.status(500).json({ erro: 'Erro interno do servidor' });
     }
 });
-
-// ROTAS DESABILITADAS - Google Sheets não disponível em produção
-/*
-// Aprovar usuário pendente - DESABILITADO (Google Sheets)
-app.post('/api/aprovar-usuario', async (req, res) => {
-    res.status(503).json({ 
-        success: false, 
-        message: 'Serviço temporariamente indisponível - migração para PostgreSQL em andamento' 
-    });
-});
-
-// Listar usuários pendentes - DESABILITADO (Google Sheets)
-app.get('/api/usuarios-pendentes', async (req, res) => {
-    res.json({
-        success: true,
-        usuarios: [],
-        message: 'Migração para PostgreSQL - funcionalidade em desenvolvimento'
-    });
-});
-
-// Listar usuários cadastrados - DESABILITADO (Google Sheets)  
-app.get('/api/listar-usuarios', async (req, res) => {
-    res.json({
-        sucesso: true,
-        total: 0,
-        usuarios: [],
-        message: 'Migração para PostgreSQL - funcionalidade em desenvolvimento'
-    });
-});
-*/
 
 // Servir páginas HTML
 app.get('/', (req, res) => {
