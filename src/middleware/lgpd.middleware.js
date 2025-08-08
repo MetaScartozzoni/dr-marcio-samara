@@ -170,23 +170,31 @@ class LGPDMiddleware {
       try {
         // Verificar preferências de cookies do usuário (com fallback seguro)
         const cookies = req.cookies || {};
+        
+        // FALLBACK SEGURO: Se cookies não existir ou for undefined
         const cookiePrefs = {
-          essenciais: cookies.cookie_essenciais !== 'false',
-          funcionais: cookies.cookie_funcionais === 'true',
-          analiticos: cookies.cookie_analiticos === 'true'
+          essenciais: (cookies && cookies.cookie_essenciais) ? cookies.cookie_essenciais !== 'false' : true, // Default: true
+          funcionais: (cookies && cookies.cookie_funcionais) ? cookies.cookie_funcionais === 'true' : false,
+          analiticos: (cookies && cookies.cookie_analiticos) ? cookies.cookie_analiticos === 'true' : false
         };
 
         // Adicionar preferências ao request para uso posterior
         req.cookiePreferences = cookiePrefs;
 
         // Se não há preferências definidas, retornar aviso (com fallback seguro)
-        if (!cookies.cookie_essenciais && req.path !== '/api/lgpd/cookies') {
+        if (cookies && !cookies.cookie_essenciais && req.path !== '/api/lgpd/cookies') {
           res.setHeader('X-Cookie-Consent-Required', 'true');
         }
 
         next();
       } catch (error) {
         console.error('Erro no middleware de cookies:', error);
+        // Em caso de erro, seguir com configuração padrão segura
+        req.cookiePreferences = {
+          essenciais: true,
+          funcionais: false, 
+          analiticos: false
+        };
         next();
       }
     };

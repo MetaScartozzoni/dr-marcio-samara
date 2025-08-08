@@ -3,6 +3,7 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const app = express();
 
@@ -68,6 +69,7 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser()); // Middleware para parsing de cookies
 
 // Middleware de segurança adicional
 app.use((req, res, next) => {
@@ -138,10 +140,10 @@ app.use('/api/', (req, res, next) => {
 
 app.use(express.static('.'));
 
-// Middleware LGPD - TEMPORARIAMENTE DESABILITADO PARA DEBUG
-// app.use(LGPDMiddleware.privacyHeaders());
-// app.use(LGPDMiddleware.cookieConsent());
-// app.use(LGPDMiddleware.logAccess());
+// Middleware LGPD - REABILITADO APÓS CORREÇÕES
+app.use(LGPDMiddleware.privacyHeaders());
+app.use(LGPDMiddleware.cookieConsent());
+// app.use(LGPDMiddleware.logAccess()); // Manter desabilitado por enquanto
 // app.use(LGPDMiddleware.detectUnauthorizedAccess());
 // app.use(LGPDMiddleware.rateLimitByUser());
 
@@ -227,8 +229,8 @@ app.post('/api/verificar-email', async (req, res) => {
         const { email } = req.body;
         
         const query = `
-            SELECT email, password_hash, tipo as role, autorizado, 
-                   email_verificado, status_aprovacao, codigo_verificacao 
+            SELECT email, password_hash, role, full_name, 
+                   autorizado, status 
             FROM usuarios WHERE email = $1
         `;
         const result = await pool.query(query, [email]);
@@ -237,11 +239,11 @@ app.post('/api/verificar-email', async (req, res) => {
             const usuario = result.rows[0];
             
             // Verificar se está aprovado
-            if (usuario.autorizado !== true || usuario.status_aprovacao !== 'aprovado') {
+            if (usuario.autorizado !== 'sim' || usuario.status !== 'ativo') {
                 return res.json({ 
                     existe: true,
                     aprovado: false,
-                    status: usuario.status_aprovacao || 'pendente',
+                    status: usuario.status || 'pendente',
                     message: 'Usuário aguardando aprovação do administrador'
                 });
             }
@@ -251,7 +253,6 @@ app.post('/api/verificar-email', async (req, res) => {
                 existe: true,
                 aprovado: true,
                 temSenha: !!usuario.password_hash,
-                emailVerificado: !!usuario.email_verificado,
                 role: usuario.role || 'patient'
             });
         } else {
@@ -312,24 +313,25 @@ app.post('/api/cadastrar', async (req, res) => {
         // Inserir novo usuário com status pendente
         const insertQuery = `
             INSERT INTO usuarios (
-                email, nome, telefone, tipo, senha, password_hash, autorizado,
-                email_verificado, status_aprovacao, codigo_verificacao, 
-                data_ultimo_codigo, created_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                user_id, email, full_name, telefone, role, status, autorizado,
+                password_hash, data_criacao, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING id
         `;
         
+        // Gerar user_id único
+        const user_id = `USR-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+        
         const values = [
+            user_id,
             email, 
             nomeUsuario, 
             telefone || null, 
             tipoUsuario,
-            'TEMP_PASSWORD', // senha temporária (será alterada na verificação)
-            '', // password_hash vazio (será criado na verificação)
-            autorizado, // usar variável para autorização
-            false, // email não verificado
             statusAprovacao, // usar variável para status
-            codigoVerificacao,
+            autorizado ? 'sim' : 'nao', // usar variável para autorização
+            '', // password_hash vazio (será criado na verificação)
+            new Date(),
             new Date(),
             new Date()
         ];
@@ -392,8 +394,8 @@ app.post('/api/login', async (req, res) => {
         
         // Buscar usuário no PostgreSQL
         const query = `
-            SELECT email, password_hash, tipo as role, nome as full_name, 
-                   autorizado, status_aprovacao, email_verificado 
+            SELECT email, password_hash, role, full_name, 
+                   autorizado, status 
             FROM usuarios WHERE email = $1
         `;
         const result = await pool.query(query, [email]);
@@ -407,11 +409,11 @@ app.post('/api/login', async (req, res) => {
         console.log('Usuário encontrado:', email, 'Role:', usuario.role); // Debug
         
         // Verificar se está aprovado
-        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+        if (usuario.autorizado !== 'sim' || usuario.status !== 'ativo') {
             console.log('Usuário não aprovado:', email); // Debug
             return res.status(403).json({ 
                 erro: 'Usuário aguardando aprovação do administrador',
-                status: usuario.status_aprovacao || 'pendente'
+                status: usuario.status || 'pendente'
             });
         }
         
@@ -479,7 +481,7 @@ app.post('/api/get-redirect', async (req, res) => {
         }
         
         // Buscar role do usuário
-        const query = 'SELECT tipo as role, nome FROM usuarios WHERE email = $1';
+        const query = 'SELECT role, full_name FROM usuarios WHERE email = $1';
         const result = await pool.query(query, [email]);
         
         if (result.rows.length === 0) {
@@ -492,7 +494,7 @@ app.post('/api/get-redirect', async (req, res) => {
         res.json({
             sucesso: true,
             role: usuario.role,
-            nome: usuario.nome,
+            nome: usuario.full_name,
             redirectUrl: redirectUrl,
             pages: {
                 admin: '/admin',
@@ -525,7 +527,7 @@ app.get('/api/check-auth', async (req, res) => {
         
         // Verificar se usuário existe e está aprovado
         const query = `
-            SELECT email, tipo as role, nome, autorizado, status_aprovacao, password_hash
+            SELECT email, role, full_name, autorizado, status, password_hash
             FROM usuarios WHERE email = $1
         `;
         const result = await pool.query(query, [email]);
@@ -541,12 +543,12 @@ app.get('/api/check-auth', async (req, res) => {
         const usuario = result.rows[0];
         
         // Verificar se está aprovado
-        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+        if (usuario.autorizado !== 'sim' || usuario.status !== 'ativo') {
             return res.json({ 
                 authenticated: false,
                 redirectUrl: '/aguardando-autorizacao',
                 message: 'Usuário aguardando aprovação',
-                status: usuario.status_aprovacao
+                status: usuario.status
             });
         }
         
@@ -568,7 +570,7 @@ app.get('/api/check-auth', async (req, res) => {
             redirectUrl: redirectUrl,
             user: {
                 email: usuario.email,
-                nome: usuario.nome,
+                nome: usuario.full_name,
                 role: usuario.role
             },
             message: 'Usuário autenticado com sucesso'
@@ -599,7 +601,7 @@ app.post('/api/validate-session', async (req, res) => {
         
         // Buscar dados do usuário
         const query = `
-            SELECT email, tipo as role, nome, autorizado, status_aprovacao
+            SELECT email, role, full_name, autorizado, status
             FROM usuarios WHERE email = $1
         `;
         const result = await pool.query(query, [email]);
@@ -615,7 +617,7 @@ app.post('/api/validate-session', async (req, res) => {
         const usuario = result.rows[0];
         
         // Verificar se ainda está aprovado
-        if (!usuario.autorizado || usuario.status_aprovacao !== 'aprovado') {
+        if (usuario.autorizado !== 'sim' || usuario.status !== 'ativo') {
             return res.status(403).json({ 
                 valid: false,
                 redirectUrl: '/aguardando-autorizacao',
@@ -627,7 +629,7 @@ app.post('/api/validate-session', async (req, res) => {
             valid: true,
             user: {
                 email: usuario.email,
-                nome: usuario.nome,
+                nome: usuario.full_name,
                 role: usuario.role
             },
             redirectUrl: getRedirectUrl(usuario.role),
@@ -650,10 +652,10 @@ app.post('/api/validate-session', async (req, res) => {
 app.get('/api/usuarios-pendentes', async (req, res) => {
     try {
         const query = `
-            SELECT id, email, nome, telefone, tipo, status_aprovacao, 
-                   created_at, codigo_verificacao
+            SELECT id, email, full_name, telefone, role, status, 
+                   created_at, user_id
             FROM usuarios 
-            WHERE status_aprovacao = 'pendente' OR autorizado = false
+            WHERE status != 'ativo' OR autorizado != 'sim'
             ORDER BY created_at DESC
         `;
         const result = await pool.query(query);
@@ -684,18 +686,14 @@ app.post('/api/aprovar-usuario', async (req, res) => {
         // Aprovar usuário
         const updateQuery = `
             UPDATE usuarios 
-            SET autorizado = true, 
-                status_aprovacao = 'aprovado',
-                codigo_verificacao = $1,
-                data_ultimo_codigo = $2,
-                updated_at = $3
-            WHERE email = $4
-            RETURNING nome, email
+            SET autorizado = 'sim', 
+                status = 'ativo',
+                updated_at = $1
+            WHERE email = $2
+            RETURNING full_name, email
         `;
         
         const result = await pool.query(updateQuery, [
-            codigoAcesso, 
-            new Date(), 
             new Date(), 
             email
         ]);
@@ -706,13 +704,12 @@ app.post('/api/aprovar-usuario', async (req, res) => {
         
         const usuario = result.rows[0];
         
-        console.log(`✅ Usuário aprovado: ${email} - Código: ${codigoAcesso}`);
+        console.log(`✅ Usuário aprovado: ${email}`);
         
         res.json({
             sucesso: true,
-            message: `Usuário ${usuario.nome} aprovado com sucesso`,
-            usuario: usuario,
-            codigoAcesso: codigoAcesso // Em produção, enviar por email
+            message: `Usuário ${usuario.full_name} aprovado com sucesso`,
+            usuario: usuario
         });
     } catch (error) {
         console.error('Erro ao aprovar usuário:', error);
@@ -732,10 +729,10 @@ app.post('/api/rejeitar-usuario', async (req, res) => {
         // Rejeitar usuário
         const updateQuery = `
             UPDATE usuarios 
-            SET status_aprovacao = 'rejeitado',
+            SET status = 'rejeitado',
                 updated_at = $1
             WHERE email = $2
-            RETURNING nome, email
+            RETURNING full_name, email
         `;
         
         const result = await pool.query(updateQuery, [new Date(), email]);
@@ -750,7 +747,7 @@ app.post('/api/rejeitar-usuario', async (req, res) => {
         
         res.json({
             sucesso: true,
-            message: `Usuário ${usuario.nome} rejeitado`,
+            message: `Usuário ${usuario.full_name} rejeitado`,
             usuario: usuario
         });
     } catch (error) {
