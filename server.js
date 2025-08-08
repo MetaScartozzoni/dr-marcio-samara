@@ -1828,3 +1828,39 @@ async function startServer() {
 
 // Iniciar aplicação
 startServer();
+
+// Adiciona rota para status do funcionário/admin
+app.get('/api/auth/status-funcionario/:email', async (req, res) => {
+    const email = decodeURIComponent(req.params.email);
+    try {
+        const client = await pool.connect();
+        // Busca usuário pelo email
+        const result = await client.query(
+            'SELECT email, role, autorizado, status FROM usuarios WHERE email = $1',
+            [email]
+        );
+        client.release();
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Usuário não encontrado',
+                email
+            });
+        }
+        const usuario = result.rows[0];
+        res.json({
+            success: true,
+            email: usuario.email,
+            role: usuario.role,
+            autorizado: usuario.autorizado,
+            status: usuario.status
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao buscar status do usuário',
+            error: error.message,
+            email
+        });
+    }
+});
