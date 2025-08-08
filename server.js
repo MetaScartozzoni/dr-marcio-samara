@@ -512,6 +512,31 @@ app.post('/api/get-redirect', async (req, res) => {
     }
 });
 
+// Health check para Railway
+app.get('/api/status', async (req, res) => {
+    try {
+        // Testar conexão com banco
+        const client = await pool.connect();
+        await client.query('SELECT 1');
+        client.release();
+        
+        res.json({
+            status: 'OK',
+            database: 'connected',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+        });
+    } catch (error) {
+        console.error('Health check failed:', error);
+        res.status(500).json({
+            status: 'ERROR',
+            database: 'disconnected',
+            timestamp: new Date().toISOString(),
+            error: error.message
+        });
+    }
+});
+
 // Middleware para verificar autenticação e redirecionamento
 app.get('/api/check-auth', async (req, res) => {
     try {
