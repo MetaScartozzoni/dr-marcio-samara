@@ -1,11 +1,22 @@
 {
   "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
   "routes": [
     { "handle": "filesystem" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/$1.html" },
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/(.+)", "dest": "/$1" }
+    
+    { "src": "/login", "dest": "/login.html" },
+    { "src": "/cadastro", "dest": "/cadastro.html" },
+    { "src": "/dashboard", "dest": "/dashboard.html" },
+    { "src": "/dashboard-admin", "dest": "/dashboard-admin.html" },
+    { "src": "/dashboard-funcionario", "dest": "/dashboard-funcionario.html" },
+    { "src": "/verificar-email", "dest": "/verificar-email.html" },
+    { "src": "/criar-senha", "dest": "/criar-senha.html" },
+    { "src": "/esqueci-senha", "dest": "/esqueci-senha.html" },
+    
+    { "src": "/app(.*)", "dest": "/src/index.jsx" },
+    { "src": "/", "dest": "/index.html" }
   ],
   "headers": [
     {

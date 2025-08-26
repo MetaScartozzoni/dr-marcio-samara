@@ -102,6 +102,11 @@ window.EdgeFunctionsClient = (function() {
     return {
         // Autenticação e administração
         adminAuth: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.ADMIN_AUTH, data),
+        authLogin: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.AUTH_LOGIN, data),
+        authRegister: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.AUTH_REGISTER, data),
+        authVerifyEmail: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.AUTH_VERIFY_EMAIL, data),
+        adminCheckFirstAccess: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.ADMIN_CHECK_FIRST_ACCESS, data),
+        adminRegisterFirstAdmin: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.ADMIN_REGISTER_FIRST_ADMIN, data),
         
         // Agendamento
         findAvailableSlots: (data) => callEdgeFunction(config.EDGE_FUNCTIONS.FIND_AVAILABLE_SLOTS, data),

@@ -35,6 +35,11 @@ window.PORTAL_CONFIG = {
     EDGE_FUNCTIONS: {
         // Autenticação e administração
         ADMIN_AUTH: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/admin-auth',
+        AUTH_LOGIN: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/auth-manager/login',
+        AUTH_REGISTER: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/auth-manager/register',
+        AUTH_VERIFY_EMAIL: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/auth-manager/verify-email',
+        ADMIN_CHECK_FIRST_ACCESS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/admin-management/check-first-access',
+        ADMIN_REGISTER_FIRST_ADMIN: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/admin-management/register-first-admin',
         
         // Agendamento
         FIND_AVAILABLE_SLOTS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/find_available_slots',

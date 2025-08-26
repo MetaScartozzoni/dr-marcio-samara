@@ -1,42 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">    <!-- Portal System Scripts -->
-    <script src="assets/js/config.js"></script>
-    <script src="components/portal-components.js"></script>
-    <script src="features/portal-professional-features.js"></script>
-    <script src="integrations/portal-integrations.js"></script>
-    <script src="analytics/portal-analytics.js"></script>
-    
-    <!-- Portal Master Initializer -->
-    <link rel="stylesheet" href="portal-master-init.css">
-    <script src="portal-master-init.js"></script> charset="UTF-8">
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Dr. Marcio - Ver                }
-            } finally {
-                loading.style.display = 'none';
-            }
-        });
-
-        // 🚀 Inicializar PWA e Sistemas
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🚀 Inicializando Portal Dr. Marcio...');
-            
-            // Registrar Service Worker
-            if ('serviceWorker' in navigator) {
-                try {
-                    const registration = await navigator.serviceWorker.register('/sw.js');
-                    console.log('✅ Service Worker registrado:', registration);
-                    
-                    // Analytics para PWA
-                    window.trackEvent('pwa_service_worker_registered', {
-                        scope: registration.scope
-                    });
-                } catch (error) {
-                    console.error('❌ Erro ao registrar Service Worker:', error);
-                }
-            }
-            
-            // Aguardar carregamento dos scripts
-            await new Promise(resolve => setTimeout(resolve, 1000));itle>
+    <title>Portal Dr. Marcio - Verificação de Acesso</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
     <link rel="stylesheet" href="style.css">
     
@@ -49,6 +16,9 @@
     <!-- 📊 Analytics System -->
     <script src="analytics/portal-analytics.js"></script>
     
+    <!-- 🔧 Configuração -->
+    <script src="assets/js/config.js"></script>
+    
     <!-- 🎨 UI Components -->
     <script src="components/portal-components.js"></script>
     
@@ -57,6 +27,15 @@
     
     <!-- 🎯 Professional Features -->
     <script src="features/portal-professional-features.js"></script>
+    
+    <!-- 🚀 Edge Functions Client -->
+    <script src="assets/js/edge-functions-client.js"></script>
+    
+    <!-- 🛣️ Sistema de Roteamento -->
+    <script src="assets/js/portal-router.js"></script>
+    
+    <!-- 🔐 Sistema de Autenticação -->
+    <script src="assets/js/portal-auth.js"></script>
     
     <!-- 📱 PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -85,7 +64,64 @@
     </div>
 
     <script>
-        // 🚀 Sistema de Roteamento Inicial Integrado com Supabase
+        // 🚀 Sistema de Roteamento e Autenticação Integrados
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Inicializando Portal Dr. Marcio...');
+            
+            // Inicializar sistema de autenticação
+            if (window.PortalAuth) {
+                window.PortalAuth.init();
+                
+                // Verificar se já existe uma sessão ativa
+                const userInfo = window.PortalAuth.getCurrentUser();
+                if (userInfo) {
+                    console.log('🔍 Sessão existente encontrada:', userInfo);
+                    
+                    // Alert moderno para sessão ativa
+                    if (window.showAlert) {
+                        window.showAlert({
+                            type: 'info',
+                            title: 'Sessão Ativa',
+                            message: 'Redirecionando para o dashboard...',
+                            timeout: 3000
+                        });
+                    }
+                    
+                    // Analytics
+                    if (window.trackEvent) {
+                        window.trackEvent('active_session_found', { 
+                            userId: userInfo.id,
+                            email: userInfo.email 
+                        });
+                    }
+                    
+                    // Redirecionar baseado no tipo de usuário
+                    setTimeout(() => {
+                        const redirectRoute = userInfo.tipoUsuario === 'admin' ? 'DASHBOARD_ADMIN' : 'DASHBOARD';
+                        window.PortalRouter.navigateTo(redirectRoute);
+                    }, 1000);
+                }
+            }
+            
+            // Registrar Service Worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('✅ Service Worker registrado:', registration);
+                    
+                    // Analytics para PWA
+                    if (window.trackEvent) {
+                        window.trackEvent('pwa_service_worker_registered', {
+                            scope: registration.scope
+                        });
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao registrar Service Worker:', error);
+                }
+            }
+        });
+        
+        // Formulário de verificação de email
         document.getElementById('verificarForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -98,96 +134,76 @@
                 return;
             }
             
-            loading.style.display = 'block';
             message.innerHTML = '';
-            
-            console.log('🔍 Verificando email:', email);
+            loading.style.display = 'block';
             
             try {
-                // Aguardar inicialização do Supabase
-                if (!window.SupabaseAuth || !window.SupabaseAuth.initialized) {
-                    message.innerHTML = '<div class="info">⏳ Inicializando sistema...</div>';
-                    
-                    // Aguardar alguns segundos e tentar novamente
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    if (!window.SupabaseAuth || !window.SupabaseAuth.initialized) {
-                        throw new Error('Sistema de autenticação não disponível');
-                    }
-                }
+                // Usar sistema Edge Functions Client para verificação de email
+                const resultado = await window.EdgeFunctionsClient.call(
+                    'admin-auth/verify-email',
+                    { email }
+                );
                 
-                // Usar o sistema integrado com Supabase
-                const resultado = await window.verificarStatusEmail(email);
+                console.log('Resposta da verificação:', resultado);
                 
-                console.log('📋 Resultado da verificação:', resultado);
-                
-                if (resultado.existe && resultado.cadastrado) {
-                    // ✅ USUÁRIO JÁ CADASTRADO - Redirecionar para LOGIN
-                    loading.style.display = 'none';
+                if (resultado.acao === 'login') {
+                    // ✅ EMAIL JÁ CADASTRADO - Redirecionar para LOGIN
+                    message.innerHTML = `<div class="success">✅ ${resultado.mensagem}</div>`;
                     
-                    // Alert moderno de sucesso
-                    showAlert({
-                        type: 'success',
-                        title: 'Email Encontrado!',
-                        message: resultado.mensagem,
-                        timeout: 3000
-                    });
+                    // Armazenar temporariamente para pré-preencher no login
+                    sessionStorage.setItem('tempEmail', email);
+                    console.log('✅ Email já cadastrado. Redirecionando para login...');
                     
-                    // Armazenar dados temporários
-                    localStorage.setItem('tempEmail', email);
-                    localStorage.setItem('emailVerificado', 'true');
-                    localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                    localStorage.setItem('usuarioTipo', resultado.usuario.tipo || 'funcionario');
-                    localStorage.setItem('usuarioRole', resultado.usuario.role || 'funcionario');
-                    
-                    // Analytics
-                    window.trackEvent('email_verification_success', { 
-                        email: email,
-                        userType: resultado.usuario.tipo 
-                    });
-                    
-                    console.log('✅ Email encontrado. Redirecionando para login...');
-                    
+                    // Usar o router para navegação
                     setTimeout(() => {
-                        window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                        window.PortalRouter.navigateTo('LOGIN', { email: email });
                     }, 1500);
                     
                 } else if (resultado.acao === 'cadastro_admin') {
                     // 👑 EMAIL DE ADMIN NÃO CADASTRADO - Redirecionar para CADASTRO ADMIN
                     loading.style.display = 'none';
                     
-                    showAlert({
-                        type: 'info',
-                        title: 'Primeiro Administrador',
-                        message: resultado.mensagem,
-                        timeout: 4000
-                    });
+                    if (window.showAlert) {
+                        window.showAlert({
+                            type: 'info',
+                            title: 'Primeiro Administrador',
+                            message: resultado.mensagem,
+                            timeout: 4000
+                        });
+                    }
                     
-                    localStorage.setItem('tempEmail', email);
-                    localStorage.setItem('emailVerificado', 'true');
-                    localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                    localStorage.setItem('usuarioTipo', 'admin');
-                    localStorage.setItem('primeiroAdmin', 'true');
+                    // Armazenar informações necessárias
+                    sessionStorage.setItem('tempEmail', email);
+                    sessionStorage.setItem('emailVerificado', 'true');
+                    sessionStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                    sessionStorage.setItem('usuarioTipo', 'admin');
+                    sessionStorage.setItem('primeiroAdmin', 'true');
                     
                     console.log('👑 Admin não cadastrado. Redirecionando para cadastro admin...');
                     
+                    // Usar o router para navegação
                     setTimeout(() => {
-                        window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}&tipo=admin`;
+                        window.PortalRouter.navigateTo('CADASTRO', { 
+                            email: email,
+                            tipo: 'admin' 
+                        });
                     }, 1500);
                     
                 } else {
                     // 📝 EMAIL NÃO CADASTRADO - Redirecionar para CADASTRO
                     message.innerHTML = `<div class="info">📝 ${resultado.mensagem}</div>`;
                     
-                    localStorage.setItem('tempEmail', email);
-                    localStorage.setItem('emailVerificado', 'true');
-                    localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                    localStorage.setItem('usuarioTipo', resultado.tipo || 'funcionario');
+                    // Armazenar informações necessárias
+                    sessionStorage.setItem('tempEmail', email);
+                    sessionStorage.setItem('emailVerificado', 'true');
+                    sessionStorage.setItem('verificacaoTimestamp', Date.now().toString());
+                    sessionStorage.setItem('usuarioTipo', resultado.tipo || 'funcionario');
                     
                     console.log('📝 Email não cadastrado. Redirecionando para cadastro...');
                     
+                    // Usar o router para navegação
                     setTimeout(() => {
-                        window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}`;
+                        window.PortalRouter.navigateTo('CADASTRO', { email: email });
                     }, 1500);
                 }
                 
@@ -197,64 +213,14 @@
                 // Fallback para modo local (sem Supabase)
                 message.innerHTML = `<div class="warning">⚠️ Sistema offline. Usando modo local...</div>`;
                 
-                // Lógica simples para modo offline
-                const isAdmin = email.includes('marcio') || 
-                               email.includes('admin') || 
-                               email.includes('@mscartozzoni.com.br');
-                
-                localStorage.setItem('tempEmail', email);
-                localStorage.setItem('emailVerificado', 'true');
-                localStorage.setItem('verificacaoTimestamp', Date.now().toString());
-                localStorage.setItem('usuarioTipo', isAdmin ? 'admin' : 'funcionario');
-                
+                // Permitir continuar para login
                 setTimeout(() => {
-                    // No modo offline, sempre vai para cadastro primeiro
-                    window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}`;
+                    window.PortalRouter.navigateTo('LOGIN', { email: email, offline: true });
                 }, 2000);
             } finally {
                 loading.style.display = 'none';
             }
         });
-
-        // 🔍 Verificar se já existe uma sessão ativa
-        document.addEventListener('DOMContentLoaded', async function() {
-            try {
-                // Aguardar carregamento dos scripts
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                if (window.SupabaseAuth && window.SupabaseAuth.obterSessaoAtual()) {
-                    const sessao = window.SupabaseAuth.obterSessaoAtual();
-                    console.log('🔍 Sessão existente encontrada:', sessao);
-                    
-                    // Alert moderno para sessão ativa
-                    showAlert({
-                        type: 'info',
-                        title: 'Sessão Ativa',
-                        message: 'Redirecionando para o dashboard...',
-                        timeout: 3000
-                    });
-                    
-                    // Analytics
-                    window.trackEvent('active_session_found', { 
-                        userId: sessao.user?.id,
-                        email: sessao.user?.email 
-                    });
-                    
-                    setTimeout(() => {
-                        window.location.href = '/dashboard.html';
-                    }, 1000);
-                }
-            } catch (error) {
-                console.log('ℹ️ Nenhuma sessão ativa encontrada');
-            }
-        });
     </script>
-    
-    <!-- Scripts de configuração e Supabase -->
-    <script src="assets/js/env.js"></script>
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/edge-functions-client.js"></script>
-    <script src="assets/js/edge-functions-examples.js"></script>
-    <script src="assets/js/supabase-auth-system.js"></script>
 </body>
 </html>

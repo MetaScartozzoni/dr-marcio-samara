@@ -6,37 +6,29 @@
     <title>Login - Portal Dr. Marcio</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
     <link rel="stylesheet" href="style.css">
-    
-    <!-- 🎨 Portal Components System -->
+
+    <!-- CSS -->
     <link rel="stylesheet" href="components/portal-components.css">
     <link rel="stylesheet" href="features/portal-professional-features.css">
-    
-    <!-- 📊 Analytics System -->
-    <script src="analytics/portal-analytics.js"></script>
-    
-    <!-- 🎨 UI Components -->
-    <script src="components/portal-components.js"></script>
-    
-    <!-- 🔌 Integrations -->
-    <script src="integrations/portal-integrations.js"></script>
-    
-    <!-- 🎯 Professional Features -->
-    <script src="features/portal-professional-features.js"></script>
-    
-    <!-- � Supabase Configuration -->
-    <script src="assets/js/config.js"></script>
-    
-    <!-- 🚀 Edge Functions Client -->
-    <script src="assets/js/edge-functions-client.js"></script>
-    <script src="assets/js/edge-functions-examples.js"></script>
-    <script src="assets/js/admin-auth-examples.js"></script>
-    
-    <!-- �🚀 Portal Master Initializer -->
     <link rel="stylesheet" href="portal-master-init.css">
-    <script src="portal-master-init.js"></script>
-    
-    <!-- 📱 PWA Manifest -->
+
+    <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+
+    <!-- CORE SCRIPTS -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/edge-functions-client.js"></script>
+    <script src="assets/js/portal-router.js"></script>
+    <script src="assets/js/portal-auth.js"></script>
+
+    <!-- FEATURE SCRIPTS -->
+    <script src="analytics/portal-analytics.js"></script>
+    <script src="components/portal-components.js"></script>
+    <script src="integrations/portal-integrations.js"></script>
+    <script src="features/portal-professional-features.js"></script>
+
+    <!-- INITIALIZER -->
+    <script src="portal-master-init.js"></script>
 </head>
 <body>
     <div class="container">
@@ -76,7 +68,6 @@
         </div>
     </div>
 
-    <script src="config-seguro.js"></script>
     <script>
        // Preencher email automaticamente se vier da verificação
         window.onload = function() {
@@ -106,95 +97,72 @@
                 
                 const email = document.getElementById('email').value.trim();
                 const senha = document.getElementById('senha').value;
+                const rememberMe = document.getElementById('rememberMe')?.checked || false;
 
                 if (!email || !senha) {
-                    // Usar novo sistema de alerts
-                    showAlert({
-                        type: 'warning',
-                        title: 'Campos Obrigatórios',
-                        message: 'Por favor, preencha email e senha.',
-                        timeout: 4000
-                    });
+                    if (window.showAlert) {
+                        window.showAlert({
+                            type: 'warning',
+                            title: 'Campos Obrigatórios',
+                            message: 'Por favor, preencha email e senha.',
+                            timeout: 4000
+                        });
+                    }
                     return;
                 }
 
-                // Log da tentativa de login
-                window.ConfigSeguro?.criarLogSeguranca('tentativa_login', email, {
-                    timestamp: new Date().toISOString()
-                });
-                
-                // Analytics
-                window.trackEvent('login_attempt', { email: email });
+                if (window.trackEvent) {
+                    window.trackEvent('login_attempt', { email: email });
+                }
 
                 this.showLoading(true);
                 this.clearMessage();
 
                 try {
-                    // Primeiro: verificar status do usuário (usando token seguro)
-                    const token = window.ConfigSeguro.gerarTokenVerificacao(email);
-                    const statusResponse = await fetch(`/secure/api/auth/status-usuario/${encodeURIComponent(token)}`);
-                    const statusData = await statusResponse.json();
-                    
-                    if (statusResponse.ok && statusData.existe) {
-                        const proximaAcao = window.ConfigSeguro.determinarProximaAcao(statusData);
-                        
-                        if (proximaAcao.acao === 'renovar_senha') {
-                            this.showMessage(`
-                                <div style="color: #856404; background: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;">
-                                    <strong>🔒 Renovação de Senha Obrigatória</strong><br>
-                                    Sua senha expirou (90 dias desde a última troca).<br>
-                                    Redirecionando para renovação...
-                                </div>
-                            `, 'warning');
-                            
-                            setTimeout(() => {
-                                window.location.href = `/recuperar-senha.html?email=${encodeURIComponent(email)}`;
-                            }, 3000);
-                            return;
-                        }
+                    // Usar o novo sistema de autenticação unificado
+                    if (!window.PortalAuth) {
+                        console.error("PortalAuth não foi inicializado.");
+                        this.showMessage('Erro crítico no sistema de autenticação.', 'error');
+                        return;
                     }
 
-                    // Login principal usando API segura
-                    const response = await fetch('/secure/api/auth/login-seguro', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ email, senha })
-                    });
-
-                    const resultado = await response.json();
-
-                    if (resultado.sucesso) {
+                    const loginResult = await window.PortalAuth.login(email, senha, rememberMe);
+                    
+                    if (loginResult.success) {
                         // Login bem-sucedido
-                        window.ConfigSeguro.criarLogSeguranca('login_sucesso', email, {
-                            tipoUsuario: resultado.usuario?.tipo || 'unknown'
-                        });
+                        this.showMessage(`
+                            <div class="success">
+                                <strong>✅ Login realizado com sucesso!</strong><br>
+                                Redirecionando para o dashboard...
+                            </div>
+                        `, 'success');
                         
-                        this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+                        if (window.trackEvent) {
+                            window.trackEvent('login_success', { 
+                                email: email,
+                                user_type: loginResult.user.tipoUsuario
+                            });
+                        }
                         
-                        // Preparar dados do usuário para localStorage
-                        const userData = {
-                            ...resultado.usuario,
-                            autorizado: true
-                        };
-                        
-                        // Salvar dados do usuário
-                        localStorage.setItem('userInfo', JSON.stringify(userData));
-                        
-                        // Redirecionar para o dashboard correto
+                        // Redirecionar para a página adequada
                         setTimeout(() => {
-                            window.location.href = resultado.redirectUrl || '/dashboard.html';
+                            if (loginResult.redirectUrl) {
+                                window.PortalRouter.navigateTo(loginResult.redirectUrl);
+                            } else {
+                                const userType = loginResult.user.tipoUsuario;
+                                if (userType === 'admin') {
+                                    window.PortalRouter.navigateTo('DASHBOARD_ADMIN');
+                                } else if (userType === 'funcionario') {
+                                    window.PortalRouter.navigateTo('DASHBOARD_FUNCIONARIO');
+                                } else {
+                                    window.PortalRouter.navigateTo('DASHBOARD');
+                                }
+                            }
                         }, 1500);
                         
                     } else {
-                        // Log de tentativa de login falhada
-                        window.ConfigSeguro.criarLogSeguranca('login_falha', email, {
-                            erro: resultado.erro || 'Credenciais inválidas'
-                        });
-                        
-                        // Mostrar erro do servidor
-                        this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
+                        // Login falhou, usar o manipulador de erros
+                        this.handleLoginError(loginResult);
                     }
 
                 } catch (error) {
@@ -206,26 +174,34 @@
             }
 
             handleLoginError(resultado) {
-                switch (resultado.action) {
-                    case 'completar_cadastro':
-                        this.showMessage('Sua conta não foi finalizada. Redirecionando...', 'warning');
-                        setTimeout(() => {
-                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
-                        }, 2000);
-                        break;
-                        
-                    case 'verificar_email':
-                        this.showMessage('Verifique seu email para ativar a conta. Redirecionando...', 'warning');
-                        setTimeout(() => {
-                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
-                        }, 2000);
-                        break;
-                        
-                    case 'criar_senha':
-                        this.showMessage('Complete o cadastro criando uma senha. Redirecionando...', 'warning');
-                        setTimeout(() => {
-                            window.location.href = `criar-senha.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
-                        }, 2000);
+                // Verificar se temos ações específicas a serem tomadas
+                if (resultado && resultado.action) {
+                    switch (resultado.action) {
+                        case 'complete_profile':
+                            this.showMessage(`<div class="warning">Sua conta não foi finalizada. Redirecionando...</div>`, 'warning');
+                            setTimeout(() => {
+                                window.PortalRouter.navigateTo('VERIFICAR_EMAIL', {
+                                    email: document.getElementById('email').value
+                                });
+                            }, 2000);
+                            break;
+                            
+                        case 'verify_email':
+                            this.showMessage(`<div class="warning">Verifique seu email para ativar a conta. Redirecionando...</div>`, 'warning');
+                            setTimeout(() => {
+                                window.PortalRouter.navigateTo('VERIFICAR_EMAIL', {
+                                    email: document.getElementById('email').value
+                                });
+                            }, 2000);
+                            break;
+                            
+                        case 'create_password':
+                            this.showMessage(`<div class="warning">Complete o cadastro criando uma senha. Redirecionando...</div>`, 'warning');
+                            setTimeout(() => {
+                                window.PortalRouter.navigateTo('CRIAR_SENHA', {
+                                    email: document.getElementById('email').value
+                                });
+                            }, 2000);
                         break;
                         
                     case 'aguardar':
@@ -239,6 +215,9 @@
                         
                     default:
                         this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
+                    }
+                } else {
+                    this.showMessage(resultado.erro || 'Credenciais inválidas.', 'error');
                 }
             }
 

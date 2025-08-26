@@ -1,15 +1,17 @@
 {
-  "name": "portal-deploy-final-correto",
+  "name": "portal-dr-marcio",
   "version": "1.0.0",
-  "main": "card-unificado.js",
+  "main": "src/index.jsx",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "echo \"Static build not required for Vercel deployment\" && exit 0",
+    "vercel-build": "echo \"Using Vercel's build system\""
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["portal", "medical", "clinic"],
+  "author": "Dr Marcio",
   "license": "ISC",
-  "description": "",
+  "description": "Portal Dr Marcio - Sistema de gestão para clínica médica",
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
     "axios": "^1.11.0",
