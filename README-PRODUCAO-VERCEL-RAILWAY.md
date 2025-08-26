@@ -73,6 +73,21 @@ O projeto utiliza Supabase como banco de dados. As configurações estão no arq
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
 
+### 🚀 Edge Functions
+
+O projeto utiliza Edge Functions do Supabase para processar lógica no backend. Estas funções estão configuradas em `assets/js/config.js` na seção `EDGE_FUNCTIONS`. As funções disponíveis são:
+
+- **Admin Auth**: Autenticação e verificação de administradores
+- **Agendamento**: Funções para buscar horários, reservar slots e gerenciar consultas
+- **Whereby Integration**: Criação de salas para videochamadas
+- **Comunicações**: Reenvio de emails e outras notificações
+
+Para facilitar o uso das Edge Functions, incluímos os seguintes arquivos:
+
+- `assets/js/edge-functions-client.js`: Cliente para chamadas às Edge Functions
+- `assets/js/edge-functions-examples.js`: Exemplos de uso para agendamento
+- `assets/js/admin-auth-examples.js`: Exemplos de uso para autenticação admin
+
 ## 🔐 Variáveis de Ambiente
 
 Ao configurar o projeto na Vercel ou Railway, defina as seguintes variáveis de ambiente:

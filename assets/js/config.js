@@ -28,6 +28,27 @@ window.PORTAL_CONFIG = {
         TIMEOUT: 30000,
         RETRY_ATTEMPTS: 3
     },
+    
+    // ========================================
+    // 🚀 EDGE FUNCTIONS - CONFIGURAÇÃO
+    // ========================================
+    EDGE_FUNCTIONS: {
+        // Autenticação e administração
+        ADMIN_AUTH: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/admin-auth',
+        
+        // Agendamento
+        FIND_AVAILABLE_SLOTS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/find_available_slots',
+        BOOK_SLOT: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/book_slot',
+        CREATE_APPOINTMENT: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/create-appointment',
+        GET_MONTHLY_APPOINTMENTS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/get_monthly_appointments',
+        SIMPLIFIED_SCHEDULE: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/simplified_schedule',
+        
+        // Videochamada
+        CREATE_WHEREBY_MEETING: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/create-whereby-meeting',
+        
+        // Comunicações
+        RESEND_EMAIL: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/resend-email'
+    },
 
     // Configurações do domínio
     DOMAIN: {
