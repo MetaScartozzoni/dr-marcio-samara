@@ -47,7 +47,27 @@ window.PORTAL_CONFIG = {
         CREATE_WHEREBY_MEETING: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/create-whereby-meeting',
         
         // Comunicações
-        RESEND_EMAIL: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/resend-email'
+        RESEND_EMAIL: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/resend-email',
+        
+        // Gestão de Pacientes
+        PATIENT_SEARCH: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/patient-search',
+        PATIENT_DETAILS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/patient-details',
+        PATIENT_SAVE: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/patient-save',
+        PATIENT_HISTORY: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/patient-history',
+        
+        // Prontuários Médicos
+        MEDICAL_RECORD_GET: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-get',
+        MEDICAL_RECORD_ADD_ENTRY: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-add-entry',
+        MEDICAL_RECORD_UPDATE: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-update',
+        MEDICAL_RECORD_GENERATE_PDF: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-generate-pdf',
+        MEDICAL_RECORD_SHARE: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-share',
+        
+        // Gestão Financeira
+        FINANCE_GET_TRANSACTIONS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-get-transactions',
+        FINANCE_CREATE_TRANSACTION: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-create-transaction',
+        FINANCE_UPDATE_TRANSACTION_STATUS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-update-transaction-status',
+        FINANCE_GENERATE_REPORT: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-generate-report',
+        FINANCE_GENERATE_BUDGET: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-generate-budget'
     },
 
     // Configurações do domínio
