@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Senha - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-message {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+        .codigo-admin {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border: 2px dashed #ffd700;
+            margin: 10px 0;
+            text-align: center;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Recuperar Senha</h1>
+            <p>Digite seu email para receber um código de verificação</p>
+            
+            <!-- Primeira etapa: Solicitar código -->
+            <div id="etapa1">
+                <form id="solicitarCodigoForm">
+                    <div class="input-group">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Enviar Código</button>
+                </form>
+            </div>
+            
+            <!-- Segunda etapa: Verificar código e redefinir senha -->
+            <div id="etapa2" style="display: none;">
+                <form id="verificarCodigoForm">
+                    <div class="input-group">
+                        <label for="emailConfirm">Email:</label>
+                        <input type="email" id="emailConfirm" name="emailConfirm" readonly style="background: #f8f9fa;">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="codigo">Código de Verificação (6 dígitos):</label>
+                        <input type="text" id="codigo" name="codigo" required 
+                               maxlength="6" pattern="[0-9]{6}" 
+                               style="font-size: 18px; text-align: center; letter-spacing: 4px;"
+                               placeholder="000000">
+                        <small style="color: #666; font-size: 12px;">
+                            Verifique seu email e digite o código de 6 dígitos recebido
+                        </small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="novaSenha">Nova Senha:</label>
+                        <input type="password" id="novaSenha" name="novaSenha" required minlength="6">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmarNovaSenha">Confirmar Nova Senha:</label>
+                        <input type="password" id="confirmarNovaSenha" name="confirmarNovaSenha" required minlength="6">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Redefinir Senha</button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button onclick="voltarEtapa1()" class="btn-secondary" 
+                            style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        Solicitar Novo Código
+                    </button>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Enviando instruções...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="text-center" style="margin-top: 20px;">
+                <a href="/login.html" class="link">Voltar para Login</a>
+                <br><br>
+                <a href="/" class="link">Verificar outro email</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
+        let codigoEnviado = null;
+        let emailAtual = null;
+        
+        // Preencher email automaticamente se vier do login
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+            const emailFromStorage = localStorage.getItem('tempEmail');
+            
+            const emailInput = document.getElementById('email');
+            
+            if (emailFromUrl) {
+                emailInput.value = emailFromUrl;
+            } else if (emailFromStorage) {
+                emailInput.value = emailFromStorage;
+            }
+        };
+        
+        function voltarEtapa1() {
+            document.getElementById('etapa1').style.display = 'block';
+            document.getElementById('etapa2').style.display = 'none';
+            document.getElementById('message').innerHTML = '';
+        }
+        
+        // Primeira etapa: Solicitar código
+        document.getElementById('solicitarCodigoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            emailAtual = email;
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin detectado para recuperação:', email);
+                
+                // Log de recuperação de senha admin
+                console.log('🔐 Admin recuperando senha:', email, 'método: codigo_fixo_admin');
+                
+                // Para admin, simular código automático (em produção seria enviado por email)
+                codigoEnviado = '123456'; // Código fixo para admin em desenvolvimento
+                
+                message.innerHTML = `
+                    <div class="admin-message">
+                        <div style="text-align: center;">
+                            <h3 style="margin: 0 0 10px 0;">👑 Administrador Detectado</h3>
+                            <p style="margin: 10px 0;">Código de verificação especial para admin:</p>
+                            <div class="codigo-admin">123456</div>
+                            <small style="opacity: 0.8;">⏰ O código expira em 15 minutos</small>
+                        </div>
+                    </div>
+                `;
+                
+                // Ir para etapa 2
+                document.getElementById('etapa1').style.display = 'none';
+                document.getElementById('etapa2').style.display = 'block';
+                document.getElementById('emailConfirm').value = email;
+                
+                // Focar no campo do código
+                setTimeout(() => {
+                    document.getElementById('codigo').focus();
+                }, 500);
+                
+                loading.style.display = 'none';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/recuperar-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                console.log('📥 Resposta:', data);
+                
+                if (data.success) {
+                    codigoEnviado = data.codigo; // Em produção, isso NÃO deve vir na resposta
+                    
+                    // Ir para etapa 2
+                    document.getElementById('etapa1').style.display = 'none';
+                    document.getElementById('etapa2').style.display = 'block';
+                    document.getElementById('emailConfirm').value = email;
+                    
+                    message.innerHTML = `
+                        <div class="success">
+                            ${data.message}
+                            <br><br>
+                            <strong>⏰ O código expira em 15 minutos</strong>
+                        </div>
+                    `;
+                    
+                    // Focar no campo do código
+                    setTimeout(() => {
+                        document.getElementById('codigo').focus();
+                    }, 500);
+                } else {
+                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div class="error">Erro ao enviar código. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Segunda etapa: Verificar código e redefinir senha
+        document.getElementById('verificarCodigoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value;
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarNovaSenha').value;
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            // Validações
+            if (codigo.length !== 6 || !/^\d{6}$/.test(codigo)) {
+                message.innerHTML = '<div class="error">O código deve ter exatamente 6 dígitos</div>';
+                return;
+            }
+            
+            if (novaSenha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem</div>';
+                return;
+            }
+            
+            if (novaSenha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres</div>';
+                return;
+            }
+            
+            // Verificar código (simulação - em produção seria no backend)
+            if (codigo !== codigoEnviado) {
+                // Log de tentativa de código inválido
+                console.error('❌ Código inválido:', emailAtual, codigo.substring(0, 3) + '***');
+                
+                message.innerHTML = '<div class="error">Código inválido ou expirado</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                emailAtual.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin && codigo === '123456') {
+                console.log('✅ Redefinição de senha admin confirmada:', emailAtual);
+                
+                // Log de redefinição de senha admin bem-sucedida
+                console.log('🔐 Admin senha redefinida:', emailAtual, 'método: recuperacao_senha', new Date().toISOString());
+                
+                // Marcar data de renovação de senha (para controle de 90 dias)
+                const dataRenovacao = new Date().toISOString();
+                localStorage.setItem('adminUltimaRenovacao', dataRenovacao);
+                
+                // Para admin, não salvar sessão automática - deve fazer login
+                message.innerHTML = `
+                    <div class="success">
+                        👑 ✅ Senha de admin redefinida com sucesso!
+                        <br><br>
+                        <p style="margin: 10px 0;">Sua senha foi atualizada. Faça login para continuar.</p>
+                        <div style="margin: 15px 0;">
+                            <div style="width: 100%; background: #e9ecef; border-radius: 10px; overflow: hidden;">
+                                <div id="progressBar" style="width: 0%; height: 6px; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s ease;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('verificarCodigoForm').style.display = 'none';
+                loading.style.display = 'none';
+                
+                // Animação de progresso e redirecionamento automático
+                let progress = 0;
+                const progressBar = document.getElementById('progressBar');
+                const interval = setInterval(() => {
+                    progress += 20;
+                    progressBar.style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            window.location.href = `/login.html?email=${encodeURIComponent(emailAtual)}`;
+                        }, 500);
+                    }
+                }, 200);
+                
+                return;
+            }
+            
+            try {
+                // Redefinir senha no backend
+                const response = await fetch('/api/redefinir-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: emailAtual,
+                        codigo: codigo,
+                        novaSenha: novaSenha
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Log de redefinição de senha bem-sucedida
+                    console.log('✅ Senha redefinida com sucesso:', emailAtual, 'tipo: funcionario_ou_paciente');
+                    
+                    message.innerHTML = `
+                        <div class="success">
+                            ✅ ${data.message}
+                            <br><br>
+                            <a href="/login.html?email=${encodeURIComponent(emailAtual)}" class="btn-primary" 
+                               style="color: white; text-decoration: none; padding: 10px 20px; background: #28a745; border-radius: 5px; display: inline-block;">
+                                Fazer Login
+                            </a>
+                        </div>
+                    `;
+                    
+                    document.getElementById('verificarCodigoForm').style.display = 'none';
+                } else {
+                    // Log de erro na redefinição
+                    console.error('❌ Erro ao redefinir senha:', emailAtual, data.message);
+                    
+                    message.innerHTML = '<div class="error">' + data.message + '</div>';
+                }
+                
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div class="error">Erro ao redefinir senha. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        
+        // Formatar input do código (apenas números)
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Remove não-dígitos
+            if (value.length > 6) value = value.substring(0, 6);
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>

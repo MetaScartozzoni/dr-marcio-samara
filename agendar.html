@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Consulta - Portal Dr. Marcio</title>
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .btn-voltar {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .month-year {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 20px;
+        }
+
+        .calendar-filters {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .calendar-filters select, .calendar-filters input {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .calendar-filters select:focus, .calendar-filters input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .calendar-container {
+            padding: 30px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header-day {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            padding: 20px;
+            text-align: center;
+            font-weight: 700;
+            color: white;
+            font-size: 16px;
+        }
+
+        .calendar-day {
+            background: white;
+            padding: 15px;
+            min-height: 150px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            overflow: hidden;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .calendar-day.selected {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .calendar-day.other-month {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .calendar-day.past {
+            background: #fafafa;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.today {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .calendar-day.has-appointment {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .day-appointments {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .appointment-item {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-left: 4px solid #667eea;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .appointment-item:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .appointment-item.tipo-consulta {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05) 0%, rgba(40, 167, 69, 0.1) 100%);
+        }
+
+        .appointment-item.tipo-cirurgia {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.05) 0%, rgba(220, 53, 69, 0.1) 100%);
+        }
+
+        .appointment-item.tipo-reuniao {
+            border-left-color: #6f42c1;
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.05) 0%, rgba(111, 66, 193, 0.1) 100%);
+        }
+
+        .appointment-time {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 13px;
+        }
+
+        .appointment-patient {
+            color: #495057;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .more-appointments {
+            text-align: center;
+            font-size: 11px;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 5px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .more-appointments:hover {
+            background: #e3f2fd;
+            color: #2c3e50;
+        }
+
+        .time-slots {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 2px solid #e9ecef;
+            margin-bottom: 25px;
+        }
+
+        .time-slots.active {
+            display: block;
+        }
+
+        .time-slots h3 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 1.4em;
+            font-weight: 700;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .time-slot {
+            background: white;
+            border: 2px solid #dee2e6;
+            padding: 15px 12px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .time-slot:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .time-slot.unavailable {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .appointment-form {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .appointment-form.active {
+            display: block;
+        }
+
+        .appointment-form h3 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 1.4em;
+            font-weight: 700;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            color: #2c3e50;
+            font-weight: 500;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .appointment-summary {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .appointment-summary h4 {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .appointment-summary p {
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-item span {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 10px;
+                margin: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .btn-voltar {
+                left: 15px;
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+                padding: 20px;
+            }
+            
+            .calendar-nav {
+                justify-content: center;
+            }
+            
+            .month-year {
+                font-size: 1.4em;
+                margin: 0 15px;
+            }
+            
+            .calendar-filters {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .calendar-grid {
+                gap: 2px;
+            }
+            
+            .calendar-header-day {
+                padding: 10px 5px;
+                font-size: 12px;
+            }
+            
+            .calendar-day {
+                min-height: 100px;
+                padding: 8px;
+            }
+            
+            .day-number {
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+            
+            .appointment-item {
+                font-size: 10px;
+                padding: 4px 6px;
+                margin-bottom: 3px;
+            }
+            
+            .day-appointments {
+                max-height: 60px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .legend {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="btn-voltar" onclick="voltarDashboard()">
+                 Voltar
+            </button>
+            <h1> Sistema de Agendamento</h1>
+            <p>Agende suas consultas e procedimentos de forma rápida e prática</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="calendar-nav">
+                <button class="nav-btn" onclick="previousMonth()">
+                     Anterior
+                </button>
+                <span class="month-year" id="currentMonth">Carregando...</span>
+                <button class="nav-btn" onclick="nextMonth()">
+                    Próximo 
+                </button>
+            </div>
+            
+            <div class="calendar-filters">
+                <select id="tipoFiltro" onchange="filtrarAgendamentos()">
+                    <option value="">Todos os Tipos</option>
+                    <option value="consulta">Consultas</option>
+                    <option value="cirurgia">Cirurgias</option>
+                    <option value="reuniao">Reuniões</option>
+                </select>
+                <input type="date" id="dataFiltro" onchange="irParaData()" 
+                       title="Selecionar data específica">
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <!-- Mensagens de feedback -->
+            <div id="successMessage" class="success-message"></div>
+            <div id="errorMessage" class="error-message"></div>
+
+            <!-- Legenda -->
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);"></div>
+                    <span>Hoje</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fff3cd; border-left: 4px solid #ffc107;"></div>
+                    <span>Com agendamentos</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f8f9fa; border: 2px solid #dee2e6;"></div>
+                    <span>Disponível</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e9ecef; opacity: 0.6;"></div>
+                    <span>Indisponível</span>
+                </div>
+            </div>
+
+            <!-- Grade do calendário -->
+            <div class="calendar-grid" id="calendarGrid">
+                <div class="loading" style="grid-column: 1 / -1;">
+                     Carregando calendário...
+                </div>
+            </div>
+
+            <!-- Seleção de horários -->
+            <div id="timeSlots" class="time-slots">
+                <h3>Horários disponíveis para <span id="selectedDate"></span></h3>
+                <div id="slotsGrid" class="slots-grid">
+                    <!-- Horários serão carregados aqui -->
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="clearSelection()">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- Formulário de agendamento -->
+            <div id="appointmentForm" class="appointment-form">
+                <h3>Finalizar Agendamento</h3>
+                
+                <div class="appointment-summary" id="appointmentSummary">
+                    <!-- Resumo será preenchido aqui -->
+                </div>
+
+                <form id="bookingForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tipoConsulta">Tipo de Consulta *</label>
+                            <select id="tipoConsulta" name="tipoConsulta" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="consulta-geral">Consulta Geral</option>
+                                <option value="retorno">Retorno</option>
+                                <option value="primeira-consulta">Primeira Consulta</option>
+                                <option value="urgencia">Urgência</option>
+                                <option value="teleconsulta">Teleconsulta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="convenio">Convênio</label>
+                            <select id="convenio" name="convenio">
+                                <option value="particular">Particular</option>
+                                <option value="unimed">Unimed</option>
+                                <option value="bradesco">Bradesco Saúde</option>
+                                <option value="sulamerica">SulAmérica</option>
+                                <option value="amil">Amil</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observacoes">Observações (opcional)</label>
+                        <textarea id="observacoes" name="observacoes" rows="3" 
+                                  placeholder="Descreva brevemente o motivo da consulta ou observações importantes"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefoneContato">Telefone de Contato *</label>
+                        <input type="tel" id="telefoneContato" name="telefoneContato" required 
+                               placeholder="(11) 99999-9999">
+                    </div>
+
+                    <!-- Seção de dados do paciente -->
+                    <div class="form-section">
+                        <h4 style="color: #2c3e50; margin: 20px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">
+                             Dados do Paciente
+                        </h4>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nomePaciente">Nome Completo *</label>
+                                <input type="text" id="nomePaciente" name="nomePaciente" required 
+                                       placeholder="Nome completo do paciente">
+                            </div>
+                            <div class="form-group">
+                                <label for="cpfPaciente">CPF *</label>
+                                <input type="text" id="cpfPaciente" name="cpfPaciente" required 
+                                       placeholder="000.000.000-00" maxlength="14">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dataNascimentoPaciente">Data de Nascimento *</label>
+                                <input type="date" id="dataNascimentoPaciente" name="dataNascimentoPaciente" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="emailPaciente">Email</label>
+                                <input type="email" id="emailPaciente" name="emailPaciente" 
+                                       placeholder="email@exemplo.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkbox-group" style="margin: 20px 0;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                            <input type="checkbox" id="criarCadernoAutomatico" name="criarCadernoAutomatico" checked>
+                            <span style="color: #2c3e50;">
+                                 
+                                Criar Caderno Digital automaticamente após o agendamento
+                            </span>
+                        </label>
+                        <small style="color: #6c757d; margin-left: 25px;">
+                            Recomendado: O caderno será criado com os dados do paciente para facilitar o atendimento
+                        </small>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="backToTimeSlots()">← Voltar</button>
+                        <button type="submit" class="btn-primary">📅 Confirmar Agendamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        let selectedTime = null;
+        let userInfo = null;
+
+        // Função para voltar ao dashboard
+        function voltarDashboard() {
+            // Verificar o tipo de usuário e redirecionar para o dashboard apropriado
+            console.log('Redirecionando usuário:', userInfo);
+            
+            if (userInfo && userInfo.role) {
+                switch (userInfo.role) {
+                    case 'admin':
+                        console.log('Redirecionando admin para: /admin.html');
+                        window.location.href = '/admin.html';
+                        break;
+                    case 'medico':
+                        console.log('Redirecionando médico para: /dashboard-funcionario.html');
+                        window.location.href = '/dashboard-funcionario.html';
+                        break;
+                    case 'recepcionista':
+                    case 'secretaria':
+                        console.log('Redirecionando funcionário para: /dashboard-funcionario.html');
+                        window.location.href = '/dashboard-funcionario.html';
+                        break;
+                    case 'paciente':
+                    default:
+                        console.log('Redirecionando paciente para: /dashboard.html');
+                        window.location.href = '/dashboard.html';
+                        break;
+                }
+            } else {
+                console.log('Sem informações do usuário, redirecionando para dashboard padrão');
+                // Fallback para dashboard padrão se não houver informações do usuário
+                window.location.href = '/dashboard.html';
+            }
+        }
+
+        // Função para ir para uma data específica
+        function irParaData() {
+            const dataInput = document.getElementById('dataFiltro');
+            if (dataInput.value) {
+                const novaData = new Date(dataInput.value + 'T00:00:00');
+                currentDate = novaData;
+                renderCalendar();
+            }
+        }
+
+        // Função para filtrar agendamentos
+        function filtrarAgendamentos() {
+            renderCalendar(); // Re-renderizar com filtro aplicado
+        }
+
+        // Gerar grade do calendário
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthHeader = document.getElementById('currentMonth');
+            
+            // Atualizar cabeçalho
+            monthHeader.textContent = currentDate.toLocaleDateString('pt-BR', { 
+                month: 'long', 
+                year: 'numeric' 
+            }).replace(/^\w/, c => c.toUpperCase());
+
+            // Limpar grade
+            grid.innerHTML = '';
+
+            // Cabeçalhos dos dias
+            const weekDays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            weekDays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header-day';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+
+            // Primeiro dia do mês
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            // Gerar dias
+            const today = new Date();
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                // Classes condicionais
+                if (date.getMonth() !== currentDate.getMonth()) {
+                    dayElement.classList.add('other-month');
+                }
+                if (date < today.setHours(0,0,0,0)) {
+                    dayElement.classList.add('past');
+                }
+                if (date.toDateString() === new Date().toDateString()) {
+                    dayElement.classList.add('today');
+                }
+
+                dayElement.innerHTML = `
+                    <div class="day-number">${date.getDate()}</div>
+                    <div class="day-appointments" id="appointments-${date.toISOString().split('T')[0]}">
+                        <!-- Agendamentos serão carregados aqui -->
+                    </div>
+                `;
+
+                // Event listener para seleção
+                if (!dayElement.classList.contains('past') && !dayElement.classList.contains('other-month')) {
+                    dayElement.addEventListener('click', (e) => selectDate(date, e));
+                }
+
+                grid.appendChild(dayElement);
+            }
+        }
+
+        // Selecionar data
+        function selectDate(date, event) {
+            // Remover seleção anterior
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+
+            // Adicionar seleção
+            const dayElement = event.currentTarget;
+            dayElement.classList.add('selected');
+
+            selectedDate = date;
+            document.getElementById('selectedDate').textContent = 
+                date.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+
+            // Mostrar horários
+            loadTimeSlots(date);
+            document.getElementById('timeSlots').classList.add('active');
+            document.getElementById('appointmentForm').classList.remove('active');
+        }
+
+        // Carregar horários disponíveis
+        async function loadTimeSlots(date) {
+            const slotsGrid = document.getElementById('slotsGrid');
+            slotsGrid.innerHTML = '<div class="loading">🔄 Carregando horários...</div>';
+
+            try {
+                // Buscar disponibilidade real da API
+                const dateStr = date.toISOString().split('T')[0];
+                const response = await fetch(`/api/agendamentos/disponibilidade?data=${dateStr}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    renderTimeSlotsFromAPI(data);
+                } else {
+                    console.error('Erro ao carregar disponibilidade:', response.statusText);
+                    // Fallback para dados de exemplo
+                    const slots = generateExampleTimeSlots();
+                    renderTimeSlots(slots);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar horários:', error);
+                // Fallback para dados de exemplo se houver erro de conexão
+                const slots = generateExampleTimeSlots();
+                renderTimeSlots(slots);
+            }
+        }
+
+        // Renderizar horários baseados na resposta da API
+        function renderTimeSlotsFromAPI(data) {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 18;
+            const interval = 30; // minutos
+            
+            // Obter horários ocupados da API
+            const ocupados = data.agendamentos_ocupados || [];
+            const horariosOcupados = ocupados.map(ag => ag.hora_consulta);
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const available = !horariosOcupados.includes(time);
+                    
+                    slots.push({
+                        time: time,
+                        available: available
+                    });
+                }
+            }
+
+            renderTimeSlots(slots);
+        }
+
+        // Gerar horários de exemplo
+        function generateExampleTimeSlots() {
+            const slots = [];
+            const startHour = 8;
+            const endHour = 18;
+            const interval = 30; // minutos
+
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += interval) {
+                    const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    const available = Math.random() > 0.3; // 70% dos horários disponíveis
+                    
+                    slots.push({
+                        time: time,
+                        available: available
+                    });
+                }
+            }
+
+            return slots;
+        }
+
+        // Renderizar horários
+        function renderTimeSlots(slots) {
+            const slotsGrid = document.getElementById('slotsGrid');
+            
+            if (slots.length === 0) {
+                slotsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #666;">Nenhum horário disponível para esta data</div>';
+                return;
+            }
+
+            slotsGrid.innerHTML = '';
+            
+            slots.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = 'time-slot';
+                slotElement.textContent = slot.time;
+                
+                if (slot.available) {
+                    slotElement.addEventListener('click', () => selectTimeSlot(slot.time, slotElement));
+                } else {
+                    slotElement.classList.add('unavailable');
+                    slotElement.title = 'Horário não disponível';
+                }
+                
+                slotsGrid.appendChild(slotElement);
+            });
+        }
+
+        // Selecionar horário
+        function selectTimeSlot(time, element) {
+            // Remover seleção anterior
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+
+            // Adicionar seleção
+            element.classList.add('selected');
+            selectedTime = time;
+
+            // Mostrar formulário
+            showAppointmentForm();
+        }
+
+        // Mostrar formulário de agendamento
+        function showAppointmentForm() {
+            document.getElementById('timeSlots').classList.remove('active');
+            document.getElementById('appointmentForm').classList.add('active');
+
+            // Preencher resumo
+            const summary = document.getElementById('appointmentSummary');
+            summary.innerHTML = `
+                <h4>📅 Resumo do Agendamento</h4>
+                <p><strong>Data:</strong> ${selectedDate.toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                })}</p>
+                <p><strong>Horário:</strong> ${selectedTime}</p>
+                <p><strong>Paciente:</strong> ${userInfo ? userInfo.nome : 'Usuário'}</p>
+            `;
+        }
+
+        // Voltar para seleção de horários
+        function backToTimeSlots() {
+            document.getElementById('appointmentForm').classList.remove('active');
+            document.getElementById('timeSlots').classList.add('active');
+        }
+
+        // Limpar seleção
+        function clearSelection() {
+            document.querySelectorAll('.calendar-day').forEach(day => {
+                day.classList.remove('selected');
+            });
+            document.getElementById('timeSlots').classList.remove('active');
+            document.getElementById('appointmentForm').classList.remove('active');
+            selectedDate = null;
+            selectedTime = null;
+        }
+
+        // Navegação do calendário
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+            loadAppointments();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+            loadAppointments();
+        }
+
+        // Carregar agendamentos existentes
+        async function loadAppointments() {
+            try {
+                // Buscar agendamentos reais da API
+                const response = await fetch('/api/agendamentos');
+                if (response.ok) {
+                    const data = await response.json();
+                    displayAppointments(data.agendamentos || []);
+                } else {
+                    console.error('Erro ao carregar agendamentos:', response.statusText);
+                    // Fallback para dados de exemplo se a API falhar
+                    const exampleAppointments = generateExampleAppointments();
+                    displayAppointments(exampleAppointments);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar agendamentos:', error);
+                // Fallback para dados de exemplo se houver erro de conexão
+                const exampleAppointments = generateExampleAppointments();
+                displayAppointments(exampleAppointments);
+            }
+        }
+
+        // Gerar dados de exemplo
+        function generateExampleAppointments() {
+            const today = new Date();
+            const appointments = [];
+            
+            // Próximos dias com agendamentos de exemplo
+            for (let i = 1; i <= 10; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                
+                if (Math.random() > 0.5) { // 50% de chance de ter agendamento
+                    const numAppointments = Math.floor(Math.random() * 3) + 1; // 1-3 agendamentos
+                    
+                    for (let j = 0; j < numAppointments; j++) {
+                        const tipos = ['consulta', 'cirurgia', 'reuniao', 'retorno', 'avaliacao'];
+                        const pacientes = ['Maria Silva', 'João Santos', 'Ana Costa', 'Carlos Lima', 'Lucia Oliveira'];
+                        const horas = ['08:00', '09:30', '10:00', '14:00', '15:30', '16:00'];
+                        
+                        appointments.push({
+                            id: Date.now() + i + j,
+                            data_consulta: date.toISOString().split('T')[0],
+                            hora_consulta: horas[Math.floor(Math.random() * horas.length)],
+                            tipo: tipos[Math.floor(Math.random() * tipos.length)],
+                            paciente_nome: pacientes[Math.floor(Math.random() * pacientes.length)],
+                            status: 'confirmado'
+                        });
+                    }
+                }
+            }
+            
+            return appointments;
+        }
+
+        // Exibir agendamentos no calendário
+        function displayAppointments(appointments) {
+            // Agrupar por data
+            const appointmentsByDate = {};
+            
+            appointments.forEach(appointment => {
+                const date = appointment.data_consulta;
+                if (!appointmentsByDate[date]) {
+                    appointmentsByDate[date] = [];
+                }
+                appointmentsByDate[date].push(appointment);
+            });
+            
+            // Exibir em cada dia
+            Object.keys(appointmentsByDate).forEach(date => {
+                const dayAppointments = appointmentsByDate[date];
+                const appointmentElement = document.getElementById(`appointments-${date}`);
+                
+                if (appointmentElement) {
+                    appointmentElement.innerHTML = '';
+                    
+                    // Ordenar por horário
+                    dayAppointments.sort((a, b) => a.hora_consulta.localeCompare(b.hora_consulta));
+                    
+                    // Mostrar até 3 agendamentos
+                    const visibleAppointments = dayAppointments.slice(0, 3);
+                    const hiddenCount = dayAppointments.length - visibleAppointments.length;
+                    
+                    visibleAppointments.forEach(appointment => {
+                        const appointmentDiv = document.createElement('div');
+                        appointmentDiv.className = `appointment-item tipo-${appointment.tipo}`;
+                        appointmentDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            abrirDetalhesAgendamento(appointment.id);
+                        };
+                        
+                        appointmentDiv.innerHTML = `
+                            <div class="appointment-time">${appointment.hora_consulta}</div>
+                            <div class="appointment-patient">${appointment.paciente_nome}</div>
+                        `;
+                        
+                        appointmentElement.appendChild(appointmentDiv);
+                    });
+                    
+                    // Mostrar "mais X" se houver agendamentos ocultos
+                    if (hiddenCount > 0) {
+                        const moreDiv = document.createElement('div');
+                        moreDiv.className = 'more-appointments';
+                        moreDiv.textContent = `+${hiddenCount} mais`;
+                        moreDiv.onclick = (e) => {
+                            e.stopPropagation();
+                            mostrarTodosAgendamentos(date);
+                        };
+                        appointmentElement.appendChild(moreDiv);
+                    }
+                    
+                    // Marcar dia como tendo agendamentos
+                    const dayElement = appointmentElement.closest('.calendar-day');
+                    if (dayElement) {
+                        dayElement.classList.add('has-appointment');
+                    }
+                }
+            });
+        }
+
+        // Abrir detalhes do agendamento
+        function abrirDetalhesAgendamento(agendamentoId) {
+            window.open(`/agendamento-detalhes.html?id=${agendamentoId}`, '_blank');
+        }
+
+        // Mostrar todos os agendamentos do dia
+        function mostrarTodosAgendamentos(date) {
+            alert(`Ver todos os agendamentos de ${new Date(date).toLocaleDateString('pt-BR')}`);
+        }
+
+        // Verificar se paciente já existe no sistema
+        async function verificarPacienteExistente(cpf) {
+            try {
+                const response = await fetch(`/api/pacientes?cpf=${cpf}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data.pacientes && data.pacientes.length > 0 ? data.pacientes[0] : null;
+                }
+                return null;
+            } catch (error) {
+                console.error('Erro ao verificar paciente:', error);
+                return null;
+            }
+        }
+
+        // Submeter formulário de agendamento
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            
+            // Dados do agendamento
+            const appointmentData = {
+                data_consulta: `${selectedDate.toISOString().split('T')[0]} ${selectedTime}`,
+                tipo_consulta: formData.get('tipoConsulta'),
+                convenio: formData.get('convenio'),
+                observacoes: formData.get('observacoes'),
+                telefone_contato: formData.get('telefoneContato'),
+                // Dados do paciente
+                paciente: {
+                    nome: formData.get('nomePaciente'),
+                    cpf: formData.get('cpfPaciente'),
+                    dataNascimento: formData.get('dataNascimentoPaciente'),
+                    telefone: formData.get('telefoneContato'),
+                    email: formData.get('emailPaciente')
+                }
+            };
+
+            const criarCaderno = formData.get('criarCadernoAutomatico') === 'on';
+
+            try {
+                // Verificar se paciente já existe no sistema
+                const pacienteExistente = await verificarPacienteExistente(appointmentData.paciente.cpf);
+                
+                let dadosPaciente = appointmentData.paciente;
+                let mensagemPaciente = '';
+                
+                if (pacienteExistente) {
+                    // Usar dados do paciente existente mas permitir atualização de telefone/email
+                    dadosPaciente = {
+                        ...pacienteExistente,
+                        telefone: appointmentData.paciente.telefone || pacienteExistente.telefone,
+                        email: appointmentData.paciente.email || pacienteExistente.email
+                    };
+                    mensagemPaciente = '👤 Paciente já cadastrado no sistema';
+                    console.log('Paciente já existe no sistema, usando dados existentes');
+                } else {
+                    mensagemPaciente = '✨ Novo paciente cadastrado';
+                }
+
+                // Criar agendamento real via API
+                const agendamentoData = {
+                    paciente_nome: dadosPaciente.nome,
+                    paciente_email: dadosPaciente.email,
+                    paciente_telefone: dadosPaciente.telefone,
+                    paciente_cpf: dadosPaciente.cpf,
+                    data_consulta: selectedDate.toISOString().split('T')[0],
+                    hora_consulta: selectedTime,
+                    tipo: appointmentData.tipo_consulta || 'consulta',
+                    observacoes: appointmentData.observacoes || '',
+                    status: 'confirmado'
+                };
+
+                const response = await fetch('/api/agendamentos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(agendamentoData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erro ao criar agendamento');
+                }
+
+                const result = await response.json();
+                
+                if (criarCaderno) {
+                    // Salvar dados do paciente para criação do caderno usando os dados corretos
+                    dadosPaciente.id = gerarIdPaciente(dadosPaciente.cpf);
+                    
+                    // Salvar no localStorage (simular banco de dados)
+                    salvarPacienteNoProntuario(dadosPaciente);
+                    
+                    showMessage('success', 
+                        `✅ Agendamento criado com sucesso!\n\n` +
+                        `📅 Data: ${selectedDate.toLocaleDateString('pt-BR')} às ${selectedTime}\n` +
+                        `${mensagemPaciente}: ${dadosPaciente.nome}\n` +
+                        `📋 Caderno Digital: Criado automaticamente\n` +
+                        `🔢 ID: ${result.agendamento.id}\n\n` +
+                        `Você receberá uma confirmação por email.`
+                    );
+
+                    // Oferecer opção de abrir o caderno
+                    setTimeout(() => {
+                        if (confirm('🏥 Deseja abrir o Caderno Digital do paciente agora?')) {
+                            abrirCadernoDigital(dadosPaciente);
+                        }
+                    }, 2000);
+                } else {
+                    showMessage('success', 
+                        `✅ Agendamento criado com sucesso!\n\n` +
+                        `📅 Data: ${selectedDate.toLocaleDateString('pt-BR')} às ${selectedTime}\n` +
+                        `${mensagemPaciente}: ${dadosPaciente.nome}\n` +
+                        `🔢 ID: ${result.agendamento.id}\n\n` +
+                        `Você receberá uma confirmação por email.`
+                    );
+                }
+
+                clearSelection();
+                renderCalendar();
+                loadAppointments();
+                e.target.reset();
+                
+            } catch (error) {
+                console.error('Erro ao agendar:', error);
+                showMessage('error', '❌ Erro ao agendar consulta: ' + error.message);
+            }
+        });
+
+        function gerarIdPaciente(cpf) {
+            // Gerar ID único baseado no CPF
+            const cpfLimpo = cpf.replace(/\D/g, '');
+            return `PAC_${cpfLimpo.slice(-6)}_${Date.now().toString().slice(-4)}`;
+        }
+
+        function salvarPacienteNoProntuario(dadosPaciente) {
+            try {
+                // Recuperar lista de pacientes existente
+                const pacientesExistentes = JSON.parse(localStorage.getItem('pacientes') || '[]');
+                
+                // Verificar se paciente já existe (por CPF)
+                const cpfLimpo = dadosPaciente.cpf.replace(/\D/g, '');
+                const pacienteExistente = pacientesExistentes.find(p => 
+                    p.cpf.replace(/\D/g, '') === cpfLimpo
+                );
+
+                if (pacienteExistente) {
+                    // Atualizar dados existentes
+                    Object.assign(pacienteExistente, dadosPaciente);
+                    console.log('Paciente atualizado:', pacienteExistente);
+                } else {
+                    // Adicionar novo paciente
+                    pacientesExistentes.push(dadosPaciente);
+                    console.log('Novo paciente adicionado:', dadosPaciente);
+                }
+
+                // Salvar lista atualizada
+                localStorage.setItem('pacientes', JSON.stringify(pacientesExistentes));
+                
+                return dadosPaciente;
+            } catch (error) {
+                console.error('Erro ao salvar paciente:', error);
+                throw error;
+            }
+        }
+
+        function abrirCadernoDigital(dadosPaciente) {
+            // Salvar dados do paciente atual para o caderno
+            localStorage.setItem('pacienteAtual', JSON.stringify(dadosPaciente));
+            
+            // Abrir caderno digital em nova aba
+            window.open('/caderno-digital.html', '_blank');
+        }
+
+        // Mostrar mensagens
+        function showMessage(type, text) {
+            const messageElement = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            messageElement.textContent = text;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Formatação de telefone
+        document.getElementById('telefoneContato').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Formatação e validação de CPF
+        document.getElementById('cpfPaciente').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+            
+            // Validar CPF se estiver completo
+            if (value.length === 14) {
+                validarCPF(value, e.target);
+            } else {
+                removerEstiloValidacao(e.target);
+            }
+        });
+
+        function validarCPF(cpf, elemento) {
+            const cpfLimpo = cpf.replace(/\D/g, '');
+            
+            // Verificar se tem 11 dígitos
+            if (cpfLimpo.length !== 11) {
+                marcarCPFInvalido(elemento, 'CPF deve ter 11 dígitos');
+                return false;
+            }
+            
+            // Verificar se não é sequência igual (111.111.111-11, etc.)
+            if (/^(\d)\1{10}$/.test(cpfLimpo)) {
+                marcarCPFInvalido(elemento, 'CPF inválido');
+                return false;
+            }
+            
+            // Calcular dígitos verificadores
+            let soma = 0;
+            let resto;
+            
+            // Primeiro dígito
+            for (let i = 1; i <= 9; i++) {
+                soma += parseInt(cpfLimpo.substring(i-1, i)) * (11 - i);
+            }
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpfLimpo.substring(9, 10))) {
+                marcarCPFInvalido(elemento, 'CPF inválido');
+                return false;
+            }
+            
+            // Segundo dígito
+            soma = 0;
+            for (let i = 1; i <= 10; i++) {
+                soma += parseInt(cpfLimpo.substring(i-1, i)) * (12 - i);
+            }
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpfLimpo.substring(10, 11))) {
+                marcarCPFInvalido(elemento, 'CPF inválido');
+                return false;
+            }
+            
+            // CPF válido
+            marcarCPFValido(elemento);
+            verificarPacienteExistente(cpfLimpo);
+            return true;
+        }
+
+        function marcarCPFInvalido(elemento, mensagem) {
+            elemento.style.borderColor = '#dc3545';
+            elemento.style.backgroundColor = '#ffe6e6';
+            mostrarTooltipCPF(elemento, mensagem, 'error');
+        }
+
+        function marcarCPFValido(elemento) {
+            elemento.style.borderColor = '#28a745';
+            elemento.style.backgroundColor = '#e6ffe6';
+            mostrarTooltipCPF(elemento, 'CPF válido', 'success');
+        }
+
+        function removerEstiloValidacao(elemento) {
+            elemento.style.borderColor = '#dee2e6';
+            elemento.style.backgroundColor = 'white';
+            removerTooltipCPF();
+        }
+
+        function mostrarTooltipCPF(elemento, mensagem, tipo) {
+            removerTooltipCPF();
+            
+            const tooltip = document.createElement('div');
+            tooltip.id = 'cpf-tooltip';
+            tooltip.style.cssText = `
+                position: absolute;
+                background: ${tipo === 'error' ? '#dc3545' : '#28a745'};
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                z-index: 1000;
+                white-space: nowrap;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            `;
+            tooltip.textContent = mensagem;
+            
+            const rect = elemento.getBoundingClientRect();
+            tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+            tooltip.style.left = rect.left + 'px';
+            
+            document.body.appendChild(tooltip);
+        }
+
+        function removerTooltipCPF() {
+            const tooltip = document.getElementById('cpf-tooltip');
+            if (tooltip) tooltip.remove();
+        }
+
+        function verificarPacienteExistente(cpfLimpo) {
+            try {
+                const pacientesExistentes = JSON.parse(localStorage.getItem('pacientes') || '[]');
+                const pacienteExistente = pacientesExistentes.find(p => 
+                    p.cpf.replace(/\D/g, '') === cpfLimpo
+                );
+
+                if (pacienteExistente) {
+                    mostrarPacienteEncontrado(pacienteExistente);
+                    preencherDadosExistentes(pacienteExistente);
+                } else {
+                    removerNotificacaoPaciente();
+                }
+            } catch (error) {
+                console.error('Erro ao verificar paciente existente:', error);
+            }
+        }
+
+        function mostrarPacienteEncontrado(paciente) {
+            removerNotificacaoPaciente();
+            
+            const notificacao = document.createElement('div');
+            notificacao.id = 'paciente-encontrado';
+            notificacao.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                z-index: 1000;
+                max-width: 350px;
+                animation: slideIn 0.5s ease;
+            `;
+
+            const idade = calcularIdadePorData(paciente.dataNascimento);
+            
+            notificacao.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                    <i class="fas fa-user-check" style="font-size: 18px;"></i>
+                    <strong>Paciente Encontrado!</strong>
+                </div>
+                <div style="font-size: 13px; line-height: 1.4; margin-bottom: 15px;">
+                    <div><strong>${paciente.nome}</strong></div>
+                    <div>📅 ${idade} anos</div>
+                    <div>📱 ${paciente.telefone}</div>
+                    ${paciente.email ? `<div>📧 ${paciente.email}</div>` : ''}
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="preencherDadosExistentes(${JSON.stringify(paciente).replace(/"/g, '&quot;')}); removerNotificacaoPaciente();" 
+                            style="background: #28a745; border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                         Usar Dados
+                    </button>
+                    <button onclick="removerNotificacaoPaciente()" 
+                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                         Fechar
+                    </button>
+                </div>
+                <button onclick="abrirCadernoExistente(${JSON.stringify(paciente).replace(/"/g, '&quot;')})" 
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 12px; width: 100%; margin-top: 10px;">
+                     Abrir Caderno Digital
+                </button>
+            `;
+            
+            document.body.appendChild(notificacao);
+        }
+
+        function preencherDadosExistentes(paciente) {
+            document.getElementById('nomePaciente').value = paciente.nome;
+            document.getElementById('dataNascimentoPaciente').value = paciente.dataNascimento;
+            document.getElementById('telefoneContato').value = paciente.telefone;
+            document.getElementById('emailPaciente').value = paciente.email || '';
+            
+            // Marcar campos como preenchidos
+            const campos = ['nomePaciente', 'dataNascimentoPaciente', 'telefoneContato'];
+            campos.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                if (elemento) {
+                    elemento.style.backgroundColor = '#e6ffe6';
+                    elemento.style.borderColor = '#28a745';
+                }
+            });
+        }
+
+        function removerNotificacaoPaciente() {
+            const notificacao = document.getElementById('paciente-encontrado');
+            if (notificacao) notificacao.remove();
+        }
+
+        function abrirCadernoExistente(paciente) {
+            localStorage.setItem('pacienteAtual', JSON.stringify(paciente));
+            window.open('/caderno-digital.html', '_blank');
+            removerNotificacaoPaciente();
+        }
+
+        function calcularIdadePorData(dataNascimento) {
+            const hoje = new Date();
+            const nascimento = new Date(dataNascimento);
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            const mes = hoje.getMonth() - nascimento.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+                idade--;
+            }
+            
+            return idade;
+        }
+
+        // Carregar informações do usuário e inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação
+            const storedUserInfo = localStorage.getItem('userInfo');
+            if (!storedUserInfo) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            userInfo = JSON.parse(storedUserInfo);
+            
+            // Verificar se há dados de pré-agendamento vindos do caderno digital
+            verificarDadosPreAgendamento();
+            
+            // Inicializar calendário
+            renderCalendar();
+            loadAppointments();
+        });
+
+        function verificarDadosPreAgendamento() {
+            const dadosPreAgendamento = localStorage.getItem('dadosPreAgendamento');
+            if (dadosPreAgendamento) {
+                try {
+                    const dados = JSON.parse(dadosPreAgendamento);
+                    
+                    if (dados.origem === 'caderno-digital' && dados.paciente) {
+                        mostrarMensagemPreAgendamento(dados.paciente);
+                        preencherDadosPaciente(dados.paciente);
+                        // Limpar dados após uso
+                        localStorage.removeItem('dadosPreAgendamento');
+                    }
+                } catch (error) {
+                    console.error('Erro ao processar dados de pré-agendamento:', error);
+                    localStorage.removeItem('dadosPreAgendamento');
+                }
+            }
+        }
+
+        function mostrarMensagemPreAgendamento(paciente) {
+            const mensagem = document.createElement('div');
+            mensagem.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 1000;
+                max-width: 350px;
+                font-size: 14px;
+                animation: slideIn 0.5s ease;
+            `;
+
+            mensagem.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="fas fa-book-medical" style="font-size: 18px;"></i>
+                    <strong>Dados Importados do Caderno Digital</strong>
+                </div>
+                <div style="font-size: 13px; opacity: 0.9;">
+                    Paciente: <strong>${paciente.nome}</strong><br>
+                    CPF: ${paciente.cpf}
+                </div>
+                <button onclick="this.parentElement.remove()" style="
+                    position: absolute;
+                    top: 5px;
+                    right: 5px;
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 16px;
+                    cursor: pointer;
+                ">×</button>
+            `;
+
+            document.body.appendChild(mensagem);
+
+            // Remover automaticamente após 8 segundos
+            setTimeout(() => {
+                if (mensagem.parentElement) {
+                    mensagem.remove();
+                }
+            }, 8000);
+        }
+
+        function preencherDadosPaciente(paciente) {
+            // Preencher campos do formulário com dados do paciente
+            if (paciente.nome) {
+                document.getElementById('nomePaciente').value = paciente.nome;
+            }
+            if (paciente.cpf) {
+                document.getElementById('cpfPaciente').value = paciente.cpf;
+            }
+            if (paciente.dataNascimento) {
+                document.getElementById('dataNascimentoPaciente').value = paciente.dataNascimento;
+            }
+            if (paciente.telefone) {
+                document.getElementById('telefoneContato').value = paciente.telefone;
+            }
+            if (paciente.email) {
+                document.getElementById('emailPaciente').value = paciente.email;
+            }
+            
+            // Armazenar globalmente para uso posterior
+            window.dadosPacienteImportado = paciente;
+            
+            console.log('Dados do paciente preenchidos:', paciente);
+        }
+    </script>
+</body>
+</html>

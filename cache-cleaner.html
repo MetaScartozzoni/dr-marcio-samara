@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 Cache Cleaner - Portal Dr. Marcio</title>
+    <style>
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .container { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        button { 
+            background: #007AFF; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover { background: #0056CC; }
+        .log { 
+            background: #000; 
+            color: #0f0; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧹 Cache Cleaner</h1>
+        <p>Use este limpador para resolver os erros de cache do portal.</p>
+        
+        <button onclick="clearAllCache()">🗑️ Limpar TUDO</button>
+        <button onclick="reloadWithTimestamp()">🔄 Reload com Timestamp</button>
+        <button onclick="window.location.href='/dashboard-admin.html'">🏥 Ir para Dashboard</button>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(msg) {
+            log.innerHTML += msg + '\n';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        async function clearAllCache() {
+            addLog('🧹 Iniciando limpeza completa...');
+            
+            // Limpar Service Worker
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    addLog('🗑️ Desregistrando SW: ' + registration.scope);
+                    await registration.unregister();
+                }
+            }
+            
+            // Limpar Cache Storage
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let cacheName of cacheNames) {
+                    addLog('🗑️ Deletando cache: ' + cacheName);
+                    await caches.delete(cacheName);
+                }
+            }
+            
+            // Limpar localStorage e sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            addLog('🗑️ Storage limpo');
+            
+            addLog('✅ Limpeza concluída! Recarregando em 3s...');
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 3000);
+        }
+        
+        function reloadWithTimestamp() {
+            const timestamp = new Date().getTime();
+            addLog('🔄 Recarregando com timestamp: ' + timestamp);
+            window.location.href = window.location.pathname + '?t=' + timestamp;
+        }
+        
+        // Auto-start log
+        addLog('🏥 Portal Dr. Marcio - Cache Cleaner Ativo');
+        addLog('📍 URL atual: ' + window.location.href);
+    </script>
+</body>
+</html>

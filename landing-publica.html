@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Marcio Scartozzoni - Cirurgia Plástica | Agende sua Consulta</title>
+    
+    <!-- SEO e Meta Tags -->
+    <meta name="description" content="Agende sua consulta com Dr. Marcio Scartozzoni, especialista em cirurgia plástica. Procedimentos estéticos com excelência e segurança.">
+    <meta name="keywords" content="cirurgia plástica, Dr. Marcio Scartozzoni, consulta, procedimentos estéticos, rinoplastia, lipoaspiração">
+    <meta name="author" content="Dr. Marcio Scartozzoni">
+    
+    <!-- Open Graph (Facebook/Instagram) -->
+    <meta property="og:title" content="Dr. Marcio Scartozzoni - Cirurgia Plástica">
+    <meta property="og:description" content="Agende sua consulta gratuita com especialista em cirurgia plástica">
+    <meta property="og:image" content="/assets/dr-marcio-og.jpg">
+    <meta property="og:url" content="https://drmarcioscartozzoni.com/consulta">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Dr. Marcio Scartozzoni - Cirurgia Plástica">
+    <meta name="twitter:description" content="Agende sua consulta gratuita com especialista em cirurgia plástica">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: white;
+            border-radius: 20px;
+            margin: 20px auto;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .hero h1 {
+            font-size: 2.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        /* Formulário */
+        .form-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .form-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        /* Botão Principal */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Messages */
+        .message {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Benefícios */
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .benefit {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .benefit:hover {
+            transform: translateY(-5px);
+        }
+        
+        .benefit-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .benefit h3 {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .benefit p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Rodapé */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            opacity: 0.9;
+        }
+        
+        .social-links {
+            margin: 20px 0;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 15px;
+            transition: transform 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .social-links a:hover {
+            transform: scale(1.2);
+        }
+        
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .form-container {
+                padding: 30px 20px;
+                margin: 20px 10px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .benefits {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Animações */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Urgência */
+        .urgency {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">Dr. Marcio Scartozzoni</div>
+        <div class="subtitle">Cirurgião Plástico CRM 123456</div>
+    </div>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero animate-in">
+            <h1>Realize o <span class="highlight">Procedimento dos Seus Sonhos</span></h1>
+            <p>Transforme sua autoestima com segurança e excelência. <strong>Consulta gratuita</strong> com especialista renomado em cirurgia plástica.</p>
+            
+            <div class="urgency">
+                🔥 <strong>OFERTA LIMITADA:</strong> Consulta de Avaliação GRATUITA até o final do mês!
+            </div>
+        </div>
+
+        <!-- Formulário de Captura -->
+        <div class="form-container animate-in">
+            <h2 class="form-title">📅 Agende Sua Consulta Gratuita</h2>
+            
+            <form id="leadForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome"> Nome Completo *</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="telefone"> WhatsApp *</label>
+                        <input type="tel" id="telefone" name="telefone" required placeholder="(11) 99999-9999">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"> Email</label>
+                        <input type="email" id="email" name="email" placeholder="seu@email.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="idade"> Idade</label>
+                        <select id="idade" name="idade">
+                            <option value="">Selecione sua idade</option>
+                            <option value="18-25">18 a 25 anos</option>
+                            <option value="26-35">26 a 35 anos</option>
+                            <option value="36-45">36 a 45 anos</option>
+                            <option value="46-55">46 a 55 anos</option>
+                            <option value="56+">Acima de 56 anos</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="procedimento"> Procedimento de Interesse *</label>
+                    <select id="procedimento" name="procedimento" required>
+                        <option value="">Selecione o procedimento</option>
+                        <option value="Rinoplastia">Rinoplastia (Nariz)</option>
+                        <option value="Lipoaspiração">Lipoaspiração</option>
+                        <option value="Mamoplastia">Mamoplastia (Seios)</option>
+                        <option value="Abdominoplastia">Abdominoplastia</option>
+                        <option value="Lifting Facial">Lifting Facial</option>
+                        <option value="Blefaroplastia">Blefaroplastia (Pálpebras)</option>
+                        <option value="Otoplastia">Otoplastia (Orelhas)</option>
+                        <option value="Preenchimento">Preenchimento</option>
+                        <option value="Botox">Botox</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoes"> Observações</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" placeholder="Conte-nos mais sobre seus objetivos..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                     AGENDAR CONSULTA GRATUITA
+                </button>
+            </form>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Processando sua solicitação...</p>
+            </div>
+            
+            <div id="message" class="message" style="display: none;"></div>
+        </div>
+
+        <!-- Benefícios -->
+        <div class="benefits">
+            <div class="benefit animate-in">
+                <div class="benefit-icon">
+                    
+                </div>
+                <h3>Especialista Renomado</h3>
+                <p>Mais de 15 anos de experiência em cirurgia plástica com centenas de procedimentos realizados com excelência.</p>
+            </div>
+            
+            <div class="benefit animate-in">
+                <div class="benefit-icon">
+                    
+                </div>
+                <h3>Segurança Total</h3>
+                <p>Clínica com infraestrutura completa e protocolos rigorosos de segurança para seu bem-estar.</p>
+            </div>
+            
+            <div class="benefit animate-in">
+                <div class="benefit-icon">
+                    
+                </div>
+                <h3>Resultados Naturais</h3>
+                <p>Técnicas avançadas que priorizam resultados naturais e harmoniosos, respeitando sua individualidade.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+        <div class="social-links">
+            <a href="#" target="_blank" title="Instagram"></a>
+            <a href="#" target="_blank" title="Facebook"></a>
+            <a href="#" target="_blank" title="WhatsApp"></a>
+        </div>
+        <p>&copy; 2025 Dr. Marcio Scartozzoni - Todos os direitos reservados</p>
+    </div>
+
+    <script>
+        // Máscara para telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Animações de entrada
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.benefit').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Envio do formulário
+        document.getElementById('leadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            // Mostrar loading
+            loading.style.display = 'block';
+            message.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            // Coletar dados do formulário
+            const formData = {
+                nome: document.getElementById('nome').value,
+                telefone: document.getElementById('telefone').value,
+                email: document.getElementById('email').value,
+                idade: document.getElementById('idade').value,
+                procedimento: document.getElementById('procedimento').value,
+                observacoes: document.getElementById('observacoes').value,
+                origem: 'landing-publica',
+                data_captura: new Date().toISOString()
+            };
+            
+            try {
+                const response = await fetch('/api/capturar-lead', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    message.className = 'message success';
+                    message.innerHTML = `
+                         
+                        <strong>Sucesso!</strong> Sua solicitação foi enviada. 
+                        <br>Entraremos em contato via WhatsApp em até 2 horas.
+                        <br><br>
+                        <strong>Protocolo:</strong> ${data.protocolo}
+                    `;
+                    
+                    // Limpar formulário
+                    e.target.reset();
+                    
+                    // Redirecionar para WhatsApp após 3 segundos
+                    setTimeout(() => {
+                        const whatsappMsg = `Olá! Acabei de preencher o formulário no site para consulta sobre ${formData.procedimento}. Protocolo: ${data.protocolo}`;
+                        const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(whatsappMsg)}`;
+                        window.open(whatsappUrl, '_blank');
+                    }, 3000);
+                    
+                } else {
+                    message.className = 'message error';
+                    message.innerHTML = `
+                         
+                        <strong>Erro:</strong> ${data.message}
+                    `;
+                }
+            } catch (error) {
+                message.className = 'message error';
+                message.innerHTML = `
+                     
+                    <strong>Erro:</strong> Falha na conexão. Tente novamente.
+                `;
+            } finally {
+                loading.style.display = 'none';
+                message.style.display = 'block';
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Analytics (Google Analytics 4)
+        gtag('event', 'page_view', {
+            page_title: 'Landing Page Consulta',
+            page_location: window.location.href
+        });
+    </script>
+
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID');
+    </script>
+
+    <!-- Meta Pixel (Facebook) -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', 'YOUR_PIXEL_ID');
+        fbq('track', 'PageView');
+    </script>
+</body>
+</html>

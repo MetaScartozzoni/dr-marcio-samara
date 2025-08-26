@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Autorizações - Admin Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    
+                    <h1>Gerenciar Autorizações</h1>
+                </div>
+                <div class="header-actions">
+                    <button id="btnRefresh" class="btn-icon" title="Atualizar">
+                        
+                    </button>
+                    <button id="btnVoltar" class="btn-secondary">
+                        
+                        Voltar ao Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-icon pending">
+                        
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalPendentes">0</div>
+                        <div class="stat-label">Pendentes</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon approved">
+                        
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalAprovados">0</div>
+                        <div class="stat-label">Aprovados</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon rejected">
+                        
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalRejeitados">0</div>
+                        <div class="stat-label">Rejeitados</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-number" id="totalGeral">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="filtroStatus">Status:</label>
+                    <select id="filtroStatus">
+                        <option value="">Todos</option>
+                        <option value="aguardando_autorizacao" selected>Aguardando Autorização</option>
+                        <option value="ativo">Aprovados</option>
+                        <option value="nao_autorizado">Rejeitados</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtroDataInicio">Data Início:</label>
+                    <input type="date" id="filtroDataInicio">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtroDataFim">Data Fim:</label>
+                    <input type="date" id="filtroDataFim">
+                </div>
+
+                <div class="filter-group">
+                    <label for="filtroBusca">Buscar:</label>
+                    <input type="text" id="filtroBusca" placeholder="Nome, email ou cargo...">
+                </div>
+
+                <button id="btnAplicarFiltros" class="btn-primary">
+                    
+                    Aplicar Filtros
+                </button>
+
+                <button id="btnLimparFiltros" class="btn-secondary">
+                    
+                    Limpar
+                </button>
+            </div>
+
+            <div id="loadingContainer" class="loading-container">
+                <div class="loading-spinner">
+                    
+                    <span>Carregando solicitações...</span>
+                </div>
+            </div>
+
+            <div id="autorizacoesContainer" class="autorizacoes-container">
+                <!-- Lista de autorizações será carregada aqui -->
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    
+                </div>
+                <h3>Nenhuma solicitação encontrada</h3>
+                <p>Não há solicitações de autorização com os filtros aplicados.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div id="modalDetalhes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes da Solicitação</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo será carregado dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="modalConfirmacao" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="modalConfirmacaoTitulo">Confirmar Ação</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalConfirmacaoTexto">Tem certeza que deseja realizar esta ação?</p>
+                <div class="modal-actions">
+                    <button id="btnConfirmarAcao" class="btn-primary">Confirmar</button>
+                    <button id="btnCancelarAcao" class="btn-secondary">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageContainer" class="message-container"></div>
+
+    <script>
+        class GerenciarAutorizacoes {
+            constructor() {
+                this.autorizacoes = [];
+                this.filteredAutorizacoes = [];
+                this.currentAction = null;
+                
+                this.initElements();
+                this.initEventListeners();
+                this.loadAutorizacoes();
+            }
+
+            initElements() {
+                this.loadingContainer = document.getElementById('loadingContainer');
+                this.autorizacoesContainer = document.getElementById('autorizacoesContainer');
+                this.emptyState = document.getElementById('emptyState');
+                this.messageContainer = document.getElementById('messageContainer');
+                
+                // Stats
+                this.totalPendentes = document.getElementById('totalPendentes');
+                this.totalAprovados = document.getElementById('totalAprovados');
+                this.totalRejeitados = document.getElementById('totalRejeitados');
+                this.totalGeral = document.getElementById('totalGeral');
+                
+                // Filtros
+                this.filtroStatus = document.getElementById('filtroStatus');
+                this.filtroDataInicio = document.getElementById('filtroDataInicio');
+                this.filtroDataFim = document.getElementById('filtroDataFim');
+                this.filtroBusca = document.getElementById('filtroBusca');
+                
+                // Modais
+                this.modalDetalhes = document.getElementById('modalDetalhes');
+                this.modalConfirmacao = document.getElementById('modalConfirmacao');
+            }
+
+            initEventListeners() {
+                // Header buttons
+                document.getElementById('btnRefresh').addEventListener('click', () => this.loadAutorizacoes());
+                document.getElementById('btnVoltar').addEventListener('click', () => {
+                    window.location.href = 'dashboard.html';
+                });
+
+                // Filtros
+                document.getElementById('btnAplicarFiltros').addEventListener('click', () => this.aplicarFiltros());
+                document.getElementById('btnLimparFiltros').addEventListener('click', () => this.limparFiltros());
+                
+                // Enter no campo de busca
+                this.filtroBusca.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.aplicarFiltros();
+                    }
+                });
+
+                // Modal close buttons
+                document.querySelectorAll('.modal-close').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.target.closest('.modal').style.display = 'none';
+                    });
+                });
+
+                // Click outside modal
+                window.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal')) {
+                        e.target.style.display = 'none';
+                    }
+                });
+
+                // Modal actions
+                document.getElementById('btnConfirmarAcao').addEventListener('click', () => this.executarAcao());
+                document.getElementById('btnCancelarAcao').addEventListener('click', () => {
+                    this.modalConfirmacao.style.display = 'none';
+                });
+            }
+
+            async loadAutorizacoes() {
+                this.showLoading(true);
+                
+                try {
+                    const response = await fetch('/api/auth/listar-solicitacoes');
+                    
+                    if (!response.ok) {
+                        throw new Error('Erro ao carregar solicitações');
+                    }
+                    
+                    const resultado = await response.json();
+                    
+                    if (resultado.sucesso) {
+                        this.autorizacoes = resultado.solicitacoes || [];
+                        this.aplicarFiltros();
+                        this.atualizarEstatisticas();
+                    } else {
+                        throw new Error(resultado.erro || 'Erro desconhecido');
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar autorizações:', error);
+                    this.showMessage('Erro ao carregar solicitações: ' + error.message, 'error');
+                    this.autorizacoes = [];
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            aplicarFiltros() {
+                let filtered = [...this.autorizacoes];
+
+                // Filtro por status
+                if (this.filtroStatus.value) {
+                    filtered = filtered.filter(auth => auth.status === this.filtroStatus.value);
+                }
+
+                // Filtro por data
+                if (this.filtroDataInicio.value) {
+                    const dataInicio = new Date(this.filtroDataInicio.value);
+                    filtered = filtered.filter(auth => {
+                        const dataAuth = new Date(auth.data_cadastro);
+                        return dataAuth >= dataInicio;
+                    });
+                }
+
+                if (this.filtroDataFim.value) {
+                    const dataFim = new Date(this.filtroDataFim.value);
+                    dataFim.setHours(23, 59, 59); // Fim do dia
+                    filtered = filtered.filter(auth => {
+                        const dataAuth = new Date(auth.data_cadastro);
+                        return dataAuth <= dataFim;
+                    });
+                }
+
+                // Filtro por busca
+                if (this.filtroBusca.value.trim()) {
+                    const busca = this.filtroBusca.value.toLowerCase();
+                    filtered = filtered.filter(auth => 
+                        auth.nome.toLowerCase().includes(busca) ||
+                        auth.email.toLowerCase().includes(busca) ||
+                        (auth.cargo && auth.cargo.toLowerCase().includes(busca))
+                    );
+                }
+
+                this.filteredAutorizacoes = filtered;
+                this.renderAutorizacoes();
+            }
+
+            limparFiltros() {
+                this.filtroStatus.value = '';
+                this.filtroDataInicio.value = '';
+                this.filtroDataFim.value = '';
+                this.filtroBusca.value = '';
+                this.aplicarFiltros();
+            }
+
+            renderAutorizacoes() {
+                if (this.filteredAutorizacoes.length === 0) {
+                    this.autorizacoesContainer.style.display = 'none';
+                    this.emptyState.style.display = 'block';
+                    return;
+                }
+
+                this.emptyState.style.display = 'none';
+                this.autorizacoesContainer.style.display = 'block';
+
+                this.autorizacoesContainer.innerHTML = this.filteredAutorizacoes.map(auth => 
+                    this.createAutorizacaoCard(auth)
+                ).join('');
+
+                // Adicionar event listeners aos botões
+                this.attachCardEventListeners();
+            }
+
+            createAutorizacaoCard(auth) {
+                const statusClass = this.getStatusClass(auth.status);
+                const statusText = this.getStatusText(auth.status);
+                const dataFormatada = new Date(auth.data_cadastro).toLocaleDateString('pt-BR');
+                
+                return `
+                    <div class="autorizacao-card ${statusClass}" data-id="${auth.id || auth.email}">
+                        <div class="card-header">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    
+                                </div>
+                                <div class="user-details">
+                                    <h3>${auth.nome}</h3>
+                                    <p class="user-email">${auth.email}</p>
+                                    <p class="user-cargo">${auth.cargo || 'Cargo não informado'}</p>
+                                </div>
+                            </div>
+                            <div class="card-status">
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                                <span class="card-date">${dataFormatada}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    
+                                    <span>${auth.telefone || 'Não informado'}</span>
+                                </div>
+                                <div class="info-item">
+                                    
+                                    <span>${auth.cpf || 'Não informado'}</span>
+                                </div>
+                                <div class="info-item">
+                                    
+                                    <span>Nascimento: ${auth.data_nascimento ? new Date(auth.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado'}</span>
+                                </div>
+                                <div class="info-item">
+                                    
+                                    <span>${auth.endereco || 'Endereço não informado'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button class="btn-details" data-action="details" data-user="${auth.email}">
+                                
+                                Ver Detalhes
+                            </button>
+                            
+                            ${auth.status === 'aguardando_autorizacao' ? `
+                                <button class="btn-approve" data-action="approve" data-user="${auth.email}">
+                                    
+                                    Aprovar
+                                </button>
+                                <button class="btn-reject" data-action="reject" data-user="${auth.email}">
+                                    
+                                    Rejeitar
+                                </button>
+                            ` : ''}
+                            
+                            ${auth.status === 'ativo' ? `
+                                <button class="btn-suspend" data-action="suspend" data-user="${auth.email}">
+                                    
+                                    Suspender
+                                </button>
+                            ` : ''}
+                            
+                            ${auth.status === 'nao_autorizado' ? `
+                                <button class="btn-reactivate" data-action="reactivate" data-user="${auth.email}">
+                                    
+                                    Reativar
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            attachCardEventListeners() {
+                document.querySelectorAll('.card-actions button').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = e.target.closest('button').dataset.action;
+                        const userEmail = e.target.closest('button').dataset.user;
+                        
+                        if (action === 'details') {
+                            this.showUserDetails(userEmail);
+                        } else {
+                            this.confirmAction(action, userEmail);
+                        }
+                    });
+                });
+            }
+
+            confirmAction(action, userEmail) {
+                const user = this.autorizacoes.find(u => u.email === userEmail);
+                if (!user) return;
+
+                const actions = {
+                    approve: {
+                        title: 'Aprovar Solicitação',
+                        text: `Aprovar a solicitação de acesso de ${user.nome}?`,
+                        class: 'approve'
+                    },
+                    reject: {
+                        title: 'Rejeitar Solicitação',
+                        text: `Rejeitar a solicitação de acesso de ${user.nome}?`,
+                        class: 'reject'
+                    },
+                    suspend: {
+                        title: 'Suspender Usuário',
+                        text: `Suspender o acesso de ${user.nome}?`,
+                        class: 'suspend'
+                    },
+                    reactivate: {
+                        title: 'Reativar Usuário',
+                        text: `Reativar o acesso de ${user.nome}?`,
+                        class: 'reactivate'
+                    }
+                };
+
+                const actionConfig = actions[action];
+                if (!actionConfig) return;
+
+                this.currentAction = { action, userEmail };
+                
+                document.getElementById('modalConfirmacaoTitulo').textContent = actionConfig.title;
+                document.getElementById('modalConfirmacaoTexto').textContent = actionConfig.text;
+                document.getElementById('btnConfirmarAcao').className = `btn-primary ${actionConfig.class}`;
+                
+                this.modalConfirmacao.style.display = 'block';
+            }
+
+            async executarAcao() {
+                if (!this.currentAction) return;
+
+                const { action, userEmail } = this.currentAction;
+                this.modalConfirmacao.style.display = 'none';
+
+                try {
+                    const response = await fetch('/api/auth/autorizar-funcionario', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: userEmail,
+                            acao: action
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        this.showMessage(resultado.mensagem || 'Ação realizada com sucesso!', 'success');
+                        this.loadAutorizacoes(); // Recarregar lista
+                    } else {
+                        throw new Error(resultado.erro || 'Erro ao realizar ação');
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao executar ação:', error);
+                    this.showMessage('Erro ao realizar ação: ' + error.message, 'error');
+                }
+
+                this.currentAction = null;
+            }
+
+            showUserDetails(userEmail) {
+                const user = this.autorizacoes.find(u => u.email === userEmail);
+                if (!user) return;
+
+                const modalBody = document.getElementById('modalDetalhesBody');
+                modalBody.innerHTML = this.createUserDetailsHTML(user);
+                this.modalDetalhes.style.display = 'block';
+            }
+
+            createUserDetailsHTML(user) {
+                const statusText = this.getStatusText(user.status);
+                const statusClass = this.getStatusClass(user.status);
+                
+                return `
+                    <div class="user-details-content">
+                        <div class="detail-section">
+                            <h4>Informações Pessoais</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <label>Nome Completo:</label>
+                                    <span>${user.nome}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Email:</label>
+                                    <span>${user.email}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>CPF:</label>
+                                    <span>${user.cpf || 'Não informado'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Data de Nascimento:</label>
+                                    <span>${user.data_nascimento ? new Date(user.data_nascimento).toLocaleDateString('pt-BR') : 'Não informado'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Telefone:</label>
+                                    <span>${user.telefone || 'Não informado'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Endereço:</label>
+                                    <span>${user.endereco || 'Não informado'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>Informações Profissionais</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <label>Cargo:</label>
+                                    <span>${user.cargo || 'Não informado'}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Tipo:</label>
+                                    <span>${user.tipo || 'funcionario'}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>Status da Conta</h4>
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <label>Status Atual:</label>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <label>Data de Cadastro:</label>
+                                    <span>${new Date(user.data_cadastro).toLocaleString('pt-BR')}</span>
+                                </div>
+                                ${user.data_autorizacao ? `
+                                <div class="detail-item">
+                                    <label>Data de Autorização:</label>
+                                    <span>${new Date(user.data_autorizacao).toLocaleString('pt-BR')}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            atualizarEstatisticas() {
+                const stats = this.autorizacoes.reduce((acc, auth) => {
+                    acc.total++;
+                    if (auth.status === 'aguardando_autorizacao') acc.pendentes++;
+                    else if (auth.status === 'ativo') acc.aprovados++;
+                    else if (auth.status === 'nao_autorizado') acc.rejeitados++;
+                    return acc;
+                }, { total: 0, pendentes: 0, aprovados: 0, rejeitados: 0 });
+
+                this.totalGeral.textContent = stats.total;
+                this.totalPendentes.textContent = stats.pendentes;
+                this.totalAprovados.textContent = stats.aprovados;
+                this.totalRejeitados.textContent = stats.rejeitados;
+            }
+
+            getStatusClass(status) {
+                const classes = {
+                    'aguardando_autorizacao': 'pending',
+                    'ativo': 'approved',
+                    'nao_autorizado': 'rejected',
+                    'suspenso': 'suspended'
+                };
+                return classes[status] || 'unknown';
+            }
+
+            getStatusText(status) {
+                const texts = {
+                    'aguardando_autorizacao': 'Aguardando Autorização',
+                    'ativo': 'Ativo',
+                    'nao_autorizado': 'Não Autorizado',
+                    'suspenso': 'Suspenso'
+                };
+                return texts[status] || 'Status Desconhecido';
+            }
+
+            showLoading(show) {
+                this.loadingContainer.style.display = show ? 'block' : 'none';
+                this.autorizacoesContainer.style.display = show ? 'none' : 'block';
+            }
+
+            showMessage(text, type = 'info') {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${type}`;
+                messageEl.innerHTML = `
+                    
+                    <span>${text}</span>
+                    <button class="message-close"></button>
+                `;
+
+                this.messageContainer.appendChild(messageEl);
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (messageEl.parentNode) {
+                        messageEl.remove();
+                    }
+                }, 5000);
+
+                // Close button
+                messageEl.querySelector('.message-close').addEventListener('click', () => {
+                    messageEl.remove();
+                });
+            }
+
+            getIconForType(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || 'fa-info-circle';
+            }
+        }
+
+        // Verificar se é admin antes de inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            
+            if (!userInfo || userInfo.tipo !== 'admin') {
+                alert('Acesso negado. Esta página é restrita a administradores.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            new GerenciarAutorizacoes();
+        });
+    </script>
+
+    <style>
+        body {
+            background: #f8f9fa;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .admin-container {
+            min-height: 100vh;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            color: #007bff;
+        }
+
+        .logo h1 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.pending { background: #ffc107; }
+        .stat-icon.approved { background: #28a745; }
+        .stat-icon.rejected { background: #dc3545; }
+        .stat-icon.total { background: #007bff; }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            color: #007bff;
+        }
+
+        .autorizacoes-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .autorizacao-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #e9ecef;
+        }
+
+        .autorizacao-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .autorizacao-card.approved {
+            border-left-color: #28a745;
+        }
+
+        .autorizacao-card.rejected {
+            border-left-color: #dc3545;
+        }
+
+        .autorizacao-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .user-details h3 {
+            margin: 0 0 5px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .user-email {
+            margin: 0 0 3px;
+            color: #007bff;
+            font-size: 0.9rem;
+        }
+
+        .user-cargo {
+            margin: 0;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .card-status {
+            text-align: right;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .card-date {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .info-item i {
+            color: #007bff;
+            width: 16px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .card-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-details {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-details:hover {
+            background: #e9ecef;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+        }
+
+        .btn-suspend {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-suspend:hover {
+            background: #e0a800;
+        }
+
+        .btn-reactivate {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-reactivate:hover {
+            background: #138496;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-small {
+            max-width: 400px;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2,
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .user-details-content {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 15px;
+            color: #333;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .detail-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .detail-item label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .detail-item span {
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 300px;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.success {
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .message.error {
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .message.warning {
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .message.info {
+            border-left-color: #007bff;
+            color: #0c5460;
+        }
+
+        .message-close {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            margin-left: auto;
+            padding: 0;
+            font-size: 0.8rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                min-width: auto;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .card-status {
+                text-align: left;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                justify-content: flex-start;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+
+            .detail-item {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .message-container {
+                left: 10px;
+                right: 10px;
+                top: 10px;
+            }
+
+            .message {
+                min-width: auto;
+            }
+        }
+    </style>
+</body>
+</html>

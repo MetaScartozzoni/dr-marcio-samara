@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-link {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+        
+        .dashboard-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dashboard-card .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .action-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
+        .action-btn:hover {
+            background: #5a67d8;
+        }
+
+        /* Botão especial para Gestão da Jornada */
+        .btn-jornada-especial {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+            border: 2px solid #ff5252 !important;
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3) !important;
+            font-weight: 600 !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .btn-jornada-especial:hover {
+            background: linear-gradient(135deg, #ff5252, #e53e3e) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+        }
+
+        .btn-jornada-especial:before {
+            content: '🔥';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        .btn-jornada-especial i {
+            margin-left: 15px !important;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e53e3e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .logout-btn:hover {
+            background: #c53030;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* Notificação visual para novos cadastros */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+            z-index: 10;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+        
+        .dashboard-card {
+            position: relative; /* Para posicionar a bolinha de notificação */
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .header-navigation {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .nav-link {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+            
+            .welcome-section {
+                padding: 20px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 24px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .dashboard-card {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .action-btn {
+                text-align: center;
+                padding: 12px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* iPad */
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            /* Desktop */
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header-navigation">
+            <a href="#" class="logout-btn" onclick="logout()">Sair</a>
+            <div class="nav-links" id="nav-links">
+                <!-- Links serão adicionados dinamicamente baseado no role -->
+            </div>
+        </div>
+        
+        <div class="welcome-section">
+            <h1 id="welcome-message">Bem-vindo ao Portal Dr. Marcio</h1>
+            <p id="user-info">Carregando informações do usuário...</p>
+        </div>
+
+        <!-- Seção para Pacientes -->
+        <div id="patient-section" class="hidden">
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Meus Agendamentos</h3>
+                    <p>Visualize e gerencie seus agendamentos médicos.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="verAgendamentos()"> Ver Agendamentos</a>
+                        <a href="#" class="action-btn" onclick="agendarConsulta()"> Agendar Consulta</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Meus Exames</h3>
+                    <p>Acesse resultados de exames e relatórios médicos.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Resultados')"> Ver Resultados</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Histórico Médico')"> Histórico</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Receitas</h3>
+                    <p>Consulte suas receitas médicas ativas.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Ver Receitas')"> Ver Receitas</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Renovar Receita')"> Renovar Receita</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Teleconsulta</h3>
+                    <p>Consultas virtuais com Dr. Marcio via videochamada.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="entrarVideochamada()"> Entrar na Consulta</a>
+                        <a href="#" class="action-btn" onclick="window.open('videochamada.html', '_blank')"> Sala Dedicada</a>
+                        <a href="#" class="action-btn" onclick="agendarTeleconsulta()"> Agendar Video</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Meu Perfil</h3>
+                    <p>Atualize suas informações pessoais e contato.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="editarPerfil()"> Editar Perfil</a>
+                        <a href="#" class="action-btn" onclick="alterarSenha()"> Alterar Senha</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção para Funcionários -->
+        <div id="staff-section" class="hidden">
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Jornada de Pacientes</h3>
+                    <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
+                    <div class="quick-actions">
+                        <a href="modules/quadro-evolutivo.html" class="action-btn"> Ver Quadro</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"> Relatório</a>
+                        <!-- Botão especial para Gestão da Jornada -->
+                        <a href="modules/jornada-paciente.html" class="action-btn btn-jornada-especial">
+                             🔥 Jornada Especial
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Caderno Digital</h3>
+                    <p>Documentação médica com anotações e fotos evolutivas.</p>
+                    <div class="quick-actions">
+                        <a href="modules/caderno-digital.html" class="action-btn"> Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"> Documentos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Agenda do Dia</h3>
+                    <p>Consulte a agenda de consultas do dia.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Ver Agenda</a>
+                        <a href="#" class="action-btn"> Marcar Consulta</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Pacientes</h3>
+                    <p>Gerencie cadastro e informações dos pacientes.</p>
+                    <div class="quick-actions">
+                        <a href="modules/gestao.html" class="action-btn"> Gestão Completa</a>
+                        <a href="#" class="action-btn"> Novo Paciente</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Relatórios</h3>
+                    <p>Acesse relatórios e estatísticas do consultório.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Relatórios</a>
+                        <a href="#" class="action-btn"> Financeiro</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Videochamadas</h3>
+                    <p>Consultas virtuais com pacientes via Whereby.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn" onclick="abrirVideochamada()"> Iniciar Consulta</a>
+                        <a href="#" class="action-btn" onclick="agendarVideochamada()"> Agendar Video</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Configurações</h3>
+                    <p>Configurações do sistema e preferências.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Configurar</a>
+                        <a href="#" class="action-btn"> Backup</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção para Médico/Admin -->
+        <div id="admin-section" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-patients">-</div>
+                    <div class="stat-label">Total de Pacientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="today-appointments">-</div>
+                    <div class="stat-label">Consultas Hoje</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-results">-</div>
+                    <div class="stat-label">Resultados Pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="month-revenue">-</div>
+                    <div class="stat-label">Receita do Mês</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Jornada de Pacientes</h3>
+                    <p>Gestão completa da jornada do paciente com prazos e notificações.</p>
+                    <div class="quick-actions">
+                        <a href="modules/quadro-evolutivo.html" class="action-btn"> Ver Quadro</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Relatório Evolutivo')"> Relatório</a>
+                        <!-- Botão especial para Gestão da Jornada -->
+                        <a href="modules/jornada-paciente.html" class="action-btn btn-jornada-especial">
+                             🔥 Jornada Especial
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Caderno Digital</h3>
+                    <p>Documentação médica com anotações e fotos evolutivas.</p>
+                    <div class="quick-actions">
+                        <a href="modules/caderno-digital.html" class="action-btn"> Abrir Caderno</a>
+                        <a href="#" class="action-btn" onclick="abrirFuncionalidade('Documentos')"> Documentos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Área Médica</h3>
+                    <p>Ferramentas médicas e prontuários eletrônicos.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Prontuários</a>
+                        <a href="#" class="action-btn"> Prescrições</a>
+                        <a href="#" class="action-btn"> Laudos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card" id="gestao-usuarios-card">
+                    <div id="notification-badge" class="notification-badge" style="display: none;">0</div>
+                    <h3><span class="icon"></span>Gestão Clínica</h3>
+                    <p>Administração geral do consultório e gestão de pacientes.</p>
+                    <div class="quick-actions">
+                        <a href="modules/gestao" class="action-btn"> Gestão de Pacientes</a>
+                        <a href="modules/admin.html" class="action-btn" id="gerenciar-usuarios-btn">
+                             Gerenciar Usuários
+                            <span id="pending-count" style="display: none; background: #dc3545; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-left: 5px;">0</span>
+                        </a>
+                        <a href="#" class="action-btn"> Relatórios</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Analytics</h3>
+                    <p>Relatórios avançados e análises.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Dashboard Completo</a>
+                        <a href="#" class="action-btn"> Exportar Dados</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="icon"></span>Administração</h3>
+                    <p>Configurações avançadas do sistema.</p>
+                    <div class="quick-actions">
+                        <a href="#" class="action-btn"> Usuários</a>
+                        <a href="#" class="action-btn"> Permissões</a>
+                        <a href="#" class="action-btn"> Sistema</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar se usuário está logado
+        function checkAuth() {
+            const user = localStorage.getItem('userInfo');
+            if (!user) {
+                window.location.href = '/login';
+                return;
+            }
+            
+            const userInfo = JSON.parse(user);
+            console.log('Dados do usuário:', userInfo); // Debug
+            console.log('Tipo do usuário:', userInfo.tipo); // Debug
+            console.log('Autorizado:', userInfo.autorizado); // Debug
+            
+            // Verificar se funcionário está autorizado
+            if (userInfo.tipo === 'funcionario' && !userInfo.autorizado) {
+                alert('⏳ Aguardando aprovação do administrador.\n\nSeu acesso ainda está pendente de autorização.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Melhorar o título com cores
+            const welcomeMessage = document.getElementById('welcome-message');
+            welcomeMessage.innerHTML = `
+                <span style="color: #FFD700; font-weight: 700;">Bem-vindo, </span>
+                <span style="color: white; font-weight: 800;">${userInfo.nome || 'Usuário'}!</span>
+            `;
+            
+            const userInfoDiv = document.getElementById('user-info');
+            userInfoDiv.innerHTML = `
+                <span style="color: #E6F3FF; font-size: 18px;">
+                    <strong>Tipo:</strong> ${userInfo.tipo || 'paciente'} | 
+                    <strong>Status:</strong> ${userInfo.autorizado ? 'Autorizado' : 'Pendente'} |
+                    <strong>Último acesso:</strong> ${new Date().toLocaleDateString('pt-BR')}
+                </span>
+            `;
+            
+            // Adicionar links de navegação baseados no tipo
+            const navLinks = document.getElementById('nav-links');
+            
+            if (userInfo.tipo === 'admin') {
+                navLinks.innerHTML = `
+                    <a href="modules/prontuarios.html" class="nav-link"> Prontuários</a>
+                    <a href="modules/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="modules/gestao.html" class="nav-link"> Gestão Orçamentos</a>
+                    <a href="modules/admin.html" class="nav-link"> Usuários</a>
+                    <a href="modules/configuracoes-sistema.html" class="nav-link"> Configurações</a>
+                    <a href="modules/" class="nav-link"> Portal</a>
+                `;
+            } else if (userInfo.tipo === 'funcionario') {
+                navLinks.innerHTML = `
+                    <a href="modules/prontuarios.html" class="nav-link"> Prontuários</a>
+                    <a href="modules/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="modules/gestao.html" class="nav-link"> Gestão Orçamentos</a>
+                    <a href="modules/" class="nav-link"> Portal</a>
+                `;
+            } else {
+                navLinks.innerHTML = `
+                    <a href="modules/agendar.html" class="nav-link"> Agendar</a>
+                    <a href="modules/" class="nav-link"> Portal</a>
+                `;
+            }
+            
+            // Mostrar seção baseada no tipo
+            if (userInfo.tipo === 'paciente') {
+                console.log('Mostrando seção de paciente'); // Debug
+                document.getElementById('patient-section').classList.remove('hidden');
+            } else if (userInfo.tipo === 'funcionario') {
+                console.log('Mostrando seção de funcionário'); // Debug
+                document.getElementById('staff-section').classList.remove('hidden');
+            } else if (userInfo.tipo === 'admin') {
+                console.log('Mostrando seção de admin'); // Debug
+                document.getElementById('admin-section').classList.remove('hidden');
+                loadAdminStats();
+            } else {
+                console.log('Role não reconhecido:', userInfo.role); // Debug
+                // Fallback - mostrar seção de paciente se role não for reconhecido
+                document.getElementById('patient-section').classList.remove('hidden');
+            }
+        }
+        
+        function loadAdminStats() {
+            // Carregar estatísticas reais da API de gestão
+            fetch('/api/gestao/estatisticas')
+                .then(response => response.json())
+                .then(stats => {
+                    document.getElementById('total-patients').textContent = stats.totalPacientes || '0';
+                    document.getElementById('today-appointments').textContent = stats.agendamentosHoje || '0';
+                    document.getElementById('pending-results').textContent = stats.orcamentosPendentes || '0';
+                    document.getElementById('month-revenue').textContent = stats.pagamentosPendentes ? `${stats.pagamentosPendentes} Pend.` : '0';
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar estatísticas:', error);
+                    // Fallback para valores estáticos
+                    document.getElementById('total-patients').textContent = '-';
+                    document.getElementById('today-appointments').textContent = '-';
+                    document.getElementById('pending-results').textContent = '-';
+                    document.getElementById('month-revenue').textContent = '-';
+                });
+        }
+        
+        function logout() {
+            localStorage.removeItem('userInfo');
+            window.location.href = '/login.html';
+        }
+        
+        // Funções para os botões do dashboard
+        function abrirFuncionalidade(nome) {
+            alert(`🚧 Funcionalidade "${nome}" em desenvolvimento.
+
+Em breve estará disponível!`);
+        }
+        
+        function agendarConsulta() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            alert(`📅 Agendar Consulta
+
+Olá ${userInfo.nome}!
+
+Esta funcionalidade será implementada em breve.
+Você poderá:
+• Escolher data e horário
+• Selecionar tipo de consulta
+• Receber confirmação por email`);
+        }
+        
+        function verAgendamentos() {
+            alert(`📋 Seus Agendamentos
+
+Em breve você poderá:
+• Ver consultas marcadas
+• Cancelar agendamentos
+• Reagendar consultas
+• Receber lembretes`);
+        }
+        
+        function editarPerfil() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            alert(`👤 Editar Perfil
+
+Olá ${userInfo.nome}!
+
+Em breve você poderá atualizar:
+• Dados pessoais
+• Telefone e endereço
+• Preferências
+• Foto do perfil`);
+        }
+        
+        function alterarSenha() {
+            if(confirm('🔐 Alterar Senha\\n\\nDeseja ir para a página de recuperação de senha?')) {
+                window.location.href = '/recuperar-senha.html';
+            }
+        }
+        
+        function abrirGestao() {
+            window.location.href = '/gestao.html';
+        }
+        
+        function abrirAdmin() {
+            window.location.href = '/admin.html';
+        }
+        
+        // Funções do Whereby - Videochamadas
+        function abrirVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // URL da sua sala Whereby (você precisa configurar sua sala)
+            const salaWhereby = 'https://marcioplasticsurgery.whereby.com/consulta-dr-marcio6d557cca-cd11-4fe1-a522-b0462bda6c0c';
+            
+            // Modal para confirmar videochamada
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center;">
+                        <h3>📹 Iniciar Videochamada</h3>
+                        <p>Você está prestes a entrar na sala de videochamada com os pacientes.</p>
+                        <p><strong>Sala:</strong> Dr. Marcio - Consulta Virtual</p>
+                        <div style="margin-top: 20px;">
+                            <button onclick="entrarSalaWhereby('${salaWhereby}')" style="background: #2ecc71; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                🎥 Entrar na Sala
+                            </button>
+                            <button onclick="fecharModal()" style="background: #e74c3c; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                        <p style="font-size: 12px; color: #666; margin-top: 15px;">
+                            💡 Dica: Teste seu microfone e câmera antes de iniciar
+                        </p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function agendarVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px;">
+                        <h3>📅 Agendar Videochamada</h3>
+                        <form onsubmit="salvarAgendamentoVideo(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Paciente:</label>
+                                <input type="text" id="paciente-video" placeholder="Nome do paciente" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Email do Paciente:</label>
+                                <input type="email" id="email-video" placeholder="email@exemplo.com" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Data:</label>
+                                <input type="date" id="data-video" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horário:</label>
+                                <select id="hora-video" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                                    <option value="">Selecione um horário</option>
+                                    <option value="08:00">08:00</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Observações:</label>
+                                <textarea id="obs-video" placeholder="Motivo da consulta, preparação necessária..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; height: 80px;"></textarea>
+                            </div>
+                            <div style="text-align: center;">
+                                <button type="submit" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    📅 Agendar
+                                </button>
+                                <button type="button" onclick="fecharModal()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function entrarVideochamada() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            // URL da sua sala Whereby para pacientes
+            const salaWhereby = 'https://marcioplasticsurgery.whereby.com/consulta-dr-marcio6d557cca-cd11-4fe1-a522-b0462bda6c0c';
+            
+            // Modal para pacientes
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; text-align: center;">
+                        <h3>📹 Teleconsulta com Dr. Marcio</h3>
+                        <p>Você está prestes a entrar na videochamada.</p>
+                        <p><strong>Paciente:</strong> ${userInfo.nome}</p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; text-align: left;">
+                            <h4 style="margin: 0 0 10px 0; color: #667eea;">📋 Preparação:</h4>
+                            <p style="margin: 5px 0; font-size: 14px;">• Certifique-se que câmera e microfone estão funcionando</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Tenha seus documentos e exames em mãos</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Esteja em local bem iluminado e silencioso</p>
+                            <p style="margin: 5px 0; font-size: 14px;">• Teste sua conexão de internet</p>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button onclick="entrarSalaWhereby('${salaWhereby}')" style="background: #2ecc71; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                🎥 Entrar na Consulta
+                            </button>
+                            <button onclick="fecharModal()" style="background: #e74c3c; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                ❌ Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function agendarTeleconsulta() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+            
+            const modal = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 600px;">
+                        <h3>📅 Solicitar Teleconsulta</h3>
+                        <p style="color: #666; margin-bottom: 20px;">Preencha os dados abaixo para solicitar uma consulta por videochamada.</p>
+                        <form onsubmit="solicitarTeleconsulta(event)">
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Seu Nome:</label>
+                                <input type="text" value="${userInfo.nome}" disabled style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; background: #f5f5f5;">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Data Preferida:</label>
+                                <input type="date" id="data-teleconsulta" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required min="${new Date().toISOString().split('T')[0]}">
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Horário Preferido:</label>
+                                <select id="hora-teleconsulta" style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px;" required>
+                                    <option value="">Selecione um horário</option>
+                                    <option value="08:00">08:00 - Manhã</option>
+                                    <option value="09:00">09:00 - Manhã</option>
+                                    <option value="10:00">10:00 - Manhã</option>
+                                    <option value="11:00">11:00 - Manhã</option>
+                                    <option value="14:00">14:00 - Tarde</option>
+                                    <option value="15:00">15:00 - Tarde</option>
+                                    <option value="16:00">16:00 - Tarde</option>
+                                    <option value="17:00">17:00 - Tarde</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Motivo da Consulta:</label>
+                                <textarea id="motivo-teleconsulta" placeholder="Descreva brevemente o motivo da consulta..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 5px; height: 80px;" required></textarea>
+                            </div>
+                            <div style="text-align: center;">
+                                <button type="submit" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    📞 Solicitar
+                                </button>
+                                <button type="button" onclick="fecharModal()" style="background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 8px; margin: 5px; cursor: pointer;">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+        
+        function entrarSalaWhereby(url) {
+            // Abrir Whereby em nova aba
+            window.open(url, '_blank');
+            fecharModal();
+            
+            // Mostrar instruções
+            setTimeout(() => {
+                alert('🎥 Videochamada iniciada!\\n\\nA sala do Whereby foi aberta em uma nova aba.\\n\\nSe não abriu automaticamente, verifique se o bloqueador de pop-ups está desabilitado.');
+            }, 1000);
+        }
+        
+        function salvarAgendamentoVideo(event) {
+            event.preventDefault();
+            
+            const agendamento = {
+                id: Date.now(),
+                paciente: document.getElementById('paciente-video').value,
+                email: document.getElementById('email-video').value,
+                data: document.getElementById('data-video').value,
+                hora: document.getElementById('hora-video').value,
+                observacoes: document.getElementById('obs-video').value,
+                tipo: 'videochamada',
+                status: 'agendado',
+                dataAgendamento: new Date().toISOString(),
+                linkSala: 'https://marcioplasticsurgery.whereby.com/consulta-dr-marcio6d557cca-cd11-4fe1-a522-b0462bda6c0c'
+            };
+            
+            // Salvar no localStorage (em produção, enviar para servidor)
+            const agendamentos = JSON.parse(localStorage.getItem('agendamentosVideo') || '[]');
+            agendamentos.push(agendamento);
+            localStorage.setItem('agendamentosVideo', JSON.stringify(agendamentos));
+            
+            alert(`✅ Videochamada agendada!\\n\\nPaciente: ${agendamento.paciente}\\nData: ${agendamento.data}\\nHora: ${agendamento.hora}\\n\\n📧 Um email será enviado para o paciente com o link da videochamada.`);
+            fecharModal();
+        }
+        
+        function solicitarTeleconsulta(event) {
+            event.preventDefault();
+            
+            const solicitacao = {
+                id: Date.now(),
+                paciente: JSON.parse(localStorage.getItem('userInfo')).nome,
+                email: JSON.parse(localStorage.getItem('userInfo')).email,
+                data: document.getElementById('data-teleconsulta').value,
+                hora: document.getElementById('hora-teleconsulta').value,
+                motivo: document.getElementById('motivo-teleconsulta').value,
+                status: 'pendente',
+                dataSolicitacao: new Date().toISOString()
+            };
+            
+            // Salvar no localStorage (em produção, enviar para servidor)
+            const solicitacoes = JSON.parse(localStorage.getItem('solicitacoesVideo') || '[]');
+            solicitacoes.push(solicitacao);
+            localStorage.setItem('solicitacoesVideo', JSON.stringify(solicitacoes));
+            
+            alert(`📞 Solicitação enviada com sucesso!\\n\\nSua solicitação de teleconsulta foi enviada para análise.\\nVocê receberá confirmação por email em até 24 horas.\\n\\nData solicitada: ${solicitacao.data}\\nHorário: ${solicitacao.hora}\\nMotivo: ${solicitacao.motivo}`);
+            fecharModal();
+        }
+        
+        function fecharModal() {
+            const modal = document.querySelector('div[style*="position: fixed"]');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        // Executar verificação quando a página carregar
+        window.onload = function() {
+            checkAuth();
+            // Verificar novos cadastros se for admin
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                const user = JSON.parse(userInfo);
+                if (user.tipo === 'admin') {
+                    verificarNovosCadastros();
+                    // Verificar a cada 30 segundos
+                    setInterval(verificarNovosCadastros, 30000);
+                }
+            }
+        };
+        
+        // Função para verificar novos cadastros pendentes
+        async function verificarNovosCadastros() {
+            try {
+                const response = await fetch('/api/usuarios-pendentes');
+                const result = await response.json();
+                
+                if (result.success && result.usuarios) {
+                    const total = result.usuarios.length;
+                    
+                    // Atualizar bolinha de notificação
+                    const badge = document.getElementById('notification-badge');
+                    const countSpan = document.getElementById('pending-count');
+                    
+                    if (total > 0) {
+                        // Mostrar notificação
+                        badge.style.display = 'flex';
+                        badge.textContent = total;
+                        
+                        // Mostrar contador no botão
+                        countSpan.style.display = 'inline';
+                        countSpan.textContent = total;
+                        
+                        console.log(`🔔 ${total} novos cadastros pendentes encontrados`);
+                    } else {
+                        // Esconder notificação
+                        badge.style.display = 'none';
+                        countSpan.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao verificar novos cadastros:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento - Dr. Marcio</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; padding: 30px 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">Dr. Marcio</h1>
+            <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">Orçamento Profissional</p>
+        </div>
+        
+        <!-- Quote Number -->
+        <div style="text-align: center; padding: 20px;">
+            <div style="display: inline-block; background-color: #6f42c1; color: white; padding: 12px 24px; border-radius: 25px; font-weight: bold;">
+                💼 Orçamento #{{numeroOrcamento}}
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 0 30px 30px 30px;">
+            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                Prezado(a) <strong>{{nome}}</strong>,
+            </p>
+            
+            <p style="font-size: 16px; color: #666; margin-bottom: 25px;">
+                Conforme solicitado, segue o orçamento detalhado dos nossos serviços:
+            </p>
+            
+            <!-- Quote Details -->
+            <div style="background-color: #f8f9fa; border: 2px solid #6f42c1; padding: 25px; margin: 25px 0; border-radius: 12px;">
+                <h3 style="margin-top: 0; color: #6f42c1; font-size: 20px; text-align: center;">💰 Valor Total</h3>
+                <div style="text-align: center; font-size: 32px; font-weight: bold; color: #28a745; margin: 15px 0;">
+                    R$ {{valorTotal}}
+                </div>
+                <div style="text-align: center; color: #666; font-size: 14px;">
+                    <strong>Válido até:</strong> {{validade}}
+                </div>
+            </div>
+            
+            <!-- Quote Actions -->
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{linkVisualizacao}}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px 10px; font-weight: bold;">
+                    👁️ Visualizar Detalhes
+                </a>
+                <a href="{{linkAceite}}" style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px 10px; font-weight: bold;">
+                    ✅ Aceitar Orçamento
+                </a>
+            </div>
+            
+            <!-- Observations -->
+            {{#if observacoes}}
+            <div style="background-color: #e9ecef; border-left: 4px solid #6c757d; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                <h4 style="margin-top: 0; color: #495057;">📋 Observações</h4>
+                <p style="color: #495057; margin: 10px 0; line-height: 1.6;">
+                    {{observacoes}}
+                </p>
+            </div>
+            {{/if}}
+            
+            <!-- Payment Options -->
+            <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="margin-top: 0; color: #155724;">💳 Formas de Pagamento</h4>
+                <ul style="color: #155724; margin: 10px 0; padding-left: 20px;">
+                    <li>Dinheiro (5% de desconto)</li>
+                    <li>PIX (3% de desconto)</li>
+                    <li>Cartão de Débito (2% de desconto)</li>
+                    <li>Cartão de Crédito (até 12x sem juros)</li>
+                </ul>
+            </div>
+            
+            <!-- Next Steps -->
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="margin-top: 0; color: #856404;">📞 Próximos Passos</h4>
+                <ol style="color: #856404; margin: 10px 0; padding-left: 20px;">
+                    <li>Analise o orçamento com calma</li>
+                    <li>Entre em contato para esclarecer dúvidas</li>
+                    <li>Confirme o aceite para agendarmos</li>
+                    <li>Aguarde nosso contato para definir datas</li>
+                </ol>
+            </div>
+            
+            <!-- Contact Info -->
+            <div style="border-top: 2px solid #e9ecef; padding-top: 25px; margin-top: 30px; text-align: center;">
+                <h4 style="color: #6f42c1; margin-bottom: 15px;">Dúvidas? Entre em Contato!</h4>
+                <div style="margin: 20px 0;">
+                    <a href="tel:11999999999" style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px; font-weight: bold;">
+                        📞 Ligar Agora
+                    </a>
+                    <a href="mailto:contato@drmarcio.com.br" style="background-color: #dc3545; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px; font-weight: bold;">
+                        📧 Enviar Email
+                    </a>
+                </div>
+                <p style="color: #666; margin: 8px 0;">
+                    📞 <strong>Telefone:</strong> (11) 99999-9999
+                </p>
+                <p style="color: #666; margin: 8px 0;">
+                    📧 <strong>Email:</strong> contato@drmarcio.com.br
+                </p>
+                <p style="color: #666; margin: 8px 0;">
+                    📍 <strong>Endereço:</strong> Rua Dr. Marcio, 123 - Centro - São Paulo/SP
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; text-align: center; padding: 20px; color: #6c757d; font-size: 14px;">
+            <p style="margin: 0;">© 2024 Portal Dr. Marcio - Todos os direitos reservados</p>
+            <p style="margin: 5px 0 0 0;">Este orçamento é válido até {{validade}}.</p>
+        </div>
+    </div>
+</body>
+</html>

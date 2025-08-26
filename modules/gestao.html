@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão Financeira - Dr. Marcio Scartozzoni</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header-left h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-voltar {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-novo {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-novo:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .dashboard-card.receita::before {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .dashboard-card.pendente::before {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .dashboard-card.vencido::before {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .dashboard-card.negociacao::before {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+
+        .dashboard-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-card.receita .dashboard-number {
+            color: #28a745;
+        }
+
+        .dashboard-card.pendente .dashboard-number {
+            color: #ffc107;
+        }
+
+        .dashboard-card.vencido .dashboard-number {
+            color: #dc3545;
+        }
+
+        .dashboard-card.negociacao .dashboard-number {
+            color: #6f42c1;
+        }
+
+        .dashboard-label {
+            color: #666;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-value {
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tabs-container {
+            margin-bottom: 25px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .orcamento-item {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .orcamento-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .orcamento-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .orcamento-paciente {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .orcamento-valor {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .orcamento-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .orcamento-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .orcamento-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .orcamento-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-aprovado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejeitado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-negociacao {
+            background: #e2e3f1;
+            color: #383d41;
+        }
+
+        .status-vencido {
+            background: #f5c6cb;
+            color: #721c24;
+        }
+
+        .orcamento-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-negociar {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+            color: white;
+        }
+
+        .btn-pagamento {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-detalhes {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .quick-actions h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-novo-orcamento {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .btn-relatorio {
+            background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+        }
+
+        .btn-cobranca {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .resumo-financeiro {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .resumo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .resumo-item:last-child {
+            border-bottom: none;
+        }
+
+        .resumo-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .resumo-value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .resumo-positivo {
+            color: #28a745;
+        }
+
+        .resumo-negativo {
+            color: #dc3545;
+        }
+
+        .resumo-neutro {
+            color: #2c3e50;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .btn-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .arquivos-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+        }
+
+        .arquivos-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .arquivos-header h4 {
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .arquivo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .arquivo-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arquivo-icon {
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .arquivo-detalhes h5 {
+            margin: 0;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+
+        .arquivo-detalhes p {
+            margin: 0;
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+
+        .arquivo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-arquivo {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-arquivo:hover {
+            background: #f8f9fa;
+            color: #667eea;
+        }
+
+        .link-aceite-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .link-aceite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .link-aceite-header h4 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-gerar-link {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-gerar-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .link-gerado {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .link-url {
+            font-family: 'Courier New', monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-link-action {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-link-action:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .instrucoes-pagamento {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .instrucoes-pagamento h5 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .instrucoes-pagamento ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .instrucoes-pagamento li {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="../assets/js/security-dev.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-chart-pie"></i> Gestão Financeira</h1>
+                <p>Orçamentos, Pagamentos e Fluxo de Caixa</p>
+            </div>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Portal
+                </a>
+                <button onclick="abrirModalNovoOrcamento()" class="btn btn-novo">
+                    <i class="fas fa-plus"></i> Novo Orçamento
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Financeiro -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card receita">
+                <div class="dashboard-number" id="receitaTotal">R$ 0</div>
+                <div class="dashboard-label">Receita Total</div>
+                <div class="dashboard-value">Este mês</div>
+            </div>
+            <div class="dashboard-card pendente">
+                <div class="dashboard-number" id="orcamentosPendentes">0</div>
+                <div class="dashboard-label">Orçamentos Pendentes</div>
+                <div class="dashboard-value" id="valorPendente">R$ 0</div>
+            </div>
+            <div class="dashboard-card vencido">
+                <div class="dashboard-number" id="vencidos">0</div>
+                <div class="dashboard-label">Vencidos</div>
+                <div class="dashboard-value" id="valorVencido">R$ 0</div>
+            </div>
+            <div class="dashboard-card negociacao">
+                <div class="dashboard-number" id="negociacoes">0</div>
+                <div class="dashboard-label">Em Negociação</div>
+                <div class="dashboard-value" id="valorNegociacao">R$ 0</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="content-section">
+                <div class="section-title">
+                    <i class="fas fa-file-invoice-dollar"></i> Orçamentos e Pagamentos
+                </div>
+
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <div class="tab active" onclick="trocarTab('todos')">Todos</div>
+                        <div class="tab" onclick="trocarTab('pendentes')">Pendentes</div>
+                        <div class="tab" onclick="trocarTab('aprovados')">Aprovados</div>
+                        <div class="tab" onclick="trocarTab('negociacao')">Negociação</div>
+                        <div class="tab" onclick="trocarTab('vencidos')">Vencidos</div>
+                    </div>
+                </div>
+
+                <div id="listaOrcamentos">
+                    <!-- Orçamentos serão carregados aqui -->
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="quick-actions">
+                    <h3><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                    
+                    <button onclick="abrirModalNovoOrcamento()" class="action-btn btn-novo-orcamento">
+                        <i class="fas fa-plus-circle"></i> Novo Orçamento
+                    </button>
+                    
+                    <button onclick="gerarRelatorio()" class="action-btn btn-relatorio">
+                        <i class="fas fa-chart-bar"></i> Relatório Mensal
+                    </button>
+                    
+                    <button onclick="processarCobrancas()" class="action-btn btn-cobranca">
+                        <i class="fas fa-bell"></i> Processar Cobranças
+                    </button>
+                </div>
+
+                <div class="resumo-financeiro">
+                    <h3><i class="fas fa-calculator"></i> Resumo Financeiro</h3>
+                    
+                    <div class="resumo-item">
+                        <span class="resumo-label">Receitas Confirmadas</span>
+                        <span class="resumo-value resumo-positivo" id="receitasConfirmadas">R$ 0</span>
+                    </div>
+                    
+                    <div class="resumo-item">
+                        <span class="resumo-label">Pendente Aprovação</span>
+                        <span class="resumo-value resumo-neutro" id="pendenteAprovacao">R$ 0</span>
+                    </div>
+                    
+                    <div class="resumo-item">
+                        <span class="resumo-label">Em Negociação</span>
+                        <span class="resumo-value resumo-neutro" id="emNegociacao">R$ 0</span>
+                    </div>
+                    
+                    <div class="resumo-item">
+                        <span class="resumo-label">Perdas (Rejeitados)</span>
+                        <span class="resumo-value resumo-negativo" id="perdas">R$ 0</span>
+                    </div>
+                    
+                    <div class="resumo-item">
+                        <span class="resumo-label">Taxa de Conversão</span>
+                        <span class="resumo-value resumo-neutro" id="taxaConversao">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Orçamento -->
+    <div class="modal" id="modalNovoOrcamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Novo Orçamento</h2>
+                <button class="btn-close" onclick="fecharModalOrcamento()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formOrcamento">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Paciente *</label>
+                            <input type="text" id="orc-paciente" required placeholder="Nome do paciente">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="orc-telefone" required placeholder="(11) 99999-9999">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Procedimento *</label>
+                            <select id="orc-procedimento" required>
+                                <option value="">Selecione o procedimento</option>
+                                <option value="rinoplastia">Rinoplastia</option>
+                                <option value="mamoplastia-aumento">Mamoplastia de Aumento</option>
+                                <option value="mamoplastia-reducao">Mamoplastia de Redução</option>
+                                <option value="abdominoplastia">Abdominoplastia</option>
+                                <option value="lipoaspiracao">Lipoaspiração</option>
+                                <option value="lifting-facial">Lifting Facial</option>
+                                <option value="blefaroplastia">Blefaroplastia</option>
+                                <option value="otoplastia">Otoplastia</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valor do Procedimento (R$) *</label>
+                            <input type="number" id="orc-valor" required step="0.01" min="0" placeholder="0,00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Validade do Orçamento (dias)</label>
+                            <select id="orc-validade">
+                                <option value="30" selected>30 dias</option>
+                                <option value="60">60 dias</option>
+                                <option value="90">90 dias</option>
+                                <option value="120">120 dias</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Forma de Pagamento</label>
+                            <select id="orc-pagamento">
+                                <option value="a-vista">À vista</option>
+                                <option value="parcelado-2x">2x sem juros</option>
+                                <option value="parcelado-3x">3x sem juros</option>
+                                <option value="parcelado-6x">6x com juros</option>
+                                <option value="parcelado-12x">12x com juros</option>
+                                <option value="financiamento">Financiamento</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Observações</label>
+                        <textarea id="orc-observacoes" placeholder="Detalhes do procedimento, condições especiais, etc."></textarea>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>E-mail</label>
+                            <input type="email" id="orc-email" placeholder="email@exemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Desconto (%)</label>
+                            <input type="number" id="orc-desconto" step="0.01" min="0" max="100" placeholder="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModalOrcamento()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button onclick="salvarOrcamento()" class="btn btn-novo">
+                    <i class="fas fa-save"></i> Salvar Orçamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes do Orçamento -->
+    <div class="modal" id="modalDetalhesOrcamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice"></i> Detalhes do Orçamento</h2>
+                <button class="btn-close" onclick="fecharModalDetalhes()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detalhesOrcamentoContent">
+                    <!-- Conteúdo será preenchido dinamicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModalDetalhes()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+                <button onclick="gerarPDFOrcamento()" class="btn btn-novo">
+                    <i class="fas fa-file-pdf"></i> Gerar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let orcamentos = [];
+        let tabAtiva = 'todos';
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('💰 Sistema de Gestão Financeira - Inicializando...');
+            carregarOrcamentos();
+        });
+
+        async function carregarOrcamentos() {
+            try {
+                // Simular carregamento de dados
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Dados de exemplo
+                orcamentos = [
+                    {
+                        id: 'ORC001',
+                        paciente: 'Maria Silva',
+                        telefone: '(11) 99999-0001',
+                        email: 'maria.silva@email.com',
+                        procedimento: 'Rinoplastia',
+                        valor: 8500.00,
+                        desconto: 10,
+                        valorFinal: 7650.00,
+                        pagamento: 'parcelado-3x',
+                        validade: 30,
+                        dataOrcamento: '2024-07-01',
+                        dataVencimento: '2024-07-31',
+                        status: 'pendente',
+                        observacoes: 'Paciente interessada, aguardando decisão familiar',
+                        arquivos: [],
+                        linkAceite: null
+                    },
+                    {
+                        id: 'ORC002',
+                        paciente: 'Ana Costa',
+                        telefone: '(11) 99999-0002',
+                        email: 'ana.costa@email.com',
+                        procedimento: 'Mamoplastia de Aumento',
+                        valor: 12000.00,
+                        desconto: 0,
+                        valorFinal: 12000.00,
+                        pagamento: 'parcelado-6x',
+                        validade: 60,
+                        dataOrcamento: '2024-07-15',
+                        dataVencimento: '2024-09-15',
+                        status: 'aprovado',
+                        observacoes: 'Aprovado! Aguardando agendamento da cirurgia',
+                        arquivos: [
+                            {
+                                id: 'ARQ001',
+                                nome: 'comprovante_pagamento.pdf',
+                                tipo: 'pdf',
+                                tamanho: '245 KB',
+                                dataUpload: '2024-07-16'
+                            }
+                        ],
+                        linkAceite: {
+                            url: 'https://portal-drmarcio.com/aceite/ORC002-ana-costa',
+                            codigo: 'AC002',
+                            dataGeracao: '2024-07-15',
+                            status: 'aceito'
+                        }
+                    },
+                    {
+                        id: 'ORC003',
+                        paciente: 'João Santos',
+                        telefone: '(11) 99999-0003',
+                        email: 'joao.santos@email.com',
+                        procedimento: 'Lipoaspiração',
+                        valor: 6500.00,
+                        desconto: 5,
+                        valorFinal: 6175.00,
+                        pagamento: 'a-vista',
+                        validade: 30,
+                        dataOrcamento: '2024-06-20',
+                        dataVencimento: '2024-07-20',
+                        status: 'vencido',
+                        observacoes: 'Orçamento vencido - entrar em contato',
+                        arquivos: [],
+                        linkAceite: null
+                    },
+                    {
+                        id: 'ORC004',
+                        paciente: 'Carla Oliveira',
+                        telefone: '(11) 99999-0004',
+                        email: 'carla.oliveira@email.com',
+                        procedimento: 'Abdominoplastia',
+                        valor: 15000.00,
+                        desconto: 15,
+                        valorFinal: 12750.00,
+                        pagamento: 'parcelado-12x',
+                        validade: 90,
+                        dataOrcamento: '2024-07-20',
+                        dataVencimento: '2024-10-20',
+                        status: 'negociacao',
+                        observacoes: 'Em negociação - paciente solicitou mais desconto',
+                        arquivos: [
+                            {
+                                id: 'ARQ002',
+                                nome: 'proposta_contraoferta.pdf',
+                                tipo: 'pdf',
+                                tamanho: '189 KB',
+                                dataUpload: '2024-07-22'
+                            }
+                        ],
+                        linkAceite: {
+                            url: 'https://portal-drmarcio.com/aceite/ORC004-carla-oliveira',
+                            codigo: 'AC004',
+                            dataGeracao: '2024-07-22',
+                            status: 'pendente'
+                        }
+                    },
+                    {
+                        id: 'ORC005',
+                        paciente: 'Pedro Lima',
+                        telefone: '(11) 99999-0005',
+                        email: 'pedro.lima@email.com',
+                        procedimento: 'Otoplastia',
+                        valor: 4500.00,
+                        desconto: 0,
+                        valorFinal: 4500.00,
+                        pagamento: 'a-vista',
+                        validade: 30,
+                        dataOrcamento: '2024-07-25',
+                        dataVencimento: '2024-08-25',
+                        status: 'rejeitado',
+                        observacoes: 'Paciente desistiu do procedimento',
+                        arquivos: [],
+                        linkAceite: null
+                    }
+                ];
+
+                renderizarOrcamentos();
+                atualizarDashboard();
+                atualizarResumo();
+                
+                console.log(`✅ ${orcamentos.length} orçamentos carregados`);
+            } catch (error) {
+                console.error('❌ Erro ao carregar orçamentos:', error);
+            }
+        }
+
+        function renderizarOrcamentos() {
+            const container = document.getElementById('listaOrcamentos');
+            let orcamentosFiltrados = orcamentos;
+
+            // Filtrar por tab ativa
+            if (tabAtiva !== 'todos') {
+                orcamentosFiltrados = orcamentos.filter(o => o.status === tabAtiva);
+            }
+
+            if (orcamentosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6c757d;">
+                        <i class="fas fa-file-invoice" style="font-size: 3em; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <h4>Nenhum orçamento encontrado</h4>
+                        <p>Não há orçamentos para esta categoria.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = orcamentosFiltrados.map(orc => {
+                const diasVencimento = calcularDiasVencimento(orc.dataVencimento);
+                const statusClass = `status-${orc.status}`;
+                
+                return `
+                    <div class="orcamento-item" onclick="verDetalhesOrcamento('${orc.id}')">
+                        <div class="orcamento-header">
+                            <div class="orcamento-paciente">${orc.paciente}</div>
+                            <div class="orcamento-valor">R$ ${orc.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                        </div>
+                        
+                        <div class="orcamento-info">
+                            <div class="orcamento-field">
+                                <div class="orcamento-label">Procedimento</div>
+                                <div class="orcamento-value">${orc.procedimento}</div>
+                            </div>
+                            <div class="orcamento-field">
+                                <div class="orcamento-label">Vencimento</div>
+                                <div class="orcamento-value">${new Date(orc.dataVencimento).toLocaleDateString('pt-BR')} ${diasVencimento < 0 ? '(Vencido)' : diasVencimento <= 7 ? '(Próximo)' : ''}</div>
+                            </div>
+                            <div class="orcamento-field">
+                                <div class="orcamento-label">Pagamento</div>
+                                <div class="orcamento-value">${formatarPagamento(orc.pagamento)}</div>
+                            </div>
+                            <div class="orcamento-field">
+                                <div class="orcamento-label">Status</div>
+                                <div class="orcamento-value">
+                                    <span class="status-badge ${statusClass}">${formatarStatus(orc.status)}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="orcamento-actions">
+                            ${orc.status === 'pendente' ? `
+                                <button onclick="event.stopPropagation(); iniciarNegociacao('${orc.id}')" class="btn-action btn-negociar">
+                                    <i class="fas fa-handshake"></i> Negociar
+                                </button>
+                                <button onclick="event.stopPropagation(); gerarLinkAceite('${orc.id}')" class="btn-action btn-detalhes">
+                                    <i class="fas fa-link"></i> Link Aceite
+                                </button>
+                            ` : ''}
+                            
+                            ${orc.status === 'aprovado' ? `
+                                <button onclick="event.stopPropagation(); processarPagamento('${orc.id}')" class="btn-action btn-pagamento">
+                                    <i class="fas fa-credit-card"></i> Pagamento
+                                </button>
+                            ` : ''}
+                            
+                            ${orc.status === 'negociacao' ? `
+                                <button onclick="event.stopPropagation(); gerarLinkAceite('${orc.id}')" class="btn-action btn-detalhes">
+                                    <i class="fas fa-link"></i> Link Aceite
+                                </button>
+                            ` : ''}
+                            
+                            <button onclick="event.stopPropagation(); gerenciarArquivos('${orc.id}')" class="btn-action btn-detalhes">
+                                <i class="fas fa-paperclip"></i> Arquivos ${orc.arquivos ? `(${orc.arquivos.length})` : ''}
+                            </button>
+                            
+                            <button onclick="event.stopPropagation(); verDetalhesOrcamento('${orc.id}')" class="btn-action btn-detalhes">
+                                <i class="fas fa-eye"></i> Detalhes
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function trocarTab(novaTab) {
+            // Remover classe active de todas as tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Adicionar classe active na tab selecionada
+            event.target.classList.add('active');
+            
+            tabAtiva = novaTab;
+            renderizarOrcamentos();
+        }
+
+        function calcularDiasVencimento(dataVencimento) {
+            const hoje = new Date();
+            const vencimento = new Date(dataVencimento);
+            const diffTime = vencimento - hoje;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        function formatarPagamento(pagamento) {
+            const formatos = {
+                'a-vista': 'À Vista',
+                'parcelado-2x': '2x sem juros',
+                'parcelado-3x': '3x sem juros',
+                'parcelado-6x': '6x com juros',
+                'parcelado-12x': '12x com juros',
+                'financiamento': 'Financiamento'
+            };
+            return formatos[pagamento] || pagamento;
+        }
+
+        function formatarStatus(status) {
+            const formatos = {
+                'pendente': 'Pendente',
+                'aprovado': 'Aprovado',
+                'rejeitado': 'Rejeitado',
+                'negociacao': 'Negociação',
+                'vencido': 'Vencido'
+            };
+            return formatos[status] || status;
+        }
+
+        function atualizarDashboard() {
+            const receita = orcamentos
+                .filter(o => o.status === 'aprovado')
+                .reduce((total, o) => total + o.valorFinal, 0);
+            
+            const pendentes = orcamentos.filter(o => o.status === 'pendente');
+            const valorPendente = pendentes.reduce((total, o) => total + o.valorFinal, 0);
+            
+            const vencidos = orcamentos.filter(o => o.status === 'vencido');
+            const valorVencido = vencidos.reduce((total, o) => total + o.valorFinal, 0);
+            
+            const negociacoes = orcamentos.filter(o => o.status === 'negociacao');
+            const valorNegociacao = negociacoes.reduce((total, o) => total + o.valorFinal, 0);
+
+            document.getElementById('receitaTotal').textContent = 
+                'R$ ' + receita.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('orcamentosPendentes').textContent = pendentes.length;
+            document.getElementById('valorPendente').textContent = 
+                'R$ ' + valorPendente.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('vencidos').textContent = vencidos.length;
+            document.getElementById('valorVencido').textContent = 
+                'R$ ' + valorVencido.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('negociacoes').textContent = negociacoes.length;
+            document.getElementById('valorNegociacao').textContent = 
+                'R$ ' + valorNegociacao.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+        }
+
+        function atualizarResumo() {
+            const confirmadas = orcamentos
+                .filter(o => o.status === 'aprovado')
+                .reduce((total, o) => total + o.valorFinal, 0);
+            
+            const pendentes = orcamentos
+                .filter(o => o.status === 'pendente')
+                .reduce((total, o) => total + o.valorFinal, 0);
+            
+            const negociacao = orcamentos
+                .filter(o => o.status === 'negociacao')
+                .reduce((total, o) => total + o.valorFinal, 0);
+            
+            const perdas = orcamentos
+                .filter(o => o.status === 'rejeitado')
+                .reduce((total, o) => total + o.valorFinal, 0);
+            
+            const totalOrcamentos = orcamentos.length;
+            const aprovados = orcamentos.filter(o => o.status === 'aprovado').length;
+            const taxaConversao = totalOrcamentos > 0 ? (aprovados / totalOrcamentos * 100).toFixed(1) : 0;
+
+            document.getElementById('receitasConfirmadas').textContent = 
+                'R$ ' + confirmadas.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('pendenteAprovacao').textContent = 
+                'R$ ' + pendentes.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('emNegociacao').textContent = 
+                'R$ ' + negociacao.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('perdas').textContent = 
+                'R$ ' + perdas.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('taxaConversao').textContent = taxaConversao + '%';
+        }
+
+        function abrirModalNovoOrcamento() {
+            document.getElementById('modalNovoOrcamento').classList.add('active');
+        }
+
+        function fecharModalOrcamento() {
+            document.getElementById('modalNovoOrcamento').classList.remove('active');
+            
+            // Limpar formulário
+            document.getElementById('formOrcamento').reset();
+        }
+
+        async function salvarOrcamento() {
+            const paciente = document.getElementById('orc-paciente').value;
+            const telefone = document.getElementById('orc-telefone').value;
+            const procedimento = document.getElementById('orc-procedimento').value;
+            const valor = parseFloat(document.getElementById('orc-valor').value);
+            const desconto = parseFloat(document.getElementById('orc-desconto').value) || 0;
+
+            if (!paciente || !telefone || !procedimento || !valor) {
+                SecureNotification.error('Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            try {
+                // Simular salvamento
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const valorFinal = valor - (valor * desconto / 100);
+                const hoje = new Date();
+                const validade = parseInt(document.getElementById('orc-validade').value);
+                const dataVencimento = new Date(hoje);
+                dataVencimento.setDate(hoje.getDate() + validade);
+
+                const novoOrcamento = {
+                    id: 'ORC' + String(orcamentos.length + 1).padStart(3, '0'),
+                    paciente: paciente,
+                    telefone: telefone,
+                    email: document.getElementById('orc-email').value,
+                    procedimento: document.getElementById('orc-procedimento').options[document.getElementById('orc-procedimento').selectedIndex].text,
+                    valor: valor,
+                    desconto: desconto,
+                    valorFinal: valorFinal,
+                    pagamento: document.getElementById('orc-pagamento').value,
+                    validade: validade,
+                    dataOrcamento: hoje.toISOString().split('T')[0],
+                    dataVencimento: dataVencimento.toISOString().split('T')[0],
+                    status: 'pendente',
+                    observacoes: document.getElementById('orc-observacoes').value,
+                    arquivos: [],
+                    linkAceite: null
+                };
+
+                orcamentos.push(novoOrcamento);
+                renderizarOrcamentos();
+                atualizarDashboard();
+                atualizarResumo();
+
+                fecharModalOrcamento();
+                SecureNotification.success('✅ Orçamento criado com sucesso!');
+
+                // Log de auditoria
+                AuditSystem.log('ORCAMENTO_CRIADO', {
+                    id: novoOrcamento.id,
+                    paciente: paciente,
+                    valor: valorFinal
+                });
+
+                console.log('✅ Novo orçamento criado:', novoOrcamento.id);
+            } catch (error) {
+                console.error('❌ Erro ao criar orçamento:', error);
+                SecureNotification.error('Erro ao criar orçamento. Tente novamente.');
+            }
+        }
+
+        function iniciarNegociacao(id) {
+            const orcamento = orcamentos.find(o => o.id === id);
+            if (orcamento) {
+                const novoValor = prompt(
+                    `💰 NEGOCIAÇÃO - ${orcamento.paciente}\n\n` +
+                    `Procedimento: ${orcamento.procedimento}\n` +
+                    `Valor Atual: R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\n` +
+                    `Digite o novo valor proposto:`,
+                    orcamento.valorFinal.toFixed(2)
+                );
+
+                if (novoValor && !isNaN(parseFloat(novoValor))) {
+                    const valorProposto = parseFloat(novoValor);
+                    const desconto = ((orcamento.valor - valorProposto) / orcamento.valor * 100).toFixed(1);
+                    
+                    if (confirm(`💼 CONFIRMAR NEGOCIAÇÃO\n\nNovo valor: R$ ${valorProposto.toFixed(2)}\nDesconto: ${desconto}%\n\nConfirmar?`)) {
+                        orcamento.valorFinal = valorProposto;
+                        orcamento.status = 'negociacao';
+                        orcamento.observacoes += `\n\nNegociação iniciada - Novo valor: R$ ${valorProposto.toFixed(2)} (Desconto: ${desconto}%)`;
+                        
+                        renderizarOrcamentos();
+                        atualizarDashboard();
+                        atualizarResumo();
+                        
+                        SecureNotification.success('💼 Negociação iniciada! Aguardando resposta do paciente.');
+                        
+                        AuditSystem.log('NEGOCIACAO_INICIADA', {
+                            orcamento: id,
+                            valorAnterior: orcamento.valor,
+                            valorNovo: valorProposto
+                        });
+                    }
+                }
+            }
+        }
+
+        function processarPagamento(id) {
+            const orcamento = orcamentos.find(o => o.id === id);
+            if (orcamento) {
+                const opcoes = [
+                    '💳 PIX/Transferência',
+                    '💰 Dinheiro',
+                    '💳 Cartão de Débito',
+                    '💳 Cartão de Crédito',
+                    '📄 Financiamento'
+                ];
+
+                const opcao = prompt(
+                    `💰 PROCESSAR PAGAMENTO\n\n` +
+                    `Paciente: ${orcamento.paciente}\n` +
+                    `Valor: R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\n` +
+                    `Escolha a forma de pagamento:\n` +
+                    opcoes.map((op, i) => `${i + 1}. ${op}`).join('\n') +
+                    `\n\nDigite o número da opção:`
+                );
+
+                if (opcao && opcao >= 1 && opcao <= 5) {
+                    const formaPagamento = opcoes[opcao - 1];
+                    
+                    if (confirm(`✅ CONFIRMAR PAGAMENTO\n\nForma: ${formaPagamento}\nValor: R$ ${orcamento.valorFinal.toFixed(2)}\n\nConfirmar recebimento?`)) {
+                        orcamento.status = 'pago';
+                        orcamento.dataPagamento = new Date().toISOString().split('T')[0];
+                        orcamento.formaPagamento = formaPagamento;
+                        orcamento.observacoes += `\n\nPagamento recebido em ${new Date().toLocaleDateString('pt-BR')} via ${formaPagamento}`;
+                        
+                        renderizarOrcamentos();
+                        atualizarDashboard();
+                        atualizarResumo();
+                        
+                        SecureNotification.success('✅ Pagamento registrado com sucesso!');
+                        
+                        AuditSystem.log('PAGAMENTO_PROCESSADO', {
+                            orcamento: id,
+                            valor: orcamento.valorFinal,
+                            forma: formaPagamento
+                        });
+                    }
+                }
+            }
+        }
+
+        function verDetalhesOrcamento(id) {
+            const orcamento = orcamentos.find(o => o.id === id);
+            if (orcamento) {
+                const detalhes = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Dados do Paciente</h4>
+                            <p><strong>Nome:</strong> ${orcamento.paciente}</p>
+                            <p><strong>Telefone:</strong> ${orcamento.telefone}</p>
+                            <p><strong>E-mail:</strong> ${orcamento.email || 'Não informado'}</p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Dados Financeiros</h4>
+                            <p><strong>Valor Original:</strong> R$ ${orcamento.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                            <p><strong>Desconto:</strong> ${orcamento.desconto}%</p>
+                            <p><strong>Valor Final:</strong> R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Procedimento</h4>
+                            <p><strong>Tipo:</strong> ${orcamento.procedimento}</p>
+                            <p><strong>Pagamento:</strong> ${formatarPagamento(orcamento.pagamento)}</p>
+                            <p><strong>Status:</strong> <span class="status-badge status-${orcamento.status}">${formatarStatus(orcamento.status)}</span></p>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Prazos</h4>
+                            <p><strong>Data Orçamento:</strong> ${new Date(orcamento.dataOrcamento).toLocaleDateString('pt-BR')}</p>
+                            <p><strong>Validade:</strong> ${orcamento.validade} dias</p>
+                            <p><strong>Vencimento:</strong> ${new Date(orcamento.dataVencimento).toLocaleDateString('pt-BR')}</p>
+                        </div>
+                    </div>
+                    
+                    ${orcamento.observacoes ? `
+                        <div style="margin-top: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Observações</h4>
+                            <p style="white-space: pre-line;">${orcamento.observacoes}</p>
+                        </div>
+                    ` : ''}
+
+                    <!-- Seção de Arquivos -->
+                    <div class="arquivos-section">
+                        <div class="arquivos-header">
+                            <h4><i class="fas fa-paperclip"></i> Arquivos e Comprovantes</h4>
+                            <button onclick="uploadArquivo('${orcamento.id}')" class="btn-upload">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload
+                            </button>
+                        </div>
+                        <div id="arquivos-${orcamento.id}">
+                            ${orcamento.arquivos && orcamento.arquivos.length > 0 ? 
+                                orcamento.arquivos.map(arquivo => `
+                                    <div class="arquivo-item">
+                                        <div class="arquivo-info">
+                                            <div class="arquivo-icon">
+                                                <i class="fas fa-${getIconeArquivo(arquivo.tipo)}"></i>
+                                            </div>
+                                            <div class="arquivo-detalhes">
+                                                <h5>${arquivo.nome}</h5>
+                                                <p>${arquivo.tamanho} • ${new Date(arquivo.dataUpload).toLocaleDateString('pt-BR')}</p>
+                                            </div>
+                                        </div>
+                                        <div class="arquivo-actions">
+                                            <button onclick="baixarArquivo('${arquivo.id}')" class="btn-arquivo" title="Baixar">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button onclick="excluirArquivo('${orcamento.id}', '${arquivo.id}')" class="btn-arquivo" title="Excluir">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('') : 
+                                '<p style="text-align: center; color: #6c757d; font-style: italic;">Nenhum arquivo anexado</p>'
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Seção de Link de Aceite -->
+                    ${(orcamento.status === 'pendente' || orcamento.status === 'negociacao') ? `
+                        <div class="link-aceite-section">
+                            <div class="link-aceite-header">
+                                <h4><i class="fas fa-link"></i> Link de Aceite</h4>
+                                ${!orcamento.linkAceite ? `
+                                    <button onclick="gerarLinkAceiteModal('${orcamento.id}')" class="btn-gerar-link">
+                                        <i class="fas fa-magic"></i> Gerar Link
+                                    </button>
+                                ` : ''}
+                            </div>
+                            
+                            ${orcamento.linkAceite ? `
+                                <div class="link-gerado">
+                                    <p><strong>Link gerado em:</strong> ${new Date(orcamento.linkAceite.dataGeracao).toLocaleDateString('pt-BR')}</p>
+                                    <p><strong>Código:</strong> ${orcamento.linkAceite.codigo}</p>
+                                    <p><strong>Status:</strong> <span style="text-transform: capitalize; font-weight: bold;">${orcamento.linkAceite.status}</span></p>
+                                    
+                                    <div class="link-url">${orcamento.linkAceite.url}</div>
+                                    
+                                    <div class="link-actions">
+                                        <button onclick="copiarLink('${orcamento.linkAceite.url}')" class="btn-link-action">
+                                            <i class="fas fa-copy"></i> Copiar
+                                        </button>
+                                        <button onclick="compartilharWhatsApp('${orcamento.id}')" class="btn-link-action">
+                                            <i class="fab fa-whatsapp"></i> WhatsApp
+                                        </button>
+                                        <button onclick="enviarEmail('${orcamento.id}')" class="btn-link-action">
+                                            <i class="fas fa-envelope"></i> E-mail
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <p style="opacity: 0.8;">Gere um link personalizado para que o paciente possa aceitar o orçamento online com instruções de pagamento.</p>
+                            `}
+                            
+                            <div class="instrucoes-pagamento">
+                                <h5><i class="fas fa-info-circle"></i> Instruções de Pagamento Incluídas:</h5>
+                                <ul>
+                                    <li>Dados bancários para transferência/PIX</li>
+                                    <li>Opções de parcelamento disponíveis</li>
+                                    <li>Prazo para confirmação do pagamento</li>
+                                    <li>Contato direto para dúvidas</li>
+                                    <li>Link para agendamento após pagamento</li>
+                                </ul>
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                document.getElementById('detalhesOrcamentoContent').innerHTML = detalhes;
+                document.getElementById('modalDetalhesOrcamento').classList.add('active');
+            }
+        }
+
+        function fecharModalDetalhes() {
+            document.getElementById('modalDetalhesOrcamento').classList.remove('active');
+        }
+
+        function gerarPDFOrcamento() {
+            SecureNotification.show('📄 Gerando PDF do orçamento...');
+            
+            setTimeout(() => {
+                SecureNotification.success('✅ PDF gerado com sucesso!\n\nEm ambiente de produção, o arquivo seria baixado automaticamente.');
+                AuditSystem.log('PDF_ORCAMENTO_GERADO');
+            }, 2000);
+        }
+
+        function gerarRelatorio() {
+            SecureNotification.show('📊 Gerando relatório financeiro mensal...');
+            
+            setTimeout(() => {
+                const hoje = new Date();
+                const relatorio = {
+                    mes: hoje.toLocaleString('pt-BR', {month: 'long', year: 'numeric'}),
+                    totalOrcamentos: orcamentos.length,
+                    receitaTotal: orcamentos.filter(o => o.status === 'aprovado').reduce((t, o) => t + o.valorFinal, 0),
+                    pendente: orcamentos.filter(o => o.status === 'pendente').length,
+                    aprovados: orcamentos.filter(o => o.status === 'aprovado').length,
+                    rejeitados: orcamentos.filter(o => o.status === 'rejeitado').length
+                };
+                
+                SecureNotification.success(
+                    `📊 RELATÓRIO FINANCEIRO\n\n` +
+                    `Período: ${relatorio.mes}\n` +
+                    `Total Orçamentos: ${relatorio.totalOrcamentos}\n` +
+                    `Receita Confirmada: R$ ${relatorio.receitaTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n` +
+                    `Aprovados: ${relatorio.aprovados}\n` +
+                    `Pendentes: ${relatorio.pendente}\n` +
+                    `Rejeitados: ${relatorio.rejeitados}`
+                );
+                
+                AuditSystem.log('RELATORIO_GERADO', relatorio);
+            }, 2000);
+        }
+
+        function gerenciarArquivos(id) {
+            const orcamento = orcamentos.find(o => o.id === id);
+            if (orcamento) {
+                verDetalhesOrcamento(id); // Abre o modal de detalhes que já tem a seção de arquivos
+            }
+        }
+
+        function uploadArquivo(orcamentoId) {
+            // Simular upload de arquivo
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.jpg,.jpeg,.png,.doc,.docx';
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    SecureNotification.show('📁 Fazendo upload do arquivo...');
+                    
+                    // Simular upload
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    const orcamento = orcamentos.find(o => o.id === orcamentoId);
+                    if (orcamento) {
+                        if (!orcamento.arquivos) orcamento.arquivos = [];
+                        
+                        const novoArquivo = {
+                            id: 'ARQ' + String(Date.now()).slice(-6),
+                            nome: file.name,
+                            tipo: file.type.includes('pdf') ? 'pdf' : 
+                                  file.type.includes('image') ? 'image' : 'document',
+                            tamanho: formatarTamanho(file.size),
+                            dataUpload: new Date().toISOString().split('T')[0]
+                        };
+                        
+                        orcamento.arquivos.push(novoArquivo);
+                        
+                        // Atualizar a exibição
+                        verDetalhesOrcamento(orcamentoId);
+                        renderizarOrcamentos(); // Atualiza o contador de arquivos nos cards
+                        
+                        SecureNotification.success('✅ Arquivo enviado com sucesso!');
+                        
+                        AuditSystem.log('ARQUIVO_UPLOADED', {
+                            orcamento: orcamentoId,
+                            arquivo: novoArquivo.nome
+                        });
+                    }
+                }
+            };
+            input.click();
+        }
+
+        function formatarTamanho(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getIconeArquivo(tipo) {
+            switch(tipo) {
+                case 'pdf': return 'file-pdf';
+                case 'image': return 'file-image';
+                case 'document': return 'file-word';
+                default: return 'file';
+            }
+        }
+
+        function baixarArquivo(arquivoId) {
+            SecureNotification.show('📥 Iniciando download do arquivo...');
+            
+            setTimeout(() => {
+                SecureNotification.success('✅ Em ambiente de produção, o arquivo seria baixado automaticamente.');
+                AuditSystem.log('ARQUIVO_DOWNLOADED', { arquivo: arquivoId });
+            }, 1000);
+        }
+
+        function excluirArquivo(orcamentoId, arquivoId) {
+            if (confirm('❌ Tem certeza que deseja excluir este arquivo?\n\nEsta ação não pode ser desfeita.')) {
+                const orcamento = orcamentos.find(o => o.id === orcamentoId);
+                if (orcamento && orcamento.arquivos) {
+                    const arquivoIndex = orcamento.arquivos.findIndex(a => a.id === arquivoId);
+                    if (arquivoIndex > -1) {
+                        const arquivo = orcamento.arquivos[arquivoIndex];
+                        orcamento.arquivos.splice(arquivoIndex, 1);
+                        
+                        // Atualizar a exibição
+                        verDetalhesOrcamento(orcamentoId);
+                        renderizarOrcamentos();
+                        
+                        SecureNotification.success('🗑️ Arquivo excluído com sucesso!');
+                        
+                        AuditSystem.log('ARQUIVO_DELETED', {
+                            orcamento: orcamentoId,
+                            arquivo: arquivo.nome
+                        });
+                    }
+                }
+            }
+        }
+
+        function gerarLinkAceite(id) {
+            gerarLinkAceiteModal(id);
+        }
+
+        function gerarLinkAceiteModal(orcamentoId) {
+            const orcamento = orcamentos.find(o => o.id === orcamentoId);
+            if (orcamento) {
+                if (confirm(`🔗 GERAR LINK DE ACEITE\n\nPaciente: ${orcamento.paciente}\nProcedimento: ${orcamento.procedimento}\nValor: R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\nO link incluirá:\n• Detalhes do orçamento\n• Instruções de pagamento\n• Dados bancários\n• Formulário de aceite\n\nGerar link?`)) {
+                    
+                    SecureNotification.show('🔗 Gerando link personalizado...');
+                    
+                    setTimeout(() => {
+                        // Gerar link único
+                        const codigo = 'AC' + String(Date.now()).slice(-6);
+                        const urlSlug = orcamento.paciente.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .replace(/\s+/g, '-')
+                            .replace(/[^a-z0-9-]/g, '');
+                        
+                        const linkAceite = {
+                            url: `https://portal-drmarcio.com/aceite/${orcamento.id.toLowerCase()}-${urlSlug}`,
+                            codigo: codigo,
+                            dataGeracao: new Date().toISOString().split('T')[0],
+                            status: 'pendente'
+                        };
+                        
+                        orcamento.linkAceite = linkAceite;
+                        orcamento.observacoes += `\n\nLink de aceite gerado em ${new Date().toLocaleDateString('pt-BR')} - Código: ${codigo}`;
+                        
+                        // Atualizar exibição
+                        verDetalhesOrcamento(orcamentoId);
+                        renderizarOrcamentos();
+                        
+                        SecureNotification.success('✅ Link de aceite gerado com sucesso!\n\nO paciente poderá aceitar o orçamento e visualizar as instruções de pagamento.');
+                        
+                        AuditSystem.log('LINK_ACEITE_GERADO', {
+                            orcamento: orcamentoId,
+                            codigo: codigo,
+                            url: linkAceite.url
+                        });
+                    }, 2000);
+                }
+            }
+        }
+
+        function copiarLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                SecureNotification.success('📋 Link copiado para a área de transferência!');
+                AuditSystem.log('LINK_COPIADO');
+            }).catch(() => {
+                // Fallback para navegadores mais antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                SecureNotification.success('📋 Link copiado!');
+            });
+        }
+
+        function compartilharWhatsApp(orcamentoId) {
+            const orcamento = orcamentos.find(o => o.id === orcamentoId);
+            if (orcamento && orcamento.linkAceite) {
+                const telefone = orcamento.telefone.replace(/\D/g, '');
+                const mensagem = `🏥 *Dr. Marcio Scartozzoni - Cirurgia Plástica*
+
+Olá ${orcamento.paciente}! 
+
+Seu orçamento está pronto! 🎯
+
+📋 *Procedimento:* ${orcamento.procedimento}
+💰 *Valor:* R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+💳 *Pagamento:* ${formatarPagamento(orcamento.pagamento)}
+
+🔗 *Aceite seu orçamento online:*
+${orcamento.linkAceite.url}
+
+✅ No link você encontrará:
+• Detalhes completos do procedimento
+• Instruções de pagamento
+• Dados bancários para transferência/PIX
+• Formulário de confirmação
+
+📞 Dúvidas? Entre em contato!
+
+*Atenciosamente,*
+*Equipe Dr. Marcio Scartozzoni*`;
+
+                const urlWhatsApp = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagem)}`;
+                window.open(urlWhatsApp, '_blank');
+                
+                SecureNotification.success('📱 WhatsApp aberto com a mensagem personalizada!');
+                
+                AuditSystem.log('WHATSAPP_ENVIADO', {
+                    orcamento: orcamentoId,
+                    telefone: telefone
+                });
+            }
+        }
+
+        function enviarEmail(orcamentoId) {
+            const orcamento = orcamentos.find(o => o.id === orcamentoId);
+            if (orcamento && orcamento.linkAceite && orcamento.email) {
+                const assunto = `Orçamento ${orcamento.id} - ${orcamento.procedimento} - Dr. Marcio Scartozzoni`;
+                const corpo = `Prezado(a) ${orcamento.paciente},
+
+Esperamos que esteja bem!
+
+Temos o prazer de enviar o orçamento solicitado para o procedimento de ${orcamento.procedimento}.
+
+DETALHES DO ORÇAMENTO:
+• Procedimento: ${orcamento.procedimento}
+• Valor: R$ ${orcamento.valorFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+• Forma de Pagamento: ${formatarPagamento(orcamento.pagamento)}
+• Validade: ${new Date(orcamento.dataVencimento).toLocaleDateString('pt-BR')}
+
+🔗 ACEITE SEU ORÇAMENTO ONLINE:
+${orcamento.linkAceite.url}
+
+No link acima você encontrará:
+✅ Detalhes completos do procedimento
+✅ Instruções de pagamento
+✅ Dados bancários para transferência/PIX
+✅ Formulário de confirmação seguro
+
+Estamos à disposição para esclarecer qualquer dúvida.
+
+Atenciosamente,
+Dr. Marcio Scartozzoni
+Cirurgia Plástica
+
+📞 Contato: ${orcamento.telefone}
+📧 E-mail: contato@drmarcio.com.br`;
+
+                const mailtoLink = `mailto:${orcamento.email}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+                window.open(mailtoLink);
+                
+                SecureNotification.success('📧 Cliente de e-mail aberto com a mensagem personalizada!');
+                
+                AuditSystem.log('EMAIL_ENVIADO', {
+                    orcamento: orcamentoId,
+                    email: orcamento.email
+                });
+            } else {
+                SecureNotification.warning('⚠️ E-mail do paciente não informado!');
+            }
+        }
+
+        function processarCobrancas() {
+            const vencidos = orcamentos.filter(o => {
+                const diasVencimento = calcularDiasVencimento(o.dataVencimento);
+                return diasVencimento < 0 && o.status === 'pendente';
+            });
+
+            const proximosVencimento = orcamentos.filter(o => {
+                const diasVencimento = calcularDiasVencimento(o.dataVencimento);
+                return diasVencimento <= 7 && diasVencimento >= 0 && o.status === 'pendente';
+            });
+
+            if (vencidos.length === 0 && proximosVencimento.length === 0) {
+                SecureNotification.success('✅ Nenhuma cobrança pendente!');
+                return;
+            }
+
+            SecureNotification.show(
+                `🔔 COBRANÇAS AUTOMÁTICAS\n\n` +
+                `Orçamentos Vencidos: ${vencidos.length}\n` +
+                `Próximos ao Vencimento: ${proximosVencimento.length}\n\n` +
+                `Processando notificações...`
+            );
+
+            setTimeout(() => {
+                // Marcar vencidos
+                vencidos.forEach(o => {
+                    o.status = 'vencido';
+                    o.observacoes += `\n\nOrçamento vencido em ${new Date().toLocaleDateString('pt-BR')} - Cobrança automática enviada`;
+                });
+
+                renderizarOrcamentos();
+                atualizarDashboard();
+                atualizarResumo();
+
+                SecureNotification.success(
+                    `✅ Cobranças processadas!\n\n` +
+                    `${vencidos.length} orçamentos marcados como vencidos\n` +
+                    `${proximosVencimento.length} lembretes enviados`
+                );
+
+                AuditSystem.log('COBRANCAS_PROCESSADAS', {
+                    vencidos: vencidos.length,
+                    proximosVencimento: proximosVencimento.length
+                });
+            }, 3000);
+        }
+
+        // Log de auditoria na inicialização
+        AuditSystem.log('GESTAO_FINANCEIRA_OPENED');
+    </script>
+</body>
+</html>

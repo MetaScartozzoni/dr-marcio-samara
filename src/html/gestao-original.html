@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Orçamentos - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="gestao-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sistema de Gestão de Orçamentos Pós-Consulta -->
+        <header class="dashboard-header">
+            <h1> Gestão de Pacientes Pós-Consulta - Portal Dr. Marcio</h1>
+            <div class="header-actions">
+                <button onclick="voltarDashboard()" class="btn-back"> Voltar ao Dashboard</button>
+                <button onclick="atualizarDados()" class="btn-refresh"> Atualizar</button>
+                <button onclick="exportarDados()" class="btn-export"> Exportar</button>
+            </div>
+        </header>
+
+        <div class="filters-section">
+            <h2> Filtros de Orçamentos</h2>
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filtroId">ID Paciente:</label>
+                    <input type="text" id="filtroId" placeholder="Digite o ID">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroNome">Nome do Paciente:</label>
+                    <input type="text" id="filtroNome" placeholder="Digite o nome">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroDataInicio">Data Orçamento (Início):</label>
+                    <input type="date" id="filtroDataInicio">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroDataFim">Data Orçamento (Fim):</label>
+                    <input type="date" id="filtroDataFim">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="filtroStatus">Status Orçamento:</label>
+                    <select id="filtroStatus">
+                        <option value="">Todos</option>
+                        <option value="Pendente">Pendente</option>
+                        <option value="Enviado">Enviado</option>
+                        <option value="Aceito">Aceito</option>
+                        <option value="Rejeitado">Rejeitado</option>
+                        <option value="Expirado">Expirado</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Concluído">Concluído</option>
+                    </select>
+                </div>
+                
+                <div class="filter-actions">
+                    <button onclick="aplicarFiltros()" class="btn-primary"> Aplicar Filtros</button>
+                    <button onclick="limparFiltros()" class="btn-secondary"> Limpar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <h3> Total de Orçamentos</h3>
+                <div class="stat-number" id="totalOrcamentos">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3> Orçamentos Pendentes</h3>
+                <div class="stat-number" id="orcamentosPendentes">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3> Orçamentos Aceitos</h3>
+                <div class="stat-number" id="orcamentosAceitos">0</div>
+            </div>
+            
+            <div class="stat-card">
+                <h3> Valor Total Pendente</h3>
+                <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="table-section">
+            <div class="table-header">
+                <h2> Gestão de Orçamentos Pós-Consulta</h2>
+                <div class="header-buttons">
+                    <button onclick="adicionarOrcamento()" class="btn-add"> Novo Orçamento</button>
+                    <button onclick="abrirAgendamentoRapido()" class="btn-calendar"> Agendamento Rápido</button>
+                    <button onclick="exportarOrcamentos()" class="btn-export"> Exportar Excel</button>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="tabelaGestao">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Paciente</th>
+                            <th>Data Consulta</th>
+                            <th>Data Orçamento</th>
+                            <th>Procedimento</th>
+                            <th>Valor Total</th>
+                            <th>Status Orçamento</th>
+                            <th>Pagamento</th>
+                            <th>Vencimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoTabela">
+                        <!-- Dados serão carregados via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Carregando dados...
+        </div>
+    </div>
+
+    <!-- Modal para Novo Orçamento -->
+    <div id="modalNovoOrcamento" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3> Novo Orçamento Pós-Consulta</h3>
+                <span class="close" onclick="fecharModalOrcamento()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formNovoOrcamento">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pacienteOrcamento">Paciente:</label>
+                            <select id="pacienteOrcamento" required>
+                                <option value="">Selecione o paciente</option>
+                                <!-- Opções carregadas dinamicamente -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dataConsulta">Data da Consulta:</label>
+                            <input type="date" id="dataConsulta" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="procedimentoPrincipal">Procedimento Principal:</label>
+                            <select id="procedimentoPrincipal" required onchange="calcularValorTotal()">
+                                <option value="">Selecione o procedimento</option>
+                                <option value="rinoplastia" data-valor="8000">Rinoplastia - R$ 8.000,00</option>
+                                <option value="mamoplastia" data-valor="12000">Mamoplastia de Aumento - R$ 12.000,00</option>
+                                <option value="lipoaspiracao" data-valor="6000">Lipoaspiração - R$ 6.000,00</option>
+                                <option value="abdominoplastia" data-valor="10000">Abdominoplastia - R$ 10.000,00</option>
+                                <option value="blefaroplastia" data-valor="5000">Blefaroplastia - R$ 5.000,00</option>
+                                <option value="lifting" data-valor="15000">Lifting Facial - R$ 15.000,00</option>
+                                <option value="otoplastia" data-valor="4000">Otoplastia - R$ 4.000,00</option>
+                                <option value="gluteoplastia" data-valor="8000">Gluteoplastia - R$ 8.000,00</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="procedimentosAdicionais">Procedimentos Adicionais:</label>
+                            <textarea id="procedimentosAdicionais" rows="3" placeholder="Descreva procedimentos complementares..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorProcedimento">Valor do Procedimento:</label>
+                            <input type="number" id="valorProcedimento" step="0.01" required placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorAnestesia">Valor Anestesia:</label>
+                            <input type="number" id="valorAnestesia" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorHospital">Valor Hospital/Clínica:</label>
+                            <input type="number" id="valorHospital" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorMaterial">Valor Material/Prótese:</label>
+                            <input type="number" id="valorMaterial" step="0.01" placeholder="0.00" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="valorTotal">Valor Total:</label>
+                            <input type="number" id="valorTotal" step="0.01" required readonly style="background: #f0f0f0; font-weight: bold;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="formaPagamento">Forma de Pagamento:</label>
+                            <select id="formaPagamento" required>
+                                <option value="">Selecione a forma</option>
+                                <option value="vista">À Vista (10% desconto)</option>
+                                <option value="2x">2x sem juros</option>
+                                <option value="3x">3x sem juros</option>
+                                <option value="6x">6x com juros (2% a.m.)</option>
+                                <option value="12x">12x com juros (3% a.m.)</option>
+                                <option value="financiamento">Financiamento</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="validadeOrcamento">Validade do Orçamento:</label>
+                            <input type="date" id="validadeOrcamento" required>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="observacoesOrcamento">Observações:</label>
+                            <textarea id="observacoesOrcamento" rows="3" placeholder="Informações adicionais sobre o orçamento..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                             Salvar Orçamento
+                        </button>
+                        <button type="button" onclick="fecharModalOrcamento()" class="btn-secondary">
+                             Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ações do Orçamento -->
+    <div id="modalAcoesOrcamento" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3> Ações do Orçamento</h3>
+                <span class="close" onclick="fecharModalAcoes()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="orcamento-info">
+                    <h4 id="infoOrcamento">Orçamento #001 - Maria Silva</h4>
+                    <div class="info-grid">
+                        <div><strong>Procedimento:</strong> <span id="infoProcedimento">-</span></div>
+                        <div><strong>Valor Total:</strong> <span id="infoValor">-</span></div>
+                        <div><strong>Status:</strong> <span id="infoStatus">-</span></div>
+                        <div><strong>Validade:</strong> <span id="infoValidade">-</span></div>
+                    </div>
+                </div>
+                
+                <div class="acoes-grid">
+                    <button onclick="gerarPDFOrcamento()" class="btn-action">
+                         Gerar PDF
+                    </button>
+                    
+                    <button onclick="imprimirOrcamento()" class="btn-action">
+                         Imprimir
+                    </button>
+                    
+                    <button onclick="copiarOrcamento()" class="btn-action">
+                         Copiar Texto
+                    </button>
+                    
+                    <button onclick="enviarPorEmail()" class="btn-action">
+                         Enviar por Email
+                    </button>
+                    
+                    <button onclick="marcarComoAceito()" class="btn-action success">
+                         Marcar Aceito
+                    </button>
+                    
+                    <button onclick="editarOrcamento()" class="btn-action">
+                         Editar
+                    </button>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" onclick="fecharModalAcoes()" class="btn-secondary">
+                         Fechar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agendamento rápido -->
+    <div id="modalAgendamentoRapido" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3> Agendamento Rápido</h3>
+                <span class="close" onclick="fecharModalAgendamento()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formAgendamentoRapido">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tipoAgendamento">Tipo de Agendamento:</label>
+                            <select id="tipoAgendamento" required onchange="atualizarDuracao()">
+                                <option value="">Selecione o tipo</option>
+                                <option value="consulta">👩‍⚕️ Consulta</option>
+                                <option value="cirurgia">🏥 Cirurgia</option>
+                                <option value="reuniao">👥 Reunião</option>
+                                <option value="retorno">🔄 Retorno</option>
+                                <option value="avaliacao">📋 Avaliação</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="pacienteSelect">Paciente:</label>
+                            <select id="pacienteSelect" required>
+                                <option value="">Selecione o paciente</option>
+                                <!-- Será preenchido dinamicamente -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dataAgendamento">Data:</label>
+                            <input type="date" id="dataAgendamento" required min="">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="horaAgendamento">Horário:</label>
+                            <select id="horaAgendamento" required>
+                                <option value="">Selecione o horário</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="duracaoAgendamento">Duração:</label>
+                            <select id="duracaoAgendamento" required>
+                                <option value="30">30 minutos</option>
+                                <option value="60">1 hora</option>
+                                <option value="90">1h 30min</option>
+                                <option value="120">2 horas</option>
+                                <option value="180">3 horas</option>
+                                <option value="240">4 horas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="observacoesAgendamento">Observações:</label>
+                            <textarea id="observacoesAgendamento" rows="3" placeholder="Motivo da consulta, preparação necessária, etc."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">
+                             Agendar
+                        </button>
+                        <button type="button" onclick="fecharModalAgendamento()" class="btn-secondary">
+                             Cancelar
+                        </button>
+                        <button type="button" onclick="abrirCalendarioCompleto()" class="btn-calendar">
+                             Calendário Completo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para edição -->
+    <div id="modalEdicao" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Paciente</h3>
+                <span class="close" onclick="fecharModal()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formEdicao">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="editNome">Nome:</label>
+                            <input type="text" id="editNome" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoData">Data Agendamento:</label>
+                            <input type="date" id="editAgendamentoData">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoHora">Hora Agendamento:</label>
+                            <input type="time" id="editAgendamentoHora">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editAgendamentoStatus">Status Agendamento:</label>
+                            <select id="editAgendamentoStatus">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="Reagendado">Reagendado</option>
+                                <option value="Cancelado">Cancelado</option>
+                                <option value="Realizado">Realizado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editConsultaStatus">Status Consulta:</label>
+                            <select id="editConsultaStatus">
+                                <option value="Não Realizada">Não Realizada</option>
+                                <option value="Em Andamento">Em Andamento</option>
+                                <option value="Concluída">Concluída</option>
+                                <option value="Cancelada">Cancelada</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoStatus">Status Orçamento:</label>
+                            <select id="editOrcamentoStatus">
+                                <option value="Não Enviado">Não Enviado</option>
+                                <option value="Em Elaboração">Em Elaboração</option>
+                                <option value="Enviado">Enviado</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                                <option value="Expirado">Expirado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoPdf">Link PDF Orçamento:</label>
+                            <input type="url" id="editOrcamentoPdf" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editOrcamentoAceite">Link Aceite:</label>
+                            <input type="url" id="editOrcamentoAceite" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editStatusAceite">Status Aceite:</label>
+                            <select id="editStatusAceite">
+                                <option value="Pendente">Pendente</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                                <option value="Expirado">Expirado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editValorEntrada">Valor Entrada:</label>
+                            <input type="number" id="editValorEntrada" step="0.01" placeholder="0.00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editComprovante">Comprovante Pagamento:</label>
+                            <input type="url" id="editComprovante" placeholder="https://...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="editStatusGeral">Status Geral:</label>
+                            <select id="editStatusGeral">
+                                <option value="Novo">Novo</option>
+                                <option value="Em Atendimento">Em Atendimento</option>
+                                <option value="Aguardando Pagamento">Aguardando Pagamento</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Concluído">Concluído</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="editObservacao">Observações:</label>
+                            <textarea id="editObservacao" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="submit" class="btn-primary">Salvar</button>
+                        <button type="button" onclick="fecharModal()" class="btn-secondary">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="gestao-script-new.js"></script>
+</body>
+</html>

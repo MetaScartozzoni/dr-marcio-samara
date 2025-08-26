@@ -1,0 +1,24 @@
+
+
+=== INSTRUÇÕES DE UPLOAD - PORTAL MÉDICO ===
+
+PASSO 1: LIMPE O SERVIDOR COMPLETAMENTE
+- FileZilla → public_html
+- Selecione TUDO (Ctrl+A) e DELETE
+
+PASSO 2: UPLOAD COMPLETO
+- Arraste TODOS os arquivos desta pasta para public_html
+- Inclui: .htaccess, htaccess.txt, index.html, assets/, modules/, etc.
+
+PASSO 3: ATIVAR .HTACCESS (CRÍTICO)
+- No servidor, renomeie 'htaccess.txt' para '.htaccess'
+- Isso ativa a política CSP corrigida
+
+PASSO 4: TESTE
+- https://portal.marcioplasticsurgery.com
+- Teste todos os módulos
+
+ARQUIVOS PRONTOS:
+      15 arquivos e pastas incluindo .htaccess correto
+
+

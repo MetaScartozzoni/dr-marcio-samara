@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento {{orcamento.numero_orcamento}}</title>
+    <style>
+        @page {
+            margin: 20mm 15mm;
+            size: A4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            background: #fff;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #0066cc;
+        }
+        
+        .logo {
+            max-height: 80px;
+            max-width: 200px;
+        }
+        
+        .clinic-info {
+            text-align: right;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .clinic-info h1 {
+            color: #0066cc;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .document-title {
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #0066cc;
+        }
+        
+        .document-title h2 {
+            color: #0066cc;
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+        
+        .document-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .info-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 30px;
+        }
+        
+        .info-box {
+            flex: 1;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fafafa;
+        }
+        
+        .info-box h3 {
+            color: #0066cc;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .info-box p {
+            margin-bottom: 5px;
+            font-size: 11px;
+        }
+        
+        .info-box strong {
+            color: #333;
+        }
+        
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .items-table th {
+            background: #0066cc;
+            color: white;
+            padding: 12px 8px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .items-table th:nth-child(2),
+        .items-table th:nth-child(3),
+        .items-table th:nth-child(4) {
+            text-align: center;
+        }
+        
+        .items-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        
+        .items-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .items-table tr:hover {
+            background: #e3f2fd;
+        }
+        
+        .item-desc {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .font-weight-bold {
+            font-weight: bold;
+            color: #0066cc;
+        }
+        
+        .totals-section {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .totals-box {
+            width: 300px;
+            border: 2px solid #0066cc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .totals-header {
+            background: #0066cc;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .totals-content {
+            padding: 15px;
+            background: white;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+        
+        .total-row.final {
+            border-top: 2px solid #0066cc;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #0066cc;
+        }
+        
+        .observacoes {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        
+        .observacoes h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .observacoes p {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+        
+        .footer .validity {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            color: #856404;
+        }
+        
+        .footer .acceptance {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 10px;
+            border-radius: 5px;
+            color: #0c5460;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .payment-methods {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+        
+        .payment-methods h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .payment-methods ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .payment-methods li {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .payment-methods li:last-child {
+            border-bottom: none;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 48px;
+            color: rgba(0, 102, 204, 0.1);
+            z-index: -1;
+            font-weight: bold;
+        }
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark">{{orcamento.numero_orcamento}}</div>
+    
+    <header class="header">
+        <div class="logo-section">
+            <img src="{{logoUrl}}" alt="Logo da Clínica" class="logo" />
+        </div>
+        <div class="clinic-info">
+            <h1>Dr. Márcio</h1>
+            <p><strong>Clínica Médica Especializada</strong></p>
+            <p>📍 Endereço da Clínica</p>
+            <p>📞 (11) 99999-9999</p>
+            <p>✉️ contato@drmarcio.com.br</p>
+            <p>🌐 www.drmarcio.com.br</p>
+        </div>
+    </header>
+
+    <div class="document-title">
+        <h2>ORÇAMENTO MÉDICO</h2>
+        <div class="document-subtitle">Número: {{orcamento.numero_orcamento}} | Data: {{dataAtual}}</div>
+    </div>
+
+    <div class="info-section">
+        <div class="info-box">
+            <h3>📋 Dados do Paciente</h3>
+            <p><strong>Nome:</strong> {{paciente.full_name}}</p>
+            <p><strong>Email:</strong> {{paciente.email}}</p>
+            <p><strong>Telefone:</strong> {{paciente.phone}}</p>
+            <p><strong>Data de Nascimento:</strong> {{paciente.birth_date}}</p>
+        </div>
+        
+        <div class="info-box">
+            <h3>📅 Informações do Orçamento</h3>
+            <p><strong>Data de Emissão:</strong> {{dataAtual}}</p>
+            <p><strong>Validade:</strong> {{orcamento.validade}}</p>
+            <p><strong>Status:</strong> {{orcamento.status}}</p>
+            <p><strong>Número:</strong> {{orcamento.numero_orcamento}}</p>
+        </div>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Descrição do Procedimento</th>
+                <th>Qtd</th>
+                <th>Valor Unitário</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{itens}}
+        </tbody>
+    </table>
+
+    <div class="totals-section">
+        <div class="totals-box">
+            <div class="totals-header">
+                💰 Resumo Financeiro
+            </div>
+            <div class="totals-content">
+                <div class="total-row">
+                    <span>Subtotal:</span>
+                    <span>{{valor_total}}</span>
+                </div>
+                <div class="total-row">
+                    <span>Desconto:</span>
+                    <span>- {{valor_desconto}}</span>
+                </div>
+                <div class="total-row final">
+                    <span>TOTAL FINAL:</span>
+                    <span>{{valor_final}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="observacoes">
+        <h3>📝 Observações Importantes</h3>
+        <p>{{orcamento.observacoes}}</p>
+        <br>
+        <p><strong>Informações Gerais:</strong></p>
+        <ul>
+            <li>Este orçamento tem validade de 30 dias a partir da data de emissão</li>
+            <li>Os valores podem sofrer alterações caso haja mudanças no plano de tratamento</li>
+            <li>O tratamento deve ser iniciado dentro do prazo de validade do orçamento</li>
+            <li>Formas de pagamento: consulte as opções disponíveis abaixo</li>
+        </ul>
+    </div>
+
+    <div class="payment-methods">
+        <h3>💳 Formas de Pagamento Aceitas</h3>
+        <ul>
+            <li>💰 <strong>À vista:</strong> Dinheiro ou PIX (5% de desconto)</li>
+            <li>💳 <strong>Cartão de Débito:</strong> À vista</li>
+            <li>💳 <strong>Cartão de Crédito:</strong> Até 12x (consulte condições)</li>
+            <li>🏦 <strong>Transferência Bancária:</strong> À vista</li>
+            <li>📋 <strong>Planos de Saúde:</strong> Consulte cobertura</li>
+        </ul>
+    </div>
+
+    <footer class="footer">
+        <div class="validity">
+            ⚠️ <strong>ATENÇÃO:</strong> Este orçamento é válido até {{orcamento.validade}} e não constitui um documento fiscal.
+        </div>
+        
+        <div class="acceptance">
+            ✅ Para aceitar este orçamento, acesse o link enviado por email ou entre em contato conosco.
+        </div>
+        
+        <p style="margin-top: 20px;">
+            <small>
+                Este documento foi gerado automaticamente pelo Sistema Portal Dr. Márcio em {{dataAtual}}<br>
+                Para dúvidas ou esclarecimentos, entre em contato: (11) 99999-9999 | contato@drmarcio.com.br
+            </small>
+        </p>
+    </footer>
+</body>
+</html>

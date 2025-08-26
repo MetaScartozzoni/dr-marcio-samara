@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadro Evolutivo - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="card-unificado.css">
+    <script src="card-unificado.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .quadro-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-quadro {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-quadro h1 {
+            color: #1e3c72;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-counter {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-5px);
+            }
+            60% {
+                transform: translateY(-3px);
+            }
+        }        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn-refresh {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-refresh:hover {
+            background: #138496;
+        }
+
+        .btn-export {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-export:hover {
+            background: #218838;
+        }
+
+        .btn-info {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #0056b3;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .stat-card.criticos {
+            border-left-color: #dc3545;
+        }
+
+        .stat-card.acompanhamento {
+            border-left-color: #ffc107;
+        }
+
+        .stat-card.estavel {
+            border-left-color: #28a745;
+        }
+
+        .stat-card.aguardando {
+            border-left-color: #17a2b8;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card.criticos .stat-number {
+            color: #dc3545;
+        }
+
+        .stat-card.acompanhamento .stat-number {
+            color: #ffc107;
+        }
+
+        .stat-card.estavel .stat-number {
+            color: #28a745;
+        }
+
+        .stat-card.aguardando .stat-number {
+            color: #17a2b8;
+        }
+
+        .stat-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .pacientes-grid, .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .cards-container .cards-grid {
+            display: contents; /* Para que os cards se distribuam no grid principal */
+        }
+
+        .paciente-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+            position: relative;
+        }
+
+        .paciente-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        /* Bolinha de notificação vermelha */
+        .notification-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            background: #dc3545;
+            border-radius: 50%;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+            }
+        }
+
+        .paciente-card.critico {
+            border-left-color: #dc3545;
+        }
+
+        .paciente-card.acompanhamento {
+            border-left-color: #ffc107;
+        }
+
+        .paciente-card.estavel {
+            border-left-color: #28a745;
+        }
+
+        .paciente-card.aguardando {
+            border-left-color: #17a2b8;
+        }
+
+        .paciente-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .paciente-info h3 {
+            color: #1e3c72;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .paciente-id {
+            color: #666;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .status-critico {
+            background: #dc3545;
+        }
+
+        .status-acompanhamento {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .status-estavel {
+            background: #28a745;
+        }
+
+        .status-aguardando {
+            background: #17a2b8;
+        }
+
+        .evolucao-timeline {
+            margin: 15px 0;
+        }
+
+        .evolucao-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .evolucao-date {
+            color: #666;
+            font-weight: 600;
+            min-width: 70px;
+        }
+
+        .evolucao-text {
+            color: #333;
+        }
+
+        .comunicacao-status {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .com-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .com-item.ativo {
+            color: #28a745;
+        }
+
+        .com-item.pendente {
+            color: #ffc107;
+        }
+
+        .com-item.inativo {
+            color: #dc3545;
+        }
+
+        .acao-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .btn-acao {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-evoluir {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-evoluir:hover {
+            background: #0056b3;
+        }
+
+        .btn-contato {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-contato:hover {
+            background: #218838;
+        }
+
+        .btn-detalhes {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-detalhes:hover {
+            background: #5a6268;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .quadro-container {
+                padding: 15px;
+            }
+
+            .header-quadro {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pacientes-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4em;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn-modal {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .paciente-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .comunicacao-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .comunicacao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .comunicacao-autor {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .comunicacao-data {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .prioridade-alta {
+            border-left-color: #dc3545 !important;
+        }
+
+        .prioridade-media {
+            border-left-color: #ffc107 !important;
+        }
+
+        .prioridade-baixa {
+            border-left-color: #28a745 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="quadro-container">
+        <header class="header-quadro">
+            <h1>📊 Quadro Evolutivo de Pacientes</h1>
+            <div class="header-actions">
+                <div class="notification-counter" id="notificationCounter" style="display: none;">
+                    🔔 <span id="notificationCount">0</span> nova(s) comunicação(ões)
+                </div>
+                <a href="/dashboard.html" class="btn btn-back">⬅️ Voltar</a>
+                <button onclick="demonstrarNotificacoes()" class="btn btn-info" title="Testar sistema de notificações">🧪 Demo</button>
+                <button onclick="atualizarQuadro()" class="btn btn-refresh">🔄 Atualizar</button>
+                <button onclick="exportarQuadro()" class="btn btn-export">📊 Exportar</button>
+            </div>
+        </header>
+
+        <!-- Visão Geral de Status -->
+        <div class="stats-overview">
+            <div class="stat-card criticos">
+                <div class="stat-number" id="total-criticos">0</div>
+                <div class="stat-label">🚨 Críticos</div>
+            </div>
+            <div class="stat-card acompanhamento">
+                <div class="stat-number" id="total-acompanhamento">0</div>
+                <div class="stat-label">⚠️ Em Acompanhamento</div>
+            </div>
+            <div class="stat-card estavel">
+                <div class="stat-number" id="total-estavel">0</div>
+                <div class="stat-label">✅ Estáveis</div>
+            </div>
+            <div class="stat-card aguardando">
+                <div class="stat-number" id="total-aguardando">0</div>
+                <div class="stat-label">⏳ Aguardando</div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filtroNome">Nome do Paciente:</label>
+                    <input type="text" id="filtroNome" placeholder="Digite o nome">
+                </div>
+                <div class="filter-group">
+                    <label for="filtroStatus">Status:</label>
+                    <select id="filtroStatus">
+                        <option value="">Todos os Status</option>
+                        <option value="critico">🚨 Crítico</option>
+                        <option value="acompanhamento">⚠️ Em Acompanhamento</option>
+                        <option value="estavel">✅ Estável</option>
+                        <option value="aguardando">⏳ Aguardando</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtroComunicacao">Comunicação:</label>
+                    <select id="filtroComunicacao">
+                        <option value="">Todas</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="pendente">Pendente</option>
+                        <option value="inativo">Sem Contato</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtroData">Última Evolução:</label>
+                    <select id="filtroData">
+                        <option value="">Todas as Datas</option>
+                        <option value="hoje">Hoje</option>
+                        <option value="semana">Esta Semana</option>
+                        <option value="mes">Este Mês</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid de Pacientes -->
+        <div class="cards-container" id="pacientes-grid">
+            <!-- Cards dos pacientes serão carregados aqui -->
+        </div>
+
+        <!-- Estado vazio -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <div class="icon">👥</div>
+            <h3>Nenhum paciente encontrado</h3>
+            <p>Ajuste os filtros ou aguarde o carregamento dos dados</p>
+        </div>
+    </div>
+
+    <script>
+        let pacientesData = [];
+        let pacientesFiltrados = [];
+        
+        // Instância do sistema de cards unificados
+        let cardUnificado;
+
+        // Verificação de autenticação
+        function checkAuth() {
+            const userInfo = localStorage.getItem('userInfo');
+            
+            if (!userInfo) {
+                console.log('❌ Nenhuma sessão encontrada - redirecionando para login');
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            const user = JSON.parse(userInfo);
+            console.log('👤 Usuário logado:', user.nome, '| Tipo:', user.tipo, '| Autorizado:', user.autorizado);
+            
+            // Verificar se funcionário está autorizado
+            if (user.tipo === 'funcionario' && !user.autorizado) {
+                console.log('⛔ Funcionário não autorizado - redirecionando para login');
+                alert('⚠️ Seu acesso ainda não foi autorizado pelo administrador.\n\nVocê será redirecionado para a tela de login.');
+                localStorage.removeItem('userInfo');
+                window.location.href = '/login.html';
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autorização primeiro
+            if (!checkAuth()) {
+                return; // Não continuar carregamento se não autorizado
+            }
+            
+            // Inicializar sistema de cards unificados
+            cardUnificado = new CardUnificado('quadro-evolutivo');
+            
+            carregarPacientes();
+            configurarFiltros();
+        });
+
+        function configurarFiltros() {
+            document.getElementById('filtroNome').addEventListener('input', aplicarFiltros);
+            document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroComunicacao').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroData').addEventListener('change', aplicarFiltros);
+        }
+
+        async function carregarPacientes() {
+            try {
+                // Simular dados para demonstração
+                const dados = await simularDadosPacientes();
+                pacientesData = dados;
+                pacientesFiltrados = [...dados];
+                
+                atualizarEstatisticas();
+                renderizarPacientes();
+                atualizarContadorNotificacoes();
+            } catch (error) {
+                console.error('Erro ao carregar pacientes:', error);
+            }
+        }
+
+        function simularDadosPacientes() {
+            return Promise.resolve([
+                {
+                    id: 'P001',
+                    nome: 'Maria Silva Santos',
+                    status: 'critico',
+                    ultimaEvolucao: '2025-01-29',
+                    comunicacao: 'ativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '29/01', texto: 'Pressão alta persistente - 180x120' },
+                        { data: '28/01', texto: 'Iniciado medicação anti-hipertensiva' },
+                        { data: '27/01', texto: 'Primeira consulta - diagnóstico inicial' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: true,
+                        telefone: false
+                    }
+                },
+                {
+                    id: 'P002',
+                    nome: 'João Carlos Oliveira',
+                    status: 'acompanhamento',
+                    ultimaEvolucao: '2025-01-28',
+                    comunicacao: 'pendente',
+                    temNotificacao: true, // Exemplo: tem nova comunicação
+                    evolucoes: [
+                        { data: '28/01', texto: 'Exames laboratoriais solicitados' },
+                        { data: '25/01', texto: 'Consulta de retorno - melhora parcial' },
+                        { data: '20/01', texto: 'Início do tratamento fisioterápico' }
+                    ],
+                    contatos: {
+                        whatsapp: false,
+                        email: true,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P003',
+                    nome: 'Ana Paula Costa',
+                    status: 'estavel',
+                    ultimaEvolucao: '2025-01-26',
+                    comunicacao: 'ativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '26/01', texto: 'Paciente estável - manter medicação' },
+                        { data: '19/01', texto: 'Resultados de exames normais' },
+                        { data: '12/01', texto: 'Consulta de rotina - sem alterações' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: true,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P004',
+                    nome: 'Roberto Ferreira',
+                    status: 'aguardando',
+                    ultimaEvolucao: '2025-01-24',
+                    comunicacao: 'inativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '24/01', texto: 'Aguardando resultados de biopsia' },
+                        { data: '22/01', texto: 'Procedimento realizado sem complicações' },
+                        { data: '15/01', texto: 'Consulta pré-procedimento' }
+                    ],
+                    contatos: {
+                        whatsapp: false,
+                        email: false,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P005',
+                    nome: 'Carmen Rodrigues',
+                    status: 'acompanhamento',
+                    ultimaEvolucao: '2025-01-29',
+                    comunicacao: 'ativo',
+                    temNotificacao: true, // Exemplo: tem nova comunicação
+                    evolucoes: [
+                        { data: '29/01', texto: 'Ajuste na dosagem da medicação' },
+                        { data: '27/01', texto: 'Relato de efeitos colaterais leves' },
+                        { data: '24/01', texto: 'Início de novo protocolo de tratamento' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: true,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P006',
+                    nome: 'Dr. Eduardo Lima',
+                    status: 'estavel',
+                    ultimaEvolucao: '2025-01-25',
+                    comunicacao: 'ativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '25/01', texto: 'Pós-operatório sem complicações' },
+                        { data: '23/01', texto: 'Cirurgia plástica realizada com sucesso' },
+                        { data: '20/01', texto: 'Exames pré-operatórios aprovados' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: true,
+                        telefone: false
+                    }
+                },
+                {
+                    id: 'P007',
+                    nome: 'Luciana Santos',
+                    status: 'critico',
+                    ultimaEvolucao: '2025-01-31',
+                    comunicacao: 'pendente',
+                    temNotificacao: true,
+                    evolucoes: [
+                        { data: '31/01', texto: 'Reação alérgica intensa - medicação suspensa' },
+                        { data: '30/01', texto: 'Início de edema facial' },
+                        { data: '29/01', texto: 'Primeira aplicação do tratamento' }
+                    ],
+                    contatos: {
+                        whatsapp: true,
+                        email: false,
+                        telefone: true
+                    }
+                },
+                {
+                    id: 'P008',
+                    nome: 'Marcos Oliveira',
+                    status: 'aguardando',
+                    ultimaEvolucao: '2025-01-28',
+                    comunicacao: 'inativo',
+                    temNotificacao: false,
+                    evolucoes: [
+                        { data: '28/01', texto: 'Exames de imagem solicitados' },
+                        { data: '26/01', texto: 'Avaliação inicial - possível indicação cirúrgica' },
+                        { data: '24/01', texto: 'Consulta inicial de triagem' }
+                    ],
+                    contatos: {
+                        whatsapp: false,
+                        email: true,
+                        telefone: true
+                    }
+                }
+            ]);
+        }
+
+        // Sistema de notificações
+        function adicionarNotificacao(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            if (paciente) {
+                paciente.temNotificacao = true;
+                renderizarPacientes();
+                atualizarContadorNotificacoes();
+                console.log(`🔔 Notificação adicionada para paciente ${pacienteId}`);
+            }
+        }
+
+        function removerNotificacao(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            if (paciente) {
+                paciente.temNotificacao = false;
+                renderizarPacientes();
+                atualizarContadorNotificacoes();
+                console.log(`✅ Notificação removida para paciente ${pacienteId}`);
+            }
+        }
+
+        function contarNotificacoes() {
+            return pacientesData.filter(p => p.temNotificacao).length;
+        }
+
+        function atualizarContadorNotificacoes() {
+            const total = contarNotificacoes();
+            const counter = document.getElementById('notificationCounter');
+            const countSpan = document.getElementById('notificationCount');
+            
+            if (total > 0) {
+                counter.style.display = 'block';
+                countSpan.textContent = total;
+            } else {
+                counter.style.display = 'none';
+            }
+        }
+
+        // Função de demonstração para testar notificações
+        function demonstrarNotificacoes() {
+            console.log('🧪 Demonstração de notificações iniciada');
+            
+            // Adicionar notificação para P001 após 3 segundos
+            setTimeout(() => {
+                adicionarNotificacao('P001');
+                console.log('🔔 Notificação adicionada para P001');
+            }, 3000);
+            
+            // Adicionar notificação para P003 após 5 segundos
+            setTimeout(() => {
+                adicionarNotificacao('P003');
+                console.log('🔔 Notificação adicionada para P003');
+            }, 5000);
+        }
+
+        function atualizarEstatisticas() {
+            const stats = {
+                criticos: pacientesFiltrados.filter(p => p.status === 'critico').length,
+                acompanhamento: pacientesFiltrados.filter(p => p.status === 'acompanhamento').length,
+                estavel: pacientesFiltrados.filter(p => p.status === 'estavel').length,
+                aguardando: pacientesFiltrados.filter(p => p.status === 'aguardando').length
+            };
+
+            document.getElementById('total-criticos').textContent = stats.criticos;
+            document.getElementById('total-acompanhamento').textContent = stats.acompanhamento;
+            document.getElementById('total-estavel').textContent = stats.estavel;
+            document.getElementById('total-aguardando').textContent = stats.aguardando;
+        }
+
+        function renderizarPacientes() {
+            const grid = document.getElementById('pacientes-grid');
+            const emptyState = document.getElementById('empty-state');
+
+            if (pacientesFiltrados.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            // Usar o card unificado
+            grid.innerHTML = `
+                <div class="cards-grid">
+                    ${pacientesFiltrados.map(paciente => {
+                        // Adaptar dados do quadro evolutivo para o card unificado
+                        const hoje = new Date();
+                        const ultimaEvolucao = new Date(paciente.ultimaEvolucao);
+                        const diasSemEvolucao = Math.ceil((hoje - ultimaEvolucao) / (1000 * 60 * 60 * 24));
+                        
+                        // Mapear status do quadro evolutivo para prioridades do card unificado
+                        const prioridadeMap = {
+                            'critico': 'urgente',
+                            'acompanhamento': 'atencao', 
+                            'estavel': 'normal',
+                            'aguardando': 'baixa'
+                        };
+                        
+                        const pacienteAdaptado = {
+                            id: paciente.id,
+                            nome: paciente.nome,
+                            telefone: '(11) 99999-0000', // Simular telefone
+                            email: paciente.nome.toLowerCase().replace(/\\s+/g, '.') + '@email.com',
+                            
+                            // Dados específicos do quadro evolutivo adaptados
+                            prioridade: prioridadeMap[paciente.status] || 'normal',
+                            statusEvolucao: paciente.status, // critico, acompanhamento, estavel, aguardando
+                            ultimaEvolucao: paciente.ultimaEvolucao,
+                            evolucoes: paciente.evolucoes,
+                            comunicacao: paciente.comunicacao,
+                            temNotificacao: paciente.temNotificacao,
+                            contatos: paciente.contatos,
+                            observacoes: paciente.evolucoes && paciente.evolucoes.length > 0 ? 
+                                paciente.evolucoes[0].texto : 'Sem evolução recente',
+                            
+                            // Marcos baseados no status evolutivo
+                            proximaConsulta: paciente.status === 'critico' ? 
+                                hoje.toISOString().split('T')[0] : // Hoje para críticos
+                                new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 dias para outros
+                            
+                            proximoRetorno: paciente.status === 'aguardando' ?
+                                new Date(hoje.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 14 dias para aguardando
+                                new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 dias para outros
+                            
+                            proximaEvolucao: paciente.status === 'critico' ?
+                                new Date(hoje.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 1 dia para críticos
+                                (paciente.status === 'acompanhamento' ?
+                                    new Date(hoje.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : // 3 dias para acompanhamento
+                                    new Date(hoje.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) // 7 dias para estável
+                        };
+                        
+                        return cardUnificado.criarCard(pacienteAdaptado);
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function getStatusLabel(status) {
+            const labels = {
+                'critico': '🚨 Crítico',
+                'acompanhamento': '⚠️ Acompanhamento',
+                'estavel': '✅ Estável',
+                'aguardando': '⏳ Aguardando'
+            };
+            return labels[status] || status;
+        }
+
+        function aplicarFiltros() {
+            const nome = document.getElementById('filtroNome').value.toLowerCase();
+            const status = document.getElementById('filtroStatus').value;
+            const comunicacao = document.getElementById('filtroComunicacao').value;
+            const data = document.getElementById('filtroData').value;
+
+            pacientesFiltrados = pacientesData.filter(paciente => {
+                let matches = true;
+
+                if (nome && !paciente.nome.toLowerCase().includes(nome)) {
+                    matches = false;
+                }
+
+                if (status && paciente.status !== status) {
+                    matches = false;
+                }
+
+                if (comunicacao && paciente.comunicacao !== comunicacao) {
+                    matches = false;
+                }
+
+                // Filtro de data seria implementado com lógica de datas reais
+                
+                return matches;
+            });
+
+            atualizarEstatisticas();
+            renderizarPacientes();
+        }
+
+        function atualizarQuadro() {
+            carregarPacientes();
+        }
+
+        function exportarQuadro() {
+            alert('📊 Funcionalidade de exportação em desenvolvimento!\n\nEm breve você poderá exportar:\n• Relatório completo em PDF\n• Planilha Excel\n• Dados para impressão');
+        }
+
+        function adicionarEvolucao(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            // Preencher informações do paciente no modal
+            document.getElementById('pacienteInfoEvolucao').innerHTML = `
+                <h4> ${paciente.nome}</h4>
+                <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
+                <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
+            `;
+            
+            // Definir data atual
+            document.getElementById('dataEvolucao').value = new Date().toISOString().split('T')[0];
+            
+            // Armazenar ID do paciente para usar na função de salvar
+            window.pacienteAtualEvolucao = pacienteId;
+            
+            // Mostrar modal
+            document.getElementById('modalEvolucao').style.display = 'block';
+        }
+
+        function verDetalhes(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            // Remover notificação quando abrir detalhes (comunicação foi visualizada)
+            removerNotificacao(pacienteId);
+            
+            // Preencher informações do paciente no modal
+            document.getElementById('pacienteInfoDetalhes').innerHTML = `
+                <h4> ${paciente.nome}</h4>
+                <p><strong>ID:</strong> ${paciente.id} | <strong>Status:</strong> ${getStatusLabel(paciente.status)}</p>
+                <p><strong>Última evolução:</strong> ${paciente.ultimaEvolucao}</p>
+            `;
+            
+            // Armazenar ID do paciente
+            window.pacienteAtualDetalhes = pacienteId;
+            
+            // Mostrar modal
+            document.getElementById('modalDetalhes').style.display = 'block';
+        }
+
+        // Funções dos modais
+        function fecharModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // Limpar formulários
+            if (modalId === 'modalEvolucao') {
+                document.getElementById('textoEvolucao').value = '';
+                document.getElementById('proximaEtapa').value = '';
+            } else if (modalId === 'modalDetalhes') {
+                document.getElementById('mensagemComunicacao').value = '';
+                document.getElementById('formNovaComunicacao').style.display = 'none';
+                document.getElementById('historicoComunicacoes').style.display = 'none';
+            }
+        }
+
+        function salvarEvolucao() {
+            const pacienteId = window.pacienteAtualEvolucao;
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            const tipo = document.getElementById('tipoEvolucao').value;
+            const data = document.getElementById('dataEvolucao').value;
+            const texto = document.getElementById('textoEvolucao').value;
+            const proxima = document.getElementById('proximaEtapa').value;
+            
+            if (!texto.trim()) {
+                alert('⚠️ Por favor, descreva a evolução do paciente.');
+                return;
+            }
+            
+            // Adicionar evolução
+            const dataFormatada = new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+            paciente.evolucoes.unshift({
+                data: dataFormatada,
+                tipo: tipo,
+                texto: texto,
+                proxima: proxima,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Atualizar última evolução
+            paciente.ultimaEvolucao = `${dataFormatada} - ${tipo}`;
+            
+            renderizarPacientes();
+            fecharModal('modalEvolucao');
+            
+            alert('✅ Evolução salva com sucesso!');
+        }
+
+        function salvarEAbrirCaderno() {
+            const pacienteId = window.pacienteAtualEvolucao;
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            // Primeiro salvar a evolução
+            salvarEvolucao();
+            
+            // Preparar dados para o Caderno Digital
+            const dadosPaciente = {
+                id: paciente.id,
+                nome: paciente.nome,
+                statusGeral: getStatusLabel(paciente.status),
+                dataUltimaConsulta: new Date().toISOString().split('T')[0],
+                observacoes: document.getElementById('textoEvolucao').value,
+                origem: 'quadro-evolutivo'
+            };
+            
+            localStorage.setItem('pacienteCaderno', JSON.stringify(dadosPaciente));
+            
+            // Abrir Caderno Digital
+            window.open('/caderno-digital.html', '_blank');
+        }
+
+        function mostrarNovaComunicacao() {
+            document.getElementById('formNovaComunicacao').style.display = 'block';
+            document.getElementById('historicoComunicacoes').style.display = 'none';
+        }
+
+        function mostrarHistorico() {
+            document.getElementById('formNovaComunicacao').style.display = 'none';
+            document.getElementById('historicoComunicacoes').style.display = 'block';
+            carregarHistoricoComunicacoes();
+        }
+
+        function cancelarComunicacao() {
+            document.getElementById('formNovaComunicacao').style.display = 'none';
+            document.getElementById('mensagemComunicacao').value = '';
+        }
+
+        function salvarComunicacao() {
+            const pacienteId = window.pacienteAtualDetalhes;
+            const tipo = document.getElementById('tipoComunicacao').value;
+            const destinatario = document.getElementById('destinatario').value;
+            const prioridade = document.getElementById('prioridade').value;
+            const mensagem = document.getElementById('mensagemComunicacao').value;
+            
+            if (!mensagem.trim()) {
+                alert('⚠️ Por favor, escreva uma mensagem.');
+                return;
+            }
+            
+            // Salvar comunicação (em produção, enviar para servidor)
+            const comunicacao = {
+                id: Date.now(),
+                pacienteId: pacienteId,
+                tipo: tipo,
+                destinatario: destinatario,
+                prioridade: prioridade,
+                mensagem: mensagem,
+                autor: 'Usuário Atual', // Em produção, pegar do usuário logado
+                data: new Date().toISOString(),
+                lida: false
+            };
+            
+            // Armazenar no localStorage
+            const comunicacoes = JSON.parse(localStorage.getItem('comunicacoes') || '[]');
+            comunicacoes.unshift(comunicacao);
+            localStorage.setItem('comunicacoes', JSON.stringify(comunicacoes));
+            
+            // 🔔 Adicionar notificação visual no card do paciente
+            adicionarNotificacao(pacienteId);
+            
+            alert('✅ Comunicação enviada com sucesso!\n🔔 Notificação adicionada ao card do paciente.');
+            cancelarComunicacao();
+            mostrarHistorico();
+        }
+
+        function carregarHistoricoComunicacoes() {
+            const pacienteId = window.pacienteAtualDetalhes;
+            const comunicacoes = JSON.parse(localStorage.getItem('comunicacoes') || '[]');
+            const comunicacoesPaciente = comunicacoes.filter(c => c.pacienteId === pacienteId);
+            
+            const container = document.getElementById('listaComunicacoes');
+            
+            if (comunicacoesPaciente.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">Nenhuma comunicação encontrada para este paciente.</p>';
+                return;
+            }
+            
+            container.innerHTML = comunicacoesPaciente.map(com => `
+                <div class="comunicacao-item prioridade-${com.prioridade}">
+                    <div class="comunicacao-header">
+                        <span class="comunicacao-autor">${com.autor} → ${com.destinatario}</span>
+                        <span class="comunicacao-data">${new Date(com.data).toLocaleString('pt-BR')}</span>
+                    </div>
+                    <p><strong>${com.tipo.toUpperCase()}:</strong> ${com.mensagem}</p>
+                </div>
+            `).join('');
+        }
+
+        function entrarContato(pacienteId) {
+            const paciente = pacientesData.find(p => p.id === pacienteId);
+            
+            const opcoes = [];
+            if (paciente.contatos.whatsapp) opcoes.push('📱 WhatsApp');
+            if (paciente.contatos.email) opcoes.push('📧 Email');
+            if (paciente.contatos.telefone) opcoes.push('📞 Telefone');
+            
+            if (opcoes.length === 0) {
+                alert('❌ Nenhum meio de comunicação disponível para este paciente.');
+                return;
+            }
+            
+            alert(`💬 Entrar em contato com ${paciente.nome}\n\nMeios disponíveis:\n${opcoes.join('\n')}\n\n(Funcionalidade em desenvolvimento)`);
+        }
+
+        // Fechar modal clicando fora
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        };
+    </script>
+
+    <!-- Modal Evolução -->
+    <div id="modalEvolucao" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2> Nova Evolução Médica</h2>
+                <button class="close-btn" onclick="fecharModal('modalEvolucao')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="paciente-info" id="pacienteInfoEvolucao">
+                    <!-- Informações do paciente serão inseridas aqui -->
+                </div>
+                
+                <div class="form-group">
+                    <label for="tipoEvolucao">Tipo de Evolução</label>
+                    <select id="tipoEvolucao">
+                        <option value="consulta">Consulta</option>
+                        <option value="procedimento">Procedimento</option>
+                        <option value="pos-operatorio">Pós-operatório</option>
+                        <option value="retorno">Retorno</option>
+                        <option value="intercorrencia">Intercorrência</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dataEvolucao">Data da Evolução</label>
+                    <input type="date" id="dataEvolucao">
+                </div>
+
+                <div class="form-group">
+                    <label for="textoEvolucao">Descrição da Evolução</label>
+                    <textarea id="textoEvolucao" placeholder="Descreva a evolução médica do paciente..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="proximaEtapa">Próxima Etapa</label>
+                    <input type="text" id="proximaEtapa" placeholder="Ex: Retorno em 7 dias, Exames complementares...">
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-modal btn-primary" onclick="salvarEvolucao()">
+                         Salvar Evolução
+                    </button>
+                    <button class="btn-modal btn-success" onclick="salvarEAbrirCaderno()">
+                         Salvar e Abrir Caderno
+                    </button>
+                    <button class="btn-modal btn-secondary" onclick="fecharModal('modalEvolucao')">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes/Comunicação -->
+    <div id="modalDetalhes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2> Comunicação Interna</h2>
+                <button class="close-btn" onclick="fecharModal('modalDetalhes')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="paciente-info" id="pacienteInfoDetalhes">
+                    <!-- Informações do paciente serão inseridas aqui -->
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                    <button class="btn-modal btn-primary" onclick="mostrarNovaComunicacao()">
+                         Nova Comunicação
+                    </button>
+                    <button class="btn-modal btn-success" onclick="mostrarHistorico()">
+                         Histórico
+                    </button>
+                </div>
+
+                <!-- Formulário Nova Comunicação -->
+                <div id="formNovaComunicacao" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Nova Comunicação</h4>
+                    
+                    <div class="form-group">
+                        <label for="tipoComunicacao">Tipo</label>
+                        <select id="tipoComunicacao">
+                            <option value="pendencia">Pendência</option>
+                            <option value="solicitacao">Solicitação</option>
+                            <option value="lembrete">Lembrete</option>
+                            <option value="observacao">Observação</option>
+                            <option value="urgente">Urgente</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="destinatario">Para</label>
+                        <select id="destinatario">
+                            <option value="medico">Dr. Marcio</option>
+                            <option value="secretaria">Secretária</option>
+                            <option value="assistente">Assistente</option>
+                            <option value="equipe">Toda Equipe</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prioridade">Prioridade</label>
+                        <select id="prioridade">
+                            <option value="baixa">Baixa</option>
+                            <option value="media">Média</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mensagemComunicacao">Mensagem</label>
+                        <textarea id="mensagemComunicacao" placeholder="Descreva a pendência, solicitação ou observação..."></textarea>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="btn-modal btn-primary" onclick="salvarComunicacao()">
+                             Enviar
+                        </button>
+                        <button class="btn-modal btn-secondary" onclick="cancelarComunicacao()">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Histórico de Comunicações -->
+                <div id="historicoComunicacoes" style="display: none;">
+                    <h4 style="margin-bottom: 15px; color: #2c3e50;">Histórico de Comunicações</h4>
+                    <div id="listaComunicacoes">
+                        <!-- Comunicações serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

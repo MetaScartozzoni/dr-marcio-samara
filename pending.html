@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aguardando Aprovação - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .pending-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        .pending-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pending-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .pending-title {
+            color: #333;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        
+        .pending-message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .user-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .user-info h3 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .user-info p {
+            color: #555;
+            margin: 5px 0;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #856404;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+        
+        .contact-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e6f3ff;
+            border-radius: 10px;
+            border: 1px solid #b3d9ff;
+        }
+        
+        .contact-info h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info p {
+            color: #2a5298;
+            margin: 5px 0;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .pending-card {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+            
+            .pending-title {
+                font-size: 24px;
+            }
+            
+            .pending-icon {
+                font-size: 60px;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="pending-container">
+        <div class="pending-card">
+            <div class="pending-icon">⏳</div>
+            
+            <h1 class="pending-title">Cadastro em Análise</h1>
+            
+            <div class="status-badge">
+                🔄 Status: Aguardando Aprovação
+            </div>
+            
+            <p class="pending-message">
+                Seu cadastro foi realizado com sucesso e está sendo analisado pela nossa equipe. 
+                Em breve você receberá uma confirmação por email e poderá acessar todas as funcionalidades do portal.
+            </p>
+            
+            <div class="user-info" id="user-info">
+                <h3>📋 Informações do Cadastro</h3>
+                <p><strong>Nome:</strong> <span id="user-name">Carregando...</span></p>
+                <p><strong>Email:</strong> <span id="user-email">Carregando...</span></p>
+                <p><strong>Data do Cadastro:</strong> <span id="register-date">Hoje</span></p>
+            </div>
+            
+            <div class="actions">
+                <button class="btn btn-primary" onclick="checkStatus()">
+                    🔄 Verificar Status
+                </button>
+                <a href="/login.html" class="btn btn-secondary">
+                    🔐 Tentar Login Novamente
+                </a>
+            </div>
+            
+            <div class="contact-info">
+                <h4>📞 Precisa de Ajuda?</h4>
+                <p><strong>WhatsApp:</strong> (11) 99999-9999</p>
+                <p><strong>Email:</strong> suporte@drmarcio.com.br</p>
+                <p><strong>Horário:</strong> Segunda a Sexta, 8h às 18h</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Carregar informações do usuário
+        function loadUserInfo() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            
+            if (userInfo.nome) {
+                document.getElementById('user-name').textContent = userInfo.nome;
+                document.getElementById('user-email').textContent = userInfo.email;
+                
+                // Se o usuário já foi aprovado, redirecionar
+                if (userInfo.status === 'ativo') {
+                    window.location.href = '/dashboard.html';
+                }
+            } else {
+                // Se não há dados do usuário, redirecionar para login
+                window.location.href = '/login.html';
+            }
+        }
+        
+        // Verificar status do usuário
+        async function checkStatus() {
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+            
+            if (!userInfo.email) {
+                alert('❌ Erro: Dados do usuário não encontrados');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/check-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: userInfo.email })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.status === 'ativo') {
+                        // Atualizar localStorage e redirecionar
+                        const updatedUserInfo = { ...userInfo, status: 'ativo' };
+                        localStorage.setItem('userInfo', JSON.stringify(updatedUserInfo));
+                        
+                        alert('🎉 Parabéns! Seu cadastro foi aprovado!');
+                        window.location.href = '/dashboard.html';
+                    } else {
+                        alert('⏳ Seu cadastro ainda está sendo analisado. Aguarde mais um pouco.');
+                    }
+                } else {
+                    alert('❌ Erro ao verificar status: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+                alert('❌ Erro de conexão. Tente novamente.');
+            }
+        }
+        
+        // Carregar informações quando a página carregar
+        window.onload = loadUserInfo;
+        
+        // Verificar status automaticamente a cada 30 segundos
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html>

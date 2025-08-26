@@ -1,0 +1,297 @@
+/* 🧪 Portal Test Suite CSS - Estilos para Sistema de Testes */
+
+/* Test Results Modal */
+.test-results {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.test-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.test-summary h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+}
+
+.test-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Test Categories */
+.test-categories {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.test-category {
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.test-category h4 {
+    background: #f8f9fa;
+    margin: 0;
+    padding: 12px 16px;
+    color: #495057;
+    font-size: 1rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.test-list {
+    padding: 10px 0;
+}
+
+.test-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: 1px solid #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+.test-item:last-child {
+    border-bottom: none;
+}
+
+.test-item:hover {
+    background: #f8f9fa;
+}
+
+.test-item.passed {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.test-item.failed {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.test-status {
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.test-name {
+    flex: 1;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.test-error {
+    font-size: 0.8rem;
+    color: #dc3545;
+    font-style: italic;
+    margin-left: 10px;
+}
+
+/* Test Actions */
+.test-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.test-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.test-actions .btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.test-actions .btn-primary:hover {
+    background: #0056b3;
+}
+
+.test-actions .btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.test-actions .btn-secondary:hover {
+    background: #545b62;
+}
+
+/* Console Test Output Styles */
+.console-test {
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+/* Test Progress Bar */
+.test-progress {
+    width: 100%;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.test-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+/* Test Status Indicators */
+.test-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.test-indicator.running {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.test-indicator.passed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.test-indicator.failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Quick Test Buttons */
+.quick-test-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.quick-test-btn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    transition: all 0.2s ease;
+    min-width: 120px;
+}
+
+.quick-test-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+}
+
+.quick-test-btn.components {
+    background: #28a745;
+}
+
+.quick-test-btn.components:hover {
+    background: #1e7e34;
+}
+
+.quick-test-btn.integrations {
+    background: #17a2b8;
+}
+
+.quick-test-btn.integrations:hover {
+    background: #117a8b;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .test-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .test-actions {
+        flex-direction: column;
+    }
+    
+    .test-actions button {
+        width: 100%;
+    }
+    
+    .quick-test-buttons {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    
+    .quick-test-btn {
+        min-width: auto;
+        flex: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .test-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .test-item {
+        flex-wrap: wrap;
+    }
+    
+    .test-error {
+        margin-left: 0;
+        margin-top: 5px;
+        width: 100%;
+    }
+    
+    .quick-test-buttons {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

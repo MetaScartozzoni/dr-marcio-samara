@@ -1,0 +1,811 @@
+<!-- lgpd-compliance.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão LGPD - Proteção de Dados</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .lgpd-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .lgpd-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .lgpd-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .lgpd-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            min-width: 150px;
+        }
+
+        .lgpd-tab.active {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            color: #667eea;
+        }
+
+        .lgpd-section {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+
+        .lgpd-section.active {
+            display: block;
+        }
+
+        .consent-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .consent-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .consent-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #667eea;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .data-export-card, .data-deletion-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .data-export-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn-lgpd {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-lgpd:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .privacy-policy {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .lgpd-tabs {
+                flex-direction: column;
+            }
+            
+            .lgpd-tab {
+                margin-bottom: 5px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lgpd-container">
+        <header class="lgpd-header">
+            <h1>🛡️ Gestão de Proteção de Dados</h1>
+            <p>Conformidade com a LGPD (Lei 13.709/2018)</p>
+        </header>
+
+        <nav class="lgpd-tabs">
+            <button class="lgpd-tab active" data-tab="consentimentos">Consentimentos</button>
+            <button class="lgpd-tab" data-tab="meus-dados">Meus Dados</button>
+            <button class="lgpd-tab" data-tab="portabilidade">Portabilidade</button>
+            <button class="lgpd-tab" data-tab="exclusao">Exclusão</button>
+            <button class="lgpd-tab" data-tab="politica">Política</button>
+            <button class="lgpd-tab" data-tab="dashboard">Dashboard</button>
+        </nav>
+
+        <!-- Seção Consentimentos -->
+        <section id="consentimentos" class="lgpd-section active">
+            <h2>Gerenciar Consentimentos</h2>
+            <div class="alert alert-info">
+                <strong>Seus Direitos:</strong> Você pode conceder ou revogar consentimentos a qualquer momento conforme Art. 18 da LGPD.
+            </div>
+            
+            <div id="consent-list">
+                <div class="loading"></div>
+                <p>Carregando consentimentos...</p>
+            </div>
+        </section>
+
+        <!-- Seção Meus Dados -->
+        <section id="meus-dados" class="lgpd-section">
+            <h2>Visualizar Meus Dados</h2>
+            <div class="alert alert-info">
+                <strong>Direito de Acesso:</strong> Conforme Art. 18, II da LGPD, você tem direito de acessar seus dados pessoais.
+            </div>
+
+            <button class="btn-lgpd" onclick="carregarMeusDados()">
+                <span id="carregar-dados-text">Carregar Meus Dados</span>
+                <span id="carregar-dados-loading" class="loading" style="display: none;"></span>
+            </button>
+
+            <div id="meus-dados-content" style="display: none; margin-top: 20px;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-registros">0</div>
+                        <div>Total de Registros</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="ultimo-acesso">-</div>
+                        <div>Último Acesso</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="dados-sensiveis">0</div>
+                        <div>Dados Sensíveis</div>
+                    </div>
+                </div>
+                
+                <div id="dados-detalhes"></div>
+            </div>
+        </section>
+
+        <!-- Seção Portabilidade -->
+        <section id="portabilidade" class="lgpd-section">
+            <h2>Portabilidade de Dados</h2>
+            <div class="data-export-card">
+                <h3>📦 Exportar Seus Dados</h3>
+                <p>Conforme Art. 18, V da LGPD, você pode solicitar a portabilidade dos seus dados pessoais em formato estruturado.</p>
+                
+                <div style="margin-top: 20px;">
+                    <label>
+                        <input type="checkbox" id="incluir-historico"> Incluir histórico completo
+                    </label>
+                    <br>
+                    <label>
+                        <input type="checkbox" id="incluir-logs"> Incluir logs de acesso
+                    </label>
+                </div>
+
+                <button class="btn-lgpd btn-success" onclick="exportarDados()" style="margin-top: 20px;">
+                    <span id="exportar-text">Solicitar Exportação</span>
+                    <span id="exportar-loading" class="loading" style="display: none;"></span>
+                </button>
+            </div>
+
+            <div id="historico-exportacoes">
+                <h3>Histórico de Exportações</h3>
+                <div id="export-history-list"></div>
+            </div>
+        </section>
+
+        <!-- Seção Exclusão -->
+        <section id="exclusao" class="lgpd-section">
+            <h2>Direito ao Esquecimento</h2>
+            <div class="data-deletion-card">
+                <h3>🗑️ Solicitar Exclusão de Dados</h3>
+                <p>Conforme Art. 18, VI da LGPD, você pode solicitar a eliminação dos seus dados pessoais.</p>
+                
+                <div class="alert alert-warning" style="margin: 20px 0;">
+                    <strong>⚠️ Atenção:</strong> Esta ação é irreversível e pode impactar o acesso a serviços.
+                </div>
+
+                <div>
+                    <label>
+                        <input type="radio" name="exclusao-tipo" value="parcial"> Exclusão Parcial (dados não essenciais)
+                    </label>
+                    <br>
+                    <label>
+                        <input type="radio" name="exclusao-tipo" value="total"> Exclusão Total (todos os dados)
+                    </label>
+                </div>
+
+                <textarea id="motivo-exclusao" placeholder="Motivo da solicitação (opcional)" 
+                         style="width: 100%; margin: 15px 0; padding: 10px; border-radius: 5px; border: 1px solid #ddd;"></textarea>
+
+                <button class="btn-lgpd btn-danger" onclick="solicitarExclusao()">
+                    <span id="exclusao-text">Solicitar Exclusão</span>
+                    <span id="exclusao-loading" class="loading" style="display: none;"></span>
+                </button>
+            </div>
+
+            <div id="historico-exclusoes">
+                <h3>Histórico de Solicitações</h3>
+                <div id="deletion-history-list"></div>
+            </div>
+        </section>
+
+        <!-- Seção Política de Privacidade -->
+        <section id="politica" class="lgpd-section">
+            <h2>Política de Privacidade</h2>
+            <div class="privacy-policy" id="politica-content">
+                <div class="loading"></div>
+                <p>Carregando política de privacidade...</p>
+            </div>
+        </section>
+
+        <!-- Seção Dashboard -->
+        <section id="dashboard" class="lgpd-section">
+            <h2>Dashboard de Conformidade</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="dash-consentimentos">0</div>
+                    <div>Consentimentos Ativos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="dash-acessos">0</div>
+                    <div>Acessos (30 dias)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="dash-exportacoes">0</div>
+                    <div>Exportações</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="dash-conformidade">100%</div>
+                    <div>Conformidade</div>
+                </div>
+            </div>
+
+            <button class="btn-lgpd" onclick="atualizarDashboard()">
+                Atualizar Dashboard
+            </button>
+        </section>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Confirmar Ação</h3>
+            <p id="modal-message">Tem certeza que deseja continuar?</p>
+            <div style="margin-top: 20px;">
+                <button class="btn-lgpd" onclick="confirmarAcao()">Confirmar</button>
+                <button class="btn-lgpd" onclick="fecharModal()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let currentUser = null;
+        let currentAction = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initLGPDApp();
+            setupTabs();
+        });
+
+        async function initLGPDApp() {
+            try {
+                // Verificar autenticação
+                currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+                if (!currentUser) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Carregar dados iniciais
+                await Promise.all([
+                    carregarConsentimentos(),
+                    carregarPoliticaPrivacidade(),
+                    carregarDashboard()
+                ]);
+
+            } catch (error) {
+                console.error('Erro na inicialização LGPD:', error);
+                showAlert('Erro ao carregar dados LGPD', 'warning');
+            }
+        }
+
+        function setupTabs() {
+            document.querySelectorAll('.lgpd-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    switchTab(targetTab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            // Atualizar tabs
+            document.querySelectorAll('.lgpd-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Atualizar seções
+            document.querySelectorAll('.lgpd-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        async function carregarConsentimentos() {
+            try {
+                const response = await fetch('/api/lgpd/consentimentos', {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+
+                const data = await response.json();
+                renderizarConsentimentos(data.consentimentos || []);
+
+            } catch (error) {
+                console.error('Erro ao carregar consentimentos:', error);
+                document.getElementById('consent-list').innerHTML = 
+                    '<div class="alert alert-warning">Erro ao carregar consentimentos</div>';
+            }
+        }
+
+        function renderizarConsentimentos(consentimentos) {
+            const container = document.getElementById('consent-list');
+            
+            if (consentimentos.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">Nenhum consentimento registrado</div>';
+                return;
+            }
+
+            container.innerHTML = consentimentos.map(consent => `
+                <div class="consent-card">
+                    <h4>${consent.tipo_consentimento}</h4>
+                    <p>${consent.descricao || 'Consentimento para processamento de dados'}</p>
+                    <small>Concedido em: ${formatarData(consent.data_consentimento)}</small>
+                    
+                    <div class="consent-toggle">
+                        <span>Status: <strong>${consent.ativo ? 'Ativo' : 'Revogado'}</strong></span>
+                        <label class="switch">
+                            <input type="checkbox" ${consent.ativo ? 'checked' : ''} 
+                                   onchange="alterarConsentimento('${consent.tipo_consentimento}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function alterarConsentimento(tipo, ativo) {
+            try {
+                const endpoint = ativo ? '/api/lgpd/consentimento' : '/api/lgpd/revogar-consentimento';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        tipo_consentimento: tipo,
+                        finalidade: 'Alteração pelo usuário'
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert(ativo ? 'Consentimento concedido' : 'Consentimento revogado', 'success');
+                    await carregarConsentimentos();
+                } else {
+                    throw new Error('Erro na operação');
+                }
+
+            } catch (error) {
+                console.error('Erro ao alterar consentimento:', error);
+                showAlert('Erro ao alterar consentimento', 'warning');
+                // Reverter checkbox
+                event.target.checked = !event.target.checked;
+            }
+        }
+
+        async function carregarMeusDados() {
+            const btn = document.getElementById('carregar-dados-text');
+            const loading = document.getElementById('carregar-dados-loading');
+            
+            btn.style.display = 'none';
+            loading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/api/lgpd/meus-dados', {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+
+                const data = await response.json();
+                renderizarMeusDados(data);
+                document.getElementById('meus-dados-content').style.display = 'block';
+
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                showAlert('Erro ao carregar seus dados', 'warning');
+            } finally {
+                btn.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderizarMeusDados(data) {
+            document.getElementById('total-registros').textContent = data.total_registros || 0;
+            document.getElementById('ultimo-acesso').textContent = 
+                data.ultimo_acesso ? formatarData(data.ultimo_acesso) : 'Nunca';
+            document.getElementById('dados-sensiveis').textContent = data.dados_sensiveis || 0;
+
+            const detalhes = document.getElementById('dados-detalhes');
+            detalhes.innerHTML = `
+                <h4>Detalhes dos Dados</h4>
+                <pre style="background: #f8f9fa; padding: 15px; border-radius: 5px; overflow-x: auto;">
+${JSON.stringify(data.dados, null, 2)}
+                </pre>
+            `;
+        }
+
+        async function exportarDados() {
+            const incluirHistorico = document.getElementById('incluir-historico').checked;
+            const incluirLogs = document.getElementById('incluir-logs').checked;
+
+            currentAction = () => realizarExportacao(incluirHistorico, incluirLogs);
+            
+            document.getElementById('modal-title').textContent = 'Confirmar Exportação';
+            document.getElementById('modal-message').textContent = 
+                'Deseja solicitar a exportação dos seus dados? O arquivo será enviado por email.';
+            document.getElementById('confirmation-modal').style.display = 'block';
+        }
+
+        async function realizarExportacao(incluirHistorico, incluirLogs) {
+            const btn = document.getElementById('exportar-text');
+            const loading = document.getElementById('exportar-loading');
+            
+            btn.style.display = 'none';
+            loading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/api/lgpd/exportar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        incluir_historico: incluirHistorico,
+                        incluir_logs: incluirLogs
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert('Solicitação de exportação enviada! Você receberá um email com os dados.', 'success');
+                } else {
+                    throw new Error('Erro na exportação');
+                }
+
+            } catch (error) {
+                console.error('Erro na exportação:', error);
+                showAlert('Erro ao solicitar exportação', 'warning');
+            } finally {
+                btn.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        }
+
+        async function solicitarExclusao() {
+            const tipo = document.querySelector('input[name="exclusao-tipo"]:checked')?.value;
+            const motivo = document.getElementById('motivo-exclusao').value;
+
+            if (!tipo) {
+                showAlert('Selecione o tipo de exclusão', 'warning');
+                return;
+            }
+
+            currentAction = () => realizarExclusao(tipo, motivo);
+            
+            document.getElementById('modal-title').textContent = 'Confirmar Exclusão';
+            document.getElementById('modal-message').textContent = 
+                `Tem certeza que deseja solicitar a ${tipo} exclusão dos seus dados? Esta ação é irreversível.`;
+            document.getElementById('confirmation-modal').style.display = 'block';
+        }
+
+        async function realizarExclusao(tipo, motivo) {
+            const btn = document.getElementById('exclusao-text');
+            const loading = document.getElementById('exclusao-loading');
+            
+            btn.style.display = 'none';
+            loading.style.display = 'inline-block';
+
+            try {
+                const response = await fetch('/api/lgpd/solicitar-exclusao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({
+                        tipo_exclusao: tipo,
+                        motivo: motivo
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert('Solicitação de exclusão enviada! Será processada em até 15 dias úteis.', 'success');
+                } else {
+                    throw new Error('Erro na solicitação');
+                }
+
+            } catch (error) {
+                console.error('Erro na exclusão:', error);
+                showAlert('Erro ao solicitar exclusão', 'warning');
+            } finally {
+                btn.style.display = 'inline';
+                loading.style.display = 'none';
+            }
+        }
+
+        async function carregarPoliticaPrivacidade() {
+            try {
+                const response = await fetch('/api/lgpd/politica-privacidade');
+                const data = await response.json();
+                
+                document.getElementById('politica-content').innerHTML = `
+                    <h3>Versão ${data.versao} - ${formatarData(data.criada_em)}</h3>
+                    <div>${data.conteudo}</div>
+                `;
+
+            } catch (error) {
+                console.error('Erro ao carregar política:', error);
+                document.getElementById('politica-content').innerHTML = 
+                    '<div class="alert alert-warning">Erro ao carregar política de privacidade</div>';
+            }
+        }
+
+        async function carregarDashboard() {
+            try {
+                const response = await fetch('/api/lgpd/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+
+                const data = await response.json();
+                atualizarDashboardUI(data);
+
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        function atualizarDashboardUI(data) {
+            document.getElementById('dash-consentimentos').textContent = data.consentimentos_ativos || 0;
+            document.getElementById('dash-acessos').textContent = data.acessos_30_dias || 0;
+            document.getElementById('dash-exportacoes').textContent = data.total_exportacoes || 0;
+        }
+
+        async function atualizarDashboard() {
+            await carregarDashboard();
+            showAlert('Dashboard atualizado', 'success');
+        }
+
+        function confirmarAcao() {
+            if (currentAction) {
+                currentAction();
+                currentAction = null;
+            }
+            fecharModal();
+        }
+
+        function fecharModal() {
+            document.getElementById('confirmation-modal').style.display = 'none';
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '1001';
+            alertDiv.style.minWidth = '300px';
+
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function formatarData(dateString) {
+            return new Date(dateString).toLocaleDateString('pt-BR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Fechar modal ao clicar fora
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmation-modal');
+            if (event.target === modal) {
+                fecharModal();
+            }
+        }
+    </script>
+</body>
+</html>

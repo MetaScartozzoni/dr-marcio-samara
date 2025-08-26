@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Senha - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #bee5eb;
+        }
+        .verification-container {
+            text-align: center;
+            padding: 20px;
+        }
+        .process-steps {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Definir Senha</h1>
+            <p>Complete seu acesso criando uma senha para o sistema</p>
+            
+            <form id="senhaForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required readonly>
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Nova Senha:</label>
+                    <input type="password" id="senha" name="senha" required minlength="6">
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirmarSenha">Confirmar Senha:</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn-primary">Definir Senha</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Definindo senha...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div id="sucesso" style="display: none;" class="success-container">
+                <div class="success">Senha definida com sucesso!</div>
+                <button onclick="window.location.href='/login.html'" class="btn-primary">
+                    Ir para Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
+        // Capturar email da URL ou localStorage
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+            const emailFromStorage = localStorage.getItem('tempEmail');
+            
+            // MODO LOCAL - DESABILITAR VERIFICAÇÃO TEMPORARIAMENTE
+            console.log('🔧 MODO LOCAL: Verificação de email desabilitada');
+            
+            // Limpar qualquer verificação anterior
+            localStorage.removeItem('emailVerificado');
+            localStorage.removeItem('verificacaoTimestamp');
+            localStorage.removeItem('tempEmail');
+            
+            const emailInput = document.getElementById('email');
+            
+            // MODO LOCAL - Permitir acesso direto
+            if (emailFromUrl) {
+                emailInput.value = emailFromUrl;
+                console.log('✅ Email da URL:', emailFromUrl);
+            } else if (emailFromStorage) {
+                emailInput.value = emailFromStorage;
+                console.log('✅ Email do storage:', emailFromStorage);
+            } else {
+                // Colocar email admin por padrão no modo local
+                emailInput.value = 'marcioscartozzoni@gmail.com';
+                console.log('✅ Email admin padrão definido');
+            }
+        };
+
+        // Verificar se o email realmente precisa definir senha
+        async function verificarStatusEmail(email) {
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin detectado:', email);
+                
+                // Log de acesso à criação de senha admin
+                console.log('🔐 Admin criando senha:', email);
+                
+                // Email admin - permitir definir senha automaticamente
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.existe) {
+                    if (data.temSenha) {
+                        // Já tem senha - deveria ir para login
+                        alert('Você já possui uma senha. Redirecionando para o login.');
+                        window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                        return;
+                    }
+                    
+                    if (!data.aprovado) {
+                        // Não aprovado ainda
+                        alert('Sua conta ainda não foi aprovada pelo administrador.');
+                        window.location.href = '/index.html';
+                        return;
+                    }
+                    
+                    // OK - pode definir senha
+                } else {
+                    // Email não existe - precisa se cadastrar primeiro
+                    mostrarMensagemCadastro(email);
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+                mostrarMensagemCadastro(email);
+            }
+        }
+
+        // Mostrar mensagem e botão para cadastro
+        function mostrarMensagemCadastro(email) {
+            document.getElementById('senhaForm').style.display = 'none';
+            
+            const container = document.querySelector('.form-container');
+            container.innerHTML = `
+                <div class="verification-container">
+                    <h1>⚠️ Email Não Cadastrado</h1>
+                    <p>O email <strong>${email}</strong> não está cadastrado no sistema.</p>
+                    <p>Você precisa fazer o cadastro primeiro antes de definir uma senha.</p>
+                    
+                    <div style="margin: 30px 0;">
+                        <button onclick="irParaCadastro('${email}')" class="btn-primary" style="margin: 10px;">
+                            📝 Fazer Cadastro
+                        </button>
+                        <button onclick="window.location.href='/index.html'" class="btn-secondary" style="margin: 10px;">
+                            🔍 Verificar Outro Email
+                        </button>
+                    </div>
+                    
+                    <div class="process-steps">
+                        <strong>📋 Processo correto:</strong><br>
+                        <ol style="margin: 10px 0; padding-left: 20px;">
+                            <li>Verificar email na página inicial</li>
+                            <li>Fazer cadastro se não existir</li>
+                            <li>Aguardar aprovação do administrador</li>
+                            <li>Definir senha após aprovação</li>
+                        </ol>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Função para ir para cadastro
+        function irParaCadastro(email) {
+            // Criar token temporário para permitir cadastro
+            localStorage.setItem('tempEmail', email);
+            localStorage.setItem('emailVerificado', 'true');
+            localStorage.setItem('verificacaoTimestamp', Date.now().toString());
+            window.location.href = `/cadastro.html?email=${encodeURIComponent(email)}`;
+        }
+        
+        document.getElementById('senhaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            const sucesso = document.getElementById('sucesso');
+            
+            // Validar senhas
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem</div>';
+                return;
+            }
+            
+            if (senha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres</div>';
+                return;
+            }
+
+            // Verificar novamente o status antes de enviar
+            loading.style.display = 'block';
+            message.innerHTML = '<div class="info">Verificando permissões...</div>';
+            
+            // Usar emails admin configurados localmente
+            const emailsAdmin = EMAILS_ADMIN;
+            
+            // Verificar se é email admin
+            const isEmailAdmin = emailsAdmin.some(adminEmail => 
+                email.toLowerCase() === adminEmail.toLowerCase()
+            );
+            
+            if (isEmailAdmin) {
+                console.log('✅ Email admin confirmado para criação de senha:', email);
+                
+                // Log de criação de senha admin
+                console.log('🔐 Admin criando senha inicial:', email, new Date().toISOString());
+                
+                message.innerHTML = '<div class="info">👑 Admin detectado. Definindo senha...</div>';
+                
+                // Prosseguir direto para criação de senha para admin
+                try {
+                    const response = await fetch('/api/auth/criar-senha', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            email: email,
+                            senha: senha 
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    console.log('📥 Resposta admin:', data);
+                    
+                    if (data.sucesso || response.ok) {
+                        // Log de sucesso na criação de senha admin
+                        console.log('✅ Admin senha criada com sucesso:', email);
+                        
+                        document.getElementById('senhaForm').style.display = 'none';
+                        sucesso.style.display = 'block';
+                        
+                        // Redirecionar para login após 3 segundos
+                        setTimeout(() => {
+                            window.location.href = '/login.html?email=' + encodeURIComponent(email);
+                        }, 3000);
+                    } else {
+                        // Log de erro na criação de senha admin
+                        const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
+                        console.error('❌ Erro criar senha admin:', email, errorMessage);
+                        
+                        message.innerHTML = '<div class="error">Erro admin: ' + errorMessage + '</div>';
+                    }
+                } catch (error) {
+                    console.error('❌ Erro admin:', error);
+                    message.innerHTML = '<div class="error">Erro ao definir senha admin. Tente novamente.</div>';
+                } finally {
+                    loading.style.display = 'none';
+                }
+                return;
+            }
+            
+            try {
+                // Dupla verificação antes de permitir criação de senha (para não-admin)
+                const statusResponse = await fetch(`/api/auth/status-funcionario/${encodeURIComponent(email)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const statusData = await statusResponse.json();
+                
+                if (!statusResponse.ok || !statusData.existe) {
+                    message.innerHTML = '<div class="error">Email não encontrado no sistema. Faça o cadastro primeiro.</div>';
+                    loading.style.display = 'none';
+                    setTimeout(() => {
+                        mostrarMensagemCadastro(email);
+                    }, 2000);
+                    return;
+                }
+                
+                if (statusData.temSenha) {
+                    message.innerHTML = '<div class="error">Este email já possui uma senha. Redirecionando para login...</div>';
+                    loading.style.display = 'none';
+                    setTimeout(() => {
+                        window.location.href = `/login.html?email=${encodeURIComponent(email)}`;
+                    }, 2000);
+                    return;
+                }
+                
+                if (!statusData.aprovado) {
+                    message.innerHTML = '<div class="error">Sua conta ainda não foi aprovada pelo administrador.</div>';
+                    loading.style.display = 'none';
+                    return;
+                }
+
+                // OK - prosseguir com criação de senha
+                message.innerHTML = '<div class="info">Definindo senha...</div>';
+            
+                const response = await fetch('/api/auth/criar-senha', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        email: email,
+                        senha: senha 
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('📥 Resposta:', data);
+                
+                if (data.sucesso || response.ok) {
+                    document.getElementById('senhaForm').style.display = 'none';
+                    sucesso.style.display = 'block';
+                    
+                    // Redirecionar para login após 3 segundos
+                    setTimeout(() => {
+                        window.location.href = '/login.html?email=' + encodeURIComponent(email);
+                    }, 3000);
+                } else {
+                    // Se email já cadastrado, mostrar link para login
+                    const errorMessage = data.message || data.error || data.erro || 'Erro desconhecido';
+                    if (errorMessage.toLowerCase().includes('já cadastrado') || errorMessage.toLowerCase().includes('já existe')) {
+                        message.innerHTML = `
+                            <div class="error">
+                                ${errorMessage}
+                                <br><br>
+                                <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-secondary" style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                    Fazer Login
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        message.innerHTML = '<div class="error">' + errorMessage + '</div>';
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div class="error">Erro ao definir senha. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

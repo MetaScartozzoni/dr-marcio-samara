@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembrete de Consulta</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #17a2b8, #138496); color: white; padding: 30px 20px; text-align: center;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🔔 Lembrete</h1>
+            <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">Consulta Agendada para Amanhã</p>
+        </div>
+        
+        <!-- Alert Badge -->
+        <div style="text-align: center; padding: 20px;">
+            <div style="display: inline-block; background-color: #ffc107; color: #212529; padding: 12px 24px; border-radius: 25px; font-weight: bold;">
+                ⏰ Consulta em 24 horas
+            </div>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 0 30px 30px 30px;">
+            <p style="font-size: 16px; color: #333; margin-bottom: 20px;">
+                Olá, <strong>{{nome}}</strong>!
+            </p>
+            
+            <p style="font-size: 16px; color: #666; margin-bottom: 25px;">
+                Este é um lembrete de que você tem uma consulta agendada para <strong>amanhã</strong>:
+            </p>
+            
+            <!-- Appointment Details -->
+            <div style="background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 20px; margin: 25px 0; border-radius: 0 8px 8px 0;">
+                <h3 style="margin-top: 0; color: #17a2b8; font-size: 18px;">Detalhes da Consulta</h3>
+                <div style="margin: 15px 0;">
+                    <p style="margin: 8px 0; color: #333;">
+                        <strong>📋 Serviço:</strong> {{servico}}
+                    </p>
+                    <p style="margin: 8px 0; color: #333;">
+                        <strong>📅 Data:</strong> {{data}}
+                    </p>
+                    <p style="margin: 8px 0; color: #333;">
+                        <strong>⏰ Horário:</strong> {{hora}}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Location Info -->
+            <div style="background-color: #e2e3e5; border: 1px solid #d6d8db; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="margin-top: 0; color: #495057;">📍 Localização</h4>
+                <p style="color: #495057; margin: 10px 0;">
+                    <strong>Endereço:</strong> {{endereco}}
+                </p>
+                <p style="color: #495057; margin: 10px 0;">
+                    <strong>Telefone:</strong> {{telefone}}
+                </p>
+                <p style="color: #495057; margin: 10px 0; font-size: 14px;">
+                    💡 <em>Estacionamento disponível no local</em>
+                </p>
+            </div>
+            
+            <!-- Checklist -->
+            <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="margin-top: 0; color: #856404;">📝 Checklist para Amanhã</h4>
+                <div style="color: #856404;">
+                    <p style="margin: 8px 0;">✅ Chegue <strong>15 minutos antes</strong> do horário</p>
+                    <p style="margin: 8px 0;">✅ Traga <strong>documento com foto</strong> (RG ou CNH)</p>
+                    <p style="margin: 8px 0;">✅ Use <strong>máscara de proteção</strong></p>
+                    <p style="margin: 8px 0;">✅ Evite perfumes ou cremes com cheiro forte</p>
+                    <p style="margin: 8px 0;">✅ Em caso de sintomas gripais, <strong>reagende</strong></p>
+                </div>
+            </div>
+            
+            <!-- Emergency Contact -->
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="color: #666; margin-bottom: 15px;">Precisa cancelar ou reagendar?</p>
+                <a href="tel:{{telefone}}" style="background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 5px; font-weight: bold;">
+                    📞 Ligar Agora
+                </a>
+            </div>
+            
+            <!-- Contact Info -->
+            <div style="border-top: 2px solid #e9ecef; padding-top: 25px; margin-top: 30px; text-align: center;">
+                <h4 style="color: #17a2b8; margin-bottom: 15px;">Informações de Contato</h4>
+                <p style="color: #666; margin: 8px 0;">
+                    📞 <strong>Telefone:</strong> {{telefone}}
+                </p>
+                <p style="color: #666; margin: 8px 0;">
+                    📧 <strong>Email:</strong> contato@drmarcio.com.br
+                </p>
+                <p style="color: #666; margin: 8px 0;">
+                    📍 <strong>Endereço:</strong> {{endereco}}
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; text-align: center; padding: 20px; color: #6c757d; font-size: 14px;">
+            <p style="margin: 0;">© 2024 Portal Dr. Marcio - Todos os direitos reservados</p>
+            <p style="margin: 5px 0 0 0;">Este é um email automático, não responda esta mensagem.</p>
+        </div>
+    </div>
+</body>
+</html>

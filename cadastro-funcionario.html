@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Funcionário - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <div class="header-section">
+                <div class="logo">
+                    
+                    <h1>Portal Dr. Marcio</h1>
+                </div>
+                <h2>Cadastro de Funcionário</h2>
+                <p class="subtitle">Complete seus dados para solicitar acesso ao sistema</p>
+            </div>
+            
+            <form id="cadastroFuncionarioForm" class="auth-form">
+                <div class="input-group">
+                    <label for="nome">
+                        
+                        Nome Completo *
+                    </label>
+                    <input type="text" id="nome" name="nome" required
+                           placeholder="Digite seu nome completo"
+                           minlength="3">
+                    <div class="input-feedback"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="email">
+                        
+                        Email Profissional *
+                    </label>
+                    <input type="email" id="email" name="email" required
+                           placeholder="seu.email@exemplo.com">
+                    <div class="input-feedback"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="telefone">
+                        
+                        Telefone
+                    </label>
+                    <input type="tel" id="telefone" name="telefone"
+                           placeholder="(11) 99999-9999">
+                    <div class="input-feedback"></div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="tipo">
+                        
+                        Tipo de Acesso *
+                    </label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="">Selecione o tipo de acesso</option>
+                        <option value="funcionario">Funcionário</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                    <div class="input-feedback"></div>
+                </div>
+                
+                <div class="info-box">
+                    
+                    <div>
+                        <h4>Como funciona o cadastro?</h4>
+                        <ol>
+                            <li>Preencha seus dados e envie o formulário</li>
+                            <li>Verifique seu email e insira o código de confirmação</li>
+                            <li>Crie uma senha segura para sua conta</li>
+                            <li>Aguarde a autorização do administrador</li>
+                            <li>Receba o email de aprovação e faça login</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary" id="btnCadastrar">
+                    
+                    Solicitar Cadastro
+                </button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                
+                Enviando solicitação...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="auth-links">
+                <p>
+                    <a href="login.html" class="link">
+                        
+                        Já tem uma conta? Fazer login
+                    </a>
+                </p>
+                <p>
+                    <a href="index.html" class="link">
+                        
+                        Voltar ao início
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CadastroFuncionario {
+            constructor() {
+                this.form = document.getElementById('cadastroFuncionarioForm');
+                this.loading = document.getElementById('loading');
+                this.message = document.getElementById('message');
+                this.btnCadastrar = document.getElementById('btnCadastrar');
+                
+                this.initEventListeners();
+                this.initValidation();
+            }
+
+            initEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                // Validação em tempo real
+                const inputs = this.form.querySelectorAll('input, select');
+                inputs.forEach(input => {
+                    input.addEventListener('blur', () => this.validateField(input));
+                    input.addEventListener('input', () => this.clearFieldError(input));
+                });
+
+                // Formatação do telefone
+                const telefoneInput = document.getElementById('telefone');
+                telefoneInput.addEventListener('input', this.formatTelefone);
+            }
+
+            initValidation() {
+                // Aplicar validações personalizadas
+                const emailInput = document.getElementById('email');
+                emailInput.addEventListener('input', () => {
+                    const email = emailInput.value;
+                    if (email && !this.isValidEmail(email)) {
+                        this.showFieldError(emailInput, 'Email inválido');
+                    }
+                });
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                
+                if (!this.validateForm()) {
+                    return;
+                }
+
+                const dados = this.getFormData();
+                
+                this.showLoading(true);
+                this.clearMessage();
+
+                try {
+                    const response = await fetch('/api/auth/cadastrar-funcionario', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(dados)
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        this.showSuccess(resultado.message);
+                        
+                        // Redirecionar para verificação de email após 2 segundos
+                        setTimeout(() => {
+                            window.location.href = `verificar-email.html?email=${encodeURIComponent(dados.email)}`;
+                        }, 2000);
+                        
+                    } else {
+                        this.showError(resultado.erro);
+                    }
+
+                } catch (error) {
+                    console.error('Erro no cadastro:', error);
+                    this.showError('Erro de conexão. Tente novamente.');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            getFormData() {
+                return {
+                    nome: document.getElementById('nome').value.trim(),
+                    email: document.getElementById('email').value.trim().toLowerCase(),
+                    telefone: document.getElementById('telefone').value.trim(),
+                    tipo: document.getElementById('tipo').value
+                };
+            }
+
+            validateForm() {
+                let isValid = true;
+                const requiredFields = ['nome', 'email', 'tipo'];
+                
+                requiredFields.forEach(fieldName => {
+                    const field = document.getElementById(fieldName);
+                    if (!this.validateField(field)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            validateField(field) {
+                const value = field.value.trim();
+                let isValid = true;
+
+                this.clearFieldError(field);
+
+                if (field.required && !value) {
+                    this.showFieldError(field, 'Este campo é obrigatório');
+                    isValid = false;
+                } else if (field.type === 'email' && value && !this.isValidEmail(value)) {
+                    this.showFieldError(field, 'Email inválido');
+                    isValid = false;
+                } else if (field.id === 'nome' && value && value.length < 3) {
+                    this.showFieldError(field, 'Nome deve ter pelo menos 3 caracteres');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            showFieldError(field, message) {
+                const inputGroup = field.closest('.input-group');
+                const feedback = inputGroup.querySelector('.input-feedback');
+                
+                field.classList.add('error');
+                feedback.textContent = message;
+                feedback.classList.add('error');
+            }
+
+            clearFieldError(field) {
+                const inputGroup = field.closest('.input-group');
+                const feedback = inputGroup.querySelector('.input-feedback');
+                
+                field.classList.remove('error');
+                feedback.textContent = '';
+                feedback.classList.remove('error');
+            }
+
+            isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            formatTelefone(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                
+                if (value.length <= 11) {
+                    value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                    value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                }
+                
+                e.target.value = value;
+            }
+
+            showLoading(show) {
+                this.loading.style.display = show ? 'block' : 'none';
+                this.btnCadastrar.disabled = show;
+                
+                if (show) {
+                    this.btnCadastrar.innerHTML = ' Processando...';
+                } else {
+                    this.btnCadastrar.innerHTML = ' Solicitar Cadastro';
+                }
+            }
+
+            showSuccess(message) {
+                this.message.className = 'message success';
+                this.message.innerHTML = `
+                    
+                    <div>
+                        <strong>Sucesso!</strong>
+                        <p>${message}</p>
+                        <p><small>Redirecionando para verificação de email...</small></p>
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            showError(message) {
+                this.message.className = 'message error';
+                this.message.innerHTML = `
+                    
+                    <div>
+                        <strong>Erro!</strong>
+                        <p>${message}</p>
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            clearMessage() {
+                this.message.style.display = 'none';
+                this.message.className = 'message';
+                this.message.innerHTML = '';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new CadastroFuncionario();
+        });
+    </script>
+
+    <style>
+        .auth-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: #007bff;
+        }
+
+        .logo h1 {
+            margin: 0;
+            color: #333;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group label i {
+            color: #007bff;
+            width: 16px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .input-group input.error,
+        .input-group select.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .input-feedback {
+            min-height: 20px;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
+        .input-feedback.error {
+            color: #dc3545;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .info-box i {
+            color: #007bff;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .info-box h4 {
+            margin: 0 0 10px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .info-box ol {
+            margin: 0;
+            padding-left: 20px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message i {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .auth-links p {
+            margin: 10px 0;
+        }
+
+        .auth-links .link {
+            color: #007bff;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s ease;
+        }
+
+        .auth-links .link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .info-box {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</body>
+</html>

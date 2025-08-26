@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #bee5eb;
+        }
+        .admin-success {
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+        .tipo-usuario {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .tipo-admin { background: #ffd700; color: #333; }
+        .tipo-funcionario { background: #17a2b8; color: white; }
+        .tipo-paciente { background: #28a745; color: white; }
+    </style>
+    
+    <!-- Scripts do Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="assets/js/config.js"></script>
+    
+    <!-- VERSAO ATUALIZADA COM TIPO DE USUARIO - 28/07/2025 -->
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Cadastro</h1>
+            <p>Preencha seus dados para se cadastrar</p>
+            
+            <form id="cadastroForm">
+                <div class="input-group">
+                    <label for="nome">Nome Completo:</label>
+                    <input type="text" id="nome" name="nome" required>
+                </div>
+                
+                                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required readonly style="background: #f8f9fa;">
+                </div>
+                
+                <!-- Campo de Senha Chave (aparece conforme o tipo) -->
+                <div id="senhaChaveGroup" class="input-group" style="display: none;">
+                    <label for="senhaChave">Senha Chave de Acesso:</label>
+                    <input type="password" id="senhaChave" name="senhaChave" placeholder="Digite a senha chave fornecida">
+                    <small id="senhaChaveHelp" style="color: #666; font-size: 12px;"></small>
+                </div>
+                
+                <div class="input-group">
+                    <label for="telefone">Telefone (opcional):</label>
+                    <input type="tel" id="telefone" name="telefone">
+                </div>
+                
+                <div class="input-group">
+                    <label for="cpf">CPF (opcional):</label>
+                    <input type="text" id="cpf" name="cpf">
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required minlength="6">
+                </div>
+                
+                <div class="input-group">
+                    <label for="confirmar_senha">Confirmar Senha:</label>
+                    <input type="password" id="confirmar_senha" name="confirmar_senha" required minlength="6">
+                </div>
+                
+                <button type="submit" class="btn-primary">Cadastrar</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Cadastrando...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="text-center">
+                <a href="/" class="link">Voltar à verificação de email</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ AGUARDAR CARREGAMENTO COMPLETO DOS SCRIPTS
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aguardar um pouco para garantir que o Supabase foi carregado
+            setTimeout(initializeApp, 100);
+        });
+        
+        function initializeApp() {
+            // Inicialização do Supabase com verificação
+            if (typeof supabase === 'undefined') {
+                console.error('❌ Supabase não carregado!');
+                return;
+            }
+            
+            const { createClient } = supabase;
+            const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Alias global para compatibilidade
+            window.supabase = supabaseClient;
+            
+            console.log('✅ Supabase inicializado com sucesso');
+            
+            // Agora configurar o formulário
+            setupFormHandler();
+        }
+        
+        function setupFormHandler() {
+        
+        // Configuração de emails admin (limitada para frontend)
+        const EMAILS_ADMIN = [
+            'marcioscartozzoni@gmail.com',
+            'admin@drmarcio.com'
+        ];
+        
+        // Senhas chave para validação (NÃO deve ficar no frontend em produção)
+        const SENHAS_CHAVE = {
+            PRIMEIRO_ADMIN: 'AdminMestre2025!',
+            FUNCIONARIO: 'FuncChave2025@',
+            PACIENTE: 'PacienteKey2025#'
+        };
+        
+        // Função para validar senha chave
+        function validarSenhaChave(email, senhaChave, tipoUsuario) {
+            const emailsAdmin = EMAILS_ADMIN;
+            const isEmailAdmin = emailsAdmin.includes(email.toLowerCase());
+            
+            if (isEmailAdmin && tipoUsuario === 'primeiro_admin') {
+                return {
+                    valida: senhaChave === SENHAS_CHAVE.PRIMEIRO_ADMIN,
+                    tipo: 'admin'
+                };
+            } else if (senhaChave === SENHAS_CHAVE.FUNCIONARIO) {
+                return {
+                    valida: true,
+                    tipo: 'funcionario'
+                };
+            } else if (senhaChave === SENHAS_CHAVE.PACIENTE) {
+                return {
+                    valida: true,
+                    tipo: 'paciente'
+                };
+            }
+            
+            return { valida: false, tipo: null };
+        }
+        
+        let tipoUsuarioDetectado = null;
+        
+        // Preencher email automaticamente se vier da verificação
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const emailFromUrl = urlParams.get('email');
+            const emailFromStorage = localStorage.getItem('tempEmail');
+            const tipoFromUrl = urlParams.get('tipo');
+            
+            // Verificar se passou pela verificação recente (últimos 5 minutos)
+            const emailVerificado = localStorage.getItem('emailVerificado');
+            const verificacaoTimestamp = localStorage.getItem('verificacaoTimestamp');
+            const agora = Date.now();
+            const cincoMinutos = 5 * 60 * 1000; // 5 minutos em ms
+            
+            const verificacaoRecente = verificacaoTimestamp && 
+                                     (agora - parseInt(verificacaoTimestamp)) < cincoMinutos;
+            
+            if (!emailVerificado || !verificacaoRecente) {
+                alert('Acesso não autorizado. Faça a verificação de email primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                localStorage.removeItem('tempEmail');
+                window.location.href = '/index.html';
+                return;
+            }
+            
+            const emailInput = document.getElementById('email');
+            let emailFinal = '';
+            
+            if (emailFromUrl) {
+                emailFinal = emailFromUrl;
+                emailInput.value = emailFromUrl;
+                emailInput.readOnly = true;
+            } else if (emailFromStorage) {
+                emailFinal = emailFromStorage;
+                emailInput.value = emailFromStorage;
+                emailInput.readOnly = true;
+            } else {
+                alert('Email não encontrado. Faça a verificação primeiro.');
+                localStorage.removeItem('emailVerificado');
+                localStorage.removeItem('verificacaoTimestamp');
+                window.location.href = '/index.html';
+                return;
+            }
+            
+            // Detectar tipo de usuário e configurar interface
+            detectarTipoUsuario(emailFinal, tipoFromUrl);
+            
+            // Limpar tokens após uso
+            localStorage.removeItem('emailVerificado');
+            localStorage.removeItem('verificacaoTimestamp');
+            localStorage.removeItem('tempEmail');
+        };
+        
+        function detectarTipoUsuario(email, tipoForcado = null) {
+            const emailsAdmin = EMAILS_ADMIN;
+            const senhaChaveGroup = document.getElementById('senhaChaveGroup');
+            const senhaChaveHelp = document.getElementById('senhaChaveHelp');
+            
+            if (tipoForcado === 'primeiro_admin' || emailsAdmin.includes(email.toLowerCase())) {
+                tipoUsuarioDetectado = 'primeiro_admin';
+                senhaChaveGroup.style.display = 'block';
+                senhaChaveHelp.innerHTML = '🔑 Digite a senha de primeiro admin (uso único): <strong>AdminMestre2025!</strong>';
+                
+                document.querySelector('h1').innerHTML = '👑 Cadastro - Primeiro Administrador';
+                const formDescription = document.querySelector('p');
+                if (formDescription) {
+                    formDescription.innerHTML = 'Configure o primeiro acesso administrativo do sistema';
+                }
+                
+            } else {
+                // Para funcionários e pacientes, mostrar opções
+                tipoUsuarioDetectado = 'funcionario'; // Default
+                senhaChaveGroup.style.display = 'block';
+                senhaChaveHelp.innerHTML = '🔑 Digite a senha chave fornecida (funcionário ou paciente)';
+            }
+        }
+        
+        // Form handler encapsulado
+        document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const nome = document.getElementById('nome').value;
+            const telefone = document.getElementById('telefone').value;
+            const cpf = document.getElementById('cpf').value;
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmar_senha').value;
+            const senhaChave = document.getElementById('senhaChave').value;
+            
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            // Validações básicas
+            if (!nome.trim()) {
+                message.innerHTML = '<div class="error">Digite seu nome completo!</div>';
+                return;
+            }
+            
+            if (!senha) {
+                message.innerHTML = '<div class="error">Digite uma senha!</div>';
+                return;
+            }
+            
+            if (senha.length < 6) {
+                message.innerHTML = '<div class="error">A senha deve ter pelo menos 6 caracteres!</div>';
+                return;
+            }
+            
+            if (senha !== confirmarSenha) {
+                message.innerHTML = '<div class="error">As senhas não coincidem!</div>';
+                return;
+            }
+            
+            // Validar senha chave primeiro
+            if (!senhaChave) {
+                message.innerHTML = '<div class="error">Digite a senha chave de acesso!</div>';
+                return;
+            }
+            
+            // Validar senha chave usando o sistema
+            const validacaoSenha = validarSenhaChave(email, senhaChave, tipoUsuarioDetectado);
+            
+            if (!validacaoSenha.valida) {
+                message.innerHTML = '<div class="error">Senha chave inválida! Verifique se você possui autorização para cadastro.</div>';
+                
+                // Log de tentativa de acesso não autorizado
+                console.error('❌ Tentativa senha chave inválida:', email, senhaChave.substring(0, 3) + '***', tipoUsuarioDetectado);
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '<div class="info">✅ Senha chave válida! Processando cadastro...</div>';
+            
+            // Log de validação bem-sucedida
+            console.log('✅ Senha chave válida:', email, 'tipo:', validacaoSenha.tipo, 'usuário:', tipoUsuarioDetectado);
+            
+            try {
+                // Usar Edge Function auth-manager para cadastro
+                console.log('🔄 Iniciando cadastro via Edge Function:', email);
+                
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/auth-manager`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        action: 'create_user',
+                        email: email,
+                        password: senha,
+                        userData: {
+                            nome: nome,
+                            tipo_usuario: validacaoSenha.tipo,
+                            telefone: telefone || '',
+                            endereco: endereco || '',
+                            data_nascimento: dataNascimento || null,
+                            senha_chave_usada: validacaoSenha.tipo
+                        }
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!response.ok || result.error) {
+                    if (!response.ok || result.error) {
+                    if (result.error && result.error.includes('User already registered')) {
+                        message.innerHTML = `
+                            <div class="error">
+                                Email já cadastrado no sistema.
+                                <br><br>
+                                <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-primary" 
+                                   style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                    Fazer Login
+                                </a>
+                            </div>
+                        `;
+                        loading.style.display = 'none';
+                        return;
+                    } else {
+                        console.log('❌ Erro na Edge Function:', result.error);
+                        message.innerHTML = '<div class="error">Erro no cadastro: ' + (result.error || 'Erro desconhecido') + '</div>';
+                        loading.style.display = 'none';
+                        return;
+                    }
+                }
+                
+                // Cadastro realizado com sucesso via Edge Function
+                console.log('✅ Cadastro realizado via Edge Function:', result);
+                
+                // Determinar tipo baseado na senha chave
+                let tipoMensagem = '';
+                if (validacaoSenha.tipo === 'primeiro_admin') {
+                    tipoMensagem = '👑 Primeiro admin - conta criada com acesso total!';
+                } else if (validacaoSenha.tipo === 'funcionario_chave') {
+                    tipoMensagem = '👨‍💼 Funcionário autorizado - conta criada!';
+                } else if (validacaoSenha.tipo === 'paciente_chave') {
+                    tipoMensagem = '👤 Paciente autorizado - conta criada!';
+                }
+                
+                if (result.user && !result.user.email_confirmed_at) {
+                    message.innerHTML = `
+                        <div class="admin-success">
+                            ${tipoMensagem}
+                            <br><br>
+                            📧 Verifique seu email para confirmar a conta.
+                            <br><br>
+                            <span class="tipo-usuario tipo-${validacaoSenha.tipo.replace('_', '-')}">${validacaoSenha.tipo.toUpperCase()}</span>
+                        </div>
+                    `;
+                } else {
+                    message.innerHTML = `
+                        <div class="admin-success">
+                            ${tipoMensagem}
+                            <br><br>
+                            ✅ Conta criada com sucesso via Edge Function!
+                            <br><br>
+                            <span class="tipo-usuario tipo-${validacaoSenha.tipo.replace('_', '-')}">${validacaoSenha.tipo.toUpperCase()}</span>
+                            <br><br>
+                            <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-primary" 
+                               style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                Fazer Login
+                            </a>
+                        </div>
+                    `;
+                }
+                }
+                
+                // Cadastro realizado com sucesso
+                console.log('✅ Cadastro realizado com sucesso:', signUpData);
+                
+                // Determinar tipo baseado na senha chave
+                let tipoMensagem = '';
+                if (validacaoSenha.tipo === 'primeiro_admin') {
+                    tipoMensagem = '👑 Primeiro admin - conta criada com acesso total!';
+                } else if (validacaoSenha.tipo === 'funcionario_chave') {
+                    tipoMensagem = '👨‍💼 Funcionário autorizado - conta criada!';
+                } else if (validacaoSenha.tipo === 'paciente_chave') {
+                    tipoMensagem = '👤 Paciente autorizado - conta criada!';
+                }
+                
+                if (signUpData.user && !signUpData.user.email_confirmed_at) {
+                    message.innerHTML = `
+                        <div class="admin-success">
+                            ${tipoMensagem}
+                            <br><br>
+                            � Verifique seu email para confirmar a conta.
+                            <br><br>
+                            <span class="tipo-usuario tipo-${validacaoSenha.tipo.replace('_', '-')}">${validacaoSenha.tipo.toUpperCase()}</span>
+                        </div>
+                    `;
+                } else {
+                    message.innerHTML = `
+                        <div class="admin-success">
+                            ${tipoMensagem}
+                            <br><br>
+                            ✅ Conta criada com sucesso!
+                            <br><br>
+                            <span class="tipo-usuario tipo-${validacaoSenha.tipo.replace('_', '-')}">${validacaoSenha.tipo.toUpperCase()}</span>
+                            <br><br>
+                            <a href="/login.html?email=${encodeURIComponent(email)}" class="btn-primary" 
+                               style="color: white; text-decoration: none; padding: 10px 20px; background: #007bff; border-radius: 5px; display: inline-block;">
+                                Fazer Login
+                            </a>
+                        </div>
+                    `;
+                }
+                
+            } catch (erro) {
+                console.log('❌ Erro cadastro:', email, erro.message, 'tipo:', validacaoSenha?.tipo);
+                message.innerHTML = '<div class="error">Erro de comunicação. Tente novamente.</div>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+        } // Fecha setupFormHandler
+    </script>
+</body>
+</html>

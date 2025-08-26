@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Cirurgia Plástica - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .medical-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .input-group-full {
+            grid-column: 1 / -1;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .patient-search {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab.active {
+            border-bottom-color: #3498db;
+            color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .procedure-config {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .procedure-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        
+        .financial-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+        
+        .financial-summary h4 {
+            margin: 0 0 15px 0;
+        }
+        
+        .financial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .financial-item {
+            text-align: center;
+        }
+        
+        .financial-item .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .financial-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> Ficha de Cirurgia Plástica</h1>
+            <p>Avaliação completa e orçamento especializado</p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="btn-secondary" onclick="window.location.href='gestao.html'">
+                     Voltar
+                </button>
+                <button class="btn-primary" onclick="window.location.href='gestao-financeira.html'">
+                     Financeiro
+                </button>
+            </div>
+        </div>
+
+        <!-- Busca de Paciente -->
+        <div class="medical-form">
+            <div class="patient-search">
+                <label>Buscar Paciente Existente</label>
+                <input type="text" id="patientSearch" placeholder="Digite nome, email ou telefone..." 
+                       onkeyup="searchPatients(this.value)">
+                <div id="searchResults" class="search-results"></div>
+            </div>
+            
+            <button class="btn-secondary" onclick="clearForm()">
+                 Novo Paciente
+            </button>
+        </div>
+
+        <!-- Navegação por Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('dados-pessoais')">
+                 Dados Pessoais
+            </button>
+            <button class="nav-tab" onclick="showTab('avaliacao-medica')">
+                 Avaliação Médica
+            </button>
+            <button class="nav-tab" onclick="showTab('procedimentos')">
+                 Procedimentos
+            </button>
+            <button class="nav-tab" onclick="showTab('orcamento')">
+                 Orçamento
+            </button>
+        </div>
+
+        <!-- Tab: Dados Pessoais -->
+        <div id="dados-pessoais" class="tab-content active">
+            <form id="fichaForm" class="medical-form">
+                <div class="form-section">
+                    <h3> Informações Pessoais</h3>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" name="nome" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Data de Nascimento</label>
+                            <input type="date" name="data_nascimento">
+                        </div>
+                        <div class="input-group">
+                            <label>CPF</label>
+                            <input type="text" name="cpf" placeholder="000.000.000-00">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Email *</label>
+                            <input type="email" name="email" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Telefone *</label>
+                            <input type="tel" name="telefone" required>
+                        </div>
+                        <div class="input-group">
+                            <label>WhatsApp</label>
+                            <input type="tel" name="whatsapp">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Endereço</label>
+                            <input type="text" name="endereco">
+                        </div>
+                        <div class="input-group">
+                            <label>Cidade</label>
+                            <input type="text" name="cidade">
+                        </div>
+                        <div class="input-group">
+                            <label>Estado</label>
+                            <select name="estado">
+                                <option value="">Selecione</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="MG">Minas Gerais</option>
+                                <!-- Outros estados -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tab: Avaliação Médica -->
+        <div id="avaliacao-medica" class="tab-content">
+            <div class="medical-form">
+                <div class="form-section">
+                    <h3> Avaliação Clínica</h3>
+                    
+                    <div class="input-group-full">
+                        <label>Queixa Principal *</label>
+                        <textarea name="queixa_principal" rows="3" required 
+                                  placeholder="Descreva a principal queixa do paciente..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Cirurgia de Interesse</label>
+                            <select name="cirurgia_interesse">
+                                <option value="">Selecione</option>
+                                <option value="Rinoplastia">Rinoplastia</option>
+                                <option value="Mamoplastia">Mamoplastia</option>
+                                <option value="Abdominoplastia">Abdominoplastia</option>
+                                <option value="Lipoaspiração">Lipoaspiração</option>
+                                <option value="Blefaroplastia">Blefaroplastia</option>
+                                <option value="Lifting Facial">Lifting Facial</option>
+                                <option value="Outras">Outras</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Área do Corpo</label>
+                            <input type="text" name="area_corpo" placeholder="Ex: Face, Seios, Abdômen">
+                        </div>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Expectativa do Resultado</label>
+                        <textarea name="expectativa_resultado" rows="3" 
+                                  placeholder="Descreva as expectativas do paciente..."></textarea>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Pontos Estéticos a Melhorar</label>
+                        <textarea name="pontos_esteticos" rows="3" 
+                                  placeholder="Identifique os pontos estéticos que podem ser melhorados..."></textarea>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Alterações Posturais Observadas</label>
+                        <textarea name="alteracoes_posturais" rows="2" 
+                                  placeholder="Descreva alterações posturais relevantes..."></textarea>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Indicação Cirúrgica</label>
+                        <textarea name="indicacao_cirurgica" rows="3" 
+                                  placeholder="Indicação médica para o procedimento..."></textarea>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Informações Adicionais</label>
+                        <textarea name="informacoes_adicionais" rows="3" 
+                                  placeholder="Outras informações relevantes..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Procedimentos -->
+        <div id="procedimentos" class="tab-content">
+            <div class="medical-form">
+                <div class="form-section">
+                    <h3> Seleção de Procedimentos</h3>
+                    
+                    <div class="procedure-config">
+                        <h4>Procedimentos Disponíveis</h4>
+                        <div id="proceduresList"></div>
+                        
+                        <h4 style="margin-top: 20px;">Procedimentos Selecionados</h4>
+                        <div id="selectedProcedures"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Orçamento -->
+        <div id="orcamento" class="tab-content">
+            <div class="medical-form">
+                <div class="form-section">
+                    <h3> Resumo Financeiro</h3>
+                    
+                    <div class="financial-summary">
+                        <h4> Detalhamento de Custos</h4>
+                        <div class="financial-grid">
+                            <div class="financial-item">
+                                <div class="label">Equipe Médica</div>
+                                <div class="value" id="valorEquipe">R$ 0,00</div>
+                            </div>
+                            <div class="financial-item">
+                                <div class="label">Hospital</div>
+                                <div class="value" id="valorHospital">R$ 0,00</div>
+                            </div>
+                            <div class="financial-item">
+                                <div class="label">Anestesia</div>
+                                <div class="value" id="valorAnestesia">R$ 0,00</div>
+                            </div>
+                            <div class="financial-item">
+                                <div class="label">Adicionais</div>
+                                <div class="value" id="valorAdicionais">R$ 0,00</div>
+                            </div>
+                            <div class="financial-item">
+                                <div class="label">Valor Total</div>
+                                <div class="value" id="valorTotal">R$ 0,00</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Desconto (%)</label>
+                            <input type="number" id="desconto" min="0" max="100" step="0.1" onchange="updateTotal()">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor Final</label>
+                            <input type="text" id="valorFinal" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group-full">
+                        <label>Observações do Orçamento</label>
+                        <textarea name="observacoes_orcamento" rows="3" 
+                                  placeholder="Observações adicionais sobre o orçamento..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="btn-group">
+            <button type="button" class="btn-secondary" onclick="saveDraft()">
+                 Salvar Rascunho
+            </button>
+            <button type="button" class="btn-primary" onclick="generateBudget()">
+                 Gerar Orçamento
+            </button>
+            <button type="button" class="btn-success" onclick="sendBudget()">
+                 Enviar Orçamento
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedProcedures = [];
+        let availableProcedures = [];
+        let currentPatient = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProcedures();
+        });
+
+        // Navegação entre tabs
+        function showTab(tabName) {
+            // Ocultar todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Buscar pacientes
+        async function searchPatients(query) {
+            if (query.length < 3) {
+                document.getElementById('searchResults').style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/fichas/buscar?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const resultsDiv = document.getElementById('searchResults');
+                    
+                    if (data.data.length === 0) {
+                        resultsDiv.innerHTML = '<div class="search-result-item">Nenhum paciente encontrado</div>';
+                    } else {
+                        resultsDiv.innerHTML = data.data.map(patient => `
+                            <div class="search-result-item" onclick="selectPatient(${patient.id})">
+                                <strong>${patient.nome}</strong><br>
+                                <small>${patient.email} - ${patient.telefone}</small>
+                            </div>
+                        `).join('');
+                    }
+                    
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erro ao buscar pacientes:', error);
+            }
+        }
+
+        // Selecionar paciente
+        async function selectPatient(patientId) {
+            try {
+                const response = await fetch(`/api/fichas/${patientId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentPatient = data.data;
+                    fillPatientData(data.data);
+                    document.getElementById('searchResults').style.display = 'none';
+                    document.getElementById('patientSearch').value = data.data.nome;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar paciente:', error);
+            }
+        }
+
+        // Preencher dados do paciente
+        function fillPatientData(patient) {
+            const form = document.getElementById('fichaForm');
+            Object.keys(patient).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input) {
+                    input.value = patient[key] || '';
+                }
+            });
+        }
+
+        // Carregar procedimentos disponíveis
+        async function loadProcedures() {
+            try {
+                const response = await fetch('/api/procedimentos');
+                const data = await response.json();
+                
+                if (data.success) {
+                    availableProcedures = data.data;
+                    displayProcedures();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar procedimentos:', error);
+            }
+        }
+
+        // Exibir procedimentos disponíveis
+        function displayProcedures() {
+            const container = document.getElementById('proceduresList');
+            container.innerHTML = availableProcedures.map(proc => `
+                <div class="procedure-item">
+                    <div>
+                        <strong>${proc.nome}</strong><br>
+                        <small>${proc.tipo} - ${proc.area_corpo || 'N/A'}</small>
+                    </div>
+                    <div>
+                        <span style="font-weight: bold;">${formatCurrency(calculateProcedureTotal(proc))}</span>
+                        <button class="btn-small btn-primary" onclick="addProcedure(${proc.id})" style="margin-left: 10px;">
+                            
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Adicionar procedimento
+        function addProcedure(procedureId) {
+            const procedure = availableProcedures.find(p => p.id === procedureId);
+            if (procedure && !selectedProcedures.find(p => p.id === procedureId)) {
+                selectedProcedures.push(procedure);
+                updateSelectedProcedures();
+                updateTotal();
+            }
+        }
+
+        // Remover procedimento
+        function removeProcedure(procedureId) {
+            selectedProcedures = selectedProcedures.filter(p => p.id !== procedureId);
+            updateSelectedProcedures();
+            updateTotal();
+        }
+
+        // Atualizar procedimentos selecionados
+        function updateSelectedProcedures() {
+            const container = document.getElementById('selectedProcedures');
+            
+            if (selectedProcedures.length === 0) {
+                container.innerHTML = '<p style="color: #666;">Nenhum procedimento selecionado</p>';
+                return;
+            }
+            
+            container.innerHTML = selectedProcedures.map(proc => `
+                <div class="procedure-item">
+                    <div>
+                        <strong>${proc.nome}</strong><br>
+                        <small>${proc.tipo} - ${proc.area_corpo || 'N/A'}</small>
+                    </div>
+                    <div>
+                        <span style="font-weight: bold;">${formatCurrency(calculateProcedureTotal(proc))}</span>
+                        <button class="btn-small btn-danger" onclick="removeProcedure(${proc.id})" style="margin-left: 10px;">
+                            
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Calcular total do procedimento
+        function calculateProcedureTotal(proc) {
+            return (parseFloat(proc.valor_equipe) || 0) +
+                   (parseFloat(proc.valor_hospital) || 0) +
+                   (parseFloat(proc.valor_anestesista) || 0) +
+                   (parseFloat(proc.valor_instrumentador) || 0) +
+                   (parseFloat(proc.valor_assistente) || 0);
+        }
+
+        // Atualizar totais
+        function updateTotal() {
+            let totalEquipe = 0;
+            let totalHospital = 0;
+            let totalAnestesia = 0;
+            let totalAdicionais = 0;
+
+            selectedProcedures.forEach(proc => {
+                totalEquipe += parseFloat(proc.valor_equipe) || 0;
+                totalHospital += parseFloat(proc.valor_hospital) || 0;
+                totalAnestesia += parseFloat(proc.valor_anestesista) || 0;
+            });
+
+            const total = totalEquipe + totalHospital + totalAnestesia + totalAdicionais;
+            const desconto = parseFloat(document.getElementById('desconto').value) || 0;
+            const valorFinal = total * (1 - desconto / 100);
+
+            document.getElementById('valorEquipe').textContent = formatCurrency(totalEquipe);
+            document.getElementById('valorHospital').textContent = formatCurrency(totalHospital);
+            document.getElementById('valorAnestesia').textContent = formatCurrency(totalAnestesia);
+            document.getElementById('valorAdicionais').textContent = formatCurrency(totalAdicionais);
+            document.getElementById('valorTotal').textContent = formatCurrency(total);
+            document.getElementById('valorFinal').value = formatCurrency(valorFinal);
+        }
+
+        // Salvar rascunho
+        async function saveDraft() {
+            const formData = new FormData(document.getElementById('fichaForm'));
+            const data = Object.fromEntries(formData.entries());
+            
+            data.procedimentos = selectedProcedures.map(p => p.id);
+            data.status = 'rascunho';
+            
+            try {
+                const response = await fetch('/api/fichas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Rascunho salvo com sucesso!');
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro ao salvar rascunho:', error);
+                alert('Erro ao salvar rascunho');
+            }
+        }
+
+        // Gerar orçamento
+        async function generateBudget() {
+            if (selectedProcedures.length === 0) {
+                alert('Selecione pelo menos um procedimento');
+                return;
+            }
+            
+            await saveDraft();
+            
+            // Implementar geração de PDF do orçamento
+            alert('Funcionalidade de geração de PDF será implementada em breve');
+        }
+
+        // Enviar orçamento
+        async function sendBudget() {
+            if (selectedProcedures.length === 0) {
+                alert('Selecione pelo menos um procedimento');
+                return;
+            }
+            
+            const email = document.querySelector('[name="email"]').value;
+            if (!email) {
+                alert('Email do paciente é obrigatório');
+                return;
+            }
+            
+            // Implementar envio por email
+            alert('Funcionalidade de envio por email será implementada em breve');
+        }
+
+        // Limpar formulário
+        function clearForm() {
+            document.getElementById('fichaForm').reset();
+            selectedProcedures = [];
+            currentPatient = null;
+            updateSelectedProcedures();
+            updateTotal();
+            document.getElementById('patientSearch').value = '';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value || 0);
+        }
+
+        // Ocultar resultados da busca ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.patient-search')) {
+                document.getElementById('searchResults').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

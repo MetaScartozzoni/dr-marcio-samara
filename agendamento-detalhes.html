@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Agendamento - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .details-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .details-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .details-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .status-confirmado { background: #28a745; color: white; }
+        .status-pendente { background: #ffc107; color: #000; }
+        .status-cancelado { background: #dc3545; color: white; }
+        .status-reagendado { background: #6f42c1; color: white; }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .details-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .details-card h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .actions-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-edit { background: #667eea; color: white; }
+        .btn-reschedule { background: #ffc107; color: #000; }
+        .btn-cancel { background: #dc3545; color: white; }
+        .btn-confirm { background: #28a745; color: white; }
+        .btn-print { background: #6c757d; color: white; }
+        .btn-back { background: #e9ecef; color: #495057; }
+
+        .timeline {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-left: 3px solid #e9ecef;
+            padding-left: 20px;
+            margin-left: 10px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+
+        .timeline-item:last-child {
+            border-left-color: transparent;
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-date {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+
+        .timeline-description {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .details-header {
+                padding: 20px;
+            }
+            
+            .details-header h1 {
+                font-size: 24px;
+            }
+        }
+
+        .tipo-indicator {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tipo-consulta { background: #d4edda; color: #155724; }
+        .tipo-cirurgia { background: #f8d7da; color: #721c24; }
+        .tipo-reuniao { background: #e2e3f1; color: #383d41; }
+        .tipo-retorno { background: #ffeeba; color: #856404; }
+        .tipo-avaliacao { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="details-container">
+        <!-- Cabeçalho -->
+        <div class="details-header">
+            <h1 id="agendamentoTitulo">Detalhes do Agendamento</h1>
+            <p id="agendamentoSubtitulo">Informações completas e ações disponíveis</p>
+            <div id="statusBadge" class="status-badge">Carregando...</div>
+        </div>
+
+        <!-- Informações principais -->
+        <div class="details-grid">
+            <!-- Informações do Agendamento -->
+            <div class="details-card">
+                <h3> Informações do Agendamento</h3>
+                <div class="detail-item">
+                    <span class="detail-label"> ID:</span>
+                    <span class="detail-value" id="agendamentoId">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Tipo:</span>
+                    <span class="detail-value" id="agendamentoTipo">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Data:</span>
+                    <span class="detail-value" id="agendamentoData">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Horário:</span>
+                    <span class="detail-value" id="agendamentoHora">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Duração:</span>
+                    <span class="detail-value" id="agendamentoDuracao">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Status:</span>
+                    <span class="detail-value" id="agendamentoStatus">-</span>
+                </div>
+            </div>
+
+            <!-- Informações do Paciente -->
+            <div class="details-card">
+                <h3> Informações do Paciente</h3>
+                <div class="detail-item">
+                    <span class="detail-label"> Nome:</span>
+                    <span class="detail-value" id="pacienteNome">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Email:</span>
+                    <span class="detail-value" id="pacienteEmail">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Telefone:</span>
+                    <span class="detail-value" id="pacienteTelefone">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Idade:</span>
+                    <span class="detail-value" id="pacienteIdade">-</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label"> Observações:</span>
+                    <span class="detail-value" id="agendamentoObservacoes">-</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações disponíveis -->
+        <div class="actions-section">
+            <h3> Ações Disponíveis</h3>
+            <div class="actions-grid">
+                <button class="action-btn btn-edit" onclick="editarAgendamento()">
+                     Editar
+                </button>
+                <button class="action-btn btn-reschedule" onclick="reagendarAgendamento()">
+                     Reagendar
+                </button>
+                <button class="action-btn btn-confirm" onclick="confirmarAgendamento()">
+                     Confirmar
+                </button>
+                <button class="action-btn btn-cancel" onclick="cancelarAgendamento()">
+                     Cancelar
+                </button>
+                <button class="action-btn btn-print" onclick="imprimirAgendamento()">
+                     Imprimir
+                </button>
+                <a href="/agendar.html" class="action-btn btn-back">
+                     Voltar ao Calendário
+                </a>
+            </div>
+        </div>
+
+        <!-- Timeline de eventos -->
+        <div class="timeline">
+            <h3> Histórico do Agendamento</h3>
+            <div id="timelineContainer">
+                <!-- Timeline será carregada dinamicamente -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let agendamentoAtual = null;
+
+        // Carregar detalhes do agendamento
+        async function carregarDetalhes() {
+            try {
+                // Obter ID do agendamento da URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const agendamentoId = urlParams.get('id');
+                
+                if (!agendamentoId) {
+                    alert('ID do agendamento não encontrado!');
+                    window.location.href = '/agendar.html';
+                    return;
+                }
+
+                // TODO: Buscar dados da API
+                // const response = await fetch(`/api/appointments/${agendamentoId}`);
+                // agendamentoAtual = await response.json();
+
+                // Dados de exemplo por enquanto
+                agendamentoAtual = {
+                    id: agendamentoId,
+                    tipo: 'consulta',
+                    data: '2025-07-31',
+                    hora: '14:30',
+                    duracao: 60,
+                    status: 'confirmado',
+                    paciente: {
+                        nome: 'Maria Silva',
+                        email: 'maria.silva@email.com',
+                        telefone: '(11) 99999-9999',
+                        idade: 35
+                    },
+                    observacoes: 'Consulta de retorno para acompanhamento pós-operatório',
+                    timeline: [
+                        {
+                            data: '2025-07-30 10:00',
+                            titulo: 'Agendamento Criado',
+                            descricao: 'Agendamento criado pelo sistema'
+                        },
+                        {
+                            data: '2025-07-30 10:05',
+                            titulo: 'Confirmação Enviada',
+                            descricao: 'Email de confirmação enviado para o paciente'
+                        },
+                        {
+                            data: '2025-07-30 14:20',
+                            titulo: 'Confirmado pelo Paciente',
+                            descricao: 'Paciente confirmou presença via email'
+                        }
+                    ]
+                };
+
+                atualizarInterface();
+                carregarTimeline();
+                
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+                alert('Erro ao carregar detalhes do agendamento');
+            }
+        }
+
+        // Atualizar interface com dados
+        function atualizarInterface() {
+            if (!agendamentoAtual) return;
+
+            const { paciente } = agendamentoAtual;
+
+            // Cabeçalho
+            document.getElementById('agendamentoTitulo').textContent = 
+                `${getTipoTexto(agendamentoAtual.tipo)} - ${paciente.nome}`;
+            
+            // Status
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.textContent = getStatusTexto(agendamentoAtual.status);
+            statusBadge.className = `status-badge status-${agendamentoAtual.status}`;
+
+            // Informações do agendamento
+            document.getElementById('agendamentoId').textContent = agendamentoAtual.id;
+            document.getElementById('agendamentoTipo').innerHTML = 
+                `<span class="tipo-indicator tipo-${agendamentoAtual.tipo}">${getTipoTexto(agendamentoAtual.tipo)}</span>`;
+            document.getElementById('agendamentoData').textContent = 
+                new Date(agendamentoAtual.data).toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            document.getElementById('agendamentoHora').textContent = agendamentoAtual.hora;
+            document.getElementById('agendamentoDuracao').textContent = `${agendamentoAtual.duracao} minutos`;
+            document.getElementById('agendamentoStatus').textContent = getStatusTexto(agendamentoAtual.status);
+
+            // Informações do paciente
+            document.getElementById('pacienteNome').textContent = paciente.nome;
+            document.getElementById('pacienteEmail').textContent = paciente.email;
+            document.getElementById('pacienteTelefone').textContent = paciente.telefone;
+            document.getElementById('pacienteIdade').textContent = `${paciente.idade} anos`;
+            document.getElementById('agendamentoObservacoes').textContent = 
+                agendamentoAtual.observacoes || 'Nenhuma observação registrada';
+        }
+
+        // Carregar timeline
+        function carregarTimeline() {
+            const container = document.getElementById('timelineContainer');
+            container.innerHTML = '';
+
+            agendamentoAtual.timeline.forEach(item => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                
+                timelineItem.innerHTML = `
+                    <div class="timeline-content">
+                        <div class="timeline-date">${new Date(item.data).toLocaleString('pt-BR')}</div>
+                        <div class="timeline-title">${item.titulo}</div>
+                        <div class="timeline-description">${item.descricao}</div>
+                    </div>
+                `;
+                
+                container.appendChild(timelineItem);
+            });
+        }
+
+        // Funções auxiliares
+        function getTipoTexto(tipo) {
+            const tipos = {
+                'consulta': '👩‍⚕️ Consulta',
+                'cirurgia': '🏥 Cirurgia',
+                'reuniao': '👥 Reunião',
+                'retorno': '🔄 Retorno',
+                'avaliacao': '📋 Avaliação'
+            };
+            return tipos[tipo] || tipo;
+        }
+
+        function getStatusTexto(status) {
+            const statuses = {
+                'confirmado': 'Confirmado',
+                'pendente': 'Pendente',
+                'cancelado': 'Cancelado',
+                'reagendado': 'Reagendado',
+                'realizado': 'Realizado'
+            };
+            return statuses[status] || status;
+        }
+
+        // Ações do agendamento
+        function editarAgendamento() {
+            // TODO: Abrir modal de edição ou redirecionar
+            alert('Funcionalidade de edição em desenvolvimento');
+        }
+
+        function reagendarAgendamento() {
+            if (confirm('Deseja reagendar este agendamento?')) {
+                // TODO: Implementar reagendamento
+                alert('Reagendamento em desenvolvimento');
+            }
+        }
+
+        function confirmarAgendamento() {
+            if (confirm('Confirmar este agendamento?')) {
+                agendamentoAtual.status = 'confirmado';
+                atualizarInterface();
+                alert('✅ Agendamento confirmado com sucesso!');
+            }
+        }
+
+        function cancelarAgendamento() {
+            if (confirm('Tem certeza que deseja cancelar este agendamento?')) {
+                agendamentoAtual.status = 'cancelado';
+                atualizarInterface();
+                alert('❌ Agendamento cancelado');
+            }
+        }
+
+        function imprimirAgendamento() {
+            window.print();
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', carregarDetalhes);
+    </script>
+</body>
+</html>

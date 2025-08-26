@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aguardando Autorização - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+    <meta http-equiv="refresh" content="30">
+</head>
+<body>
+    <div class="container">
+        <div class="status-container">
+            <div class="header-section">
+                <div class="logo">
+                    
+                    <h1>Aguardando Autorização</h1>
+                </div>
+                <p class="subtitle">Sua conta foi criada com sucesso!</p>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">
+                    <div class="icon-container">
+                        
+                        <div class="pulse-ring"></div>
+                    </div>
+                </div>
+                
+                <div class="status-content">
+                    <h2>Conta Pendente de Aprovação</h2>
+                    <p>
+                        Sua solicitação de acesso foi enviada com sucesso! 
+                        O administrador do sistema foi notificado e analisará sua solicitação.
+                    </p>
+                    
+                    <div class="timeline">
+                        <div class="timeline-item completed">
+                            <div class="timeline-icon">
+                                
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Cadastro Realizado</h4>
+                                <p>Dados enviados com sucesso</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item completed">
+                            <div class="timeline-icon">
+                                
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Email Verificado</h4>
+                                <p>Confirmação realizada</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item completed">
+                            <div class="timeline-icon">
+                                
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Senha Criada</h4>
+                                <p>Conta configurada</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item current">
+                            <div class="timeline-icon">
+                                
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Aguardando Autorização</h4>
+                                <p>Análise do administrador</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item">
+                            <div class="timeline-icon">
+                                
+                            </div>
+                            <div class="timeline-content">
+                                <h4>Conta Autorizada</h4>
+                                <p>Acesso liberado</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="info-cards">
+                <div class="info-card">
+                    <div class="card-icon">
+                        
+                    </div>
+                    <div class="card-content">
+                        <h4>Notificação Automática</h4>
+                        <p>Você receberá um email quando sua conta for aprovada</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-icon">
+                        
+                    </div>
+                    <div class="card-content">
+                        <h4>Processo Seguro</h4>
+                        <p>Todas as solicitações são verificadas para garantir a segurança</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="card-icon">
+                        
+                    </div>
+                    <div class="card-content">
+                        <h4>Suporte Disponível</h4>
+                        <p>Entre em contato se precisar de ajuda</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-section">
+                <div class="refresh-info">
+                    
+                    <span>Esta página será atualizada automaticamente a cada 30 segundos</span>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="btnVerificarStatus" class="btn-primary">
+                        
+                        Verificar Status
+                    </button>
+                    
+                    <button id="btnTentarLogin" class="btn-secondary">
+                        
+                        Tentar Login
+                    </button>
+                </div>
+            </div>
+            
+            <div id="statusMessage" class="message"></div>
+            
+            <div class="contact-section">
+                <h3>Precisa de Ajuda?</h3>
+                <div class="contact-options">
+                    <a href="tel:11999999999" class="contact-option">
+                        
+                        <span>(11) 99999-9999</span>
+                    </a>
+                    
+                    <a href="mailto:contato@drmarcio.com.br" class="contact-option">
+                        
+                        <span>contato@drmarcio.com.br</span>
+                    </a>
+                    
+                    <a href="https://wa.me/5511999999999" class="contact-option" target="_blank">
+                        
+                        <span>WhatsApp</span>
+                    </a>
+                </div>
+                
+                <p class="contact-note">
+                    
+                    Horário de atendimento: Segunda a Sexta, 8h às 18h
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AguardandoAutorizacao {
+            constructor() {
+                this.statusMessage = document.getElementById('statusMessage');
+                this.btnVerificarStatus = document.getElementById('btnVerificarStatus');
+                this.btnTentarLogin = document.getElementById('btnTentarLogin');
+                
+                this.initEventListeners();
+                this.verificarStatusInicial();
+            }
+
+            initEventListeners() {
+                this.btnVerificarStatus.addEventListener('click', () => this.verificarStatus());
+                this.btnTentarLogin.addEventListener('click', () => this.tentarLogin());
+            }
+
+            async verificarStatusInicial() {
+                // Verificar se ainda precisa aguardar autorização
+                const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                
+                if (userInfo.email) {
+                    await this.verificarStatus(false); // Verificação silenciosa
+                }
+            }
+
+            async verificarStatus(showMessage = true) {
+                if (showMessage) {
+                    this.btnVerificarStatus.disabled = true;
+                    this.btnVerificarStatus.innerHTML = ' Verificando...';
+                }
+
+                try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                    
+                    if (!userInfo.email) {
+                        this.showMessage('Informações de usuário não encontradas. Faça login novamente.', 'warning');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 3000);
+                        return;
+                    }
+
+                    // Tentar fazer login para verificar status atual
+                    const response = await fetch('/api/auth/login-completo', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: userInfo.email,
+                            senha: 'check-status-only' // Senha especial para verificação
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        // Autorização aprovada!
+                        this.showMessage('🎉 Sua conta foi autorizada! Redirecionando...', 'success');
+                        
+                        // Atualizar dados no localStorage
+                        localStorage.setItem('userInfo', JSON.stringify(resultado.usuario));
+                        
+                        setTimeout(() => {
+                            window.location.href = resultado.redirectTo || 'dashboard.html';
+                        }, 2000);
+                        
+                    } else if (resultado.status === 'aguardando_autorizacao' || resultado.status === 'nao_autorizado') {
+                        if (showMessage) {
+                            this.showMessage('Ainda aguardando autorização do administrador.', 'info');
+                        }
+                    } else {
+                        if (showMessage) {
+                            this.showMessage('Status: ' + (resultado.erro || 'Verificando...'), 'warning');
+                        }
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao verificar status:', error);
+                    if (showMessage) {
+                        this.showMessage('Erro ao verificar status. Tente novamente.', 'error');
+                    }
+                } finally {
+                    if (showMessage) {
+                        this.btnVerificarStatus.disabled = false;
+                        this.btnVerificarStatus.innerHTML = ' Verificar Status';
+                    }
+                }
+            }
+
+            tentarLogin() {
+                const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                
+                if (userInfo.email) {
+                    window.location.href = `login.html?email=${encodeURIComponent(userInfo.email)}`;
+                } else {
+                    window.location.href = 'login.html';
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                this.statusMessage.className = `message ${type}`;
+                this.statusMessage.innerHTML = `
+                    
+                    <span>${text}</span>
+                `;
+                this.statusMessage.style.display = 'block';
+
+                // Auto-hide message after 5 seconds
+                setTimeout(() => {
+                    this.statusMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            getIconForType(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || 'fa-info-circle';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new AguardandoAutorizacao();
+            
+            // Verificar status a cada 30 segundos
+            setInterval(() => {
+                const instance = window.aguardandoInstance;
+                if (instance) {
+                    instance.verificarStatus(false);
+                }
+            }, 30000);
+        });
+
+        // Salvar instância globalmente para o intervalo
+        window.addEventListener('load', () => {
+            window.aguardandoInstance = new AguardandoAutorizacao();
+        });
+    </script>
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .status-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header-section {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #ffc107;
+            animation: pulse 2s infinite;
+        }
+
+        .logo h1 {
+            margin: 0;
+            color: #333;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 40px;
+            margin: 30px 0;
+        }
+
+        .status-icon {
+            margin-bottom: 30px;
+        }
+
+        .icon-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .icon-container i {
+            font-size: 4rem;
+            color: #ffc107;
+            z-index: 2;
+            position: relative;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border: 3px solid #ffc107;
+            border-radius: 50%;
+            animation: pulsate 2s ease-out infinite;
+            opacity: 0.7;
+        }
+
+        .status-content h2 {
+            color: #333;
+            margin: 0 0 20px;
+            font-size: 1.5rem;
+        }
+
+        .status-content p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .timeline {
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 48px;
+            width: 2px;
+            height: 30px;
+            background: #dee2e6;
+        }
+
+        .timeline-item.completed::after {
+            background: #28a745;
+        }
+
+        .timeline-item.current::after {
+            background: #ffc107;
+        }
+
+        .timeline-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .timeline-item.completed .timeline-icon {
+            background: #28a745;
+            color: white;
+        }
+
+        .timeline-item.current .timeline-icon {
+            background: #ffc107;
+            color: #212529;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-item:not(.completed):not(.current) .timeline-icon {
+            background: #e9ecef;
+            color: #6c757d;
+        }
+
+        .timeline-content h4 {
+            margin: 0 0 5px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .timeline-content p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-icon {
+            margin-bottom: 15px;
+        }
+
+        .card-icon i {
+            font-size: 2rem;
+            color: #007bff;
+        }
+
+        .card-content h4 {
+            margin: 0 0 10px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .card-content p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .action-section {
+            margin: 40px 0;
+        }
+
+        .refresh-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .refresh-info i {
+            animation: rotate 2s linear infinite;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #007bff;
+            border: 2px solid #007bff;
+        }
+
+        .btn-secondary:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .message.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message.warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .contact-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .contact-section h3 {
+            color: #333;
+            margin: 0 0 25px;
+            font-size: 1.3rem;
+        }
+
+        .contact-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .contact-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+
+        .contact-option:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .contact-option i {
+            color: #007bff;
+        }
+
+        .contact-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .contact-note i {
+            color: #007bff;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulsate {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .status-container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .status-card {
+                padding: 25px;
+            }
+
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+
+            .contact-options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .contact-option {
+                width: 100%;
+                max-width: 250px;
+                justify-content: center;
+            }
+        }
+    </style>
+</body>
+</html>

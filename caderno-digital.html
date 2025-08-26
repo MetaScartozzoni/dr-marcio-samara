@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caderno Digital do Paciente - Dr. Marcio Scartozzoni</title>
+    <link rel="stylesheet" href="effects.css">
+    <link rel="stylesheet" href="src/pdf-templates.css">
+    
+    <!-- ========================================
+         CSS PRINCIPAL - CADERNO DIGITAL
+         ======================================== -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        /* Melhorias de Performance - CSS Otimizado */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Container principal otimizado */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Loading Spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(102, 126, 234, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Header aprimorado */
+
+        /* Header aprimorado com melhor responsividade */
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        
+        .header-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 30px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Sistema de status em tempo real */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: #ef4444;
+            animation: none;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-center {
+            text-align: center;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        /* Ferramentas de Desenho e Edição */
+        .drawing-tools {
+            display: flex;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .tool-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .tool-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: scale(1.1);
+        }
+
+        .tool-btn.active {
+            background: #ff6b9d;
+            box-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
+        }
+
+        /* Régua de Medidas */
+        .ruler-tool {
+            position: relative;
+        }
+
+        .ruler-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+            background: repeating-linear-gradient(
+                to right,
+                transparent 0px,
+                rgba(255, 107, 157, 0.3) 1px,
+                transparent 2px,
+                transparent 10px
+            ),
+            repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                rgba(255, 107, 157, 0.3) 1px,
+                transparent 2px,
+                transparent 10px
+            );
+            display: none;
+        }
+
+        .ruler-overlay.active {
+            display: block;
+        }
+
+        /* Canvas de Desenho */
+        .drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .drawing-canvas.active {
+            display: block;
+            pointer-events: auto;
+        }
+
+        .paciente-info {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .paciente-info h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+            color: #fff;
+        }
+
+        .paciente-info .dados {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .prontuario-id {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 2.2em;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .btn-voltar {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .toolbar {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .toolbar select, .toolbar input {
+            padding: 10px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .toolbar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 70vh;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-right: 2px solid #e9ecef;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            opacity: 0.95;
+            z-index: 1;
+        }
+
+        .sidebar > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        .sidebar h3 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Estilos para os botões de ação rápida */
+        .acoes-rapidas {
+            margin-bottom: 30px;
+        }
+
+        .btn-acao {
+            width: 100%;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #af7ac5 100%);
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .btn-acao::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-acao:hover::before {
+            left: 100%;
+        }
+
+        .btn-acao:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.4);
+            background: linear-gradient(135deg, #9b59b6 0%, #af7ac5 50%, #c39bd3 100%);
+        }
+
+        .btn-acao:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .btn-acao i {
+            font-size: 18px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+        }
+
+        /* Estilos para botões de edição dos cards */
+        .btn-edit-marco, .btn-edit-agendamento {
+            background: #6c757d;
+            border: none;
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .btn-edit-marco:hover, .btn-edit-agendamento:hover {
+            background: #5a6268;
+            transform: scale(1.1);
+        }
+
+        .marco-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agendamento-recente {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+        }
+
+        .agendamento-recente:hover {
+            background: rgba(255,255,255,0.9);
+            transform: translateX(3px);
+        }
+
+        .agendamento-info {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .document-list {
+            list-style: none;
+        }
+
+        .document-item {
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(142, 68, 173, 0.2);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .document-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #8e44ad, #9b59b6, #af7ac5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .document-item:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(142, 68, 173, 0.4);
+            border-color: #ff6b9d;
+            background: rgba(255,255,255,0.98);
+        }
+
+        .document-item:hover::before {
+            opacity: 0.1;
+        }
+
+        .document-item.active {
+            border: 2px solid #ff6b9d;
+            background: linear-gradient(135deg, rgba(142, 68, 173, 0.9) 0%, rgba(255, 107, 157, 0.8) 100%);
+            box-shadow: 0 0 25px rgba(255, 107, 157, 0.3), 0 0 50px rgba(142, 68, 173, 0.2);
+            animation: neonPulse 2s infinite;
+            color: white;
+        }
+
+        .document-item.active .document-info h4,
+        .document-item.active .document-info p {
+            color: white !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .document-item.active .document-icon {
+            background: rgba(255,255,255,0.2) !important;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        @keyframes neonPulse {
+            0%, 100% {
+                box-shadow: 0 0 25px rgba(255, 107, 157, 0.3), 0 0 50px rgba(142, 68, 173, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 107, 157, 0.5), 0 0 70px rgba(142, 68, 173, 0.3);
+            }
+        }
+
+        .document-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .document-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .document-icon.orcamento { background: #3498db; }
+        .document-icon.cadastro { background: #2ecc71; }
+        .document-icon.jornada { background: #e74c3c; }
+        .document-icon.acompanhamento { background: #f39c12; }
+        .document-icon.receita { background: #9b59b6; }
+        .document-icon.exames { background: #1abc9c; }
+
+        .document-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-modelo, .btn-download {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-modelo {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-modelo:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        /* Estilos para os botões de ação do orçamento */
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            flex-wrap: wrap;
+        }
+
+        .form-actions .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
+            justify-content: center;
+        }
+
+        .form-actions .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+
+        .form-actions .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4);
+        }
+
+        .form-actions .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .form-actions .btn-success:hover {
+            background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+
+        .form-actions .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
+
+        .form-actions .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62 0%, #3d4248 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+        }
+
+        /* Responsividade para botões */
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .form-actions .btn {
+                flex: none;
+                width: 100%;
+            }
+        }
+
+        /* ==============================================
+           EFEITOS BLUR PARA CADERNO DIGITAL
+           ============================================== */
+
+        /* Container para documentos */
+        .document-library:hover .document-item:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.6;
+            transform: scale(0.96);
+        }
+
+        .document-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .document-item:hover {
+            transform: translateY(-5px) scale(1.02) !important;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeitos para marcos principais */
+        #marcosPrincipais:hover .marco-item:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.7;
+            transform: scale(0.96);
+        }
+
+        .marco-item {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .marco-item:hover {
+            transform: translateY(-6px) scale(1.03) !important;
+            box-shadow: 0 12px 25px rgba(0,0,0,0.15) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeitos para agendamentos recentes */
+        #agendamentosRecentes:hover .agendamento-recente:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.7;
+            transform: scale(0.96);
+        }
+
+        .agendamento-recente {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .agendamento-recente:hover {
+            transform: translateY(-4px) scale(1.02) !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeito shimmer para elementos do caderno */
+        .document-item::after, .marco-item::after, .agendamento-recente::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .document-item:hover::after, .marco-item:hover::after, .agendamento-recente:hover::after {
+            animation: cadernoShimmer 0.8s ease-in-out;
+        }
+
+        @keyframes cadernoShimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        .document-info h4 {
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .document-info p {
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+
+        /* Estilos para Histórico de Agendamentos */
+        .historico-container {
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .marcos-principais {
+            margin-bottom: 20px;
+        }
+
+        .marco-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .marco-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+        }
+
+        .marco-item.primeira-consulta { border-left-color: #28a745; }
+        .marco-item.retorno { border-left-color: #17a2b8; }
+        .marco-item.cirurgia { border-left-color: #dc3545; }
+        .marco-item.primeiro-retorno { border-left-color: #fd7e14; }
+        .marco-item.proximo-retorno { border-left-color: #6f42c1; }
+        .marco-item.alta { border-left-color: #20c997; }
+
+        .marco-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+
+        .marco-tipo {
+            font-weight: 600;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+
+        .marco-data {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .marco-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: auto;
+        }
+
+        .marco-status.realizado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .marco-status.agendado {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .marco-status.pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .agendamento-recente {
+            background: white;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid #667eea;
+        }
+
+        .agendamento-recente:hover {
+            transform: translateX(3px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+        }
+
+        .agendamento-data {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 3px;
+        }
+
+        .agendamento-tipo {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        /* Estilos para Cards de Evolução */
+        .card-evolucao {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 5px solid;
+            transition: all 0.3s ease;
+        }
+
+        .card-evolucao:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-evolucao.success {
+            border-left-color: #28a745;
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        }
+
+        .card-evolucao.warning {
+            border-left-color: #ffc107;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+        }
+
+        .card-evolucao.danger {
+            border-left-color: #dc3545;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title h4 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-tipo {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+            color: #6c757d;
+            margin-top: 5px;
+            display: inline-block;
+        }
+
+        .card-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .card-status.warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .card-status.danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .card-prazo {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-prazo.urgente {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+        }
+
+        .card-tarefas h5 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-tarefas ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .card-tarefas li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 13px;
+        }
+
+        .card-tarefas li:last-child {
+            border-bottom: none;
+        }
+
+        .card-tarefas li.concluido span {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .card-tarefas input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #28a745;
+        }
+
+        .card-observacoes {
+            margin: 15px 0;
+        }
+
+        .card-observacoes textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 12px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .card-actions button {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .btn-edit {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #138496;
+        }
+
+        .btn-duplicate {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-duplicate:hover {
+            background: #5a6268;
+        }
+
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: #c82333;
+        }
+
+        /* Estilos para Status Cards */
+        .status-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .status-card.success {
+            border-left-color: #28a745;
+        }
+
+        .status-card.warning {
+            border-left-color: #ffc107;
+        }
+
+        .status-card.danger {
+            border-left-color: #dc3545;
+        }
+
+        .status-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-card.success .status-icon {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .status-card.warning .status-icon {
+            background: #fff3cd;
+            color: #ffc107;
+        }
+
+        .status-card.danger .status-icon {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .status-info h4 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .status-info p {
+            margin: 0;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        /* Estilos para Notificações */
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid;
+        }
+
+        .notification.urgent {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .notification.warning {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
+            background: #f0fcff;
+        }
+
+        .notification-text {
+            font-size: 12px;
+            color: #2c3e50;
+            flex: 1;
+        }
+
+        .notification-action {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .notification-action:hover {
+            background: #5a6268;
+        }
+
+        .no-notifications {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        /* Animação de pulse */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            50% { transform: scale(1.05); box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        }
+
+        .canvas-area {
+            padding: 30px;
+            background: white;
+            position: relative;
+            overflow: auto;
+        }
+
+        .canvas-container {
+            background: #fafafa;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            min-height: 600px;
+            position: relative;
+            padding: 20px;
+        }
+
+        .canvas-placeholder {
+            text-align: center;
+            padding: 100px 20px;
+            color: #7f8c8d;
+        }
+
+        .canvas-placeholder i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .document-form {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .document-form.active {
+            display: block;
+        }
+
+        .form-section {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .photo-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-upload:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .photo-upload i {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .photo-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        .photo-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .photo-actions button {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .photo-actions button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .annotation-tools {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tool-btn {
+            background: white;
+            border: 2px solid #dee2e6;
+            color: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-btn:hover,
+        .tool-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .evolution-timeline {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 60px;
+            bottom: -25px;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-marker {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .timeline-date {
+            color: #7f8c8d;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 30px auto;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Sistema de modais aprimorados */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            scrollbar-width: thin;
+            scrollbar-color: #667eea #f1f1f1;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        @keyframes slideInUp {
+            from { 
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1) rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            background: #fafbfc;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            background: white;
+            border-radius: 0 0 20px 20px;
+        }
+
+        /* Preset texts melhorados */
+        .preset-texts {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preset-btn {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #dee2e6;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: left;
+            font-size: 14px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #667eea;
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .preset-btn:hover::before {
+            transform: scaleY(1);
+        }
+
+        /* Botões do modal aprimorados */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+        }
+
+        /* Form Actions - Botões da Ficha de Atendimento */
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 3px solid #e9ecef;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px -20px -20px -20px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-actions button {
+            flex: 1;
+            max-width: 200px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-actions button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .form-actions button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .form-actions button:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .form-actions .btn-primary {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+        }
+
+        .form-actions .btn-secondary {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+        }
+
+        /* Modal Evolução do Paciente */
+        .modal-evolucao {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-evolucao.active {
+            display: flex;
+        }
+
+        .modal-content-evolucao {
+            background: white;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header-evolucao {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body-evolucao {
+            padding: 30px;
+        }
+
+        .timeline-evolucao {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline-evolucao::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #e74c3c, #c0392b);
+        }
+
+        .evolucao-item {
+            position: relative;
+            background: white;
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .evolucao-item::before {
+            content: '';
+            position: absolute;
+            left: -45px;
+            top: 20px;
+            width: 12px;
+            height: 12px;
+            background: #e74c3c;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .evolucao-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8f9fa;
+        }
+
+        .evolucao-data {
+            font-weight: 700;
+            color: #e74c3c;
+            font-size: 16px;
+        }
+
+        .evolucao-tipo {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .evolucao-descricao {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .evolucao-detalhes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .detalhe-item {
+            text-align: center;
+        }
+
+        .detalhe-valor {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .detalhe-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        /* Modal Ficha de Atendimento */
+        .modal-ficha {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-ficha.active {
+            display: flex;
+        }
+
+        .modal-content-ficha {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 1400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 30px 60px rgba(142, 68, 173, 0.4), 0 0 100px rgba(255, 107, 157, 0.2);
+            border: 3px solid transparent;
+            background-image: linear-gradient(white, white), linear-gradient(135deg, #8e44ad, #ff6b9d, #9b59b6);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .modal-header-ficha {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+            padding: 30px 35px;
+            border-radius: 17px 17px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(142, 68, 173, 0.3);
+        }
+
+        .modal-header-ficha h2 {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+        .modal-body-ficha {
+            padding: 40px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .ficha-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+        }
+
+        .ficha-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 30px;
+            border-radius: 18px;
+            border-left: 6px solid #8e44ad;
+            box-shadow: 0 8px 25px rgba(142, 68, 173, 0.1);
+            border: 2px solid rgba(142, 68, 173, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .ficha-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(142, 68, 173, 0.15);
+            border-color: rgba(142, 68, 173, 0.2);
+        }
+
+        .ficha-section h3 {
+            color: #8e44ad;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+            font-weight: 700;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e9ecef;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            letter-spacing: 0.3px;
+        }
+
+        .ficha-section label {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        .ficha-section input,
+        .ficha-section textarea,
+        .ficha-section select {
+            font-size: 15px;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .ficha-section input:focus,
+        .ficha-section textarea:focus,
+        .ficha-section select:focus {
+            border-color: #8e44ad;
+            box-shadow: 0 0 15px rgba(142, 68, 173, 0.2);
+            outline: none;
+            background: white;
+        }
+
+        .form-group-ficha {
+            margin-bottom: 20px;
+        }
+
+        .form-group-ficha label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group-ficha input,
+        .form-group-ficha select,
+        .form-group-ficha textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group-ficha input:focus,
+        .form-group-ficha select:focus,
+        .form-group-ficha textarea:focus {
+            border-color: #8e44ad;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .fotos-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .foto-slot {
+            aspect-ratio: 1;
+            border: 3px dashed #8e44ad;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .foto-slot:hover {
+            border-color: #7d3c98;
+            background: #f8f4fd;
+        }
+
+        .foto-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .foto-slot i {
+            font-size: 24px;
+            color: #8e44ad;
+            margin-bottom: 8px;
+        }
+
+        .foto-slot span {
+            color: #8e44ad;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-nova-evolucao {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nova-evolucao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .ficha-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .fotos-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                border-right: none;
+                border-bottom: 2px solid #e9ecef;
+            }
+            
+            .btn-voltar {
+                position: relative;
+                left: 0;
+                top: 0;
+                transform: none;
+                margin-bottom: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* Menu de fluxo integrado */
+        #integrated-navigation {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        #integrated-navigation h2 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        #integrated-navigation p {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        #integrated-navigation button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        #integrated-navigation button:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Caderno Digital</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="prontuario.html">Prontuário</a></li>
+            <li><a href="receita.html">Receita</a></li>
+            <li><a href="exames.html">Exames</a></li>
+        </ul>
+    </nav>
+    
+    <!-- Inserindo container para integração do hook -->
+    <main id="caderno-digital-container">
+        <!-- Menu de fluxo integrado adicionado -->
+        <section id="integrated-navigation">
+            <h2>Fluxo Integrado</h2>
+            <p>Selecione a área para prosseguir:</p>
+            <div>
+                <button onclick="window.location.href='cadastro.html'">Cadastro</button>
+                <button onclick="window.location.href='agendamentos.html'">Agendamento</button>
+                <button onclick="window.location.href='prontuario.html'">Prontuário</button>
+                <button onclick="window.location.href='orcamento.html'">Orçamento</button>
+            </div>
+        </section>
+
+        <div class="container">
+            <div class="header">
+                <div class="header-content">
+                    <div class="header-left">
+                        <button class="btn-voltar" onclick="voltarProntuarios()">
+                             Voltar aos Prontuários
+                        </button>
+                    </div>
+                    
+                    <div class="header-center">
+                        <h1> Caderno Digital do Paciente</h1>
+                        <p>Sistema integrado de documentação médica especializada</p>
+                    </div>
+                    
+                    <div class="header-right">
+                        <div class="paciente-info" id="pacienteInfoHeader">
+                            <div class="prontuario-id" id="prontuarioId">PRON001</div>
+                            <h3 id="nomePacienteHeader">Selecione um paciente</h3>
+                            <div class="dados" id="dadosPacienteHeader">
+                                <div>📅 Nascimento: --/--/----</div>
+                                <div>📱 Telefone: (--) --------- </div>
+                                <div>📧 Email: -------</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <button onclick="editarDadosPaciente()" style="background: linear-gradient(135deg, #fd7e14 0%, #f39c12 100%);">
+                         Editar Dados
+                    </button>
+                    
+                    <input type="date" id="dataFiltro" placeholder="Filtrar por data" style="
+                        padding: 12px 15px;
+                        border: 2px solid #8e44ad;
+                        border-radius: 10px;
+                        background: rgba(255,255,255,0.9);
+                        font-weight: 500;
+                        color: #2c3e50;
+                        outline: none;
+                        transition: all 0.3s ease;
+                    ">
+                    
+                    <button onclick="novoDocumento()" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);">
+                         Novo Documento
+                    </button>
+                    
+                    <button onclick="sincronizar()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+                         Sincronizar
+                    </button>
+                </div>
+
+                <!-- Ferramentas de Desenho e Edição -->
+                <div class="drawing-tools">
+                    <button class="tool-btn ruler-tool" onclick="toggleRuler()" title="Régua de Medidas">
+                        
+                    </button>
+                    <button class="tool-btn" onclick="toggleDrawing()" title="Desenhar/Rabiscar">
+                        
+                    </button>
+                    <button class="tool-btn" onclick="toggleEraser()" title="Borracha">
+                        
+                    </button>
+                    <button class="tool-btn" onclick="openPhotoEditor()" title="Editor de Fotos">
+                        
+                    </button>
+                    <button class="tool-btn" onclick="addTextBox()" title="Adicionar Texto">
+                        
+                    </button>
+                    <button class="tool-btn" onclick="clearCanvas()" title="Limpar Desenhos">
+                        
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="sidebar">
+                    <!-- Seção de Ações Rápidas - MOVIDA PARA O TOPO -->
+                    <h3> Ações Rápidas</h3>
+                    <div class="acoes-rapidas" style="margin-bottom: 30px;">
+                        <button onclick="abrirFichaAtendimento()" class="btn-acao" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%); margin-bottom: 10px;">
+                             Ficha de Atendimento
+                        </button>
+                        
+                        <button onclick="abrirEvolucao()" class="btn-acao" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); margin-bottom: 10px;">
+                             Evolução Paciente
+                        </button>
+                        
+                        <button onclick="abrirDocumento('orcamento')" class="btn-acao" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); margin-bottom: 10px;">
+                             Orçamento
+                        </button>
+                        
+                        <button onclick="gerarReceita()" class="btn-acao" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-bottom: 10px;">
+                             Gerar Receita
+                        </button>
+                        
+                        <button onclick="gerarExames()" class="btn-acao" style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); margin-bottom: 10px;">
+                             Gerar Exames
+                        </button>
+                        
+                        <button onclick="agendarConsultaPaciente()" class="btn-acao" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); margin-bottom: 10px;">
+                             Agendar Consulta
+                        </button>
+                        
+                        <button onclick="capturarFoto()" class="btn-acao" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); margin-bottom: 10px;">
+                             Tirar Foto
+                        </button>
+                    </div>
+                    
+                    <h3> Documentos</h3>
+                    <ul class="document-list" style="margin-bottom: 30px;">
+                        <li class="document-item active" onclick="abrirDocumento('orcamento')">
+                            <div class="document-header">
+                                <div class="document-icon orcamento">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Orçamento Cirúrgico</h4>
+                                    <p>Valores e formas de pagamento</p>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="document-item" onclick="abrirDocumento('cadastro')">
+                            <div class="document-header">
+                                <div class="document-icon cadastro">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Dados do Paciente</h4>
+                                    <p>Cadastro completo</p>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="document-item" onclick="abrirDocumento('jornada')">
+                            <div class="document-header">
+                                <div class="document-icon jornada">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Caderno de Jornada</h4>
+                                    <p>Acompanhamento evolutivo</p>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="document-item" onclick="abrirDocumento('acompanhamento')">
+                            <div class="document-header">
+                                <div class="document-icon acompanhamento">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Acompanhamento</h4>
+                                    <p>Follow-up pós-operatório</p>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="document-item" onclick="abrirDocumento('receita')">
+                            <div class="document-header">
+                                <div class="document-icon receita">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Receitas</h4>
+                                    <p>Prescrições médicas</p>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <li class="document-item" onclick="abrirDocumento('exames')">
+                            <div class="document-header">
+                                <div class="document-icon exames">
+                                    
+                                </div>
+                                <div class="document-info">
+                                    <h4>Pedido de Exames</h4>
+                                    <p>Solicitações laboratoriais</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <!-- Seção de Histórico de Agendamentos - MOVIDA PARA BAIXO -->
+                    <h3> Histórico & Marcos</h3>
+                    <div class="historico-container">
+                        <div class="marcos-principais" id="marcosPrincipais">
+                            <!-- Marcos serão carregados aqui -->
+                        </div>
+                        <div class="agendamentos-recentes">
+                            <h4 style="color: #6c757d; font-size: 14px; margin: 15px 0 10px 0;">
+                                 Consultas Recentes
+                            </h4>
+                            <div id="agendamentosRecentes">
+                                <!-- Agendamentos serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-area">
+                    <!-- Placeholder inicial -->
+                    <div class="canvas-placeholder" id="placeholder">
+                        
+                        <h3>Selecione um documento para começar</h3>
+                        <p>Escolha um tipo de documento no menu lateral</p>
+                    </div>
+
+                    <!-- Formulário de Orçamento -->
+                    <div class="document-form" id="orcamento-form">
+                        <div class="form-section">
+                            <h3> Orçamento Cirúrgico</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Nome Completo</label>
+                                    <input type="text" id="orcamento-nome" placeholder="Nome do paciente">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cirurgia</label>
+                                    <input type="text" id="orcamento-cirurgia" placeholder="Tipo de cirurgia">
+                                </div>
+                                <div class="form-group">
+                                    <label>Valor Clínica</label>
+                                    <input type="number" id="orcamento-valor-clinica" placeholder="0,00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Valor Hospital</label>
+                                    <input type="number" id="orcamento-valor-hospital" placeholder="0,00">
+                                </div>
+                            </div>
+                            
+                            <h4>Forma de Pagamento</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>
+                                        <input type="radio" name="pagamento" value="vista"> 
+                                        Pagamento à vista (3% desconto)
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="radio" name="pagamento" value="3x"> 
+                                        Em até 3x (5% acréscimo)
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="radio" name="pagamento" value="10x"> 
+                                        Em até 10x (10% acréscimo)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Hospital</label>
+                                <input type="text" id="orcamento-hospital" placeholder="Hospital onde será realizada">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Observações</label>
+                                <textarea id="orcamento-obs" rows="4" placeholder="Informações adicionais"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Modelo de Orçamento</label>
+                                <div class="document-actions">
+                                    <button type="button" onclick="visualizarOrcamentoModelo()" class="btn-modelo">
+                                         Ver Modelo PDF
+                                    </button>
+                                    <button type="button" onclick="baixarOrcamentoModelo()" class="btn-download">
+                                         Baixar Modelo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" onclick="gerarOrcamento()" class="btn btn-primary">
+                                     Gerar Orçamento
+                                </button>
+                                <button type="button" onclick="enviarParaGestao()" class="btn btn-success">
+                                     Enviar para Gestão
+                                </button>
+                                <button type="button" onclick="salvarRascunho()" class="btn btn-secondary">
+                                     Salvar Rascunho
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Cadastro -->
+                    <div class="document-form" id="cadastro-form">
+                        <div class="form-section">
+                            <h3> Dados do Paciente</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Nome Completo</label>
+                                    <input type="text" id="cadastro-nome" placeholder="Nome completo">
+                                </div>
+                                <div class="form-group">
+                                    <label>CPF</label>
+                                    <input type="text" id="cadastro-cpf" placeholder="000.000.000-00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data de Nascimento</label>
+                                    <input type="date" id="cadastro-nascimento">
+                                </div>
+                                <div class="form-group">
+                                    <label>E-mail</label>
+                                    <input type="email" id="cadastro-email" placeholder="email@exemplo.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Celular</label>
+                                    <input type="tel" id="cadastro-celular" placeholder="(11) 99999-9999">
+                                </div>
+                                <div class="form-group">
+                                    <label>Telefone</label>
+                                    <input type="tel" id="cadastro-telefone" placeholder="(11) 3333-3333">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Endereço Completo</label>
+                                <textarea id="cadastro-endereco" rows="3" placeholder="Rua, número, complemento, bairro, cidade, CEP"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Caderno de Jornada -->
+                    <div class="document-form" id="jornada-form">
+                        <div class="form-section">
+                            <h3> Caderno de Jornada - Acompanhamento Evolutivo</h3>
+                            
+                            <div class="annotation-tools">
+                                <button class="tool-btn active" onclick="selecionarFerramenta('texto')">
+                                     Texto
+                                </button>
+                                <button class="tool-btn" onclick="selecionarFerramenta('desenho')">
+                                     Desenho
+                                </button>
+                                <button class="tool-btn" onclick="selecionarFerramenta('regua')">
+                                     Régua
+                                </button>
+                                <button class="tool-btn" onclick="selecionarFerramenta('marca')">
+                                     Marcador
+                                </button>
+                                <button class="tool-btn" onclick="selecionarFerramenta('foto')">
+                                     Foto
+                                </button>
+                            </div>
+                            
+                            <div class="evolution-timeline">
+                                <h4>Timeline de Evolução</h4>
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-date">29/07/2025 - 10:30</div>
+                                        <div class="timeline-title">Consulta Inicial</div>
+                                        <p>Avaliação inicial do paciente. Estado geral bom, sem comorbidades significativas.</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-date">02/08/2025 - 14:00</div>
+                                        <div class="timeline-title">Pré-operatório</div>
+                                        <p>Exames pré-operatórios realizados. Paciente apto para cirurgia.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Nova Evolução</label>
+                                <textarea id="nova-evolucao" rows="4" placeholder="Descreva a evolução do paciente..."></textarea>
+                                <button type="button" onclick="adicionarEvolucao()" style="margin-top: 10px; background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px;">
+                                     Adicionar Evolução
+                                </button>
+                            </div>
+                            
+                            <div class="photo-upload" onclick="document.getElementById('foto-input').click()">
+                                
+                                <h4>Capturar ou Adicionar Foto</h4>
+                                <p>Clique para capturar uma foto ou selecionar da galeria</p>
+                                <input type="file" id="foto-input" accept="image/*" style="display: none;" onchange="adicionarFoto(this)">
+                            </div>
+                            
+                            <div class="photo-gallery" id="galeria-fotos">
+                                <!-- Fotos serão adicionadas aqui dinamicamente -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Outros formulários similares para acompanhamento, receita, exames -->
+                    <div class="document-form" id="acompanhamento-form">
+                        <div class="form-section">
+                            <h3> Formulário de Acompanhamento</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Data da Consulta</label>
+                                    <input type="date" id="acomp-data">
+                                </div>
+                                <div class="form-group">
+                                    <label>Peso Atual</label>
+                                    <input type="number" id="acomp-peso" placeholder="kg">
+                                </div>
+                                <div class="form-group">
+                                    <label>Pressão Arterial</label>
+                                    <input type="text" id="acomp-pressao" placeholder="120/80">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sintomas</label>
+                                    <textarea id="acomp-sintomas" rows="3" placeholder="Descreva sintomas ou queixas"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="document-form" id="receita-form">
+                        <div class="form-section">
+                            <h3> Receita Médica</h3>
+                            <div class="form-group">
+                                <label>Medicamentos Prescritos</label>
+                                <textarea id="receita-medicamentos" rows="6" placeholder="1. Medicamento - Posologia - Duração&#10;2. Medicamento - Posologia - Duração"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Orientações Gerais</label>
+                                <textarea id="receita-orientacoes" rows="4" placeholder="Orientações adicionais para o paciente"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="document-form" id="exames-form">
+                        <div class="form-section">
+                            <h3> Pedido de Exames</h3>
+                            <div class="form-group">
+                                <label>Exames Solicitados</label>
+                                <textarea id="exames-lista" rows="6" placeholder="Liste os exames solicitados:&#10;- Hemograma completo&#10;- Glicemia de jejum&#10;- etc."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Justificativa</label>
+                                <textarea id="exames-justificativa" rows="3" placeholder="Justificativa clínica para os exames"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="salvarDocumento()">
+                 Salvar Documento
+            </button>
+        </div>
+    </main>
+
+    <!-- Inclusão do hook para funcionalidades adicionais (exames, receita, etc.) -->
+    <script src="../js/cadernodigital-hook.js" defer></script>
+
+    <!-- Régua de Medidas -->
+    <div class="ruler-overlay" id="rulerOverlay"></div>
+
+    <!-- Canvas de Desenho -->
+    <canvas class="drawing-canvas" id="drawingCanvas"></canvas>
+
+    <!-- ============================================
+         MÓDULO DE FERRAMENTAS DE DESENHO
+         ============================================ -->
+    <script>
+        // Ferramentas de Desenho e Edição
+        let isDrawing = false;
+        let isRulerActive = false;
+        let currentTool = 'pen';
+        let canvas, ctx;
+
+        // Inicializar Canvas
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+            
+            // Configurar tamanho do canvas
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Configurações do contexto
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#ff6b9d';
+        }
+
+        // Toggle Régua
+        function toggleRuler() {
+            const ruler = document.getElementById('rulerOverlay');
+            const btn = document.querySelector('.ruler-tool');
+            
+            isRulerActive = !isRulerActive;
+            ruler.classList.toggle('active');
+            btn.classList.toggle('active');
+        }
+
+        // Toggle Desenho
+        function toggleDrawing() {
+            const canvas = document.getElementById('drawingCanvas');
+            const btn = event.target.closest('.tool-btn');
+            
+            canvas.classList.toggle('active');
+            btn.classList.toggle('active');
+            
+            if (canvas.classList.contains('active')) {
+                initCanvas();
+                addDrawingListeners();
+            } else {
+                removeDrawingListeners();
+            }
+        }
+
+        // Adicionar listeners de desenho
+        function addDrawingListeners() {
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+        }
+
+        // Remover listeners de desenho
+        function removeDrawingListeners() {
+            canvas.removeEventListener('mousedown', startDrawing);
+            canvas.removeEventListener('mousemove', draw);
+            canvas.removeEventListener('mouseup', stopDrawing);
+            canvas.removeEventListener('mouseout', stopDrawing);
+        }
+
+        // Iniciar desenho
+        function startDrawing(e) {
+            isDrawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.clientX, e.clientY);
+        }
+
+        // Desenhar
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            ctx.lineWidth = currentTool === 'eraser' ? 10 : 2;
+            ctx.globalCompositeOperation = currentTool === 'eraser' ? 'destination-out' : 'source-over';
+            
+            ctx.lineTo(e.clientX, e.clientY);
+            ctx.stroke();
+        }
+
+        // Parar desenho
+        function stopDrawing() {
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        // Toggle Borracha
+        function toggleEraser() {
+            const btn = event.target.closest('.tool-btn');
+            currentTool = currentTool === 'eraser' ? 'pen' : 'eraser';
+            btn.classList.toggle('active');
+        }
+
+        // Limpar Canvas
+        function clearCanvas() {
+            if (canvas && ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Editor de Fotos (placeholder)
+        function openPhotoEditor() {
+            alert('🎨 Editor de Fotos\n\nFuncionalidades disponíveis:\n• Crop/Recorte\n• Filtros\n• Ajustes de brilho/contraste\n• Redimensionamento\n\n(Em desenvolvimento)');
+        }
+
+        // Adicionar Texto (placeholder)
+        function addTextBox() {
+            const text = prompt('Digite o texto para adicionar:');
+            if (text && canvas && ctx) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#ff6b9d';
+                ctx.fillText(text, 100, 100);
+            }
+        }
+
+        // Redimensionar canvas quando a janela mudar
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+
+    <!-- ============================================
+         SISTEMA DE EFEITOS VISUAIS
+         ============================================ -->
+    <script src="src/visual-effects.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pré-Cadastro - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        .step-counter {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .codigo-input {
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .success-animation {
+            text-align: center;
+            font-size: 48px;
+            color: #28a745;
+            animation: bounce 1s ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Portal Dr. Marcio Scartozzoni</h1>
+            <p>Pré-Cadastro de Paciente</p>
+        </header>
+
+        <div class="form-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 33%"></div>
+            </div>
+            <div class="step-counter" id="stepCounter">Passo 1 de 3</div>
+
+            <!-- Passo 1: Dados Básicos -->
+            <div class="step active" id="step1">
+                <h2>📝 Seus Dados</h2>
+                <p>Preencha suas informações básicas para iniciar o pré-cadastro.</p>
+                
+                <form id="dadosForm">
+                    <div class="form-group">
+                        <label for="nome">Nome Completo *</label>
+                        <input type="text" id="nome" name="nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone">Telefone</label>
+                        <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cpf">CPF</label>
+                        <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
+                    </div>
+
+                    <button type="button" class="btn-primary" onclick="proximoPasso()">
+                        📧 Enviar Código de Verificação
+                    </button>
+                </form>
+            </div>
+
+            <!-- Passo 2: Verificação Email -->
+            <div class="step" id="step2">
+                <h2>📬 Verificação de Email</h2>
+                <p>Enviamos um código de verificação para seu email. Digite o código abaixo:</p>
+                
+                <div class="form-group">
+                    <label for="codigo">Código de Verificação</label>
+                    <input type="text" id="codigo" name="codigo" class="codigo-input" 
+                           placeholder="000000" maxlength="6" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="voltarPasso()">
+                        ← Voltar
+                    </button>
+                    <button type="button" class="btn-primary" onclick="validarCodigo()">
+                        ✅ Validar Código
+                    </button>
+                </div>
+
+                <p class="help-text">
+                    Não recebeu o código? 
+                    <a href="javascript:void(0)" onclick="reenviarCodigo()">Reenviar</a>
+                </p>
+            </div>
+
+            <!-- Passo 3: Definir Senha -->
+            <div class="step" id="step3">
+                <h2>🔐 Criar Senha</h2>
+                <p>Defina uma senha segura para sua conta:</p>
+                
+                <div class="form-group">
+                    <label for="senha">Nova Senha *</label>
+                    <input type="password" id="senha" name="senha" required 
+                           minlength="6" placeholder="Mínimo 6 caracteres">
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmarSenha">Confirmar Senha *</label>
+                    <input type="password" id="confirmarSenha" name="confirmarSenha" required>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="voltarPasso()">
+                        ← Voltar
+                    </button>
+                    <button type="button" class="btn-primary" onclick="finalizarCadastro()">
+                        🎉 Finalizar Cadastro
+                    </button>
+                </div>
+            </div>
+
+            <!-- Passo 4: Sucesso -->
+            <div class="step" id="step4">
+                <div class="success-animation">✅</div>
+                <h2>🎉 Cadastro Realizado!</h2>
+                <p>Seu pré-cadastro foi realizado com sucesso! Agora você precisa aguardar a aprovação do administrador.</p>
+                
+                <div class="info-box">
+                    <h4>📋 Próximos Passos:</h4>
+                    <ul>
+                        <li>✅ Dados enviados e validados</li>
+                        <li>⏳ Aguardando aprovação do administrador</li>
+                        <li>📧 Você receberá um email quando for aprovado</li>
+                        <li>🚀 Após aprovação, poderá acessar o portal</li>
+                    </ul>
+                </div>
+
+                <div class="button-group">
+                    <a href="/login.html" class="btn-primary">
+                        🏠 Ir para Login
+                    </a>
+                    <a href="/index.html" class="btn-secondary">
+                        🏥 Página Inicial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let passoAtual = 1;
+        let dadosUsuario = {};
+
+        function atualizarProgresso() {
+            const progressos = { 1: 33, 2: 66, 3: 100, 4: 100 };
+            document.getElementById('progressFill').style.width = progressos[passoAtual] + '%';
+            document.getElementById('stepCounter').textContent = 
+                passoAtual <= 3 ? `Passo ${passoAtual} de 3` : 'Concluído';
+        }
+
+        function mostrarPasso(numero) {
+            document.querySelectorAll('.step').forEach(step => step.classList.remove('active'));
+            document.getElementById(`step${numero}`).classList.add('active');
+            passoAtual = numero;
+            atualizarProgresso();
+        }
+
+        function proximoPasso() {
+            // Validar dados básicos
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (!nome || !email) {
+                alert('Por favor, preencha os campos obrigatórios (Nome e Email).');
+                return;
+            }
+
+            // Salvar dados
+            dadosUsuario = {
+                nome: nome,
+                email: email,
+                telefone: document.getElementById('telefone').value.trim(),
+                cpf: document.getElementById('cpf').value.trim()
+            };
+
+            // Enviar código de verificação
+            enviarCodigoVerificacao();
+        }
+
+        function voltarPasso() {
+            if (passoAtual > 1) {
+                mostrarPasso(passoAtual - 1);
+            }
+        }
+
+        async function enviarCodigoVerificacao() {
+            try {
+                const response = await fetch('/api/solicitar-codigo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: dadosUsuario.email })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarPasso(2);
+                    alert('Código de verificação enviado para seu email!');
+                } else {
+                    alert('Erro ao enviar código: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao enviar código de verificação.');
+            }
+        }
+
+        async function reenviarCodigo() {
+            await enviarCodigoVerificacao();
+        }
+
+        async function validarCodigo() {
+            const codigo = document.getElementById('codigo').value.trim();
+
+            if (!codigo || codigo.length !== 6) {
+                alert('Digite um código válido de 6 dígitos.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/validar-codigo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: dadosUsuario.email,
+                        codigo: codigo 
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarPasso(3);
+                } else {
+                    alert('Código inválido ou expirado. Tente novamente.');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao validar código.');
+            }
+        }
+
+        async function finalizarCadastro() {
+            const senha = document.getElementById('senha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+
+            if (!senha || senha.length < 6) {
+                alert('A senha deve ter pelo menos 6 caracteres.');
+                return;
+            }
+
+            if (senha !== confirmarSenha) {
+                alert('As senhas não coincidem.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/definir-senha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: dadosUsuario.email,
+                        senha: senha
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Criar pré-cadastro
+                    await criarPreCadastro();
+                } else {
+                    alert('Erro ao definir senha: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao finalizar cadastro.');
+            }
+        }
+
+        async function criarPreCadastro() {
+            try {
+                const response = await fetch('/api/pre-cadastro', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosUsuario)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    mostrarPasso(4);
+                } else {
+                    alert('Erro ao criar pré-cadastro: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao criar pré-cadastro.');
+            }
+        }
+
+        // Formatação automática de CPF
+        document.getElementById('cpf').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Formatação automática de telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Formatação automática do código
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').toUpperCase();
+        });
+    </script>
+</body>
+</html>

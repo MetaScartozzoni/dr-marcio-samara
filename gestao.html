@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Orçamentos - Dr. Marcio Scartozzoni</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gestao-style.css">
+    <link rel="stylesheet" href="card-unificado.css">
+    <link rel="stylesheet" href="effects.css">
+    
+    <!-- Meta tags para SEO e acessibilidade -->
+    <meta name="description" content="Sistema de gestão de orçamentos e pacientes - Dr. Marcio Scartozzoni">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://drmarcioscartozzoni.com/gestao">
+    
+    <!-- Preload recursos críticos -->
+    <link rel="preload" href="gestao-script.js" as="script">
+    <link rel="preload" href="config-api-integration.js" as="script">
+    <link rel="preload" href="visual-effects.js" as="script">
+    <script src="card-unificado.js"></script>
+    <script src="visual-effects.js"></script>
+    <style>
+        /* Estilos para alternância de visualização */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .view-toggle .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .view-toggle .btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .view-toggle .btn:not(.active) {
+            background-color: transparent;
+            color: #007bff;
+            border-color: #007bff;
+        }
+        
+        .view-toggle .btn:not(.active):hover {
+            background-color: #f8f9fa;
+        }
+        
+        .empty-state {
+            color: #6c757d;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        /* Ajustes para container de cards */
+        #containerCards .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        /* Efeitos blur e hover para stat-cards */
+        .stats-grid {
+            position: relative;
+        }
+
+        .stats-grid:hover .stat-card:not(:hover) {
+            filter: blur(2px);
+            opacity: 0.6;
+            transform: scale(0.95);
+        }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.05) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Efeito de brilho nos stat-cards */
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .stat-card:hover::after {
+            animation: statCardShimmer 0.8s ease-in-out;
+        }
+
+        @keyframes statCardShimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Efeito blur para cards de orçamento */
+        .cards-grid {
+            position: relative;
+        }
+
+        .cards-grid:hover .card-paciente:not(:hover) {
+            filter: blur(3px);
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .cards-grid .card-paciente {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .cards-grid .card-paciente:hover {
+            transform: translateY(-10px) scale(1.03) !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+            filter: blur(0px) !important;
+            opacity: 1 !important;
+            z-index: 10;
+        }
+
+        /* Estilos para alertas de prazo */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .alert-error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-dismissible .btn-close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 1.25rem 1rem;
+            color: inherit;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .alert-dismissible .btn-close:hover {
+            opacity: 0.75;
+        }
+        
+        /* Melhorias nos botões de ação */
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .actions-bar .btn {
+            flex: 1;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header melhorado -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="header-title">
+                    
+                    Gestão de Orçamentos
+                </h1>
+                
+                <div class="header-actions">
+                    <button onclick="window.location.href='gestao-financeira.html'" class="btn btn-success btn-sm" title="Gestão Financeira">
+                        
+                        Financeiro
+                    </button>
+                    
+                    <button onclick="abrirLeadsManager()" class="btn btn-warning btn-sm" title="Gerenciar Leads">
+                        
+                        Leads
+                    </button>
+                    
+                    <button onclick="abrirAgendamentoRapido()" class="btn btn-info btn-sm" title="Agendamento Rápido">
+                        
+                        <span class="sr-only">Agendamento Rápido</span>
+                    </button>
+                    
+                    <button onclick="voltarDashboard()" class="btn btn-secondary btn-sm" title="Voltar ao Dashboard">
+                        
+                        Dashboard
+                    </button>
+                    
+                    <button onclick="AuthManager.logout()" class="btn btn-danger btn-sm" title="Sair do Sistema">
+                        
+                        <span class="sr-only">Sair</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Navegação por Tabs -->
+            <nav class="tab-navigation" role="tablist">
+                <button class="tab-button active" id="tab-orcamentos" role="tab" aria-selected="true" aria-controls="panel-orcamentos">
+                    
+                    Gestão de Orçamentos
+                </button>
+                <button class="tab-button" id="tab-pacientes" role="tab" aria-selected="false" aria-controls="panel-pacientes">
+                    
+                    Gestão de Pacientes
+                </button>
+                <button class="tab-button" id="tab-cirurgia" role="tab" aria-selected="false" aria-controls="panel-cirurgia" onclick="window.location.href='cirurgia-plastica.html'">
+                    
+                    Cirurgia Plástica
+                </button>
+            </nav>
+
+            <!-- Painel de Orçamentos -->
+            <div id="panel-orcamentos" class="tab-panel active" role="tabpanel" aria-labelledby="tab-orcamentos">
+                <!-- Estatísticas melhoradas -->
+                <section class="stats-section" aria-labelledby="stats-title">
+                    <h2 id="stats-title" class="sr-only">Estatísticas dos Orçamentos</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalOrcamentos">0</div>
+                                <div class="stat-label">Total de Orçamentos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="orcamentosPendentes">0</div>
+                                <div class="stat-label">Orçamentos Pendentes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="orcamentosAceitos">0</div>
+                                <div class="stat-label">Orçamentos Aceitos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="valorTotalPendente">R$ 0,00</div>
+                                <div class="stat-label">Valor Total Pendente</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            <!-- Filtros melhorados -->
+            <section class="filters-section" aria-labelledby="filters-title">
+                <h2 id="filters-title" class="section-title">Filtros</h2>
+                
+                <div class="filters-container">
+                    <div class="filters-row">
+                        <div class="filter-group">
+                            <label for="filtroId">ID do Orçamento</label>
+                            <input type="text" id="filtroId" class="form-control" placeholder="Ex: ORC001" autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroNome">Nome do Paciente</label>
+                            <input type="text" id="filtroNome" class="form-control" placeholder="Digite o nome..." autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroStatus">Status</label>
+                            <select id="filtroStatus" class="form-control">
+                                <option value="">Todos os status</option>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Enviado">Enviado</option>
+                                <option value="Aceito">Aceito</option>
+                                <option value="Rejeitado">Rejeitado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataInicio">Data Início</label>
+                            <input type="date" id="filtroDataInicio" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataFim">Data Fim</label>
+                            <input type="date" id="filtroDataFim" class="form-control">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button onclick="limparFiltros()" class="btn btn-secondary" title="Limpar todos os filtros">
+                                
+                                Limpar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ações principais -->
+            <section class="actions-section" aria-labelledby="actions-title">
+                <h2 id="actions-title" class="sr-only">Ações Principais</h2>
+                
+                <div class="actions-bar">
+                    <button onclick="adicionarOrcamento()" class="btn btn-primary">
+                        
+                        Novo Orçamento
+                    </button>
+                    
+                    <button onclick="exportarOrcamentos()" class="btn btn-info">
+                        
+                        Exportar Orçamentos
+                    </button>
+                    
+                    <button onclick="carregarDados()" class="btn btn-secondary" title="Atualizar dados">
+                        
+                        Atualizar
+                    </button>
+                    
+                    <button onclick="verificarPrazosValidade()" class="btn btn-warning" title="Verificar prazos de validade">
+                        
+                        Verificar Prazos
+                    </button>
+                </div>
+            </section>
+
+            <!-- Tabela melhorada -->
+            <section class="table-section" aria-labelledby="table-title">
+                <div class="section-header">
+                    <h2 id="table-title" class="section-title">Lista de Orçamentos</h2>
+                    
+                    <!-- Botões de visualização -->
+                    <div class="view-toggle">
+                        <button id="btnVisualizacaoTabela" onclick="alternarVisualizacao('tabela')" class="btn btn-sm btn-outline-primary active" title="Visualização em Tabela">
+                            
+                            Tabela
+                        </button>
+                        <button id="btnVisualizacaoCards" onclick="alternarVisualizacao('cards')" class="btn btn-sm btn-outline-primary" title="Visualização em Cards">
+                            
+                            Cards
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container" id="containerTabela">
+                    <div id="loading" class="table-loading" style="display: none;">
+                        <div class="spinner" aria-label="Carregando dados"></div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table" role="table" aria-label="Tabela de orçamentos">
+                            <thead>
+                                <tr role="row">
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Paciente</th>
+                                    <th scope="col">Data Consulta</th>
+                                    <th scope="col">Data Orçamento</th>
+                                    <th scope="col">Procedimento</th>
+                                    <th scope="col">Valor Total</th>
+                                    <th scope="col">Status Orçamento</th>
+                                    <th scope="col">Status Pagamento</th>
+                                    <th scope="col">Validade</th>
+                                    <th scope="col">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabela" role="rowgroup">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Container para visualização em cards -->
+                <div class="cards-container" id="containerCards" style="display: none;">
+                    <div class="cards-grid" id="orcamentosCards">
+                        <!-- Cards serão inseridos aqui via JavaScript -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal Novo Orçamento - Melhorado -->
+    <div id="modalNovoOrcamento" class="modal" role="dialog" aria-labelledby="modal-title" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="modal-title">Novo Orçamento</h3>
+                <button onclick="fecharModalOrcamento()" class="close" aria-label="Fechar modal">
+                    <span >&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formNovoOrcamento" novalidate>
+                    <div class="form-group">
+                        <label for="pacienteOrcamento">Paciente *</label>
+                        <select id="pacienteOrcamento" name="paciente_id" class="form-control" required aria-required="true">
+                            <option value="">Selecione o paciente</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="dataConsulta">Data da Consulta *</label>
+                        <input type="date" id="dataConsulta" name="data_consulta" class="form-control" required aria-required="true">
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="procedimentoPrincipal">Procedimento Principal *</label>
+                        <select id="procedimentoPrincipal" name="procedimento_principal" class="form-control" required aria-required="true" onchange="calcularValorTotal()">
+                            <option value="">Selecione o procedimento</option>
+                            <option value="Rinoplastia" data-valor="8500">Rinoplastia</option>
+                            <option value="Mamoplastia de Aumento" data-valor="12000">Mamoplastia de Aumento</option>
+                            <option value="Lipoaspiração" data-valor="7500">Lipoaspiração</option>
+                            <option value="Abdominoplastia" data-valor="10000">Abdominoplastia</option>
+                            <option value="Blefaroplastia" data-valor="6000">Blefaroplastia</option>
+                        </select>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="procedimentosAdicionais">Procedimentos Adicionais</label>
+                        <textarea id="procedimentosAdicionais" name="procedimentos_adicionais" class="form-control" rows="2" placeholder="Descreva procedimentos adicionais..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="valorProcedimento">Valor do Procedimento *</label>
+                            <input type="number" id="valorProcedimento" name="valor_procedimento" class="form-control" step="0.01" min="0" required aria-required="true" onchange="calcularValorTotal()">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="valorAnestesia">Valor da Anestesia</label>
+                            <input type="number" id="valorAnestesia" name="valor_anestesia" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="valorHospital">Valor do Hospital</label>
+                            <input type="number" id="valorHospital" name="valor_hospital" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="valorMaterial">Valor do Material</label>
+                            <input type="number" id="valorMaterial" name="valor_material" class="form-control" step="0.01" min="0" onchange="calcularValorTotal()">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valorTotal">Valor Total *</label>
+                        <input type="number" id="valorTotal" name="valor_total" class="form-control" step="0.01" min="0" required aria-required="true" readonly>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="formaPagamento">Forma de Pagamento *</label>
+                            <select id="formaPagamento" name="forma_pagamento" class="form-control" required aria-required="true">
+                                <option value="">Selecione</option>
+                                <option value="vista">À Vista</option>
+                                <option value="2x">2x sem juros</option>
+                                <option value="3x">3x sem juros</option>
+                                <option value="4x">4x sem juros</option>
+                                <option value="6x">6x sem juros</option>
+                                <option value="12x">12x com juros</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        
+                        <div class="form-group col-md-6">
+                            <label for="validadeOrcamento">Validade *</label>
+                            <input type="date" id="validadeOrcamento" name="validade" class="form-control" required aria-required="true">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="observacoesOrcamento">Observações</label>
+                        <textarea id="observacoesOrcamento" name="observacoes" class="form-control" rows="3" placeholder="Observações adicionais..."></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" onclick="fecharModalOrcamento()" class="btn btn-secondary">Cancelar</button>
+                <button type="submit" form="formNovoOrcamento" class="btn btn-primary">
+                    
+                    Salvar Orçamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ações do Orçamento - Melhorado -->
+    <div id="modalAcoesOrcamento" class="modal" role="dialog" aria-labelledby="modal-acoes-title" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-acoes-title" class="modal-title">Ações do Orçamento</h3>
+                <button onclick="fecharModalAcoes()" class="close" aria-label="Fechar modal">
+                    <span >&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="orcamento-info">
+                    <h4>Informações do Orçamento</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Orçamento:</strong>
+                            <span id="infoOrcamento">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Procedimento:</strong>
+                            <span id="infoProcedimento">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Valor:</strong>
+                            <span id="infoValor">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Status:</strong>
+                            <span id="infoStatus">-</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Validade:</strong>
+                            <span id="infoValidade">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="acoes-grid">
+                    <button onclick="gerarPDFOrcamento()" class="btn btn-primary btn-action">
+                        
+                        Gerar PDF
+                    </button>
+                    
+                    <button onclick="enviarPorEmail()" class="btn btn-info btn-action">
+                        
+                        Enviar Email
+                    </button>
+                    
+                    <button onclick="copiarOrcamento()" class="btn btn-secondary btn-action">
+                        
+                        Copiar Texto
+                    </button>
+                    
+                    <button onclick="imprimirOrcamento()" class="btn btn-secondary btn-action">
+                        
+                        Imprimir
+                    </button>
+                    
+                    <button onclick="marcarComoAceito()" class="btn btn-success btn-action">
+                        
+                        Marcar como Aceito
+                    </button>
+                    
+                    <button onclick="editarOrcamento()" class="btn btn-warning btn-action">
+                        
+                        Editar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="fecharModalAcoes()" class="btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+            </div> <!-- Fim do panel-orcamentos -->
+
+            <!-- Painel de Pacientes -->
+            <div id="panel-pacientes" class="tab-panel" role="tabpanel" aria-labelledby="tab-pacientes">
+                <section class="stats-section">
+                    <h2 class="sr-only">Estatísticas dos Pacientes</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalPacientes">0</div>
+                                <div class="stat-label">Total de Pacientes</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="pacientesNovos">0</div>
+                                <div class="stat-label">Novos este Mês</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="pacientesAtivos">0</div>
+                                <div class="stat-label">Pacientes Ativos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="consultasAgendadas">0</div>
+                                <div class="stat-label">Consultas Agendadas</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filtros para Pacientes -->
+                <section class="filters-section">
+                    <h2> Filtros de Pacientes</h2>
+                    
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filtroNomePaciente">Nome do Paciente:</label>
+                            <input type="text" id="filtroNomePaciente" class="form-control" placeholder="Digite o nome..." autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroCpfPaciente">CPF:</label>
+                            <input type="text" id="filtroCpfPaciente" class="form-control" placeholder="000.000.000-00" autocomplete="off">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroStatusPaciente">Status:</label>
+                            <select id="filtroStatusPaciente" class="form-control">
+                                <option value="">Todos os Status</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                                <option value="bloqueado">Bloqueado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroAcessoDashboard">Acesso Dashboard:</label>
+                            <select id="filtroAcessoDashboard" class="form-control">
+                                <option value="">Todos</option>
+                                <option value="true">Com Acesso</option>
+                                <option value="false">Sem Acesso</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-actions">
+                        <button onclick="filtrarPacientes()" class="btn btn-primary">
+                             Filtrar
+                        </button>
+                        <button onclick="limparFiltrosPacientes()" class="btn btn-secondary">
+                             Limpar
+                        </button>
+                        <button onclick="adicionarPaciente()" class="btn btn-success">
+                             Novo Paciente
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tabela de Pacientes -->
+                <section class="table-section">
+                    <h2> Lista de Pacientes</h2>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>CPF</th>
+                                    <th>Email</th>
+                                    <th>Telefone</th>
+                                    <th>Dashboard</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabelaPacientes">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div> <!-- Fim do panel-pacientes -->
+
+            <!-- Painel de Logs Administrativos -->
+            <div id="panel-logs" class="tab-panel" role="tabpanel" aria-labelledby="tab-logs">
+                <section class="stats-section">
+                    <h2 class="sr-only">Estatísticas dos Logs</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="totalLogs">0</div>
+                                <div class="stat-label">Total de Logs</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon warning">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="logs24h">0</div>
+                                <div class="stat-label">Últimas 24h</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon info">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="usuariosAtivos">0</div>
+                                <div class="stat-label">Usuários Ativos</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon success">
+                                
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-number" id="atividadeMedia">0</div>
+                                <div class="stat-label">Atividade/Hora</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Filtros para Logs -->
+                <section class="filters-section">
+                    <h2> Filtros de Logs</h2>
+                    
+                    <div class="filters-grid">
+                        <div class="filter-group">
+                            <label for="filtroTipoLog">Tipo de Log:</label>
+                            <select id="filtroTipoLog" class="form-control">
+                                <option value="">Todos os Tipos</option>
+                                <option value="PACIENTE">Pacientes</option>
+                                <option value="ORCAMENTO">Orçamentos</option>
+                                <option value="FICHA_ATENDIMENTO">Fichas</option>
+                                <option value="ACESSO">Acessos</option>
+                                <option value="SISTEMA">Sistema</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataInicioLog">Data Início:</label>
+                            <input type="datetime-local" id="filtroDataInicioLog" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroDataFimLog">Data Fim:</label>
+                            <input type="datetime-local" id="filtroDataFimLog" class="form-control">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="filtroLimiteLogs">Limite:</label>
+                            <select id="filtroLimiteLogs" class="form-control">
+                                <option value="50">50 registros</option>
+                                <option value="100" selected>100 registros</option>
+                                <option value="200">200 registros</option>
+                                <option value="500">500 registros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="filters-actions">
+                        <button onclick="filtrarLogs()" class="btn btn-primary">
+                             Filtrar
+                        </button>
+                        <button onclick="limparFiltrosLogs()" class="btn btn-secondary">
+                             Limpar
+                        </button>
+                        <button onclick="exportarLogs()" class="btn btn-info">
+                             Exportar
+                        </button>
+                        <button onclick="atualizarLogsAutomatico()" class="btn btn-success" id="btnAutoRefresh">
+                             Auto-Atualizar
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tabela de Logs -->
+                <section class="table-section">
+                    <h2> Logs do Sistema</h2>
+                    
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Usuário</th>
+                                    <th>Detalhes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabelaLogs">
+                                <!-- Dados serão inseridos aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div> <!-- Fim do panel-logs -->
+        </div>
+    </main>
+
+    <!-- Modal de Ações para Pacientes -->
+    <div id="modalAcoesPaciente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Ações do Paciente</h3>
+                <button onclick="fecharModalAcoesPaciente()" class="btn-close">×</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="paciente-info">
+                    <h4 id="nomePacienteSelecionado">Nome do Paciente</h4>
+                    <p id="detalhesPacienteSelecionado">Detalhes do paciente</p>
+                </div>
+                
+                <div class="modal-actions">
+                    <button onclick="editarPaciente()" class="btn btn-primary btn-action">
+                        
+                        Editar Dados
+                    </button>
+                    
+                    <button onclick="verHistoricoPaciente()" class="btn btn-info btn-action">
+                        
+                        Ver Histórico
+                    </button>
+                    
+                    <button onclick="gerenciarAcesso()" class="btn btn-warning btn-action">
+                        
+                        Gerenciar Acesso
+                    </button>
+                    
+                    <button onclick="agendarConsulta()" class="btn btn-success btn-action">
+                        
+                        Agendar Consulta
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button onclick="fecharModalAcoesPaciente()" class="btn btn-secondary">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="config-api-integration.js"></script>
+    <script src="gestao-script.js"></script>
+    
+    <!-- Script de inicialização -->
+    <script>
+        // Variáveis globais para cards unificados
+        let cardUnificado;
+        let orcamentosData = [];
+        let visualizacaoAtual = 'tabela'; // 'tabela' ou 'cards'
+        
+        // Função para alternar visualização
+        function alternarVisualizacao(tipo) {
+            visualizacaoAtual = tipo;
+            
+            const containerTabela = document.getElementById('containerTabela');
+            const containerCards = document.getElementById('containerCards');
+            const btnTabela = document.getElementById('btnVisualizacaoTabela');
+            const btnCards = document.getElementById('btnVisualizacaoCards');
+            
+            if (tipo === 'tabela') {
+                containerTabela.style.display = 'block';
+                containerCards.style.display = 'none';
+                btnTabela.classList.add('active');
+                btnCards.classList.remove('active');
+            } else {
+                containerTabela.style.display = 'none';
+                containerCards.style.display = 'block';
+                btnTabela.classList.remove('active');
+                btnCards.classList.add('active');
+                
+                // Renderizar cards se houver dados
+                if (orcamentosData.length > 0) {
+                    renderizarOrcamentosCards();
+                }
+            }
+        }
+        
+        // Função para renderizar orçamentos em cards
+        function renderizarOrcamentosCards() {
+            if (!cardUnificado) return;
+            
+            const container = document.getElementById('orcamentosCards');
+            
+            if (orcamentosData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        
+                        <h3>Nenhum orçamento encontrado</h3>
+                        <p>Adicione um novo orçamento para começar</p>
+                        <button onclick="adicionarOrcamento()" class="btn btn-primary">
+                             Novo Orçamento
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = orcamentosData.map(orcamento => {
+                // Adaptar dados do orçamento para card unificado
+                const hoje = new Date();
+                const dataValidade = new Date(orcamento.validade);
+                const diasRestantes = Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+                
+                // Determinar prioridade baseada no status e validade
+                let prioridade = 'normal';
+                if (orcamento.status_orcamento === 'Vencido' || diasRestantes < 0) {
+                    prioridade = 'urgente';
+                } else if (orcamento.status_orcamento === 'Pendente' && diasRestantes <= 7) {
+                    prioridade = 'atencao';
+                } else if (orcamento.status_orcamento === 'Aceito') {
+                    prioridade = 'baixa';
+                }
+                
+                const orcamentoAdaptado = {
+                    id: orcamento.id,
+                    nome: orcamento.paciente_nome,
+                    telefone: orcamento.telefone || '(11) 99999-0000',
+                    email: orcamento.email || 'contato@email.com',
+                    
+                    prioridade: prioridade,
+                    procedimento: orcamento.procedimento_principal,
+                    valor: orcamento.valor_total,
+                    statusOrcamento: orcamento.status_orcamento,
+                    statusPagamento: orcamento.status_pagamento,
+                    dataConsulta: orcamento.data_consulta,
+                    dataOrcamento: orcamento.data_orcamento,
+                    validade: orcamento.validade,
+                    
+                    observacoes: `${orcamento.procedimento_principal} - R$ ${orcamento.valor_total}`,
+                    
+                    // Marcos baseados no orçamento
+                    proximaConsulta: orcamento.data_consulta,
+                    validadeOrcamento: orcamento.validade,
+                    proximoRetorno: new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                };
+                
+                return cardUnificado.criarCard(orcamentoAdaptado);
+            }).join('');
+        }
+        
+        // Verificar se todas as dependências estão carregadas
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Sistema de gestão inicializado');
+            
+            // Inicializar card unificado
+            cardUnificado = new CardUnificado('gestao-orcamentos');
+            
+            // Verificar dependências
+            if (typeof NotificationManager === 'undefined') {
+                console.error('❌ NotificationManager não carregado');
+                return;
+            }
+            
+            if (typeof AuthManager === 'undefined') {
+                console.error('❌ AuthManager não carregado');
+                return;
+            }
+            
+            // Inicializar sistema de tabs
+            if (typeof initializeTabs === 'function') {
+                initializeTabs();
+                console.log('✅ Sistema de tabs inicializado');
+            }
+            
+            // Sistema pronto
+            console.log('🚀 Todas as dependências carregadas com sucesso');
+            
+            // Carregar orçamentos do Caderno Digital
+            carregarOrcamentosCadernoDigital();
+            
+            // Adicionar efeitos de fade-in
+            adicionarEfeitosFadeIn();
+        });
+
+        // Função para adicionar efeitos de fade-in
+        function adicionarEfeitosFadeIn() {
+            // Adicionar classe fade-in aos stat-cards
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.classList.add('fade-in');
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Adicionar classe fade-in aos cards de orçamento
+            setTimeout(() => {
+                document.querySelectorAll('.card-paciente').forEach((card, index) => {
+                    card.classList.add('fade-in');
+                    card.style.animationDelay = `${index * 0.1}s`;
+                });
+            }, 500);
+        }
+
+        // Funções para gestão de orçamentos do Caderno Digital
+        function carregarOrcamentosCadernoDigital() {
+            const orcamentosCaderno = JSON.parse(localStorage.getItem('orcamentosGestao') || '[]');
+            
+            if (orcamentosCaderno.length > 0) {
+                console.log(`📊 ${orcamentosCaderno.length} orçamento(s) encontrado(s) do Caderno Digital`);
+                
+                // Integrar com dados existentes
+                integrarOrcamentosCaderno(orcamentosCaderno);
+                
+                // Atualizar estatísticas
+                atualizarEstatisticas();
+                
+                // Verificar prazos
+                verificarPrazosValidade();
+            }
+        }
+
+        function integrarOrcamentosCaderno(orcamentosCaderno) {
+            // Converter formato do Caderno Digital para formato da Gestão
+            const orcamentosConvertidos = orcamentosCaderno.map(orcamento => ({
+                id: orcamento.id,
+                paciente_nome: orcamento.nome,
+                telefone: orcamento.telefone || '(11) 99999-0000',
+                email: orcamento.email || 'contato@clinica.com',
+                procedimento_principal: orcamento.cirurgia,
+                valor_total: orcamento.valorFinal,
+                status_orcamento: orcamento.status === 'pendente' ? 'Pendente' : orcamento.status,
+                status_pagamento: 'Aguardando',
+                data_orcamento: new Date(orcamento.dataGeracao).toISOString().split('T')[0],
+                validade: new Date(orcamento.prazoValidade).toISOString().split('T')[0],
+                data_consulta: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 dias
+                observacoes: orcamento.observacoes || '',
+                hospital: orcamento.hospital,
+                forma_pagamento: orcamento.descricaoFormaPagamento,
+                valor_parcela: orcamento.valorParcela,
+                origem: 'caderno-digital'
+            }));
+
+            // Mesclar com orçamentos existentes
+            const orcamentosExistentes = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            const todosOrcamentos = [...orcamentosExistentes, ...orcamentosConvertidos];
+            
+            // Remover duplicatas (baseado no ID)
+            const orcamentosUnicos = todosOrcamentos.filter((orcamento, index, array) => 
+                array.findIndex(item => item.id === orcamento.id) === index
+            );
+            
+            // Salvar dados mesclados
+            localStorage.setItem('orcamentosData', JSON.stringify(orcamentosUnicos));
+            
+            // Limpar orçamentos do Caderno Digital (já foram integrados)
+            localStorage.removeItem('orcamentosGestao');
+            
+            console.log(`✅ ${orcamentosConvertidos.length} orçamento(s) integrado(s) com sucesso`);
+        }
+
+        function verificarPrazosValidade() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            const hoje = new Date();
+            
+            let vencendoEm3Dias = 0;
+            let vencidos = 0;
+            
+            orcamentos.forEach(orcamento => {
+                const dataValidade = new Date(orcamento.validade);
+                const diasRestantes = Math.ceil((dataValidade - hoje) / (1000 * 60 * 60 * 24));
+                
+                if (diasRestantes < 0) {
+                    vencidos++;
+                    // Atualizar status se vencido
+                    if (orcamento.status_orcamento !== 'Vencido') {
+                        orcamento.status_orcamento = 'Vencido';
+                    }
+                } else if (diasRestantes <= 3 && orcamento.status_orcamento === 'Pendente') {
+                    vencendoEm3Dias++;
+                }
+            });
+            
+            // Salvar alterações de status
+            localStorage.setItem('orcamentosData', JSON.stringify(orcamentos));
+            
+            // Mostrar alertas se necessário
+            if (vencidos > 0) {
+                mostrarAlertaPrazos(`⚠️ ${vencidos} orçamento(s) vencido(s)!`, 'error');
+            }
+            
+            if (vencendoEm3Dias > 0) {
+                mostrarAlertaPrazos(`⏰ ${vencendoEm3Dias} orçamento(s) vencem em 3 dias!`, 'warning');
+            }
+        }
+
+        function mostrarAlertaPrazos(mensagem, tipo) {
+            // Criar elemento de alerta
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alerta.style.position = 'fixed';
+            alerta.style.top = '20px';
+            alerta.style.right = '20px';
+            alerta.style.zIndex = '9999';
+            alerta.style.maxWidth = '400px';
+            
+            alerta.innerHTML = `
+                ${mensagem}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            document.body.appendChild(alerta);
+            
+            // Auto-remover após 10 segundos
+            setTimeout(() => {
+                if (alerta.parentElement) {
+                    alerta.remove();
+                }
+            }, 10000);
+        }
+
+        function atualizarEstatisticas() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            
+            const total = orcamentos.length;
+            const pendentes = orcamentos.filter(o => o.status_orcamento === 'Pendente').length;
+            const aceitos = orcamentos.filter(o => o.status_orcamento === 'Aceito').length;
+            const valorTotalPendente = orcamentos
+                .filter(o => o.status_orcamento === 'Pendente')
+                .reduce((sum, o) => sum + parseFloat(o.valor_total || 0), 0);
+            
+            // Atualizar elementos da interface
+            const elementoTotal = document.getElementById('totalOrcamentos');
+            const elementoPendentes = document.getElementById('orcamentosPendentes');
+            const elementoAceitos = document.getElementById('orcamentosAceitos');
+            const elementoValorTotal = document.getElementById('valorTotalPendente');
+            
+            if (elementoTotal) elementoTotal.textContent = total;
+            if (elementoPendentes) elementoPendentes.textContent = pendentes;
+            if (elementoAceitos) elementoAceitos.textContent = aceitos;
+            if (elementoValorTotal) {
+                elementoValorTotal.textContent = `R$ ${valorTotalPendente.toFixed(2).replace('.', ',')}`;
+            }
+        }
+
+        function adicionarOrcamento() {
+            // Abrir modal ou redirecionar para criação de orçamento
+            const resposta = confirm('🔗 Deseja criar um novo orçamento?\n\n✅ SIM - Abrir Caderno Digital\n❌ NÃO - Criar aqui mesmo');
+            
+            if (resposta) {
+                // Abrir Caderno Digital
+                window.open('/caderno-digital.html', '_blank');
+            } else {
+                // Implementar modal de criação local (futuro)
+                alert('📝 Funcionalidade de criação local será implementada em breve.\n\nPor enquanto, use o Caderno Digital para criar orçamentos.');
+            }
+        }
+
+        function exportarOrcamentos() {
+            const orcamentos = JSON.parse(localStorage.getItem('orcamentosData') || '[]');
+            
+            if (orcamentos.length === 0) {
+                alert('⚠️ Nenhum orçamento para exportar.');
+                return;
+            }
+            
+            // Criar CSV
+            const csvContent = [
+                'ID,Paciente,Procedimento,Valor,Status,Data Orçamento,Validade,Hospital,Forma Pagamento',
+                ...orcamentos.map(o => [
+                    o.id,
+                    o.paciente_nome,
+                    o.procedimento_principal,
+                    o.valor_total,
+                    o.status_orcamento,
+                    o.data_orcamento,
+                    o.validade,
+                    o.hospital || '',
+                    o.forma_pagamento || ''
+                ].join(','))
+            ].join('\n');
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `orcamentos_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            alert('📊 Relatório de orçamentos exportado com sucesso!');
+        }
+        
+        // Função para abrir gerenciamento de leads
+        function abrirLeadsManager() {
+            window.location.href = 'leads-manager.html';
+        }
+    </script>
+</body>
+</html>

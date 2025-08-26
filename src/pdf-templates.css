@@ -1,0 +1,100 @@
+/* ==============================================
+   CSS PARA TEMPLATES PDF - CADERNO DIGITAL
+   ============================================== */
+
+/* PDF - Orçamento */
+.pdf-orcamento body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+}
+
+.pdf-orcamento .header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.pdf-orcamento .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.pdf-orcamento .subtitle {
+    color: #7f8c8d;
+}
+
+.pdf-orcamento .content {
+    margin: 20px 0;
+}
+
+.pdf-orcamento .section {
+    margin: 20px 0;
+}
+
+.pdf-orcamento .label {
+    font-weight: bold;
+}
+
+.pdf-orcamento .value {
+    margin-left: 10px;
+}
+
+.pdf-orcamento .total {
+    font-size: 18px;
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.pdf-orcamento .footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #7f8c8d;
+}
+
+/* PDF - Receitas */
+.pdf-receita body {
+    font-family: 'Times New Roman', serif;
+    margin: 30px;
+}
+
+.pdf-receita .header {
+    text-align: center;
+    border-bottom: 2px solid #2c3e50;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+/* PDF - Exames */
+.pdf-exame body {
+    font-family: Arial, sans-serif;
+    margin: 30px;
+}
+
+.pdf-exame .header {
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+/* PDF - Ficha de Atendimento */
+.pdf-ficha body {
+    font-family: Arial, sans-serif;
+    margin: 25px;
+    line-height: 1.4;
+}
+
+.pdf-ficha .header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.pdf-ficha .form-group {
+    margin-bottom: 15px;
+}
+
+.pdf-ficha .form-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 120px;
+}

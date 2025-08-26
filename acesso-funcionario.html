@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Funcionário - Portal Dr. Marcio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>🔑 Acesso Funcionário</h1>
+            <p>Digite o código de acesso fornecido pelo administrador</p>
+            
+            <form id="codigoForm">
+                <div class="input-group">
+                    <label for="codigo">Código de Acesso:</label>
+                    <input type="text" id="codigo" name="codigo" placeholder="Ex: FUNC12ABC3D4" required 
+                           style="text-transform: uppercase; letter-spacing: 2px; text-align: center; font-weight: bold;">
+                </div>
+                
+                <button type="submit" class="btn-primary">🚀 Verificar Código</button>
+            </form>
+            
+            <div id="loading" class="loading" style="display: none;">
+                ⏳ Verificando código...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 14px;">
+                <strong>📋 INSTRUÇÕES:</strong><br>
+                1. Digite o código fornecido pelo administrador<br>
+                2. O código tem formato: FUNC + 8 caracteres<br>
+                3. Após verificação, você poderá definir sua senha
+            </div>
+            
+            <p class="text-center" style="margin-top: 20px;">
+                <a href="/" class="link">← Voltar ao início</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('codigoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const codigo = document.getElementById('codigo').value.trim().toUpperCase();
+            const loading = document.getElementById('loading');
+            const message = document.getElementById('message');
+            
+            if (!codigo) {
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ Digite o código de acesso</div>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            message.innerHTML = '';
+            
+            try {
+                console.log('🔑 Verificando código:', codigo);
+                
+                const response = await fetch('/api/verificar-codigo-funcionario', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ codigo })
+                });
+                
+                const data = await response.json();
+                console.log('📥 Resposta:', data);
+                
+                if (data.sucesso) {
+                    message.innerHTML = `
+                        <div style="color: green; padding: 15px; background: #d4edda; border-radius: 5px;">
+                            ✅ Código válido!<br>
+                            <strong>Nome:</strong> ${data.nome}<br>
+                            <strong>Cargo:</strong> ${data.cargo}<br>
+                            <strong>Email:</strong> ${data.email}<br>
+                            <br>Redirecionando para definir senha...
+                        </div>
+                    `;
+                    
+                    // Redirecionar para definir senha
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ ' + (data.message || 'Código inválido') + '</div>';
+                }
+            } catch (error) {
+                console.error('❌ Erro:', error);
+                message.innerHTML = '<div style="color: red; padding: 10px; background: #f8d7da; border-radius: 5px;">❌ Erro de conexão</div>';
+            }
+            
+            loading.style.display = 'none';
+        });
+        
+        // Auto-formatação do código
+        document.getElementById('codigo').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+/* 🚀 Portal Master Initializer - Estilos CSS */
+
+/* Container de detalhes da inicialização */
+.initialization-details {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 100%;
+    padding: 20px;
+}
+
+/* Resumo da inicialização */
+.init-summary {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.init-summary h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Estatísticas */
+.init-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    text-align: center;
+}
+
+/* Categorias */
+.init-categories {
+    display: grid;
+    gap: 20px;
+}
+
+.init-category {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.init-category h4 {
+    margin: 0 0 15px 0;
+    font-size: 1.2rem;
+    color: #374151;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f3f4f6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Items da categoria */
+.init-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.init-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f9fafb;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.init-item:hover {
+    background: #f3f4f6;
+    transform: translateX(2px);
+}
+
+/* Status dos items */
+.init-item.success {
+    border-left-color: #10b981;
+    background: #ecfdf5;
+}
+
+.init-item.failed {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.init-item.error {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.init-item.not_supported {
+    border-left-color: #6b7280;
+    background: #f9fafb;
+}
+
+/* Status icons */
+.init-status {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Nomes dos items */
+.init-name {
+    font-weight: 500;
+    color: #374151;
+    flex-grow: 1;
+}
+
+/* Mensagens de erro */
+.init-error {
+    font-size: 0.8rem;
+    color: #ef4444;
+    background: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+    max-width: 200px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Botões de ação */
+.init-actions {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.init-actions button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.init-actions .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.init-actions .btn-primary:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.init-actions .btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.init-actions .btn-secondary:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .init-stats {
+        gap: 20px;
+    }
+    
+    .stat-item {
+        min-width: 100px;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .init-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .init-error {
+        max-width: 100%;
+        margin-left: 0;
+        margin-top: 5px;
+    }
+    
+    .init-actions {
+        flex-direction: column;
+    }
+    
+    .init-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.initialization-details {
+    animation: fadeInUp 0.5s ease;
+}
+
+.init-category {
+    animation: fadeInUp 0.5s ease;
+    animation-fill-mode: both;
+}
+
+.init-category:nth-child(1) { animation-delay: 0.1s; }
+.init-category:nth-child(2) { animation-delay: 0.2s; }
+.init-category:nth-child(3) { animation-delay: 0.3s; }
+.init-category:nth-child(4) { animation-delay: 0.4s; }
+
+/* Loading spinner para quando estiver inicializando */
+.init-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 1.1rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* Status global do portal */
+.portal-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: white;
+    z-index: 10000;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.portal-status.initializing {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.portal-status.ready {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.portal-status.error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.portal-status:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}

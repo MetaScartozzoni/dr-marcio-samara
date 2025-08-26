@@ -1,0 +1,60 @@
+{
+  "services": {
+    "email": {
+      "enabled": false,
+      "configured": false,
+      "provider": "sendgrid",
+      "credentials": null
+    },
+    "sms": {
+      "enabled": false,
+      "configured": false,
+      "provider": "twilio",
+      "credentials": null
+    },
+    "payments": {
+      "enabled": false,
+      "configured": false,
+      "providers": {
+        "stripe": {
+          "enabled": false,
+          "configured": false,
+          "credentials": null
+        },
+        "pagseguro": {
+          "enabled": false,
+          "configured": false,
+          "credentials": null
+        }
+      }
+    },
+    "whatsapp": {
+      "enabled": false,
+      "configured": false,
+      "provider": "whatsapp-business",
+      "credentials": null
+    },
+    "database": {
+      "enabled": true,
+      "configured": true,
+      "provider": "postgresql"
+    },
+    "storage": {
+      "enabled": true,
+      "configured": true,
+      "provider": "local"
+    }
+  },
+  "features": {
+    "lgpd": true,
+    "billing": true,
+    "reports": true,
+    "notifications": true
+  },
+  "environment": {
+    "mode": "development",
+    "debug": true,
+    "logging": true
+  },
+  "lastUpdated": "2025-07-31T00:03:22.981Z"
+}

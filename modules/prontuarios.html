@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Prontuários - Dr. Marcio Scartozzoni</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/card-unificado.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header-left h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-voltar {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-novo {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-novo:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .busca-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .busca-section h2 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .busca-form {
+            display: grid;
+            grid-template-columns: 2fr 2fr auto;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-buscar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .btn-buscar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .resultados-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .resultados-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .resultados-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .total-prontuarios {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .prontuarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+
+        .prontuario-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prontuario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .prontuario-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .prontuario-id {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-status {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-ativo {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-inativo {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .paciente-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .paciente-dados {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .dado-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .dado-item i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        .estatisticas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .estatistica-item {
+            text-align: center;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .estatistica-numero {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .estatistica-label {
+            font-size: 11px;
+            color: #6c757d;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .card-actions .btn {
+            flex: 1;
+            padding: 10px 15px;
+            font-size: 13px;
+            justify-content: center;
+        }
+
+        .btn-caderno {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+        }
+
+        .btn-evolucao {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-jornada {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .estado-vazio {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .estado-vazio i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .estado-vazio h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .loading i {
+            font-size: 3em;
+            animation: spin 2s linear infinite;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .btn-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .modal-form .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-form .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .modal-form .form-group input {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .modal-form .form-group input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .busca-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .prontuarios-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+        }
+    </style>
+    <script src="../assets/js/security-dev.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-folder-open"></i> Gestão de Prontuários</h1>
+                <p>Central de prontuários médicos com integração completa</p>
+            </div>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Portal
+                </a>
+                <button onclick="abrirModalNovoProntuario()" class="btn btn-novo">
+                    <i class="fas fa-plus"></i> Novo Prontuário
+                </button>
+            </div>
+        </div>
+
+        <div class="busca-section">
+            <h2><i class="fas fa-search"></i> Buscar Prontuários</h2>
+            <div class="busca-form">
+                <div class="form-group">
+                    <label>Nome do Paciente</label>
+                    <input type="text" id="busca-nome" placeholder="Digite o nome...">
+                </div>
+                <div class="form-group">
+                    <label>CPF</label>
+                    <input type="text" id="busca-cpf" placeholder="000.000.000-00">
+                </div>
+                <button onclick="buscarProntuarios()" class="btn-buscar">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+
+        <div class="resultados-section">
+            <div class="resultados-header">
+                <h2><i class="fas fa-list"></i> Prontuários Encontrados</h2>
+                <div class="total-prontuarios" id="totalProntuarios">0 prontuários</div>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner"></i>
+                <h3>Carregando prontuários...</h3>
+                <p>Aguarde enquanto buscamos os dados</p>
+            </div>
+            
+            <div class="prontuarios-grid" id="prontuariosGrid">
+                <!-- Prontuários serão carregados aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Prontuário -->
+    <div class="modal" id="modalNovoProntuario">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Novo Prontuário</h2>
+                <button class="btn-close" onclick="fecharModalNovoProntuario()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="modal-form" onsubmit="criarProntuario(event)">
+                    <div class="form-group">
+                        <label>Nome Completo *</label>
+                        <input type="text" id="novo-nome" required placeholder="Nome completo do paciente">
+                    </div>
+                    <div class="form-group">
+                        <label>CPF *</label>
+                        <input type="text" id="novo-cpf" required placeholder="000.000.000-00">
+                    </div>
+                    <div class="form-group">
+                        <label>Data de Nascimento *</label>
+                        <input type="date" id="novo-nascimento" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone *</label>
+                        <input type="tel" id="novo-telefone" required placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="novo-email" placeholder="email@exemplo.com">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModalNovoProntuario()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button onclick="criarProntuario()" class="btn btn-novo">
+                    <i class="fas fa-save"></i> Criar Prontuário
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let prontuarios = [];
+        let prontuariosFiltrados = [];
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 Gestão de Prontuários - Inicializando...');
+            carregarProntuarios();
+        });
+
+        async function carregarProntuarios() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+
+            try {
+                // Simular carregamento de dados
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Dados de exemplo
+                prontuarios = [
+                    {
+                        id: 'PRON001',
+                        nome: 'João Silva',
+                        cpf: '123.456.789-00',
+                        dataNascimento: '1985-05-15',
+                        telefone: '(11) 99999-0001',
+                        email: 'joao.silva@email.com',
+                        dataCriacao: '2024-01-15',
+                        ultimaConsulta: '2024-07-20',
+                        totalConsultas: 5,
+                        status: 'Ativo'
+                    },
+                    {
+                        id: 'PRON002',
+                        nome: 'Maria Santos',
+                        cpf: '987.654.321-00',
+                        dataNascimento: '1990-08-22',
+                        telefone: '(11) 99999-0002',
+                        email: 'maria.santos@email.com',
+                        dataCriacao: '2024-02-10',
+                        ultimaConsulta: '2024-07-25',
+                        totalConsultas: 3,
+                        status: 'Ativo'
+                    },
+                    {
+                        id: 'PRON003',
+                        nome: 'Pedro Oliveira',
+                        cpf: '456.789.123-00',
+                        dataNascimento: '1978-12-03',
+                        telefone: '(11) 99999-0003',
+                        email: 'pedro.oliveira@email.com',
+                        dataCriacao: '2024-03-05',
+                        ultimaConsulta: '2024-06-15',
+                        totalConsultas: 8,
+                        status: 'Ativo'
+                    },
+                    {
+                        id: 'PRON004',
+                        nome: 'Ana Costa',
+                        cpf: '789.123.456-00',
+                        dataNascimento: '1995-04-18',
+                        telefone: '(11) 99999-0004',
+                        email: 'ana.costa@email.com',
+                        dataCriacao: '2024-04-20',
+                        ultimaConsulta: null,
+                        totalConsultas: 0,
+                        status: 'Ativo'
+                    }
+                ];
+
+                prontuariosFiltrados = [...prontuarios];
+                renderizarProntuarios();
+                
+                console.log(`✅ ${prontuarios.length} prontuários carregados`);
+            } catch (error) {
+                console.error('❌ Erro ao carregar prontuários:', error);
+                mostrarErro('Erro ao carregar prontuários');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function renderizarProntuarios() {
+            const grid = document.getElementById('prontuariosGrid');
+            const total = document.getElementById('totalProntuarios');
+
+            total.textContent = prontuariosFiltrados.length + ' prontuário' + (prontuariosFiltrados.length !== 1 ? 's' : '');
+
+            if (prontuariosFiltrados.length === 0) {
+                grid.innerHTML = `
+                    <div class="estado-vazio" style="grid-column: 1 / -1;">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>Nenhum prontuário encontrado</h3>
+                        <p>Tente ajustar os termos de busca ou crie um novo prontuário</p>
+                        <button onclick="abrirModalNovoProntuario()" class="btn btn-novo" style="margin-top: 20px;">
+                            <i class="fas fa-plus"></i> Criar Primeiro Prontuário
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = prontuariosFiltrados.map(prontuario => `
+                <div class="prontuario-card" onclick="selecionarProntuario('${prontuario.id}')">
+                    <div class="card-header">
+                        <div class="prontuario-id">${prontuario.id}</div>
+                        <div class="card-status status-${prontuario.status.toLowerCase()}">
+                            ${prontuario.status}
+                        </div>
+                    </div>
+
+                    <div class="paciente-info">
+                        <h3>${prontuario.nome}</h3>
+                        
+                        <div class="paciente-dados">
+                            <div class="dado-item">
+                                <i class="fas fa-id-card"></i>
+                                <span>${prontuario.cpf}</span>
+                            </div>
+                            <div class="dado-item">
+                                <i class="fas fa-birthday-cake"></i>
+                                <span>${calcularIdade(prontuario.dataNascimento)} anos</span>
+                            </div>
+                            <div class="dado-item">
+                                <i class="fas fa-phone"></i>
+                                <span>${prontuario.telefone}</span>
+                            </div>
+                            <div class="dado-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>${prontuario.email || 'Não informado'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="estatisticas">
+                            <div class="estatistica-item">
+                                <div class="estatistica-numero">${prontuario.totalConsultas}</div>
+                                <div class="estatistica-label">Consultas</div>
+                            </div>
+                            <div class="estatistica-item">
+                                <div class="estatistica-numero">${prontuario.ultimaConsulta ? calcularDiasDesde(prontuario.ultimaConsulta) : '-'}</div>
+                                <div class="estatistica-label">Dias</div>
+                            </div>
+                            <div class="estatistica-item">
+                                <div class="estatistica-numero">${new Date(prontuario.dataCriacao).getFullYear()}</div>
+                                <div class="estatistica-label">Criado</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-actions">
+                            <button onclick="event.stopPropagation(); abrirCaderno('${prontuario.id}')" class="btn btn-caderno">
+                                <i class="fas fa-book-medical"></i> Caderno
+                            </button>
+                            <button onclick="event.stopPropagation(); abrirEvolucao('${prontuario.id}')" class="btn btn-evolucao">
+                                <i class="fas fa-chart-line"></i> Evolução
+                            </button>
+                            <button onclick="event.stopPropagation(); abrirJornada('${prontuario.id}')" class="btn btn-jornada">
+                                <i class="fas fa-route"></i> Jornada
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Animação de entrada
+            setTimeout(() => {
+                document.querySelectorAll('.prontuario-card').forEach((card, index) => {
+                    card.style.animation = `fadeInUp 0.6s ease forwards ${index * 0.1}s`;
+                });
+            }, 100);
+        }
+
+        function buscarProntuarios() {
+            const nome = document.getElementById('busca-nome').value.toLowerCase();
+            const cpf = document.getElementById('busca-cpf').value.replace(/\D/g, '');
+
+            prontuariosFiltrados = prontuarios.filter(prontuario => {
+                const nomeMatch = !nome || prontuario.nome.toLowerCase().includes(nome);
+                const cpfMatch = !cpf || prontuario.cpf.replace(/\D/g, '').includes(cpf);
+                return nomeMatch && cpfMatch;
+            });
+
+            renderizarProntuarios();
+            console.log(`🔍 Busca realizada: ${prontuariosFiltrados.length} resultados`);
+        }
+
+        function abrirModalNovoProntuario() {
+            document.getElementById('modalNovoProntuario').classList.add('active');
+        }
+
+        function fecharModalNovoProntuario() {
+            document.getElementById('modalNovoProntuario').classList.remove('active');
+            
+            // Limpar formulário
+            document.getElementById('novo-nome').value = '';
+            document.getElementById('novo-cpf').value = '';
+            document.getElementById('novo-nascimento').value = '';
+            document.getElementById('novo-telefone').value = '';
+            document.getElementById('novo-email').value = '';
+        }
+
+        async function criarProntuario() {
+            const nome = document.getElementById('novo-nome').value;
+            const cpf = document.getElementById('novo-cpf').value;
+            const nascimento = document.getElementById('novo-nascimento').value;
+            const telefone = document.getElementById('novo-telefone').value;
+            const email = document.getElementById('novo-email').value;
+
+            if (!nome || !cpf || !nascimento || !telefone) {
+                SecureNotification.show('⚠️ Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            // Verificar se CPF já existe
+            const cpfNumerico = cpf.replace(/\D/g, '');
+            const cpfExiste = prontuarios.find(p => p.cpf.replace(/\D/g, '') === cpfNumerico);
+            
+            if (cpfExiste) {
+                SecureNotification.show('❌ Já existe um prontuário com este CPF!');
+                return;
+            }
+
+            try {
+                // Simular criação no servidor
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const novoProntuario = {
+                    id: 'PRON' + String(prontuarios.length + 1).padStart(3, '0'),
+                    nome: nome,
+                    cpf: cpf,
+                    dataNascimento: nascimento,
+                    telefone: telefone,
+                    email: email,
+                    dataCriacao: new Date().toISOString().split('T')[0],
+                    ultimaConsulta: null,
+                    totalConsultas: 0,
+                    status: 'Ativo'
+                };
+
+                prontuarios.push(novoProntuario);
+                prontuariosFiltrados = [...prontuarios];
+                renderizarProntuarios();
+
+                fecharModalNovoProntuario();
+                SecureNotification.show('✅ Prontuário criado com sucesso!');
+
+                // Perguntar se quer abrir o caderno
+                if (confirm('📋 Deseja abrir o caderno digital deste paciente?')) {
+                    abrirCaderno(novoProntuario.id);
+                }
+
+                console.log('✅ Novo prontuário criado:', novoProntuario.id);
+            } catch (error) {
+                console.error('❌ Erro ao criar prontuário:', error);
+                SecureNotification.show('❌ Erro ao criar prontuário. Tente novamente.');
+            }
+        }
+
+        function selecionarProntuario(id) {
+            const prontuario = prontuarios.find(p => p.id === id);
+            if (prontuario) {
+                console.log('👤 Prontuário selecionado:', prontuario.nome);
+                
+                // Salvar dados do paciente para uso nos outros módulos
+                localStorage.setItem('pacienteAtual', JSON.stringify(prontuario));
+                
+                // Mostrar opções
+                const opcao = confirm(
+                    `📋 Prontuário: ${prontuario.nome}\n\n` +
+                    `Deseja abrir o Caderno Digital?\n\n` +
+                    `• OK = Abrir Caderno Digital\n` +
+                    `• Cancelar = Ver opções`
+                );
+                
+                if (opcao) {
+                    abrirCaderno(id);
+                } else {
+                    mostrarOpcoesProntuario(prontuario);
+                }
+            }
+        }
+
+        function mostrarOpcoesProntuario(prontuario) {
+            const opcoes = [
+                '1 - Caderno Digital',
+                '2 - Quadro de Evolução',
+                '3 - Jornada do Paciente',
+                '4 - Histórico Completo'
+            ];
+            
+            const escolha = prompt(
+                `📋 ${prontuario.nome} - ${prontuario.id}\n\n` +
+                `Escolha uma opção:\n\n` +
+                opcoes.join('\n')
+            );
+            
+            switch (escolha) {
+                case '1':
+                    abrirCaderno(prontuario.id);
+                    break;
+                case '2':
+                    abrirEvolucao(prontuario.id);
+                    break;
+                case '3':
+                    abrirJornada(prontuario.id);
+                    break;
+                case '4':
+                    mostrarHistorico(prontuario);
+                    break;
+            }
+        }
+
+        function abrirCaderno(id) {
+            const prontuario = prontuarios.find(p => p.id === id);
+            if (prontuario) {
+                localStorage.setItem('pacienteAtual', JSON.stringify(prontuario));
+                window.open('caderno-digital.html', '_blank');
+                console.log('📖 Abrindo caderno digital para:', prontuario.nome);
+            }
+        }
+
+        function abrirEvolucao(id) {
+            const prontuario = prontuarios.find(p => p.id === id);
+            if (prontuario) {
+                localStorage.setItem('pacienteAtual', JSON.stringify(prontuario));
+                window.open('quadro-evolutivo.html', '_blank');
+                console.log('📈 Abrindo quadro evolutivo para:', prontuario.nome);
+            }
+        }
+
+        function abrirJornada(id) {
+            const prontuario = prontuarios.find(p => p.id === id);
+            if (prontuario) {
+                localStorage.setItem('pacienteAtual', JSON.stringify(prontuario));
+                window.open('jornada-paciente.html', '_blank');
+                console.log('🛣️ Abrindo jornada do paciente para:', prontuario.nome);
+            }
+        }
+
+        function mostrarHistorico(prontuario) {
+            SecureNotification.show(
+                `📊 Histórico Completo - ${prontuario.nome}\n\n` +
+                `📋 ID: ${prontuario.id}\n` +
+                `📅 Criado em: ${new Date(prontuario.dataCriacao).toLocaleDateString('pt-BR')}\n` +
+                `🏥 Total de Consultas: ${prontuario.totalConsultas}\n` +
+                `📆 Última Consulta: ${prontuario.ultimaConsulta ? new Date(prontuario.ultimaConsulta).toLocaleDateString('pt-BR') : 'Nunca'}\n` +
+                `📊 Status: ${prontuario.status}\n\n` +
+                `📞 Contato: ${prontuario.telefone}\n` +
+                `📧 Email: ${prontuario.email || 'Não informado'}`
+            );
+        }
+
+        function mostrarErro(mensagem) {
+            const grid = document.getElementById('prontuariosGrid');
+            grid.innerHTML = `
+                <div class="estado-vazio" style="grid-column: 1 / -1;">
+                    <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                    <h3>Erro ao carregar dados</h3>
+                    <p>${mensagem}</p>
+                    <button onclick="carregarProntuarios()" class="btn btn-novo" style="margin-top: 20px;">
+                        <i class="fas fa-redo"></i> Tentar Novamente
+                    </button>
+                </div>
+            `;
+        }
+
+        // Funções utilitárias
+        function calcularIdade(dataNascimento) {
+            const hoje = new Date();
+            const nascimento = new Date(dataNascimento);
+            let idade = hoje.getFullYear() - nascimento.getFullYear();
+            const mes = hoje.getMonth() - nascimento.getMonth();
+            
+            if (mes < 0 || (mes === 0 && hoje.getDate() < nascimento.getDate())) {
+                idade--;
+            }
+            
+            return idade;
+        }
+
+        function calcularDiasDesde(data) {
+            const hoje = new Date();
+            const dataReferencia = new Date(data);
+            const diferenca = hoje - dataReferencia;
+            return Math.floor(diferenca / (1000 * 60 * 60 * 24));
+        }
+
+        // Busca em tempo real
+        document.getElementById('busca-nome').addEventListener('input', buscarProntuarios);
+        document.getElementById('busca-cpf').addEventListener('input', buscarProntuarios);
+
+        // Animação CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

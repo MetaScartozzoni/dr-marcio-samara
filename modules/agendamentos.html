@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultas - Dr. Marcio Scartozzoni</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/card-unificado.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- 🎨 Portal Components System -->
+    <link rel="stylesheet" href="../components/portal-components.css">
+    <link rel="stylesheet" href="../features/portal-professional-features.css">
+    
+    <!-- 📊 Analytics System -->
+    <script src="../analytics/portal-analytics.js"></script>
+    
+    <!-- 🎨 UI Components -->
+    <script src="../components/portal-components.js"></script>
+    
+    <!-- 🔌 Integrations -->
+    <script src="../integrations/portal-integrations.js"></script>
+    
+    <!-- 🎯 Professional Features -->
+    <script src="../features/portal-professional-features.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header-left h1 {
+            font-size: 2.2em;
+            margin-bottom: 5px;
+        }
+
+        .header-left p {
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-voltar {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-voltar:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-novo {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-novo:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .calendar-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .calendar-header h2 {
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .calendar-nav button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .month-year {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .calendar-day-header {
+            background: #f8f9fa;
+            padding: 15px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+        }
+
+        .calendar-day.other-month {
+            background: #f8f9fa;
+            color: #adb5bd;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .calendar-day.selected {
+            background: #28a745;
+            color: white;
+        }
+
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .day-appointments {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .appointment-item {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            border-left: 3px solid #667eea;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .appointment-item.consulta {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border-left-color: #28a745;
+        }
+
+        .appointment-item.cirurgia {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-left-color: #dc3545;
+        }
+
+        .appointment-item.retorno {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+            border-left-color: #f39c12;
+        }
+
+        .agenda-lateral {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .agenda-hoje {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .agenda-hoje h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .compromisso-item {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .compromisso-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .compromisso-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .compromisso-horario {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .compromisso-tipo {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .btn-atender {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-atender:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-primeira-consulta {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .consulta-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .consulta-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .consulta-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .consulta-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-size: 1em;
+        }
+
+        .consulta-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-agendado {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-confirmado {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-em-andamento {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .status-concluido {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        .tipo-cirurgia { background: #dc3545; }
+        .tipo-retorno { background: #f39c12; }
+
+        .compromisso-paciente {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .compromisso-detalhes {
+            color: #6c757d;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compromisso-detalhes i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        .compromisso-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-compromisso {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-confirmar {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-remarcar {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn-cancelar {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+        }
+
+        .btn-compromisso:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .stats-resumo {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stats-resumo h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .btn-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .agendamento-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: #f8f9fa;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .estado-vazio {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .estado-vazio i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .estado-vazio h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 1200px) {
+            .agenda-lateral {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .calendar-nav {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="../assets/js/security-dev.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1><i class="fas fa-calendar-alt"></i> Consultas</h1>
+                <p>Gestão de consultas e atendimentos</p>
+            </div>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Portal
+                </a>
+                <button onclick="abrirModalNovoAgendamento()" class="btn btn-novo">
+                    <i class="fas fa-plus"></i> Novo Agendamento
+                </button>
+            </div>
+        </div>
+
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <h2><i class="fas fa-calendar"></i> Calendário de Agendamentos</h2>
+                <div class="calendar-nav">
+                    <button onclick="mesAnterior()">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    <div class="month-year" id="monthYear">Julho 2024</div>
+                    <button onclick="proximoMes()">
+                        Próximo <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button onclick="irParaHoje()">
+                        <i class="fas fa-home"></i> Hoje
+                    </button>
+                </div>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendário será gerado aqui -->
+            </div>
+        </div>
+
+        <div class="agenda-lateral">
+            <div class="agenda-hoje">
+                <h3><i class="fas fa-clock"></i> Agenda de Hoje - <span id="dataHoje"></span></h3>
+                <div id="compromissosHoje">
+                    <!-- Compromissos de hoje serão carregados aqui -->
+                </div>
+            </div>
+
+            <div class="stats-resumo">
+                <h3><i class="fas fa-chart-pie"></i> Resumo da Semana</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Total de Consultas</span>
+                    <span class="stat-value" id="totalConsultas">25</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cirurgias Agendadas</span>
+                    <span class="stat-value" id="totalCirurgias">8</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Retornos</span>
+                    <span class="stat-value" id="totalRetornos">12</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Taxa de Ocupação</span>
+                    <span class="stat-value" id="taxaOcupacao">85%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Confirmados</span>
+                    <span class="stat-value" id="totalConfirmados">22</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Pendentes</span>
+                    <span class="stat-value" id="totalPendentes">3</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo Agendamento -->
+    <div class="modal" id="modalNovoAgendamento">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-plus"></i> Novo Agendamento</h2>
+                <button class="btn-close" onclick="fecharModalAgendamento()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="agendamento-form" onsubmit="salvarAgendamento(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Paciente *</label>
+                            <input type="text" id="agend-paciente" required placeholder="Nome do paciente">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="agend-telefone" required placeholder="(11) 99999-9999">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data *</label>
+                            <input type="date" id="agend-data" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Horário *</label>
+                            <input type="time" id="agend-horario" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Consulta *</label>
+                            <select id="agend-tipo" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="consulta">Consulta</option>
+                                <option value="cirurgia">Cirurgia</option>
+                                <option value="retorno">Retorno</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Duração (minutos)</label>
+                            <select id="agend-duracao">
+                                <option value="30">30 minutos</option>
+                                <option value="60" selected>60 minutos</option>
+                                <option value="90">90 minutos</option>
+                                <option value="120">120 minutos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label>Procedimento/Observações</label>
+                        <textarea id="agend-procedimento" placeholder="Descreva o procedimento ou observações importantes..."></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="agend-email" placeholder="email@exemplo.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="agend-status">
+                                <option value="pendente" selected>Pendente Confirmação</option>
+                                <option value="confirmado">Confirmado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button onclick="fecharModalAgendamento()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button onclick="salvarAgendamento()" class="btn btn-novo">
+                    <i class="fas fa-save"></i> Agendar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Detalhes da Consulta -->
+    <div class="consulta-modal" id="modalDetalhesConsulta">
+        <div class="consulta-modal-content">
+            <div class="consulta-header">
+                <h2><i class="fas fa-user-md"></i> Detalhes da Consulta</h2>
+                <button class="btn-close" onclick="fecharModalConsulta()">&times;</button>
+            </div>
+            
+            <div class="consulta-info">
+                <div class="info-item">
+                    <div class="info-label">Paciente</div>
+                    <div class="info-value" id="consultaPaciente">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Data e Horário</div>
+                    <div class="info-value" id="consultaDataHora">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Tipo de Consulta</div>
+                    <div class="info-value" id="consultaTipo">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">
+                        <span class="status-badge" id="consultaStatus">-</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Telefone</div>
+                    <div class="info-value" id="consultaTelefone">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">E-mail</div>
+                    <div class="info-value" id="consultaEmail">-</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Procedimento</div>
+                    <div class="info-value" id="consultaProcedimento">-</div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <div class="info-label">Observações</div>
+                    <div class="info-value" id="consultaObservacoes">-</div>
+                </div>
+            </div>
+
+            <div class="consulta-actions">
+                <button onclick="fecharModalConsulta()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Fechar
+                </button>
+                <button onclick="confirmarConsulta()" class="btn btn-novo" id="btnConfirmar" style="display: none;">
+                    <i class="fas fa-check"></i> Confirmar
+                </button>
+                <button onclick="iniciarAtendimento()" class="btn btn-atender" id="btnAtender">
+                    <i class="fas fa-play"></i> <span id="textoAtender">Atender</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dataAtual = new Date();
+        let agendamentos = [];
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📅 Sistema de Agendamentos - Inicializando...');
+            carregarAgendamentos();
+            renderizarCalendario();
+            atualizarDataHoje();
+        });
+
+        async function carregarAgendamentos() {
+            try {
+                // Simular carregamento de dados
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Dados de exemplo
+                agendamentos = [
+                    {
+                        id: 'AGD001',
+                        paciente: 'João Silva',
+                        telefone: '(11) 99999-0001',
+                        email: 'joao.silva@email.com',
+                        data: '2024-07-31',
+                        horario: '09:00',
+                        tipo: 'consulta',
+                        duracao: 60,
+                        procedimento: 'Consulta inicial para rinoplastia',
+                        status: 'confirmado'
+                    },
+                    {
+                        id: 'AGD002',
+                        paciente: 'Maria Santos',
+                        telefone: '(11) 99999-0002',
+                        email: 'maria.santos@email.com',
+                        data: '2024-07-31',
+                        horario: '10:30',
+                        tipo: 'retorno',
+                        duracao: 30,
+                        procedimento: 'Retorno pós-operatório',
+                        status: 'confirmado'
+                    },
+                    {
+                        id: 'AGD003',
+                        paciente: 'Pedro Oliveira',
+                        telefone: '(11) 99999-0003',
+                        email: 'pedro.oliveira@email.com',
+                        data: '2024-07-31',
+                        horario: '14:00',
+                        tipo: 'cirurgia',
+                        duracao: 120,
+                        procedimento: 'Lipoaspiração',
+                        status: 'confirmado'
+                    },
+                    {
+                        id: 'AGD004',
+                        paciente: 'Ana Costa',
+                        telefone: '(11) 99999-0004',
+                        email: 'ana.costa@email.com',
+                        data: '2024-08-01',
+                        horario: '09:30',
+                        tipo: 'consulta',
+                        duracao: 60,
+                        procedimento: 'Avaliação para mamoplastia',
+                        status: 'pendente'
+                    },
+                    {
+                        id: 'AGD005',
+                        paciente: 'Carlos Mendes',
+                        telefone: '(11) 99999-0005',
+                        email: 'carlos.mendes@email.com',
+                        data: '2024-08-02',
+                        horario: '11:00',
+                        tipo: 'retorno',
+                        duracao: 30,
+                        procedimento: 'Acompanhamento pós-cirúrgico',
+                        status: 'confirmado'
+                    }
+                ];
+
+                renderizarCalendario();
+                renderizarCompromissosHoje();
+                atualizarEstatisticas();
+                
+                console.log(`✅ ${agendamentos.length} agendamentos carregados`);
+            } catch (error) {
+                console.error('❌ Erro ao carregar agendamentos:', error);
+            }
+        }
+
+        function renderizarCalendario() {
+            const grid = document.getElementById('calendarGrid');
+            const monthYear = document.getElementById('monthYear');
+            
+            // Atualizar cabeçalho do mês
+            const meses = [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ];
+            monthYear.textContent = `${meses[dataAtual.getMonth()]} ${dataAtual.getFullYear()}`;
+
+            // Cabeçalhos dos dias da semana
+            const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            let html = diasSemana.map(dia => 
+                `<div class="calendar-day-header">${dia}</div>`
+            ).join('');
+
+            // Calcular dias do calendário
+            const primeiroDia = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), 1);
+            const ultimoDia = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, 0);
+            const hoje = new Date();
+
+            // Dias do mês anterior para completar a primeira semana
+            const diasAnteriores = primeiroDia.getDay();
+            for (let i = diasAnteriores - 1; i >= 0; i--) {
+                const data = new Date(primeiroDia);
+                data.setDate(data.getDate() - i - 1);
+                html += renderizarDiaCalendario(data, true);
+            }
+
+            // Dias do mês atual
+            for (let dia = 1; dia <= ultimoDia.getDate(); dia++) {
+                const data = new Date(dataAtual.getFullYear(), dataAtual.getMonth(), dia);
+                const isHoje = data.toDateString() === hoje.toDateString();
+                html += renderizarDiaCalendario(data, false, isHoje);
+            }
+
+            // Dias do próximo mês para completar a última semana
+            const diasRestantes = 42 - (diasAnteriores + ultimoDia.getDate());
+            for (let dia = 1; dia <= diasRestantes; dia++) {
+                const data = new Date(dataAtual.getFullYear(), dataAtual.getMonth() + 1, dia);
+                html += renderizarDiaCalendario(data, true);
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function renderizarDiaCalendario(data, outroMes = false, isHoje = false) {
+            const dataStr = data.toISOString().split('T')[0];
+            const agendamentosData = agendamentos.filter(a => a.data === dataStr);
+            
+            let classes = ['calendar-day'];
+            if (outroMes) classes.push('other-month');
+            if (isHoje) classes.push('today');
+
+            let appointmentsHtml = '';
+            agendamentosData.slice(0, 3).forEach(agend => {
+                appointmentsHtml += `
+                    <div class="appointment-item ${agend.tipo}" 
+                         onclick="event.stopPropagation(); verAgendamento('${agend.id}')"
+                         title="${agend.horario} - ${agend.paciente} (${getTipoLabel(agend.tipo)})">
+                        ${agend.horario} ${agend.paciente}
+                    </div>
+                `;
+            });
+
+            if (agendamentosData.length > 3) {
+                appointmentsHtml += `
+                    <div class="appointment-item" style="background: #f8f9fa; color: #6c757d;">
+                        +${agendamentosData.length - 3} mais
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="${classes.join(' ')}" onclick="selecionarDia('${dataStr}')">
+                    <div class="day-number">${data.getDate()}</div>
+                    <div class="day-appointments">
+                        ${appointmentsHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderizarCompromissosHoje() {
+            const container = document.getElementById('compromissosHoje');
+            const hoje = new Date().toISOString().split('T')[0];
+            const compromissosHoje = agendamentos.filter(a => a.data === hoje);
+
+            if (compromissosHoje.length === 0) {
+                container.innerHTML = `
+                    <div class="estado-vazio">
+                        <i class="fas fa-calendar-check"></i>
+                        <h4>Nenhum compromisso hoje</h4>
+                        <p>Agenda livre para hoje</p>
+                    </div>
+                `;
+                return;
+            }
+
+            compromissosHoje.sort((a, b) => a.horario.localeCompare(b.horario));
+
+            container.innerHTML = compromissosHoje.map(comp => `
+                <div class="compromisso-item" onclick="verAgendamento('${comp.id}')">
+                    <div class="compromisso-header">
+                        <div class="compromisso-horario">${comp.horario}</div>
+                        <div class="compromisso-tipo tipo-${comp.tipo}">
+                            ${getTipoLabel(comp.tipo)}
+                        </div>
+                    </div>
+                    <div class="compromisso-paciente">${comp.paciente}</div>
+                    <div class="compromisso-detalhes">
+                        <i class="fas fa-phone"></i>
+                        <span>${comp.telefone}</span>
+                    </div>
+                    <div class="compromisso-detalhes">
+                        <i class="fas fa-clock"></i>
+                        <span>${comp.duracao} minutos</span>
+                    </div>
+                    <div class="compromisso-detalhes">
+                        <i class="fas fa-notes-medical"></i>
+                        <span>${comp.procedimento}</span>
+                    </div>
+                    
+                    <div class="compromisso-actions">
+                        ${comp.status === 'pendente' ? `
+                        <button onclick="event.stopPropagation(); confirmarAgendamento('${comp.id}')" class="btn-compromisso btn-confirmar">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>` : ''}
+                        
+                        <button onclick="event.stopPropagation(); iniciarAtendimento('${comp.id}')" class="btn-compromisso btn-atender ${comp.tipo === 'consulta' && !temProntuario(comp.paciente) ? 'btn-primeira-consulta' : ''}">
+                            <i class="fas fa-user-md"></i> ${comp.tipo === 'consulta' && !temProntuario(comp.paciente) ? 'Primeira Consulta' : 'Atender'}
+                        </button>
+                        
+                        <button onclick="event.stopPropagation(); remarcarAgendamento('${comp.id}')" class="btn-compromisso btn-remarcar">
+                            <i class="fas fa-calendar-alt"></i> Remarcar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function atualizarDataHoje() {
+            const hoje = new Date();
+            document.getElementById('dataHoje').textContent = hoje.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                day: '2-digit',
+                month: 'long'
+            });
+        }
+
+        function atualizarEstatisticas() {
+            // Calcular estatísticas da semana atual
+            const hoje = new Date();
+            const inicioSemana = new Date(hoje);
+            inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+            const fimSemana = new Date(inicioSemana);
+            fimSemana.setDate(inicioSemana.getDate() + 6);
+
+            const agendamentosSemanais = agendamentos.filter(a => {
+                const dataAgend = new Date(a.data);
+                return dataAgend >= inicioSemana && dataAgend <= fimSemana;
+            });
+
+            const consultas = agendamentosSemanais.filter(a => a.tipo === 'consulta').length;
+            const cirurgias = agendamentosSemanais.filter(a => a.tipo === 'cirurgia').length;
+            const retornos = agendamentosSemanais.filter(a => a.tipo === 'retorno').length;
+            const confirmados = agendamentosSemanais.filter(a => a.status === 'confirmado').length;
+            const pendentes = agendamentosSemanais.filter(a => a.status === 'pendente').length;
+
+            document.getElementById('totalConsultas').textContent = consultas;
+            document.getElementById('totalCirurgias').textContent = cirurgias;
+            document.getElementById('totalRetornos').textContent = retornos;
+            document.getElementById('totalConfirmados').textContent = confirmados;
+            document.getElementById('totalPendentes').textContent = pendentes;
+
+            const ocupacao = agendamentosSemanais.length > 0 ? Math.round((confirmados / agendamentosSemanais.length) * 100) : 0;
+            document.getElementById('taxaOcupacao').textContent = ocupacao + '%';
+        }
+
+        function getTipoLabel(tipo) {
+            const labels = {
+                'consulta': 'Consulta',
+                'cirurgia': 'Cirurgia',
+                'retorno': 'Retorno'
+            };
+            return labels[tipo] || tipo;
+        }
+
+        function mesAnterior() {
+            dataAtual.setMonth(dataAtual.getMonth() - 1);
+            renderizarCalendario();
+        }
+
+        function proximoMes() {
+            dataAtual.setMonth(dataAtual.getMonth() + 1);
+            renderizarCalendario();
+        }
+
+        function irParaHoje() {
+            dataAtual = new Date();
+            renderizarCalendario();
+        }
+
+        function selecionarDia(data) {
+            console.log('📅 Dia selecionado:', data);
+            const agendamentosData = agendamentos.filter(a => a.data === data);
+            
+            if (agendamentosData.length > 0) {
+                SecureNotification.show(`📅 ${new Date(data).toLocaleDateString('pt-BR')}\n\n${agendamentosData.length} agendamento(s):\n\n${agendamentosData.map(a => `${a.horario} - ${a.paciente} (${getTipoLabel(a.tipo)})`).join('\n')}`);
+            } else {
+                const opcao = confirm(`📅 ${new Date(data).toLocaleDateString('pt-BR')}\n\nNenhum agendamento nesta data.\n\nDeseja criar um novo agendamento?`);
+                if (opcao) {
+                    abrirModalNovoAgendamento(data);
+                }
+            }
+        }
+
+        function abrirModalNovoAgendamento(data = null) {
+            if (data) {
+                document.getElementById('agend-data').value = data;
+            }
+            document.getElementById('modalNovoAgendamento').classList.add('active');
+        }
+
+        function fecharModalAgendamento() {
+            document.getElementById('modalNovoAgendamento').classList.remove('active');
+            
+            // Limpar formulário
+            document.getElementById('agend-paciente').value = '';
+            document.getElementById('agend-telefone').value = '';
+            document.getElementById('agend-data').value = '';
+            document.getElementById('agend-horario').value = '';
+            document.getElementById('agend-tipo').value = '';
+            document.getElementById('agend-duracao').value = '60';
+            document.getElementById('agend-procedimento').value = '';
+            document.getElementById('agend-email').value = '';
+            document.getElementById('agend-status').value = 'pendente';
+        }
+
+        async function salvarAgendamento() {
+            const paciente = document.getElementById('agend-paciente').value;
+            const telefone = document.getElementById('agend-telefone').value;
+            const data = document.getElementById('agend-data').value;
+            const horario = document.getElementById('agend-horario').value;
+            const tipo = document.getElementById('agend-tipo').value;
+            const duracao = document.getElementById('agend-duracao').value;
+            const procedimento = document.getElementById('agend-procedimento').value;
+            const email = document.getElementById('agend-email').value;
+            const status = document.getElementById('agend-status').value;
+
+            if (!paciente || !telefone || !data || !horario || !tipo) {
+                SecureNotification.show('⚠️ Preencha todos os campos obrigatórios.');
+                return;
+            }
+
+            // Verificar conflito de horário
+            const conflito = agendamentos.find(a => 
+                a.data === data && a.horario === horario && a.status !== 'cancelado'
+            );
+            
+            if (conflito) {
+                SecureNotification.show('❌ Já existe um agendamento neste horário!');
+                return;
+            }
+
+            try {
+                // Simular salvamento
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                const novoAgendamento = {
+                    id: 'AGD' + String(agendamentos.length + 1).padStart(3, '0'),
+                    paciente: paciente,
+                    telefone: telefone,
+                    email: email,
+                    data: data,
+                    horario: horario,
+                    tipo: tipo,
+                    duracao: parseInt(duracao),
+                    procedimento: procedimento,
+                    status: status
+                };
+
+                agendamentos.push(novoAgendamento);
+                renderizarCalendario();
+                renderizarCompromissosHoje();
+                atualizarEstatisticas();
+
+                fecharModalAgendamento();
+                SecureNotification.show('✅ Agendamento criado com sucesso!');
+
+                console.log('✅ Novo agendamento criado:', novoAgendamento.id);
+            } catch (error) {
+                console.error('❌ Erro ao criar agendamento:', error);
+                SecureNotification.show('❌ Erro ao criar agendamento. Tente novamente.');
+            }
+        }
+
+        function verAgendamento(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (agendamento) {
+                // Preencher dados no modal
+                document.getElementById('consultaPaciente').textContent = agendamento.paciente;
+                document.getElementById('consultaDataHora').textContent = 
+                    `${new Date(agendamento.data).toLocaleDateString('pt-BR')} às ${agendamento.horario}`;
+                document.getElementById('consultaTipo').textContent = getTipoLabel(agendamento.tipo);
+                document.getElementById('consultaTelefone').textContent = agendamento.telefone;
+                document.getElementById('consultaEmail').textContent = agendamento.email || 'Não informado';
+                document.getElementById('consultaProcedimento').textContent = agendamento.procedimento;
+                document.getElementById('consultaObservacoes').textContent = agendamento.observacoes || 'Nenhuma observação';
+                
+                // Configurar status badge
+                const statusBadge = document.getElementById('consultaStatus');
+                statusBadge.textContent = agendamento.status;
+                statusBadge.className = `status-badge status-${agendamento.status}`;
+                
+                // Configurar botões
+                const btnConfirmar = document.getElementById('btnConfirmar');
+                const btnAtender = document.getElementById('btnAtender');
+                const textoAtender = document.getElementById('textoAtender');
+                
+                if (agendamento.status === 'pendente') {
+                    btnConfirmar.style.display = 'flex';
+                } else {
+                    btnConfirmar.style.display = 'none';
+                }
+                
+                // Verificar se é primeira consulta
+                const primeiraConsulta = agendamento.tipo === 'consulta' && !temProntuario(agendamento.paciente);
+                
+                if (primeiraConsulta) {
+                    btnAtender.className = 'btn btn-primeira-consulta';
+                    textoAtender.textContent = 'Primeira Consulta';
+                } else {
+                    btnAtender.className = 'btn btn-atender';
+                    textoAtender.textContent = 'Atender';
+                }
+                
+                // Armazenar ID do agendamento atual
+                btnAtender.setAttribute('data-agendamento-id', id);
+                
+                // Mostrar modal
+                document.getElementById('modalDetalhesConsulta').style.display = 'flex';
+            }
+        }
+
+        function fecharModalConsulta() {
+            document.getElementById('modalDetalhesConsulta').style.display = 'none';
+        }
+
+        function confirmarConsulta() {
+            const btnAtender = document.getElementById('btnAtender');
+            const agendamentoId = btnAtender.getAttribute('data-agendamento-id');
+            
+            if (agendamentoId) {
+                confirmarAgendamento(agendamentoId);
+                fecharModalConsulta();
+            }
+        }
+
+        // Função para verificar se paciente já tem prontuário
+        function temProntuario(nomePaciente) {
+            // Simular verificação de prontuário
+            // Em produção, consultaria a base de dados
+            const pacientesComProntuario = [
+                'Maria Santos', 
+                'Pedro Oliveira', 
+                'Carlos Mendes'
+            ];
+            
+            return pacientesComProntuario.includes(nomePaciente);
+        }
+
+        // Função principal do fluxo de atendimento
+        async function iniciarAtendimento(agendamentoId) {
+            const agendamento = agendamentos.find(a => a.id === agendamentoId);
+            if (!agendamento) return;
+            
+            const primeiraConsulta = agendamento.tipo === 'consulta' && !temProntuario(agendamento.paciente);
+            
+            try {
+                // 1. Criar/Atualizar prontuário do paciente
+                await criarProntuarioPaciente(agendamento.paciente, agendamento);
+                
+                // 2. Iniciar Jornada do Paciente
+                await iniciarJornadaPaciente(agendamento);
+                
+                // 3. Marcar consulta como "em andamento"
+                agendamento.status = 'em-andamento';
+                
+                // 4. Verificar se é primeira consulta
+                if (primeiraConsulta) {
+                    const opcao = await mostrarModalPrimeiraConsulta(agendamento);
+                    
+                    if (opcao === 'caderno') {
+                        // Abrir Caderno Digital do paciente
+                        abrirCadernoDigitalPaciente(agendamento.paciente);
+                    } else if (opcao === 'orcamento') {
+                        // Verificar se precisa criar orçamento
+                        await verificarOrcamento(agendamento);
+                    }
+                } else {
+                    // Consulta normal - abrir Caderno Digital
+                    abrirCadernoDigitalPaciente(agendamento.paciente);
+                }
+                
+                // Atualizar interface
+                renderizarCalendario();
+                renderizarCompromissosHoje();
+                fecharModalConsulta();
+                
+                AuditSystem.log('ATENDIMENTO_INICIADO', {
+                    agendamento: agendamentoId,
+                    paciente: agendamento.paciente,
+                    primeiraConsulta: primeiraConsulta
+                });
+                
+            } catch (error) {
+                console.error('❌ Erro ao iniciar atendimento:', error);
+                SecureNotification.error('Erro ao iniciar atendimento. Tente novamente.');
+            }
+        }
+
+        async function criarProntuarioPaciente(nomePaciente, agendamento) {
+            SecureNotification.show('📁 Criando prontuário do paciente...');
+            
+            // Simular criação de prontuário
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const prontuario = {
+                id: 'PRONT' + Date.now(),
+                paciente: nomePaciente,
+                telefone: agendamento.telefone,
+                email: agendamento.email,
+                dataCriacao: new Date().toISOString(),
+                status: 'ativo',
+                consultas: [agendamento.id]
+            };
+            
+            // Salvar no localStorage (simulação)
+            const prontuarios = JSON.parse(localStorage.getItem('prontuarios') || '[]');
+            prontuarios.push(prontuario);
+            localStorage.setItem('prontuarios', JSON.stringify(prontuarios));
+            
+            SecureNotification.success('✅ Prontuário criado com sucesso!');
+            
+            return prontuario;
+        }
+
+        async function iniciarJornadaPaciente(agendamento) {
+            SecureNotification.show('🚀 Iniciando jornada do paciente...');
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const jornada = {
+                id: 'JORNADA' + Date.now(),
+                paciente: agendamento.paciente,
+                agendamentoId: agendamento.id,
+                dataInicio: new Date().toISOString(),
+                etapas: [
+                    {
+                        nome: 'Consulta Inicial',
+                        status: 'em-andamento',
+                        dataInicio: new Date().toISOString()
+                    }
+                ],
+                status: 'ativa'
+            };
+            
+            // Salvar jornada (simulação)
+            const jornadas = JSON.parse(localStorage.getItem('jornadas') || '[]');
+            jornadas.push(jornada);
+            localStorage.setItem('jornadas', JSON.stringify(jornadas));
+            
+            SecureNotification.success('✅ Jornada do paciente iniciada!');
+            
+            return jornada;
+        }
+
+        function mostrarModalPrimeiraConsulta(agendamento) {
+            return new Promise((resolve) => {
+                const modal = confirm(
+                    `🏥 PRIMEIRA CONSULTA\n\n` +
+                    `Paciente: ${agendamento.paciente}\n` +
+                    `Procedimento: ${agendamento.procedimento}\n\n` +
+                    `Deseja:\n\n` +
+                    `✅ OK = Abrir Caderno Digital para atendimento\n` +
+                    `❌ Cancelar = Criar orçamento primeiro\n\n` +
+                    `Lembre-se: Primeira consulta deve sair com orçamento ou justificativa!`
+                );
+                
+                resolve(modal ? 'caderno' : 'orcamento');
+            });
+        }
+
+        async function verificarOrcamento(agendamento) {
+            const temOrcamento = confirm(
+                `💰 ORÇAMENTO OBRIGATÓRIO\n\n` +
+                `Para primeira consulta é obrigatório:\n` +
+                `• Criar orçamento, OU\n` +
+                `• Justificar por que não foi criado\n\n` +
+                `✅ OK = Tem orçamento\n` +
+                `❌ Cancelar = Precisa justificar`
+            );
+            
+            if (!temOrcamento) {
+                const justificativa = prompt(
+                    '📝 JUSTIFICATIVA OBRIGATÓRIA\n\n' +
+                    'Por que o orçamento não foi criado?\n\n' +
+                    'Exemplos:\n' +
+                    '• Paciente precisa de mais tempo para decidir\n' +
+                    '• Necessário exames complementares\n' +
+                    '• Contraindicação médica\n' +
+                    '• Paciente desistiu do procedimento'
+                );
+                
+                if (!justificativa || justificativa.trim() === '') {
+                    SecureNotification.error('❌ Justificativa é obrigatória para primeira consulta sem orçamento!');
+                    return false;
+                }
+                
+                // Salvar justificativa
+                agendamento.justificativaSemOrcamento = justificativa;
+                agendamento.observacoes = (agendamento.observacoes || '') + '\n\nJUSTIFICATIVA SEM ORÇAMENTO: ' + justificativa;
+                
+                SecureNotification.warning('⚠️ Justificativa registrada. Lembre-se de fazer follow-up com o paciente.');
+            } else {
+                SecureNotification.success('✅ Orçamento confirmado para primeira consulta.');
+            }
+            
+            // Abrir Caderno Digital após resolver orçamento
+            abrirCadernoDigitalPaciente(agendamento.paciente);
+            
+            return true;
+        }
+
+        function abrirCadernoDigitalPaciente(nomePaciente) {
+            // Passar dados do paciente via URL parameters
+            const url = `caderno-digital.html?paciente=${encodeURIComponent(nomePaciente)}&origem=consulta`;
+            
+            SecureNotification.show(`📋 Abrindo Caderno Digital para ${nomePaciente}...`);
+            
+            setTimeout(() => {
+                window.open(url, '_blank');
+            }, 1000);
+        }
+
+        function confirmarAgendamento(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (agendamento) {
+                agendamento.status = 'confirmado';
+                renderizarCalendario();
+                renderizarCompromissosHoje();
+                atualizarEstatisticas();
+                SecureNotification.show('✅ Agendamento confirmado com sucesso!');
+                console.log('✅ Agendamento confirmado:', id);
+            }
+        }
+
+        function remarcarAgendamento(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (agendamento) {
+                const novaData = prompt('📅 Nova data (YYYY-MM-DD):', agendamento.data);
+                const novoHorario = prompt('🕐 Novo horário (HH:MM):', agendamento.horario);
+                
+                if (novaData && novoHorario) {
+                    // Verificar conflito
+                    const conflito = agendamentos.find(a => 
+                        a.id !== id && a.data === novaData && a.horario === novoHorario && a.status !== 'cancelado'
+                    );
+                    
+                    if (conflito) {
+                        SecureNotification.show('❌ Já existe um agendamento neste novo horário!');
+                        return;
+                    }
+                    
+                    agendamento.data = novaData;
+                    agendamento.horario = novoHorario;
+                    renderizarCalendario();
+                    renderizarCompromissosHoje();
+                    SecureNotification.show('✅ Agendamento remarcado com sucesso!');
+                    console.log('✅ Agendamento remarcado:', id);
+                }
+            }
+        }
+
+        function cancelarAgendamento(id) {
+            const agendamento = agendamentos.find(a => a.id === id);
+            if (agendamento) {
+                if (confirm(`❌ Cancelar agendamento de ${agendamento.paciente}?\n\nEsta ação não pode ser desfeita.`)) {
+                    agendamento.status = 'cancelado';
+                    renderizarCalendario();
+                    renderizarCompromissosHoje();
+                    atualizarEstatisticas();
+                    SecureNotification.show('✅ Agendamento cancelado com sucesso!');
+                    console.log('❌ Agendamento cancelado:', id);
+                }
+            }
+        }
+    </script>
+    <script src="../assets/js/agendamentos.js"></script>
+</body>
+</html>

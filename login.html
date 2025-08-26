@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Portal Dr. Marcio</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 🎨 Portal Components System -->
+    <link rel="stylesheet" href="components/portal-components.css">
+    <link rel="stylesheet" href="features/portal-professional-features.css">
+    
+    <!-- 📊 Analytics System -->
+    <script src="analytics/portal-analytics.js"></script>
+    
+    <!-- 🎨 UI Components -->
+    <script src="components/portal-components.js"></script>
+    
+    <!-- 🔌 Integrations -->
+    <script src="integrations/portal-integrations.js"></script>
+    
+    <!-- 🎯 Professional Features -->
+    <script src="features/portal-professional-features.js"></script>
+    
+    <!-- 🚀 Portal Master Initializer -->
+    <link rel="stylesheet" href="portal-master-init.css">
+    <script src="portal-master-init.js"></script>
+    
+    <!-- 📱 PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h1>Login</h1>
+            <p>Faça login para acessar o portal</p>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Entrar</button>
+            </form>
+            
+            <div class="forgot-password" style="text-align: center; margin: 15px 0;">
+                <a href="/esqueci-senha.html" class="link" style="color: #007bff; text-decoration: none; font-size: 14px;">
+                    🔑 Esqueceu a senha? Clique aqui
+                </a>
+            </div>
+            
+            <div id="loading" class="loading" style="display: none;">
+                Fazendo login...
+            </div>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="text-center">
+                <a href="/" class="link">Voltar à verificação de email</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="config-seguro.js"></script>
+    <script>
+       // Preencher email automaticamente se vier da verificação
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            if (email) {
+                document.getElementById('email').value = email;
+                document.getElementById('senha').focus();
+            }
+        };
+
+        class LoginManager {
+            constructor() {
+                this.form = document.getElementById('loginForm');
+                this.loading = document.getElementById('loading');
+                this.message = document.getElementById('message');
+                
+                this.initEventListeners();
+            }
+
+            initEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleLogin(e));
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value.trim();
+                const senha = document.getElementById('senha').value;
+
+                if (!email || !senha) {
+                    // Usar novo sistema de alerts
+                    showAlert({
+                        type: 'warning',
+                        title: 'Campos Obrigatórios',
+                        message: 'Por favor, preencha email e senha.',
+                        timeout: 4000
+                    });
+                    return;
+                }
+
+                // Log da tentativa de login
+                window.ConfigSeguro?.criarLogSeguranca('tentativa_login', email, {
+                    timestamp: new Date().toISOString()
+                });
+                
+                // Analytics
+                window.trackEvent('login_attempt', { email: email });
+
+                this.showLoading(true);
+                this.clearMessage();
+
+                try {
+                    // Primeiro: verificar status do usuário (usando token seguro)
+                    const token = window.ConfigSeguro.gerarTokenVerificacao(email);
+                    const statusResponse = await fetch(`/secure/api/auth/status-usuario/${encodeURIComponent(token)}`);
+                    const statusData = await statusResponse.json();
+                    
+                    if (statusResponse.ok && statusData.existe) {
+                        const proximaAcao = window.ConfigSeguro.determinarProximaAcao(statusData);
+                        
+                        if (proximaAcao.acao === 'renovar_senha') {
+                            this.showMessage(`
+                                <div style="color: #856404; background: #fff3cd; padding: 15px; border-radius: 5px; border: 1px solid #ffeaa7;">
+                                    <strong>🔒 Renovação de Senha Obrigatória</strong><br>
+                                    Sua senha expirou (90 dias desde a última troca).<br>
+                                    Redirecionando para renovação...
+                                </div>
+                            `, 'warning');
+                            
+                            setTimeout(() => {
+                                window.location.href = `/recuperar-senha.html?email=${encodeURIComponent(email)}`;
+                            }, 3000);
+                            return;
+                        }
+                    }
+
+                    // Login principal usando API segura
+                    const response = await fetch('/secure/api/auth/login-seguro', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, senha })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.sucesso) {
+                        // Login bem-sucedido
+                        window.ConfigSeguro.criarLogSeguranca('login_sucesso', email, {
+                            tipoUsuario: resultado.usuario?.tipo || 'unknown'
+                        });
+                        
+                        this.showMessage('Login realizado com sucesso! Redirecionando...', 'success');
+                        
+                        // Preparar dados do usuário para localStorage
+                        const userData = {
+                            ...resultado.usuario,
+                            autorizado: true
+                        };
+                        
+                        // Salvar dados do usuário
+                        localStorage.setItem('userInfo', JSON.stringify(userData));
+                        
+                        // Redirecionar para o dashboard correto
+                        setTimeout(() => {
+                            window.location.href = resultado.redirectUrl || '/dashboard.html';
+                        }, 1500);
+                        
+                    } else {
+                        // Log de tentativa de login falhada
+                        window.ConfigSeguro.criarLogSeguranca('login_falha', email, {
+                            erro: resultado.erro || 'Credenciais inválidas'
+                        });
+                        
+                        // Mostrar erro do servidor
+                        this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Erro no login:', error);
+                    this.showMessage('Erro de conexão. Tente novamente.', 'error');
+                } finally {
+                    this.showLoading(false);
+                }
+            }
+
+            handleLoginError(resultado) {
+                switch (resultado.action) {
+                    case 'completar_cadastro':
+                        this.showMessage('Sua conta não foi finalizada. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'verificar_email':
+                        this.showMessage('Verifique seu email para ativar a conta. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `verificar-email.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'criar_senha':
+                        this.showMessage('Complete o cadastro criando uma senha. Redirecionando...', 'warning');
+                        setTimeout(() => {
+                            window.location.href = `criar-senha.html?email=${encodeURIComponent(document.getElementById('email').value)}`;
+                        }, 2000);
+                        break;
+                        
+                    case 'aguardar':
+                    case 'aguardar_autorizacao':
+                        this.showMessage('Sua conta está aguardando autorização do administrador.', 'info');
+                        break;
+                        
+                    case 'contatar_admin':
+                        this.showMessage(`${resultado.erro} Entre em contato: (11) 99999-9999`, 'error');
+                        break;
+                        
+                    default:
+                        this.showMessage(resultado.erro || 'Erro no login. Tente novamente.', 'error');
+                }
+            }
+
+            showLoading(show) {
+                this.loading.style.display = show ? 'block' : 'none';
+                const submitButton = this.form.querySelector('button[type="submit"]');
+                submitButton.disabled = show;
+                
+                if (show) {
+                    submitButton.textContent = 'Fazendo login...';
+                } else {
+                    submitButton.textContent = 'Entrar';
+                }
+            }
+
+            showMessage(text, type = 'info') {
+                this.message.innerHTML = `
+                    <div class="${type}">
+                        
+                        ${text}
+                    </div>
+                `;
+                this.message.style.display = 'block';
+            }
+
+            clearMessage() {
+                this.message.style.display = 'none';
+                this.message.innerHTML = '';
+            }
+
+            getIconForType(type) {
+                const icons = {
+                    success: 'fa-check-circle',
+                    error: 'fa-exclamation-triangle',
+                    warning: 'fa-exclamation-circle',
+                    info: 'fa-info-circle'
+                };
+                return icons[type] || 'fa-info-circle';
+            }
+        }
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+
+    <style>
+        .message {
+            margin: 15px 0;
+        }
+
+        .message div {
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .message .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .message .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .message .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .message .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .message i {
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 15px;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .forgot-password {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .forgot-password .link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-password .link:hover {
+            color: #0056b3;
+            text-decoration: underline;
+        }
+    </style>
+</body>
+</html>

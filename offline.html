@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Dr. Marcio - Offline</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .offline-container {
+            text-align: center;
+            background: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 500px;
+            margin: 20px;
+        }
+
+        .offline-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .offline-title {
+            font-size: 2rem;
+            color: #2c5aa0;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .offline-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .offline-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 90, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .offline-features {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #eee;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .feature-icon {
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .feature-text {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .connection-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #856404;
+        }
+
+        .connection-status.online {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        @media (max-width: 480px) {
+            .offline-container {
+                padding: 40px 30px;
+                margin: 10px;
+            }
+
+            .offline-title {
+                font-size: 1.5rem;
+            }
+
+            .offline-icon {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">📡</div>
+        <h1 class="offline-title">Modo Offline</h1>
+        <p class="offline-message">
+            Você está sem conexão com a internet. Algumas funcionalidades estão disponíveis offline, 
+            e seus dados serão sincronizados automaticamente quando a conexão for restaurada.
+        </p>
+
+        <div class="offline-actions">
+            <button class="btn btn-primary" onclick="checkConnection()">
+                🔄 Tentar Reconectar
+            </button>
+            <a href="/" class="btn btn-secondary">
+                🏠 Voltar ao Início
+            </a>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+            ⚠️ Sem conexão com a internet
+        </div>
+
+        <div class="offline-features">
+            <h3 style="color: #2c5aa0; margin-bottom: 20px;">📋 Recursos Disponíveis Offline:</h3>
+            
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <div class="feature-text">Visualizar dados salvos localmente</div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">📝</div>
+                <div class="feature-text">Preencher formulários (serão enviados quando conectar)</div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">📅</div>
+                <div class="feature-text">Consultar agenda do dia salva</div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">👥</div>
+                <div class="feature-text">Acessar dados de pacientes recentes</div>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-text">Sincronização automática ao reconectar</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🔍 Verificar status da conexão
+        function updateConnectionStatus() {
+            const statusElement = document.getElementById('connectionStatus');
+            
+            if (navigator.onLine) {
+                statusElement.textContent = '✅ Conexão restaurada! Redirecionando...';
+                statusElement.className = 'connection-status online';
+                
+                // Redirecionar após 2 segundos
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+            } else {
+                statusElement.textContent = '⚠️ Sem conexão com a internet';
+                statusElement.className = 'connection-status';
+            }
+        }
+
+        // 🔄 Tentar reconectar
+        function checkConnection() {
+            const button = document.querySelector('.btn-primary');
+            const originalText = button.innerHTML;
+            
+            button.innerHTML = '🔄 Verificando...';
+            button.disabled = true;
+            
+            // Simular verificação
+            setTimeout(() => {
+                updateConnectionStatus();
+                
+                if (!navigator.onLine) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    
+                    // Mostrar feedback visual
+                    button.style.background = '#dc3545';
+                    button.innerHTML = '❌ Ainda offline';
+                    
+                    setTimeout(() => {
+                        button.style.background = 'linear-gradient(135deg, #2c5aa0 0%, #1e3f73 100%)';
+                        button.innerHTML = originalText;
+                    }, 2000);
+                }
+            }, 1500);
+        }
+
+        // 👂 Eventos de conexão
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // 🚀 Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            updateConnectionStatus();
+            
+            // Verificar periodicamente
+            setInterval(updateConnectionStatus, 10000); // A cada 10 segundos
+        });
+
+        // 📱 Service Worker - Registrar se disponível
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration()
+                .then(registration => {
+                    if (registration) {
+                        console.log('📱 Service Worker ativo - Modo offline suportado');
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

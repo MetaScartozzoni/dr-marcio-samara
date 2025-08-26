@@ -1,0 +1,507 @@
+/* 🎨 Portal Components CSS - Componentes Reutilizáveis */
+
+/* 🪟 Modal Styles */
+.portal-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.portal-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modalSlideIn 0.3s ease;
+    position: relative;
+}
+
+.portal-modal-sm { width: 90%; max-width: 400px; }
+.portal-modal-md { width: 90%; max-width: 600px; }
+.portal-modal-lg { width: 90%; max-width: 800px; }
+.portal-modal-xl { width: 90%; max-width: 1200px; }
+
+.portal-modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9fa;
+}
+
+.portal-modal-header h3 {
+    margin: 0;
+    color: #2c5aa0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.portal-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.portal-modal-close:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.portal-modal-body {
+    padding: 24px;
+    max-height: calc(90vh - 100px);
+    overflow-y: auto;
+}
+
+/* 🚨 Alert Styles */
+.portal-alerts-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+    max-width: 400px;
+}
+
+.portal-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    animation: slideInRight 0.3s ease;
+    position: relative;
+}
+
+.portal-alert-success {
+    background: rgba(212, 237, 218, 0.95);
+    border-left: 4px solid #28a745;
+    color: #155724;
+}
+
+.portal-alert-error {
+    background: rgba(248, 215, 218, 0.95);
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+}
+
+.portal-alert-warning {
+    background: rgba(255, 243, 205, 0.95);
+    border-left: 4px solid #ffc107;
+    color: #856404;
+}
+
+.portal-alert-info {
+    background: rgba(209, 236, 241, 0.95);
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+}
+
+.portal-alert-icon {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.portal-alert-content {
+    flex: 1;
+}
+
+.portal-alert-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 0.95rem;
+}
+
+.portal-alert-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.portal-alert-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.portal-alert-action {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.portal-alert-action:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+.portal-alert-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.portal-alert-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+/* 📋 Card Styles */
+.portal-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.portal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.portal-card-header {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.portal-card-header h4 {
+    margin: 0;
+    color: #2c5aa0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.portal-card-body {
+    padding: 20px;
+}
+
+.portal-card-footer {
+    padding: 16px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.portal-card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.portal-card-action {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.portal-card-action.btn-primary {
+    background: #2c5aa0;
+    color: white;
+}
+
+.portal-card-action.btn-primary:hover {
+    background: #1e3f73;
+}
+
+.portal-card-action.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.portal-card-action.btn-secondary:hover {
+    background: #545b62;
+}
+
+.portal-card-action.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.portal-card-action.btn-success:hover {
+    background: #1e7e34;
+}
+
+.portal-card-action.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.portal-card-action.btn-danger:hover {
+    background: #c82333;
+}
+
+/* 📅 Calendar Styles */
+.portal-calendar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.portal-calendar-header {
+    background: #2c5aa0;
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.portal-calendar-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.portal-calendar-nav {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.portal-calendar-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.portal-calendar-grid {
+    padding: 20px;
+}
+
+.portal-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    margin-bottom: 10px;
+}
+
+.portal-calendar-weekdays > div {
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #666;
+    padding: 8px 4px;
+}
+
+.portal-calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+}
+
+.portal-calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    position: relative;
+    min-height: 40px;
+}
+
+.portal-calendar-day:not(.empty):hover {
+    background: #e3f2fd;
+}
+
+.portal-calendar-day.empty {
+    cursor: default;
+}
+
+.portal-calendar-day.today {
+    background: #2c5aa0;
+    color: white;
+    font-weight: 600;
+}
+
+.portal-calendar-day.has-events {
+    background: #fff3cd;
+}
+
+.portal-calendar-day.has-events.today {
+    background: #2c5aa0;
+    color: white;
+}
+
+.day-number {
+    font-size: 0.9rem;
+}
+
+.event-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #dc3545;
+    color: white;
+    font-size: 0.7rem;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 768px) {
+    .portal-modal-sm,
+    .portal-modal-md,
+    .portal-modal-lg,
+    .portal-modal-xl {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .portal-alerts-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+    
+    .portal-card {
+        margin: 10px;
+    }
+    
+    .portal-calendar-grid {
+        padding: 10px;
+    }
+    
+    .portal-calendar-day {
+        min-height: 35px;
+        font-size: 0.8rem;
+    }
+}
+
+/* 🎭 Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* 🌟 Utility Classes */
+.portal-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #2c5aa0;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.portal-hidden {
+    display: none !important;
+}
+
+.portal-fade-in {
+    animation: fadeIn 0.3s ease;
+}
+
+.portal-slide-up {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
