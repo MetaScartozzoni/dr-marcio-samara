@@ -1,170 +1,103 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { ptBR } from 'date-fns/locale';
+import { CssBaseline } from '@mui/material';
+import { AuthProvider } from './context/AuthContext';
 
-// Redux Store
-import store from './store';
+// Pages
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import ResetPassword from './pages/auth/ResetPassword';
+import UpdatePassword from './pages/auth/UpdatePassword';
+import EmailConfirmation from './pages/auth/EmailConfirmation';
+import VerifyCode from './pages/auth/VerifyCode';
+import Dashboard from './pages/dashboard/Dashboard';
 
-// Components
-import Login from './components/auth/Login';
-import Dashboard from './components/dashboard/Dashboard';
-import CalendarioAgendamento from './components/agendamento/CalendarioAgendamento';
-import PacienteList from './components/paciente/PacienteList';
+// Route Protection
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleBasedRoute from './components/auth/RoleBasedRoute';
 
-// Theme personalizado
+// Theme configuration
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2196F3',
-      light: '#64B5F6',
-      dark: '#1976D2',
+      main: '#1976d2',
     },
     secondary: {
-      main: '#FF9800',
-      light: '#FFB74D',
-      dark: '#F57C00',
+      main: '#dc004e',
     },
     background: {
-      default: '#F5F5F5',
-      paper: '#FFFFFF',
+      default: '#f5f5f5',
     },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    h4: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 600,
-    },
   },
   components: {
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-        },
-      },
-    },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 8,
           textTransform: 'none',
-          fontWeight: 600,
-        },
-      },
-    },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 8,
-          },
         },
       },
     },
   },
 });
 
-// Componente para proteger rotas
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
-};
-
-// Layout principal
-const MainLayout = ({ children }) => {
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Sidebar seria adicionada aqui */}
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        {children}
-      </Box>
-    </Box>
-  );
-};
-
 function App() {
   return (
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
-          <CssBaseline />
-          <Router>
-            <Routes>
-              {/* Rotas públicas */}
-              <Route path="/login" element={<Login />} />
-              
-              {/* Rotas protegidas */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Dashboard />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path="/agendamentos"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <CalendarioAgendamento />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              
-              <Route
-                path="/pacientes"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <PacienteList />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              
-              {/* Rota padrão */}
-              <Route path="/" element={<Navigate to="/dashboard" />} />
-              
-              {/* Rota 404 */}
-              <Route
-                path="*"
-                element={
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      minHeight: '100vh',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <h1>404 - Página não encontrada</h1>
-                    <p>A página que você está procurando não existe.</p>
-                    <a href="/dashboard">Voltar ao Dashboard</a>
-                  </Box>
-                }
-              />
-            </Routes>
-          </Router>
-        </LocalizationProvider>
-      </ThemeProvider>
-    </Provider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
+            <Route path="/email-confirmation" element={<EmailConfirmation />} />
+            <Route path="/verify-code" element={<VerifyCode />} />
+            <Route path="/esqueci-senha" element={<Navigate to="/reset-password" replace />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+            {/* Protected Routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Routes */}
+            <Route
+              path="/admin/*"
+              element={
+                <RoleBasedRoute allowedRoles={['admin']}>
+                  <div>Admin Routes - To be implemented</div>
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* Funcionario Routes */}
+            <Route
+              path="/funcionario/*"
+              element={
+                <RoleBasedRoute allowedRoles={['funcionario']}>
+                  <div>Funcionario Routes - To be implemented</div>
+                </RoleBasedRoute>
+              }
+            />
+
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

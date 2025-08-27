@@ -1,0 +1,1479 @@
+{
+  "scanDate": "2025-08-27T20:12:51.111Z",
+  "summary": {
+    "filesAffected": 60,
+    "totalIssues": 120,
+    "categories": {
+      "Campo \"tipo_usuario\" (deve ser role)": 33,
+      "Campo \"telefone\" (deve ser phone)": 35,
+      "Campo \"data_nascimento\" (deve ser date_of_birth)": 12,
+      "Acesso incorreto user.profiles (não existe)": 9,
+      "Tabela \"usuarios\" em português": 12,
+      "Campo \"nome_completo\" (deve ser full_name)": 16,
+      "Acesso incorreto profiles.user (não existe)": 1,
+      "Referência a user_profile (estrutura antiga)": 1,
+      "Acesso incorreto profile.user": 1
+    }
+  },
+  "files": [
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/DATABASE-SETUP.md",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            80
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            45
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/GUIA-IMPLEMENTACAO-FINAL.md",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 9,
+          "lines": [
+            32,
+            49,
+            68,
+            73,
+            99,
+            104,
+            106
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            36
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 1,
+          "lines": [
+            37
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 2,
+          "lines": [
+            136,
+            142
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/GUIA-MIGRACAO-CODIGO.md",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            12
+          ]
+        },
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 2,
+          "lines": [
+            13,
+            18
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            13,
+            19
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 3,
+          "lines": [
+            13,
+            20,
+            48
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/GUIA-PRIMEIROS-PASSOS.md",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/IMPLEMENTATION_GUIDE.md",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 3,
+          "lines": [
+            145,
+            186
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/SOLUCAO-PADRONIZACAO-USUARIOS.md",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 4,
+          "lines": [
+            22,
+            48,
+            85,
+            89
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 7,
+          "lines": [
+            26,
+            52,
+            60,
+            76,
+            86,
+            90
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 4,
+          "lines": [
+            23,
+            49,
+            85,
+            89
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 4,
+          "lines": [
+            24,
+            50,
+            85,
+            89
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 3,
+          "lines": [
+            10,
+            102,
+            145
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/SOLUCAO-RAPIDA.md",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 3,
+          "lines": [
+            16,
+            36,
+            41
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 1,
+          "lines": [
+            58
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/SUPABASE_API_GUIDE.md",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            73,
+            174
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/correcoes-otp.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 2,
+          "lines": [
+            52,
+            79
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            53,
+            80
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/create-profiles-standard.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 2,
+          "lines": [
+            125,
+            185
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 5,
+          "lines": [
+            128,
+            130,
+            187
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            125,
+            186
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 2,
+          "lines": [
+            125,
+            189
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/criar-tabela-usuarios.js",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 9,
+          "lines": [
+            36,
+            48,
+            57,
+            67,
+            72,
+            74
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            38
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 1,
+          "lines": [
+            39
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/diagnostic-email-issues.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            92
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/diagnostico-otp-erro.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            53
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            54
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/exemplos-codigo-profiles.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            13
+          ]
+        },
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 2,
+          "lines": [
+            14,
+            19
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            14,
+            20
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            14,
+            21
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 2,
+          "lines": [
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/fix-rls-policies.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            108
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 4,
+          "lines": [
+            50,
+            58,
+            84,
+            92
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/migration-usuarios-to-profiles.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            50
+          ]
+        },
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 3,
+          "lines": [
+            88,
+            145,
+            149
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 6,
+          "lines": [
+            92,
+            100,
+            121,
+            146,
+            150
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 3,
+          "lines": [
+            89,
+            145,
+            149
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 3,
+          "lines": [
+            90,
+            145,
+            149
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 5,
+          "lines": [
+            166,
+            179,
+            208,
+            212,
+            217
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/scanner-migracao.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 2,
+          "lines": [
+            20
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            21
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            22
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 2,
+          "lines": [
+            23
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 1,
+          "lines": [
+            26
+          ]
+        },
+        {
+          "pattern": "/profiles\\.user/g",
+          "description": "Acesso incorreto profiles.user (não existe)",
+          "matches": 1,
+          "lines": [
+            27
+          ]
+        },
+        {
+          "pattern": "/user_profile/g",
+          "description": "Referência a user_profile (estrutura antiga)",
+          "matches": 4,
+          "lines": [
+            17,
+            30
+          ]
+        },
+        {
+          "pattern": "/profile\\.user/g",
+          "description": "Acesso incorreto profile.user",
+          "matches": 1,
+          "lines": [
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/server.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 14,
+          "lines": [
+            278,
+            324,
+            334,
+            662,
+            773,
+            777,
+            780,
+            790,
+            799,
+            840,
+            876,
+            887,
+            1216,
+            1251
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/solucao-perfis-completa.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            204
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 13,
+          "lines": [
+            74,
+            90,
+            108,
+            114,
+            120,
+            145,
+            150,
+            152,
+            169,
+            174
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            78
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 1,
+          "lines": [
+            79
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 3,
+          "lines": [
+            195,
+            201,
+            210
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/auth-system-complete.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 7,
+          "lines": [
+            90,
+            118,
+            536,
+            944
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 7,
+          "lines": [
+            90,
+            119,
+            537,
+            945
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/card-unificado.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            77,
+            197
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/components/AuthExample.jsx",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            55,
+            128
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/components/MedicalDashboard.jsx",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            152,
+            365
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/components/dashboard/AgendamentoRapido.jsx",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 5,
+          "lines": [
+            50,
+            104,
+            129,
+            324,
+            325
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/components/dashboard/Dashboard.jsx",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            290
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/components/paciente/PacienteList.jsx",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 3,
+          "lines": [
+            199,
+            292,
+            421
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 1,
+          "lines": [
+            304
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/config/database.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 6,
+          "lines": [
+            67,
+            87,
+            117,
+            154,
+            284,
+            360
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 1,
+          "lines": [
+            286
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/context/AuthContext.jsx",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 2,
+          "lines": [
+            39,
+            235
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            249,
+            253
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/controllers/agendamento.controller.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 9,
+          "lines": [
+            212,
+            265,
+            350,
+            515,
+            541,
+            543,
+            565
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/controllers/funcionarios.controller.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 10,
+          "lines": [
+            11,
+            31,
+            33,
+            69,
+            97,
+            130,
+            134,
+            136
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/controllers/lgpd.controller.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            293,
+            297
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/controllers/orcamento.controller.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            163
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/controllers/paciente.controller.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 10,
+          "lines": [
+            34,
+            45,
+            51,
+            119,
+            227,
+            310,
+            337
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 5,
+          "lines": [
+            35,
+            45,
+            51,
+            228
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/gestao-script.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 4,
+          "lines": [
+            1046,
+            1056,
+            1066,
+            1099
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/hooks/useSupabase.js",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            110,
+            114
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/middleware/lgpd.middleware.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 5,
+          "lines": [
+            295,
+            318,
+            319
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/pages/LoginOTP.jsx",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            31
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/pages/auth/Register.jsx",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            58
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            60
+          ]
+        },
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 6,
+          "lines": [
+            23,
+            59,
+            106,
+            108,
+            110
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/routes/agendamento.routes.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            177
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/routes/financeiro.routes.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 2,
+          "lines": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/routes/pacientes.routes.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 4,
+          "lines": [
+            25,
+            252,
+            282
+          ]
+        },
+        {
+          "pattern": "/data_nascimento/g",
+          "description": "Campo \"data_nascimento\" (deve ser date_of_birth)",
+          "matches": 3,
+          "lines": [
+            27,
+            253
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/routes/setup.routes.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 4,
+          "lines": [
+            69,
+            173,
+            178
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/routes/system.routes.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            102
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/services/lgpd.service.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 8,
+          "lines": [
+            80,
+            164,
+            165,
+            219,
+            389,
+            391
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/services/orcamento.service.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 1,
+          "lines": [
+            340
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/services/payment.service.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 10,
+          "lines": [
+            111,
+            113,
+            325,
+            347,
+            361,
+            386
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/services/sms.service.js",
+      "issues": [
+        {
+          "pattern": "/telefone/g",
+          "description": "Campo \"telefone\" (deve ser phone)",
+          "matches": 33,
+          "lines": [
+            15,
+            19,
+            38,
+            42,
+            94,
+            97,
+            119,
+            142,
+            145,
+            178,
+            181,
+            212,
+            215,
+            252,
+            255,
+            261,
+            274,
+            301,
+            304,
+            334,
+            337,
+            343,
+            345,
+            346,
+            350,
+            359,
+            443,
+            445,
+            449,
+            460
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/src/services/supabaseApi.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 4,
+          "lines": [
+            194,
+            220,
+            246,
+            282
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 5,
+          "lines": [
+            57,
+            251,
+            252
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-correct-api-key.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            88
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-new-api-key.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 1,
+          "lines": [
+            74
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-otp-login-flow.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            33
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            34
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-otp-system-updated.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            53
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            54
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-supabase-auth.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            32
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            33
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-supabase.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            42
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            43
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/test-token-exchange-integration.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            112
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            113
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/teste-conectividade.js",
+      "issues": [
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            81
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/teste-final-correcoes.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            39
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/teste-rapido.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 3,
+          "lines": [
+            18,
+            56,
+            86
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            40,
+            69
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 1,
+          "lines": [
+            99
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/teste-sistema-final.js",
+      "issues": [
+        {
+          "pattern": "/from\\(['\"`]usuarios['\"`]\\)/g",
+          "description": "Tabela \"usuarios\" em português",
+          "matches": 2,
+          "lines": [
+            95,
+            128
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 2,
+          "lines": [
+            75,
+            107
+          ]
+        },
+        {
+          "pattern": "/user\\.profiles/g",
+          "description": "Acesso incorreto user.profiles (não existe)",
+          "matches": 3,
+          "lines": [
+            161,
+            172,
+            184
+          ]
+        }
+      ]
+    },
+    {
+      "filePath": "/Users/marciosamara/Documents/portal-dr-marcio-final/teste-verificacao-otp.js",
+      "issues": [
+        {
+          "pattern": "/nome_completo/g",
+          "description": "Campo \"nome_completo\" (deve ser full_name)",
+          "matches": 1,
+          "lines": [
+            42
+          ]
+        },
+        {
+          "pattern": "/tipo_usuario/g",
+          "description": "Campo \"tipo_usuario\" (deve ser role)",
+          "matches": 1,
+          "lines": [
+            43
+          ]
+        }
+      ]
+    }
+  ]
+}

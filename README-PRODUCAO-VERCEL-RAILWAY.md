@@ -81,12 +81,15 @@ O projeto utiliza Edge Functions do Supabase para processar lógica no backend. 
 - **Agendamento**: Funções para buscar horários, reservar slots e gerenciar consultas
 - **Whereby Integration**: Criação de salas para videochamadas
 - **Comunicações**: Reenvio de emails e outras notificações
+- **Date Utils**: 📅 Utilitários completos para manipulação de datas (formatação, cálculo de idade, dias úteis, etc.)
 
 Para facilitar o uso das Edge Functions, incluímos os seguintes arquivos:
 
 - `assets/js/edge-functions-client.js`: Cliente para chamadas às Edge Functions
 - `assets/js/edge-functions-examples.js`: Exemplos de uso para agendamento
 - `assets/js/admin-auth-examples.js`: Exemplos de uso para autenticação admin
+- `assets/js/date-utils-client.js`: Cliente específico para a função date-utils
+- `assets/js/date-utils-examples.js`: Exemplos completos de uso da função date-utils
 
 ## 🔐 Variáveis de Ambiente
 

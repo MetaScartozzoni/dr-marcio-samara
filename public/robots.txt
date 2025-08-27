@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Arquivos e pastas que devem ser bloqueados
+Disallow: /assets/js/
+Disallow: /config/
+Disallow: *.json
+Disallow: *.log
+
+# Permitir arquivos CSS e imagens
+Allow: /assets/css/
+Allow: /assets/images/
+
+# Sitemap
+Sitemap: https://portal.marcioplasticsurgery.com/sitemap.xml
+
+# Informações do site
+# Portal Médico Dr. Marcio Scartozzoni
+# Sistema completo de gestão médica

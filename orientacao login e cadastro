@@ -1,0 +1,817 @@
+/auth
+  - /auth/register
+  - /auth/login
+  - /auth/promote-to-patient
+  - /auth/change-role
+
+app.post("/auth/register", async (c) => { ... })
+app.post("/auth/login", async (c) => { ... })
+app.post("/auth/promote-to-patient", async (c) => { ... })
+app.post("/auth/change-role", async (c) => { ... })
+
+
+// Registrar um novo usuário (contact)
+const { data } = await supabase.functions.invoke('auth', {
+  body: {
+    action: 'register',
+    email: 'user@example.com',
+    password: 'password123',
+    full_name: 'User Name'
+  }
+})
+
+// Promover um contact para patient
+const { data } = await supabase.functions.invoke('auth', {
+  body: {
+    action: 'promote-to-patient',
+    user_id: '123e4567-e89b-12d3-a456-426614174000'
+  }
+})
+
+// Antes (erro)
+import { corsMiddleware } from "npm:@hono/cors@0.0.6";
+
+// Depois (funciona)
+import { cors } from "npm:hono@3.9.2/middleware/cors";
+
+Como fazer deploy corretamente
+Copie o novo código que forneci acima para seu arquivo local em supabase/functions/auth/index.ts
+
+No terminal, dentro da pasta raiz do seu projeto, execute:
+
+supabase 
+functions
+ deploy auth --no-verify-jwt
+
+O parâmetro --no-verify-jwt é importante porque você tem endpoints públicos como o de registro e login que precisam ser acessados sem um token JWT.
+
+Teste a função chamando um dos endpoints, por exemplo:
+const { data, error } = await supabase.functions.invoke('auth', {
+  body: {
+    email: 'teste@exemplo.com',
+    password: 'senha123',
+    full_name: 'Usuário Teste'
+  },
+  method: 'POST',
+  path: '/register'
+})
+
+Você também pode definir a configuração de verificação de JWT no arquivo supabase/config.toml:
+
+[functions.auth]
+verify_jwt = 
+false
+
+1. Unifique o processo de registro
+Em vez de ter rotas separadas para registrar médicos, pacientes e funcionários, você pode ter uma única rota de registro que determine o tipo de usuário com base em um campo role enviado:
+
+app.post(
+"/auth/register"
+, async (c) => {
+  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRole);
+  const { email, password, full_name, role = 
+"patient"
+, phone, crm, specialty, employee_type } = await c.req.json();
+  if (!email || !password || !full_name) {
+    return c.json({ success: 
+false
+, message: 
+"Campos obrigatórios ausentes"
+ }, 
+400
+);
+  }
+  
+// Validações específicas por tipo de usuário
+
+  if (role === 
+"doctor"
+ && !crm) {
+    return c.json({ success: 
+false
+, message: 
+"CRM é obrigatório para médicos"
+ }, 
+400
+);
+  }
+  try {
+    
+// 1. Criar usuário na autenticação (igual para todos)
+
+    const { data: userData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: 
+true
+,
+      user_metadata: { full_name, role }
+    });
+    if (authError) throw authError;
+    const userId = userData.user.id;
+    
+// 2. Criar perfil (igual para todos)
+
+    const { error: profileError } = await supabaseAdmin.from(
+"profiles"
+).insert({
+      id: userId,
+      full_name,
+      role,
+      email,
+      phone
+    });
+    if (profileError) throw profileError;
+    
+// 3. Criar perfil específico com base no tipo
+
+    let specificProfile = 
+null
+;
+    let specificError = 
+null
+;
+    if (role === 
+"doctor"
+) {
+      const result = await supabaseAdmin.from(
+"doctors"
+).insert({
+        user_id: userId,
+        full_name,
+        crm,
+        specialty: specialty || 
+""
+,
+        email,
+        phone
+      }).select().single();
+      specificError = result.error;
+      specificProfile = result.data;
+    } 
+    else if (role === 
+"patient"
+) {
+      const result = await supabaseAdmin.from(
+"patients"
+).insert({
+        user_id: userId,
+        full_name,
+        phone: phone || 
+""
+,
+        email,
+        status: 
+"active"
+
+      }).select().single();
+      specificError = result.error;
+      specificProfile = result.data;
+    }
+    else if (role === 
+"employee"
+ || role === 
+"admin"
+) {
+      const result = await supabaseAdmin.from(
+"employees"
+).insert({
+        user_id: userId,
+        email,
+        full_name,
+        role,
+        employee_type: employee_type || role,
+        is_active: 
+true
+,
+        phone
+      }).select().single();
+      specificError = result.error;
+      specificProfile = result.data;
+    }
+    if (specificError) throw specificError;
+    return c.json({
+      success: 
+true
+,
+      message: `${role.charAt(0).toUpperCase() + role.slice(1)} registrado com sucesso`,
+      user: userData.user,
+      profile: specificProfile
+    }, 
+201
+);
+  } catch (error) {
+    console.error(`Erro ao registrar ${role}:`, error);
+    return c.json({ success: 
+false
+, message: error.message }, 
+500
+);
+  }
+});
+
+2. Crie funções auxiliares para evitar duplicação
+Você pode extrair a lógica comum em funções auxiliares:
+
+// Função auxiliar para obter perfil específico do usuário
+
+async
+ function 
+getUserProfile
+(
+supabase, userId, role
+)
+ {
+  
+let
+ roleData = 
+null
+;
+  
+if
+ (role === 
+"doctor"
+) {
+    
+const
+ { data } = 
+await
+ supabase
+      .
+from
+(
+"doctors"
+)
+      .
+select
+(
+"*"
+)
+      .eq(
+"user_id"
+, userId)
+      .single();
+    roleData = data;
+  } 
+  
+else
+ 
+if
+ (role === 
+"patient"
+) {
+    
+const
+ { data } = 
+await
+ supabase
+      .
+from
+(
+"patients"
+)
+      .
+select
+(
+"*"
+)
+      .eq(
+"user_id"
+, userId)
+      .single();
+    roleData = data;
+  } 
+  
+else
+ 
+if
+ (role === 
+"employee"
+ || role === 
+"admin"
+) {
+    
+const
+ { data } = 
+await
+ supabase
+      .
+from
+(
+"employees"
+)
+      .
+select
+(
+"*"
+)
+      .eq(
+"user_id"
+, userId)
+      .single();
+    roleData = data;
+  }
+  
+return
+ roleData;
+}
+
+3. Use o mesmo formato de resposta para todas as solicitações
+Manter um formato consistente de resposta torna a API mais previsível para o frontend:
+
+function
+ 
+createSuccessResponse
+(
+message, data = {}
+) 
+{
+  
+return
+ {
+    
+success
+: 
+true
+,
+    message,
+    ...data
+  };
+}
+function
+ 
+createErrorResponse
+(
+message, details = 
+null
+) 
+{
+  
+return
+ {
+    
+success
+: 
+false
+,
+    message,
+    ...(details ? { details } : {})
+  };
+}
+
+4. Simplifique o login
+O processo de login já é bastante genérico, pois detecta o papel do usuário e busca os dados apropriados:
+
+app.post(
+"/auth/login"
+, async (c) => {
+  
+const
+ supabase = createClient(supabaseUrl, supabaseAnonKey);
+  
+const
+ { email, password } = await c.req.json();
+  
+if
+ (!email || !password) {
+    
+return
+ c.json(createErrorResponse(
+"Email e senha são obrigatórios"
+), 
+400
+);
+  }
+  
+try
+ {
+    
+const
+ { 
+data
+, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    
+if
+ (error) 
+throw
+ error;
+    
+const
+ role = 
+data
+.user?.user_metadata?.role;
+    
+const
+ roleData = await getUserProfile(supabase, 
+data
+.user.id, role);
+    
+return
+ c.json(createSuccessResponse(
+"Login realizado com sucesso"
+, {
+      session: 
+data
+.session,
+      user: 
+data
+.user,
+      profile: roleData
+    }));
+  } 
+catch
+ (error) {
+    console.error(
+"Erro no login:"
+, error);
+    
+return
+ c.json(createErrorResponse(`Falha no login: ${error.message}`), 
+401
+);
+  }
+});
+
+5. Documente os formatos de requisição esperados
+Para facilitar a integração com o frontend, você pode documentar os formatos esperados no início do arquivo:
+
+/**
+ * Formatos de requisição esperados:
+ * 
+ * 
+1.
+ Registro:
+ * POST /auth/register
+ * {
+ *   
+"email"
+: 
+"usuario@exemplo.com"
+,
+ *   
+"password"
+: 
+"senha123"
+,
+ *   
+"full_name"
+: 
+"Nome Completo"
+,
+ *   
+"role"
+: 
+"doctor|patient|employee|admin"
+,
+ *   
+"phone"
+: 
+"123456789"
+,
+ *   
+"crm"
+: 
+"12345"
+ (obrigatório para médicos),
+ *   
+"specialty"
+: 
+"Cardiologia"
+ (opcional para médicos),
+ *   
+"employee_type"
+: 
+"secretária"
+ (opcional para funcionários)
+ * }
+ * 
+ * 
+2.
+ Login:
+ * POST /auth/login
+ * {
+ *   
+"email"
+: 
+"usuario@exemplo.com"
+,
+ *   
+"password"
+: 
+"senha123"
+
+ * }
+ */
+
+Estas melhorias tornarão seu código mais DRY (Don't Repeat Yourself) e mais fácil de manter no futuro. O principal objetivo é ter uma estrutura de código que possa ser facilmente adaptada conforme seu aplicativo evolui, sem ter que duplicar lógica semelhante.
+
+E qual o melhor momento, de que forma, que a role é estabelecida?
+
+
+
+O melhor momento para estabelecer a role de um usuário é durante o processo de registro. Existem algumas formas de implementar isso de maneira eficiente:
+
+1. Durante o Registro (Melhor Prática)
+O momento ideal para estabelecer a role é durante o registro do usuário, incorporando-a em dois lugares principais:
+
+Em user_metadata na tabela auth.users:
+
+const { data: userData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+  email,
+  password,
+  email_confirm: 
+true
+,
+  user_metadata: { full_name, role }  
+// Role definida aqui
+
+});
+
+Na tabela profiles:
+
+const { error: profileError } = await supabaseAdmin.from(
+"profiles"
+).insert({
+  id: userId,
+  full_name,
+  role,  
+// Role duplicada aqui para facilitar consultas
+
+  email,
+  phone
+});
+
+2. Como Determinar a Role
+Existem três abordagens principais para determinar qual role atribuir:
+
+a) Explicitamente no Payload de Registro
+// O cliente envia a role no payload
+
+const
+ { email, password, full_name, role = 
+"patient"
+ } = 
+await
+ c.req.json();
+
+Esta é a abordagem mais simples e direta, onde o cliente (frontend) especifica explicitamente qual role está sendo registrada. É a melhor quando você tem diferentes fluxos de registro no frontend (ex: "Registrar como Médico", "Registrar como Paciente").
+
+b) Por Rotas Separadas
+// Rotas separadas para cada tipo de usuário
+
+app.post(
+"/auth/register-doctor"
+, 
+async
+ (c) => {
+  
+// Lógica específica para médicos
+
+  
+// role = "doctor" é definido automaticamente
+
+});
+app.post(
+"/auth/register-patient"
+, 
+async
+ (c) => {
+  
+// Lógica específica para pacientes
+
+  
+// role = "patient" é definido automaticamente
+
+});
+
+Esta abordagem torna a intenção clara pela URL, mas adiciona duplicação de código.
+
+c) Por Atributos no Payload
+// Determinar a role com base nos campos fornecidos
+
+let
+ role = 
+"patient"
+;  
+// Default
+
+if
+ (payload.crm) role = 
+"doctor"
+;
+else
+ 
+if
+ (payload.employee_type) role = 
+"employee"
+;
+
+3. Validação e Segurança
+Independentemente do método escolhido, implemente validações para garantir segurança:
+
+// Verificar permissão para criar usuários administrativos
+
+if (role === 
+"admin"
+) {
+  
+// Verificar se o solicitante tem permissão para criar admins
+
+  const isAuthorized = await checkAdminCreationPermission(requestToken);
+  if (!isAuthorized) {
+    return c.json({ 
+      success: 
+false
+, 
+      message: 
+"Sem permissão para criar usuários administrativos"
+ 
+    }, 
+403
+);
+  }
+}
+// Validar campos obrigatórios por role
+
+if (role === 
+"doctor"
+ && !payload.crm) {
+  return c.json({ 
+    success: 
+false
+, 
+    message: 
+"CRM é obrigatório para médicos"
+ 
+  }, 
+400
+);
+}
+
+4. Melhor Prática Recomendada
+A abordagem mais limpa combina os métodos (a) e (c):
+
+app.post(
+"/auth/register"
+, 
+async
+ (c) => {
+  
+const
+ payload = 
+await
+ c.req.json();
+  
+const
+ { email, password, full_name, phone } = payload;
+  
+// Determinar role com base no payload e parâmetro explícito
+
+  
+let
+ role = payload.role || 
+"patient"
+;
+  
+// Validações específicas por role
+
+  
+if
+ (role === 
+"doctor"
+ && !payload.crm) {
+    
+return
+ c.json({
+      
+success
+: 
+false
+,
+      
+message
+: 
+"CRM é obrigatório para médicos"
+
+    }, 
+400
+);
+  }
+  
+// Verificar permissões para roles privilegiadas
+
+  
+if
+ (role === 
+"admin"
+) {
+    
+const
+ token = c.req.header(
+"Authorization"
+)?.replace(
+"Bearer "
+, 
+""
+);
+    
+const
+ isAdmin = 
+await
+ verifyAdminPermission(token);
+    
+if
+ (!isAdmin) {
+      
+return
+ c.json({
+        
+success
+: 
+false
+,
+        
+message
+: 
+"Sem permissão para criar usuários administrativos"
+
+      }, 
+403
+);
+    }
+  }
+  
+// Processar registro com a role determinada
+
+  
+// ...resto do código de registro
+
+});
+
+5. Gerenciamento de Roles Após Registro
+Para alterar a role de um usuário após o registro, crie um endpoint específico:
+
+app.post(
+"/auth/change-role"
+, async (c) => {
+  
+// Apenas administradores podem alterar roles
+
+  const adminToken = c.req.header(
+"Authorization"
+)?.replace(
+"Bearer "
+, 
+""
+);
+  const isAdmin = await verifyAdminPermission(adminToken);
+  if (!isAdmin) {
+    return c.json({
+      success: 
+false
+,
+      message: 
+"Permissão negada"
+
+    }, 
+403
+);
+  }
+  const { userId, newRole } = await c.req.json();
+  
+// Atualizar em auth.users
+
+  const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(
+    userId,
+    { user_metadata: { role: newRole } }
+  );
+  
+// Atualizar em profiles
+
+  const { error: profileError } = await supabaseAdmin
+    .from(
+"profiles"
+)
+    .update({ role: newRole })
+    .eq(
+"id"
+, userId);
+  
+// Código para lidar com a migração entre tabelas específicas...
+
+  return c.json({
+    success: 
+true
+,
+    message: 
+"Role alterada com sucesso"
+
+  });
+});
+
+Concluindo, o melhor momento para estabelecer a role é durante o registro do usuário, utilizando um método que equilibre clareza e flexibilidade, com validações adequadas para garantir segurança e consistência dos dados.
+
+Como disse. A minha idéia é Todos que entram em contato é um user.Contact, que se agendar uma consulta é um patient. Se for para tirar duvida. user.Contact. Se ja for patient, patient. Employee e doctorCadast

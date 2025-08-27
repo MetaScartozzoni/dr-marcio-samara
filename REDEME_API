@@ -1,0 +1,185 @@
+# API Centralizada - Clínica Médica
+
+Esta API centralizada fornece endpoints seguros para todos os painéis do sistema (Admin, Médico, Secretaria, Paciente, Orçamento, Bot).
+
+## 🚀 Como Usar
+
+### 1. Configuração
+- Configure as variáveis de ambiente no arquivo `config.php`
+- Execute o `database_schema.sql` no seu banco MySQL
+- Configure o servidor web para apontar para `api/index.php`
+
+### 2. Autenticação
+Todos os endpoints (exceto login/register) requerem autenticação via JWT token no header:
+```
+Authorization: Bearer SEU_TOKEN_JWT
+```
+
+### 3. Estrutura de Resposta
+Todas as respostas seguem o formato JSON:
+```json
+{
+  "success": true,
+  "data": {...},
+  "message": "Operação realizada com sucesso"
+}
+```
+
+## 📚 Endpoints Principais
+
+### Autenticação
+- `POST /auth/login` - Login de usuário
+- `POST /auth/register` - Registro de novo usuário
+- `GET /auth/me` - Dados do usuário autenticado
+
+### Usuários
+- `GET /users` - Listar usuários
+- `POST /users` - Criar usuário
+- `GET /users/{id}` - Obter usuário específico
+- `PUT /users/{id}` - Atualizar usuário
+- `DELETE /users/{id}` - Deletar usuário
+
+### Pacientes
+- `GET /patients` - Listar pacientes
+- `POST /patients` - Criar paciente
+- `GET /patients/{id}` - Obter paciente específico
+- `PUT /patients/{id}` - Atualizar paciente
+- `DELETE /patients/{id}` - Deletar paciente
+
+### Agendamentos
+- `GET /appointments` - Listar agendamentos
+- `POST /appointments` - Criar agendamento
+- `GET /appointments/{id}` - Obter agendamento específico
+- `PUT /appointments/{id}` - Atualizar agendamento
+- `DELETE /appointments/{id}` - Deletar agendamento
+
+### Orçamentos
+- `GET /budgets` - Listar orçamentos
+- `POST /budgets` - Criar orçamento
+- `GET /budgets/{id}` - Obter orçamento específico
+- `PUT /budgets/{id}` - Atualizar orçamento
+- `PATCH /budgets/{id}/status` - Atualizar status do orçamento
+- `DELETE /budgets/{id}` - Deletar orçamento
+
+### Conversas e Mensagens
+- `GET /conversations` - Listar conversas
+- `POST /conversations` - Criar conversa
+- `GET /messages` - Listar mensagens
+- `POST /messages` - Enviar mensagem
+- `PUT /messages/{id}` - Atualizar mensagem
+
+### Notificações
+- `GET /notifications` - Listar notificações do usuário
+- `POST /notifications/mark-read` - Marcar notificações como lidas
+
+### Webhooks
+- `POST /webhook/botconversa` - Webhook para bot de conversa
+- Requer `X-API-Key` header para validação
+
+### Dashboard
+- `GET /dashboard/stats` - Estatísticas do dashboard
+- `GET /dashboard/monthly-report` - Relatório mensal
+
+## 🔒 Segurança
+
+### Medidas Implementadas:
+- **Autenticação JWT** com expiração
+- **Validação de API Key** para webhooks
+- **Sanitização de entrada** contra XSS/SQL Injection
+- **CORS configurado** para domínios específicos
+- **Headers de segurança** (HSTS, X-Frame-Options, etc.)
+- **Logs de auditoria** para todas as operações
+- **Rate limiting** recomendado no servidor web
+
+### Boas Práticas:
+- Sempre use HTTPS em produção
+- Valide todas as entradas no frontend
+- Implemente rate limiting
+- Monitore logs de auditoria regularmente
+
+## 🔧 Configuração de Produção
+
+### Apache (.htaccess)
+```apache
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ api/index.php [QSA,L]
+```
+
+### Nginx
+```nginx
+location /api/ {
+    try_files /dev/null /api/index.php;
+}
+```
+
+### Variáveis de Ambiente
+```bash
+export DB_HOST="localhost"
+export DB_NAME="clinica_db"
+export DB_USER="your_user"
+export DB_PASSWORD="your_password"
+export JWT_SECRET="your-jwt-secret"
+export API_SECRET_KEY="your-api-key"
+export STRIPE_SECRET_KEY="sk_test_..."
+export WHEREBY_API_KEY="your-whereby-key"
+```
+
+## 📊 Monitoramento
+
+### Health Check
+- `GET /health` - Status do sistema (implementar se necessário)
+
+### Logs
+Todos os erros são logados em `php_error_log`
+Auditorias são salvas na tabela `audit_logs`
+
+## 🚀 Deploy
+
+1. Configure o banco de dados
+2. Faça upload dos arquivos API
+3. Configure variáveis de ambiente
+4. Configure o servidor web
+5. Teste os endpoints
+
+## 📝 Exemplos de Uso
+
+### Login
+```bash
+curl -X POST http://localhost/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"password"}'
+```
+
+### Listar Pacientes
+```bash
+curl -X GET http://localhost/api/patients \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Criar Agendamento
+```bash
+curl -X POST http://localhost/api/appointments \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "patient_id": 1,
+    "doctor_id": 2,
+    "appointment_date": "2024-01-15 10:00:00",
+    "title": "Consulta Inicial"
+  }'
+```
+
+## 🆘 Suporte
+
+Para dúvidas ou problemas:
+1. Verifique os logs de erro do PHP
+2. Valide a configuração do banco de dados
+3. Teste a conectividade com o frontend
+4. Consulte a documentação dos painéis individuais
+
+---
+
+**Nota:** Esta API foi projetada para ser escalável e segura. Em produção, considere implementar cache (Redis), CDN para assets estáticos, e monitoramento avançado.</content>
+<parameter name="filePath">/Users/marciosamara/Documents/REVISAO PAINEL HOSTINGER/api/README.md

@@ -67,6 +67,9 @@ window.PORTAL_CONFIG = {
         MEDICAL_RECORD_GENERATE_PDF: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-generate-pdf',
         MEDICAL_RECORD_SHARE: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/medical-record-share',
         
+        // 🛠️ Utilitários
+        DATE_UTILS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/date-utils',
+        
         // Gestão Financeira
         FINANCE_GET_TRANSACTIONS: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-get-transactions',
         FINANCE_CREATE_TRANSACTION: 'https://obohdaxvawmjhxsjgikp.supabase.co/functions/v1/finance-create-transaction',
