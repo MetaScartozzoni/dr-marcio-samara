@@ -35,7 +35,6 @@ server-auth.js         ← Auth de desenvolvimento
 
 ### 📄 **Arquivos de documentação/desenvolvimento:**
 ```
-DEPLOY_VERCEL_SUPABASE.md
 README-HOSTINGER.md
 README-SUPABASE.md
 README-SUPABASE-OFICIAL.md

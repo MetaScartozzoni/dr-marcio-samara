@@ -1,4 +1,4 @@
-// _middleware.js para Vercel
+// _middleware.js para Railway
 export default function middleware(request) {
   const url = new URL(request.url);
   const { pathname } = url;
