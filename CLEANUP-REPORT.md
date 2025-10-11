@@ -287,19 +287,18 @@ Para validar completamente a limpeza, recomenda-se testar:
    - Gerar orçamentos
 
 #### Arquivos Críticos a Verificar:
-- ✅ `assets/js/config.js` - Configurações carregadas
-- ✅ `assets/js/portal-auth.js` - Autenticação funcionando
-- ✅ `src/services/api.js` - Chamadas API respondendo
-- ✅ HTMLs principais (login.html, dashboard.html, etc) - Carregando scripts corretamente
+- [ ] `assets/js/config.js` - Verificar se configurações são carregadas
+- [ ] `assets/js/portal-auth.js` - Verificar autenticação
+- [ ] `src/services/api.js` - Verificar chamadas API
+- [ ] HTMLs principais (login.html, dashboard.html, etc) - Verificar carregamento de scripts
 
-**Nota:** Como os arquivos removidos não eram referenciados em nenhum lugar, espera-se 100% de compatibilidade. Esta lista de testes é apenas por precaução.
+**Nota:** Como os arquivos removidos não eram referenciados em nenhum lugar, espera-se 100% de compatibilidade. Esta lista é uma recomendação de testes de regressão por precaução.
 
 ---
 
 **Data:** 11 de Outubro de 2025  
 **PR:** copilot/remove-duplicate-files-functions  
-**Commits:** 
-- 14c936e - Initial plan
-- fcc7a0d - Remove duplicate folders and empty files
+**Commits principais:** 
+- fcc7a0d - Remove duplicate folders and empty files (33 arquivos)
 - 75a11cf - Update README with cleanup documentation
-- 8b46ee9 - Add comprehensive cleanup report
+- Ver histórico completo do PR para todos os commits
