@@ -25,8 +25,21 @@ root/
 - **Documentação:** Cada módulo/pasta deve conter um README.md explicando sua função.
 - **Autenticação:** Todas as rotas e acessos protegidos por autenticação.
 - **Backup:** Realizar backup semanal e salvar em `backup/`.
-- **Arquivos Duplicados:** Auditoria e limpeza regular para evitar duplicidade.
+- **Arquivos Duplicados:** ✅ Limpeza realizada em Out/2025 - removidos 33 arquivos duplicados
 - **Relatórios:** Gerar relatório mensal em `docs/relatorio-mensal-AAAA-MM.md`.
+
+## Limpeza de Duplicatas (Out/2025)
+Foi realizada uma varredura completa removendo:
+- **scripts/javascript/js/**: 11 arquivos idênticos aos de scripts/javascript/
+- **scripts/javascript/**: Pasta completa (não utilizada em produção)
+- **js/**: Pasta com arquivos stub não referenciados
+- Arquivos vazios: style.css, supabase-auth-oficial.js, 6 arquivos HTML " 2.html"
+
+**Estrutura consolidada:**
+- 📁 `assets/js/` → Scripts do frontend (usados pelos arquivos HTML)
+- 📁 `src/` → Código backend/React (serviços, componentes, utils)
+- 📁 `api/` → Serverless functions
+- ⚠️ Arquivos test-*.js na raiz são ferramentas de desenvolvimento (não removidos)
 
 ## Como contribuir
 Consulte o README.md principal e os READMEs de cada módulo para instruções detalhadas.
