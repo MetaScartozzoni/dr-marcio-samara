@@ -1,4 +1,4 @@
-// API de autenticação para uso com Vercel/Railway
+// API de autenticação para uso com Railway
 import { initSupabase, handleError } from './_utils';
 
 export default async function handler(req, res) {

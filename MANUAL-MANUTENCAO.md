@@ -43,8 +43,8 @@ Para modificar funções Edge:
 
 ### Deploy
 
-Para fazer deploy no VPS:
-1. Siga as instruções no arquivo README-VERCEL-DEPLOY.md
+Para fazer deploy:
+1. Siga as instruções no arquivo README-PRODUCAO-RAILWAY.md para deploy no Railway
 2. Ou use o procedimento de deploy Docker documentado
 
 ## Solução de Problemas Comuns

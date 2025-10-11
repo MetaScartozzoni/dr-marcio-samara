@@ -11,7 +11,7 @@ portal-dr-marcio/
 ├── .env.example            # Exemplo de variáveis de ambiente
 ├── README.md
 ├── package.json
-└── vercel.json / railway.json # Configurações de deploy (apenas uma, conforme serviço escolhido)
+└── railway.json            # Configurações de deploy para Railway
 2. Detalhamento de Cada Pasta
 apps/web: Interface do usuário (React, Next.js, etc). Consome API backend.
 apps/api: Backend (Node.js, Next.js API routes, etc). Comunica com Supabase.
@@ -20,7 +20,7 @@ supabase: SQL migrations, policies, seeds, configuração do Supabase CLI (supab
 scripts: Automatizações, ex: importar dados, backup, etc.
 .env.example: Nunca suba .env com dados sensíveis. Use .env.example para mostrar quais variáveis são necessárias.
 README.md: Documente como instalar, rodar, migrar, acessar o Supabase, deploy, etc.
-vercel.json / railway.json: Só mantenha o que for usado para deploy, para evitar confusão.
+railway.json: Configuração de deploy para Railway.
 3. Boas Práticas para Evitar Duplicidade
 Código compartilhado: Use o packages/shared para tipos, validações, funções utilitárias. Evita duplicar lógica entre frontend e backend.
 Modelos de dados: Centralize definições dos modelos (ex: shared/types.ts) e importe em todos os lugares.
@@ -29,7 +29,7 @@ Organização de migrations: Mantenha migrations do Supabase versionadas e bem n
 Scripts de seed/teste: Evite duplicar dados de teste em vários lugares; um script único na pasta scripts/.
 4. Integração Supabase e Deploy
 Supabase: Use o CLI para gerenciar migrations (supabase migration new ...). Armazene tudo em supabase/.
-Vercel / Railway: Escolha um dos dois para deploy. Configure variáveis de ambiente no painel deles, NUNCA suba dados sensíveis.
+Railway: Configure variáveis de ambiente no painel do Railway. NUNCA suba dados sensíveis.
 Deploy: Documente como fazer o deploy no README, com comandos e links para o painel do serviço.
 5. Exemplo de Estrutura Inicial
 plaintext
@@ -66,7 +66,7 @@ Migrations versionadas e scripts automatizados
 Documentação clara
 Configuração apenas do serviço de deploy escolhido
 
-considerando o uso de Supabase como banco de dados e Vercel ou Railway como plataforma de deploy. Essa estrutura separa frontend, backend, e código compartilhado, além de facilitar a organização dos arquivos de banco e automação.
+considerando o uso de Supabase como banco de dados e Railway como plataforma de deploy. Essa estrutura separa frontend, backend, e código compartilhado, além de facilitar a organização dos arquivos de banco e automação.
 
 plaintext
 portal-dr-marcio/
@@ -80,8 +80,7 @@ portal-dr-marcio/
 ├── .env.example            # Variáveis de ambiente (modelo)
 ├── README.md               # Documentação do projeto
 ├── package.json            # Dependências e scripts gerais
-├── vercel.json             # Configuração Vercel (se usar Vercel)
-└── railway.json            # Configuração Railway (se usar Railway)
+└── railway.json            # Configuração Railway
 Abaixo, exemplos de arquivos iniciais para cada parte principal:
 
 
@@ -113,23 +112,9 @@ Configuração do Supabase
 Veja a pasta supabase/ para scripts de migração e seed.
 
 Deploy
-Escolha entre Vercel ou Railway e configure o arquivo correspondente.
+Configure o arquivo railway.json para deploy.
 
 Code
-
-```json name=vercel.json
-{
-  "version": 2,
-  "builds": [
-    { "src": "apps/web/package.json", "use": "@vercel/node" },
-    { "src": "apps/api/package.json", "use": "@vercel/node" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "apps/api/src/$1.js" },
-    { "src": "/(.*)", "dest": "apps/web/src/$1.js" }
-  ]
-}
-```
 
 ```json name=railway.json
 {

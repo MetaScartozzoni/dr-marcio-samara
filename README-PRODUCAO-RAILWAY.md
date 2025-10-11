@@ -16,28 +16,9 @@ Este documento contém instruções detalhadas para deploy do Portal Dr. Marcio 
 - `features/`: Funcionalidades profissionais
 - `integrations/`: Integrações externas
 - `analytics/`: Sistema de métricas
-- `api/`: API serverless para Vercel/Railway
+- `api/`: API serverless
 
-## 🚢 Opções de Deploy
-
-### Opção 1: Deploy no Vercel (Recomendado)
-
-1. **Instalação do CLI da Vercel**:
-   ```bash
-   npm i -g vercel
-   ```
-
-2. **Login na Vercel**:
-   ```bash
-   vercel login
-   ```
-
-3. **Deploy para produção**:
-   ```bash
-   vercel --prod
-   ```
-
-### Opção 2: Deploy no Railway
+## 🚢 Deploy no Railway
 
 1. **Instalação do CLI do Railway**:
    ```bash
@@ -93,7 +74,7 @@ Para facilitar o uso das Edge Functions, incluímos os seguintes arquivos:
 
 ## 🔐 Variáveis de Ambiente
 
-Ao configurar o projeto na Vercel ou Railway, defina as seguintes variáveis de ambiente:
+Ao configurar o projeto no Railway, defina as seguintes variáveis de ambiente:
 
 ```
 SUPABASE_URL=https://seu-projeto.supabase.co
@@ -113,7 +94,7 @@ SUPABASE_KEY=sua-chave-service-role
 ## 📝 Notas Importantes
 
 - O sistema está configurado para funcionar sem backend dedicado, utilizando Supabase para armazenamento e autenticação
-- As APIs serverless estão na pasta `/api` e funcionam automaticamente com Vercel e Railway
+- As APIs serverless estão na pasta `/api` e funcionam automaticamente com Railway
 - O PWA está configurado para funcionar offline
 
 ## 🚨 Troubleshooting
