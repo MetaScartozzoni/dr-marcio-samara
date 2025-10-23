@@ -1,6 +1,7 @@
 // src/controllers/orcamento.controller.js
 const { validationResult } = require('express-validator');
 const Logger = require('../utils/logger');
+const orcamentoService = require('../services/orcamento.service');
 
 class OrcamentoController {
     constructor(db) {
@@ -103,6 +104,14 @@ class OrcamentoController {
                 }
             );
 
+            // Enqueue PDF generation asynchronously
+            try {
+                await orcamentoService.enqueuePDFGeneration(orcamento.id);
+            } catch (pdfError) {
+                console.error('Failed to enqueue PDF generation:', pdfError);
+                // Don't fail the whole request if enqueuing fails
+            }
+
             res.status(201).json({
                 success: true,
                 message: 'Orçamento criado com sucesso!',
@@ -115,6 +124,7 @@ class OrcamentoController {
                         descricao_procedimento: orcamento.descricao_procedimento,
                         forma_pagamento: orcamento.forma_pagamento,
                         status: orcamento.status,
+                        pdf_status: 'queued',
                         vencimento: orcamento.vencimento,
                         criado_em: orcamento.criado_em
                     }
