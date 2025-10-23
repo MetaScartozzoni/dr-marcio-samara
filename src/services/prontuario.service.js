@@ -22,6 +22,10 @@ class ProntuarioService {
    * @param {string} options.examesCursor - Pagination cursor for exames
    * @param {string} options.agendamentosCursor - Pagination cursor for agendamentos
    * @returns {Promise<Object>} Complete prontuário data
+   * 
+   * NOTE: Query structure intentionally uses explicit branches for cursor vs non-cursor
+   * to ensure correct parameter indexing. Future refactoring could extract common parts
+   * to a helper function, but current implementation prioritizes correctness and clarity.
    */
   async buscarCompleto(id, options = {}) {
     const {
