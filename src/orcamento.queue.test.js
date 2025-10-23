@@ -1,7 +1,16 @@
-// tests/orcamento.queue.test.js
+// src/orcamento.queue.test.js
 // Integration tests for queue and job enqueueing
 
-const queueManager = require('../src/queue');
+// Skip these tests in CI if DATABASE_URL or REDIS not available
+const skipTests = !process.env.DATABASE_URL || process.env.SKIP_QUEUE_TESTS === 'true';
+
+if (skipTests) {
+  describe.skip('Orcamento Queue (Skipped - No Database)', () => {
+    test('placeholder', () => {});
+  });
+} else {
+  
+const queueManager = require('./queue');
 
 describe('Orcamento Queue', () => {
   
@@ -173,3 +182,5 @@ describe('Worker Behavior (Table Queue Only)', () => {
   });
 
 });
+
+} // End of conditional test block

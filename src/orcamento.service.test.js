@@ -1,7 +1,23 @@
-// tests/orcamento.service.test.js
+// src/orcamento.service.test.js
 // Unit tests for orcamento calculation logic
 
-const orcamentoService = require('../src/services/orcamento.service');
+// Mock dependencies before importing the service
+jest.mock('./queue', () => ({
+  addJob: jest.fn(),
+  initialize: jest.fn(),
+  getJobStatus: jest.fn()
+}));
+
+// Mock pg Pool
+jest.mock('pg', () => ({
+  Pool: jest.fn().mockImplementation(() => ({
+    connect: jest.fn(),
+    query: jest.fn(),
+    end: jest.fn()
+  }))
+}));
+
+const orcamentoService = require('./services/orcamento.service');
 
 describe('OrcamentoService - calcularOrcamento', () => {
   
