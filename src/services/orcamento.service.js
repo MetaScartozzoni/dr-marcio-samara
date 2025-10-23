@@ -1,10 +1,8 @@
 // src/services/orcamento.service.js
-const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs').promises;
 const { Pool } = require('pg');
-const AWS = require('aws-sdk');
 const crypto = require('crypto');
+const queueManager = require('../queue');
 
 class OrcamentoService {
   constructor() {
@@ -13,15 +11,81 @@ class OrcamentoService {
     });
     
     this.templatePath = path.join(__dirname, '../templates/orcamento.html');
+  }
+
+  /**
+   * Centralized calculation method for orçamento
+   * @param {Array} itens - Array of items with descricao, qtd, valor_unitario
+   * @param {Object} desconto - Discount object with percentual or desconto_valor
+   * @returns {Object} - Calculated values: subtotal, desconto_valor, valor_final
+   */
+  calcularOrcamento(itens, desconto = {}) {
+    // Validate items
+    if (!itens || !Array.isArray(itens) || itens.length === 0) {
+      throw new Error('Pelo menos um item deve ser incluído no orçamento');
+    }
+
+    for (const item of itens) {
+      if (!item.descricao || typeof item.descricao !== 'string' || item.descricao.trim() === '') {
+        throw new Error('Todos os itens devem ter descrição válida');
+      }
+
+      const qtd = Number(item.qtd || item.quantidade);
+      const valorUnitario = Number(item.valor_unitario);
+
+      if (isNaN(qtd) || qtd < 1) {
+        throw new Error(`Quantidade deve ser >= 1 para item "${item.descricao}"`);
+      }
+
+      if (isNaN(valorUnitario) || valorUnitario < 0) {
+        throw new Error(`Valor unitário deve ser >= 0 para item "${item.descricao}"`);
+      }
+    }
+
+    // Calculate subtotal
+    const subtotal = itens.reduce((total, item) => {
+      const qtd = Number(item.qtd || item.quantidade);
+      const valorUnitario = Number(item.valor_unitario);
+      return total + (qtd * valorUnitario);
+    }, 0);
+
+    // Calculate discount
+    let descontoValor = 0;
     
-    // Configurar AWS S3 para upload de PDFs
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      region: process.env.AWS_REGION || 'us-east-1'
-    });
-    
-    this.bucketName = process.env.AWS_S3_BUCKET || 'portal-dr-marcio-pdfs';
+    if (desconto.desconto_valor !== undefined) {
+      descontoValor = Number(desconto.desconto_valor);
+      if (isNaN(descontoValor) || descontoValor < 0) {
+        throw new Error('Desconto em valor deve ser >= 0');
+      }
+      if (descontoValor > subtotal) {
+        throw new Error('Desconto não pode ser maior que o subtotal');
+      }
+    } else if (desconto.percentual !== undefined) {
+      const percentual = Number(desconto.percentual);
+      if (isNaN(percentual) || percentual < 0 || percentual > 100) {
+        throw new Error('Desconto percentual deve estar entre 0 e 100');
+      }
+      descontoValor = (subtotal * percentual) / 100;
+    }
+
+    // Validate consistency if both are provided
+    if (desconto.percentual !== undefined && desconto.desconto_valor !== undefined) {
+      const expectedDesconto = (subtotal * Number(desconto.percentual)) / 100;
+      const providedDesconto = Number(desconto.desconto_valor);
+      
+      // Allow small floating point differences
+      if (Math.abs(expectedDesconto - providedDesconto) > 0.01) {
+        throw new Error('Desconto percentual e valor são inconsistentes');
+      }
+    }
+
+    const valorFinal = subtotal - descontoValor;
+
+    return {
+      subtotal: Math.round(subtotal * 100) / 100,
+      desconto_valor: Math.round(descontoValor * 100) / 100,
+      valor_final: Math.round(valorFinal * 100) / 100
+    };
   }
 
   async gerarOrcamento(dadosOrcamento) {
@@ -34,7 +98,7 @@ class OrcamentoService {
         paciente,
         atendimento,
         itens,
-        desconto = 0,
+        desconto = {},
         observacoes = '',
         validade_dias = 30,
         forma_pagamento = []
@@ -43,13 +107,8 @@ class OrcamentoService {
       // Validar dados de entrada
       this.validarDadosOrcamento(dadosOrcamento);
 
-      // Calcular valores
-      const valorTotal = itens.reduce((total, item) => {
-        return total + (item.quantidade * item.valor_unitario);
-      }, 0);
-
-      const valorDesconto = (valorTotal * desconto) / 100;
-      const valorFinal = valorTotal - valorDesconto;
+      // Calcular valores usando método centralizado
+      const { subtotal, desconto_valor, valor_final } = this.calcularOrcamento(itens, desconto);
 
       // Gerar número do orçamento
       const numeroOrcamento = await this.gerarNumeroOrcamento(client);
@@ -60,35 +119,38 @@ class OrcamentoService {
         paciente_id: paciente.id,
         numero_orcamento: numeroOrcamento,
         itens: JSON.stringify(itens),
-        valor_total: valorTotal,
-        desconto: valorDesconto,
-        valor_final: valorFinal,
+        valor_total: subtotal,
+        desconto: desconto_valor,
+        valor_final: valor_final,
         validade: this.calcularDataValidade(validade_dias),
         observacoes,
         forma_pagamento: JSON.stringify(forma_pagamento),
         status: 'pendente'
       });
 
-      // Gerar PDF
-      const pdfUrl = await this.gerarPDF(orcamento, paciente, itens);
-      
       // Gerar link de aceite
       const linkAceite = await this.gerarLinkAceite(orcamento.id);
       const tokenAceite = this.gerarTokenSeguro();
 
       // Atualizar registro com URLs e token
-      await this.atualizarUrls(client, orcamento.id, pdfUrl, linkAceite, tokenAceite);
+      await client.query(`
+        UPDATE orcamentos 
+        SET link_aceite = $1, token_aceite = $2, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $3
+      `, [linkAceite, tokenAceite, orcamento.id]);
 
       await client.query('COMMIT');
 
+      // Enqueue PDF generation and notification job
+      await this.enqueuePDFGeneration(orcamento.id);
+
       return {
         ...orcamento,
-        pdf_url: pdfUrl,
         link_aceite: linkAceite,
         token_aceite: tokenAceite,
-        valor_total: valorTotal,
-        valor_desconto: valorDesconto,
-        valor_final: valorFinal
+        valor_total: subtotal,
+        valor_desconto: desconto_valor,
+        valor_final: valor_final
       };
 
     } catch (error) {
@@ -97,6 +159,34 @@ class OrcamentoService {
       throw error;
     } finally {
       client.release();
+    }
+  }
+
+  /**
+   * Enqueue PDF generation and notification job
+   */
+  async enqueuePDFGeneration(orcamentoId) {
+    try {
+      await queueManager.addJob(
+        'orcamento',
+        'generate-pdf',
+        { orcamentoId },
+        { 
+          jobId: `orcamento-pdf-${orcamentoId}`,
+          attempts: 3
+        }
+      );
+
+      console.log(`✅ PDF generation job enqueued for orcamento ${orcamentoId}`);
+      
+      return {
+        success: true,
+        message: 'PDF generation job enqueued successfully'
+      };
+
+    } catch (error) {
+      console.error('Failed to enqueue PDF generation:', error);
+      throw error;
     }
   }
 
@@ -109,157 +199,6 @@ class OrcamentoService {
     
     if (!itens || !Array.isArray(itens) || itens.length === 0) {
       throw new Error('Pelo menos um item deve ser incluído no orçamento');
-    }
-    
-    for (const item of itens) {
-      if (!item.descricao || !item.quantidade || !item.valor_unitario) {
-        throw new Error('Todos os itens devem ter descrição, quantidade e valor unitário');
-      }
-      
-      if (item.quantidade <= 0 || item.valor_unitario <= 0) {
-        throw new Error('Quantidade e valor unitário devem ser positivos');
-      }
-    }
-  }
-
-  async gerarPDF(orcamento, paciente, itens) {
-    let browser;
-    
-    try {
-      browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-gpu'
-        ]
-      });
-
-      const page = await browser.newPage();
-      
-      // Carregar template HTML
-      const template = await fs.readFile(this.templatePath, 'utf8');
-      
-      // Substituir variáveis no template
-      const html = this.processarTemplate(template, {
-        orcamento,
-        paciente,
-        itens,
-        dataAtual: new Date().toLocaleDateString('pt-BR'),
-        logoUrl: process.env.LOGO_URL || '/images/logo.png'
-      });
-
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-      
-      // Configurações do PDF
-      const pdfBuffer = await page.pdf({
-        format: 'A4',
-        printBackground: true,
-        margin: {
-          top: '20mm',
-          right: '15mm',
-          bottom: '20mm',
-          left: '15mm'
-        },
-        displayHeaderFooter: true,
-        headerTemplate: '<div></div>',
-        footerTemplate: `
-          <div style="width: 100%; font-size: 10px; padding: 5px; text-align: center;">
-            <span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span>
-          </div>
-        `
-      });
-
-      // Upload para S3
-      const fileName = `orcamento_${orcamento.numero_orcamento}.pdf`;
-      const pdfUrl = await this.uploadPDF(fileName, pdfBuffer);
-
-      return pdfUrl;
-
-    } finally {
-      if (browser) {
-        await browser.close();
-      }
-    }
-  }
-
-  processarTemplate(template, dados) {
-    let html = template;
-    
-    // Substituir variáveis básicas
-    html = html.replace(/{{(\w+)}}/g, (match, key) => {
-      return dados[key] || '';
-    });
-
-    // Substituir dados do orçamento
-    html = html.replace(/{{orcamento\.(\w+)}}/g, (match, key) => {
-      return dados.orcamento[key] || '';
-    });
-
-    // Substituir dados do paciente
-    html = html.replace(/{{paciente\.(\w+)}}/g, (match, key) => {
-      return dados.paciente[key] || '';
-    });
-
-    // Processar lista de itens
-    const itensHtml = dados.itens.map((item, index) => `
-      <tr ${index % 2 === 0 ? 'class="even-row"' : ''}>
-        <td class="item-desc">${item.descricao}</td>
-        <td class="text-center">${item.quantidade}</td>
-        <td class="text-right">R$ ${item.valor_unitario.toFixed(2).replace('.', ',')}</td>
-        <td class="text-right font-weight-bold">R$ ${(item.quantidade * item.valor_unitario).toFixed(2).replace('.', ',')}</td>
-      </tr>
-    `).join('');
-
-    html = html.replace('{{itens}}', itensHtml);
-
-    // Calcular e substituir totais
-    const valorTotal = dados.itens.reduce((total, item) => total + (item.quantidade * item.valor_unitario), 0);
-    const valorDesconto = dados.orcamento.desconto || 0;
-    const valorFinal = valorTotal - valorDesconto;
-
-    html = html.replace('{{valor_total}}', `R$ ${valorTotal.toFixed(2).replace('.', ',')}`);
-    html = html.replace('{{valor_desconto}}', `R$ ${valorDesconto.toFixed(2).replace('.', ',')}`);
-    html = html.replace('{{valor_final}}', `R$ ${valorFinal.toFixed(2).replace('.', ',')}`);
-
-    return html;
-  }
-
-  async uploadPDF(fileName, pdfBuffer) {
-    try {
-      const params = {
-        Bucket: this.bucketName,
-        Key: `orcamentos/${fileName}`,
-        Body: pdfBuffer,
-        ContentType: 'application/pdf',
-        ACL: 'private', // Apenas acesso autorizado
-        Metadata: {
-          'created-at': new Date().toISOString(),
-          'type': 'orcamento'
-        }
-      };
-
-      const result = await this.s3.upload(params).promise();
-      
-      // Gerar URL assinada válida por 7 dias
-      const signedUrl = await this.s3.getSignedUrlPromise('getObject', {
-        Bucket: this.bucketName,
-        Key: `orcamentos/${fileName}`,
-        Expires: 60 * 60 * 24 * 7 // 7 dias
-      });
-
-      return signedUrl;
-
-    } catch (error) {
-      console.error('Erro no upload do PDF:', error);
-      
-      // Fallback: salvar localmente se S3 falhar
-      const localPath = path.join(process.cwd(), 'uploads', 'orcamentos', fileName);
-      await fs.mkdir(path.dirname(localPath), { recursive: true });
-      await fs.writeFile(localPath, pdfBuffer);
-      
-      return `/uploads/orcamentos/${fileName}`;
     }
   }
 
@@ -323,15 +262,7 @@ class OrcamentoService {
     return orcamento;
   }
 
-  async atualizarUrls(client, orcamentoId, pdfUrl, linkAceite, tokenAceite) {
-    const query = `
-      UPDATE orcamentos 
-      SET pdf_url = $1, link_aceite = $2, token_aceite = $3, updated_at = CURRENT_TIMESTAMP
-      WHERE id = $4
-    `;
-    
-    await client.query(query, [pdfUrl, linkAceite, tokenAceite, orcamentoId]);
-  }
+
 
   // Métodos adicionais para gestão de orçamentos
 
