@@ -2,6 +2,10 @@
 const { pool } = require('../config/database');
 const bcrypt = require('bcrypt');
 
+// NOTE: UUID COMPATIBILITY
+// This controller works with UUID primary keys. PostgreSQL parameterized queries
+// handle UUID types automatically. Validate UUIDs using validateUuidParam() middleware.
+
 class FuncionariosController {
     
     // Cadastrar novo funcionário

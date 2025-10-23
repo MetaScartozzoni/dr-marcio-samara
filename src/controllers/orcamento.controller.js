@@ -2,6 +2,11 @@
 const { validationResult } = require('express-validator');
 const Logger = require('../utils/logger');
 
+// NOTE: UUID COMPATIBILITY
+// This controller works with UUID primary keys. PostgreSQL parameterized queries
+// handle UUID types automatically. For explicit casting, use $1::uuid in SQL.
+// Validate UUIDs using validateUuidParam() middleware or isValidUuid() utility.
+
 class OrcamentoController {
     constructor(db) {
         this.db = db;
