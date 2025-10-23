@@ -81,32 +81,57 @@ class ProntuarioService {
 
       // Fetch fichas_atendimento (other consultation records for this patient)
       // In this schema, prontuarios ARE the consultation records (fichas)
-      const fichasQuery = `
-        SELECT 
-          p.id,
-          p.paciente_id as prontuario_id,
-          p.agendamento_id,
-          p.data_consulta,
-          p.anamnese,
-          p.exame_fisico,
-          p.diagnostico,
-          p.tratamento,
-          p.prescricao,
-          p.exames_solicitados,
-          p.observacoes,
-          p.criado_em,
-          p.atualizado_em
-        FROM prontuarios p
-        WHERE p.paciente_id = $1::uuid
-          AND p.id != $3::uuid
-          ${fichasCursor ? 'AND p.criado_em < $4::timestamp' : ''}
-        ORDER BY p.criado_em DESC
-        LIMIT $2
-      `;
-
-      const fichasParams = fichasCursor 
-        ? [prontuario.paciente_id, fichasLimit + 1, id, fichasCursor]
-        : [prontuario.paciente_id, fichasLimit + 1, id];
+      let fichasQuery;
+      let fichasParams;
+      
+      if (fichasCursor) {
+        fichasQuery = `
+          SELECT 
+            p.id,
+            p.paciente_id as prontuario_id,
+            p.agendamento_id,
+            p.data_consulta,
+            p.anamnese,
+            p.exame_fisico,
+            p.diagnostico,
+            p.tratamento,
+            p.prescricao,
+            p.exames_solicitados,
+            p.observacoes,
+            p.criado_em,
+            p.atualizado_em
+          FROM prontuarios p
+          WHERE p.paciente_id = $1::uuid
+            AND p.id != $2::uuid
+            AND p.criado_em < $3::timestamp
+          ORDER BY p.criado_em DESC
+          LIMIT $4
+        `;
+        fichasParams = [prontuario.paciente_id, id, fichasCursor, fichasLimit + 1];
+      } else {
+        fichasQuery = `
+          SELECT 
+            p.id,
+            p.paciente_id as prontuario_id,
+            p.agendamento_id,
+            p.data_consulta,
+            p.anamnese,
+            p.exame_fisico,
+            p.diagnostico,
+            p.tratamento,
+            p.prescricao,
+            p.exames_solicitados,
+            p.observacoes,
+            p.criado_em,
+            p.atualizado_em
+          FROM prontuarios p
+          WHERE p.paciente_id = $1::uuid
+            AND p.id != $2::uuid
+          ORDER BY p.criado_em DESC
+          LIMIT $3
+        `;
+        fichasParams = [prontuario.paciente_id, id, fichasLimit + 1];
+      }
 
       const fichasResult = await client.query(fichasQuery, fichasParams);
       const fichas = fichasResult.rows.slice(0, fichasLimit);
@@ -114,27 +139,47 @@ class ProntuarioService {
 
       // Fetch orcamentos - need to check if this table exists in the schema
       // Based on database.js, orcamentos table exists
-      const orcamentosQuery = `
-        SELECT 
-          o.id,
-          o.protocolo,
-          o.paciente_id,
-          o.valor_total,
-          o.descricao_procedimento,
-          o.status,
-          o.data_validade,
-          o.criado_em,
-          o.atualizado_em
-        FROM orcamentos o
-        WHERE o.paciente_id = (SELECT paciente_id FROM prontuarios WHERE id = $1::uuid)
-          ${orcamentosCursor ? 'AND o.criado_em < $3::timestamp' : ''}
-        ORDER BY o.criado_em DESC
-        LIMIT $2
-      `;
-
-      const orcamentosParams = orcamentosCursor
-        ? [id, orcamentosLimit + 1, orcamentosCursor]
-        : [id, orcamentosLimit + 1];
+      let orcamentosQuery;
+      let orcamentosParams;
+      
+      if (orcamentosCursor) {
+        orcamentosQuery = `
+          SELECT 
+            o.id,
+            o.protocolo,
+            o.paciente_id,
+            o.valor_total,
+            o.descricao_procedimento,
+            o.status,
+            o.data_validade,
+            o.criado_em,
+            o.atualizado_em
+          FROM orcamentos o
+          WHERE o.paciente_id = $1::uuid
+            AND o.criado_em < $2::timestamp
+          ORDER BY o.criado_em DESC
+          LIMIT $3
+        `;
+        orcamentosParams = [prontuario.paciente_id, orcamentosCursor, orcamentosLimit + 1];
+      } else {
+        orcamentosQuery = `
+          SELECT 
+            o.id,
+            o.protocolo,
+            o.paciente_id,
+            o.valor_total,
+            o.descricao_procedimento,
+            o.status,
+            o.data_validade,
+            o.criado_em,
+            o.atualizado_em
+          FROM orcamentos o
+          WHERE o.paciente_id = $1::uuid
+          ORDER BY o.criado_em DESC
+          LIMIT $2
+        `;
+        orcamentosParams = [prontuario.paciente_id, orcamentosLimit + 1];
+      }
 
       let orcamentos = [];
       let hasMoreOrcamentos = false;
@@ -148,29 +193,51 @@ class ProntuarioService {
       }
 
       // Fetch exames
-      const examesQuery = `
-        SELECT 
-          e.id,
-          e.prontuario_id,
-          e.nome_exame,
-          e.tipo_exame,
-          e.laboratorio,
-          e.data_solicitacao,
-          e.data_realizacao,
-          e.data_resultado,
-          e.status,
-          e.criado_em,
-          e.atualizado_em
-        FROM exames e
-        WHERE e.prontuario_id = $1::uuid
-          ${examesCursor ? 'AND e.criado_em < $3::timestamp' : ''}
-        ORDER BY e.criado_em DESC
-        LIMIT $2
-      `;
-
-      const examesParams = examesCursor
-        ? [id, examesLimit + 1, examesCursor]
-        : [id, examesLimit + 1];
+      let examesQuery;
+      let examesParams;
+      
+      if (examesCursor) {
+        examesQuery = `
+          SELECT 
+            e.id,
+            e.prontuario_id,
+            e.nome_exame,
+            e.tipo_exame,
+            e.laboratorio,
+            e.data_solicitacao,
+            e.data_realizacao,
+            e.data_resultado,
+            e.status,
+            e.criado_em,
+            e.atualizado_em
+          FROM exames e
+          WHERE e.prontuario_id = $1::uuid
+            AND e.criado_em < $2::timestamp
+          ORDER BY e.criado_em DESC
+          LIMIT $3
+        `;
+        examesParams = [id, examesCursor, examesLimit + 1];
+      } else {
+        examesQuery = `
+          SELECT 
+            e.id,
+            e.prontuario_id,
+            e.nome_exame,
+            e.tipo_exame,
+            e.laboratorio,
+            e.data_solicitacao,
+            e.data_realizacao,
+            e.data_resultado,
+            e.status,
+            e.criado_em,
+            e.atualizado_em
+          FROM exames e
+          WHERE e.prontuario_id = $1::uuid
+          ORDER BY e.criado_em DESC
+          LIMIT $2
+        `;
+        examesParams = [id, examesLimit + 1];
+      }
 
       let exames = [];
       let hasMoreExames = false;
@@ -184,27 +251,47 @@ class ProntuarioService {
       }
 
       // Fetch agendamentos
-      const agendamentosQuery = `
-        SELECT 
-          a.id,
-          a.paciente_id,
-          a.data_hora,
-          a.tipo_consulta,
-          a.status,
-          a.motivo_consulta,
-          a.observacoes,
-          a.criado_em,
-          a.atualizado_em
-        FROM agendamentos a
-        WHERE a.paciente_id = $1::uuid
-          ${agendamentosCursor ? 'AND a.criado_em < $3::timestamp' : ''}
-        ORDER BY a.criado_em DESC
-        LIMIT $2
-      `;
-
-      const agendamentosParams = agendamentosCursor
-        ? [prontuario.paciente_id, agendamentosLimit + 1, agendamentosCursor]
-        : [prontuario.paciente_id, agendamentosLimit + 1];
+      let agendamentosQuery;
+      let agendamentosParams;
+      
+      if (agendamentosCursor) {
+        agendamentosQuery = `
+          SELECT 
+            a.id,
+            a.paciente_id,
+            a.data_hora,
+            a.tipo_consulta,
+            a.status,
+            a.motivo_consulta,
+            a.observacoes,
+            a.criado_em,
+            a.atualizado_em
+          FROM agendamentos a
+          WHERE a.paciente_id = $1::uuid
+            AND a.criado_em < $2::timestamp
+          ORDER BY a.criado_em DESC
+          LIMIT $3
+        `;
+        agendamentosParams = [prontuario.paciente_id, agendamentosCursor, agendamentosLimit + 1];
+      } else {
+        agendamentosQuery = `
+          SELECT 
+            a.id,
+            a.paciente_id,
+            a.data_hora,
+            a.tipo_consulta,
+            a.status,
+            a.motivo_consulta,
+            a.observacoes,
+            a.criado_em,
+            a.atualizado_em
+          FROM agendamentos a
+          WHERE a.paciente_id = $1::uuid
+          ORDER BY a.criado_em DESC
+          LIMIT $2
+        `;
+        agendamentosParams = [prontuario.paciente_id, agendamentosLimit + 1];
+      }
 
       let agendamentos = [];
       let hasMoreAgendamentos = false;
