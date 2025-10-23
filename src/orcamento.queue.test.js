@@ -134,7 +134,7 @@ describe('Orcamento Queue', () => {
   describe('Integration with orcamento service', () => {
     
     test('should enqueue PDF generation via service', async () => {
-      const orcamentoService = require('../src/services/orcamento.service');
+      const orcamentoService = require('./services/orcamento.service');
       
       const result = await orcamentoService.enqueuePDFGeneration('test-orcamento-789');
       
