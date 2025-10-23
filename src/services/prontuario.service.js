@@ -79,12 +79,12 @@ class ProntuarioService {
       const pacienteResult = await client.query(pacienteQuery, [prontuario.paciente_id]);
       const paciente = pacienteResult.rows[0] || null;
 
-      // Fetch fichas_atendimento (actually, prontuarios are the consultation records)
-      // We'll fetch other consultation records for this patient
+      // Fetch fichas_atendimento (other consultation records for this patient)
+      // In this schema, prontuarios ARE the consultation records (fichas)
       const fichasQuery = `
         SELECT 
           p.id,
-          p.prontuario_id,
+          p.paciente_id as prontuario_id,
           p.agendamento_id,
           p.data_consulta,
           p.anamnese,
@@ -98,14 +98,15 @@ class ProntuarioService {
           p.atualizado_em
         FROM prontuarios p
         WHERE p.paciente_id = $1::uuid
-          ${fichasCursor ? 'AND p.criado_em < $3::timestamp' : ''}
+          AND p.id != $3::uuid
+          ${fichasCursor ? 'AND p.criado_em < $4::timestamp' : ''}
         ORDER BY p.criado_em DESC
         LIMIT $2
       `;
 
       const fichasParams = fichasCursor 
-        ? [prontuario.paciente_id, fichasLimit + 1, fichasCursor]
-        : [prontuario.paciente_id, fichasLimit + 1];
+        ? [prontuario.paciente_id, fichasLimit + 1, id, fichasCursor]
+        : [prontuario.paciente_id, fichasLimit + 1, id];
 
       const fichasResult = await client.query(fichasQuery, fichasParams);
       const fichas = fichasResult.rows.slice(0, fichasLimit);
