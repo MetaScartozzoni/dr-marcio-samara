@@ -5,6 +5,10 @@ const { validationResult } = require('express-validator');
 const emailService = require('../services/email.service');
 const smsService = require('../services/sms.service');
 
+// NOTE: UUID COMPATIBILITY
+// This controller works with UUID primary keys. PostgreSQL parameterized queries
+// handle UUID types automatically. Validate UUIDs using validateUuidParam() middleware.
+
 class AgendamentoController {
   constructor() {
     this.db = new Pool({

@@ -3,6 +3,14 @@ const bcrypt = require('bcrypt');
 const { validationResult } = require('express-validator');
 const Logger = require('../utils/logger');
 
+// NOTE: UUID COMPATIBILITY
+// This controller now works with UUID primary keys instead of SERIAL/integer.
+// PostgreSQL automatically handles UUID type conversion for parameterized queries ($1, $2, etc.),
+// so most queries work without modification. If you need explicit UUID casting, use:
+//   - WHERE id = $1::uuid (explicit cast in SQL)
+//   - Use validateUuidParam() middleware in routes to validate UUID format
+//   - Use isValidUuid() from src/utils/db.js to validate UUIDs in code
+
 class PacienteController {
     constructor(db) {
         this.db = db;

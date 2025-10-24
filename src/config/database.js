@@ -43,6 +43,10 @@ async function testConnection() {
 async function initializeDatabase() {
     const client = await pool.connect();
     try {
+        // Enable UUID extension first
+        console.log('🔧 Habilitando extensão uuid-ossp...');
+        await client.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
+        
         // Verificar se as tabelas existem
         const tables = await client.query(`
             SELECT table_name 
@@ -60,7 +64,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS funcionarios (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     nome VARCHAR(255) NOT NULL,
                     email VARCHAR(255) UNIQUE NOT NULL,
                     senha VARCHAR(255) NOT NULL,
@@ -80,7 +84,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS usuarios (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     user_id VARCHAR(50) UNIQUE NOT NULL,
                     email VARCHAR(255) UNIQUE NOT NULL,
                     full_name VARCHAR(255) NOT NULL,
@@ -111,7 +115,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS leads (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     protocolo VARCHAR(50) UNIQUE NOT NULL,
                     nome VARCHAR(255) NOT NULL,
                     telefone VARCHAR(20),
@@ -124,7 +128,7 @@ async function initializeDatabase() {
                     data_captura TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     convertido_em_paciente BOOLEAN DEFAULT false,
-                    paciente_id INTEGER,
+                    paciente_id UUID,
                     data_conversao TIMESTAMP,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -146,9 +150,9 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS agendamentos (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     protocolo VARCHAR(50) UNIQUE NOT NULL,
-                    paciente_id INTEGER,
+                    paciente_id UUID,
                     paciente_nome VARCHAR(255) NOT NULL,
                     paciente_email VARCHAR(255),
                     paciente_telefone VARCHAR(20),
@@ -164,7 +168,7 @@ async function initializeDatabase() {
                     confirmado BOOLEAN DEFAULT false,
                     lembrete_enviado BOOLEAN DEFAULT false,
                     prontuario_criado BOOLEAN DEFAULT false,
-                    prontuario_id INTEGER,
+                    prontuario_id UUID,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     created_by VARCHAR(100),
@@ -188,7 +192,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS calendario_config (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     dia_semana INTEGER NOT NULL CHECK (dia_semana BETWEEN 0 AND 6),
                     hora_inicio TIME NOT NULL,
                     hora_fim TIME NOT NULL,
@@ -223,7 +227,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS calendario_bloqueios (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     data_inicio TIMESTAMP NOT NULL,
                     data_fim TIMESTAMP NOT NULL,
                     motivo VARCHAR(255) NOT NULL,
@@ -246,11 +250,11 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS system_config (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     config_key VARCHAR(100) UNIQUE NOT NULL,
                     config_value TEXT,
                     is_locked BOOLEAN DEFAULT false,
-                    created_by INTEGER,
+                    created_by UUID,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             `);
@@ -262,10 +266,10 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS logs_sistema (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     tipo VARCHAR(50) NOT NULL,
                     descricao TEXT NOT NULL,
-                    usuario_id INTEGER,
+                    usuario_id UUID,
                     data_evento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     detalhes JSONB
                 )
@@ -278,7 +282,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS pacientes (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     nome VARCHAR(255) NOT NULL,
                     email VARCHAR(255) UNIQUE,
                     telefone VARCHAR(20),
@@ -293,7 +297,7 @@ async function initializeDatabase() {
                     proximo_retorno DATE,
                     observacoes TEXT,
                     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    cadastrado_por INTEGER,
+                    cadastrado_por UUID,
                     FOREIGN KEY (cadastrado_por) REFERENCES funcionarios(id)
                 )
             `);
@@ -305,8 +309,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS jornada_paciente (
-                    id SERIAL PRIMARY KEY,
-                    paciente_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    paciente_id UUID NOT NULL,
                     tipo_evento VARCHAR(50) NOT NULL,
                     data_prevista DATE NOT NULL,
                     data_realizada DATE,
@@ -315,7 +319,7 @@ async function initializeDatabase() {
                     notificacao_enviada BOOLEAN DEFAULT false,
                     data_notificacao TIMESTAMP,
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
                 )
@@ -328,8 +332,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS prontuarios (
-                    id SERIAL PRIMARY KEY,
-                    paciente_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    paciente_id UUID NOT NULL,
                     numero_prontuario VARCHAR(20) UNIQUE NOT NULL,
                     data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     ativo BOOLEAN DEFAULT true,
@@ -352,9 +356,9 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS orcamentos (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     protocolo VARCHAR(50) UNIQUE NOT NULL,
-                    paciente_id INTEGER NOT NULL,
+                    paciente_id UUID NOT NULL,
                     paciente_nome VARCHAR(255) NOT NULL,
                     paciente_email VARCHAR(255),
                     paciente_telefone VARCHAR(20),
@@ -379,8 +383,8 @@ async function initializeDatabase() {
                     -- Auditoria
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER NOT NULL,
-                    atualizado_por INTEGER,
+                    criado_por UUID NOT NULL,
+                    atualizado_por UUID,
                     
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id),
@@ -404,10 +408,10 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS fichas_atendimento (
-                    id SERIAL PRIMARY KEY,
-                    paciente_id INTEGER NOT NULL,
-                    prontuario_id INTEGER NOT NULL,
-                    agendamento_id INTEGER,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    paciente_id UUID NOT NULL,
+                    prontuario_id UUID NOT NULL,
+                    agendamento_id UUID,
                     
                     -- Dados básicos
                     peso DECIMAL(5,2),
@@ -440,13 +444,13 @@ async function initializeDatabase() {
                     finalizada BOOLEAN DEFAULT false,
                     data_finalizacao TIMESTAMP,
                     orcamento_gerado BOOLEAN DEFAULT false,
-                    orcamento_id INTEGER,
+                    orcamento_id UUID,
                     
                     -- Auditoria
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER NOT NULL,
-                    atualizado_por INTEGER,
+                    criado_por UUID NOT NULL,
+                    atualizado_por UUID,
                     
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
                     FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE CASCADE,
@@ -472,9 +476,9 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS notificacoes (
-                    id SERIAL PRIMARY KEY,
-                    paciente_id INTEGER,
-                    funcionario_id INTEGER,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    paciente_id UUID,
+                    funcionario_id UUID,
                     tipo VARCHAR(50) NOT NULL,
                     titulo VARCHAR(255) NOT NULL,
                     mensagem TEXT NOT NULL,
@@ -496,8 +500,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS logs_acesso (
-                    id SERIAL PRIMARY KEY,
-                    usuario_id INTEGER,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    usuario_id UUID,
                     ip_acesso INET,
                     user_agent TEXT,
                     url_acessada VARCHAR(500),
@@ -523,8 +527,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS consentimentos_lgpd (
-                    id SERIAL PRIMARY KEY,
-                    usuario_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    usuario_id UUID NOT NULL,
                     tipo_consentimento VARCHAR(100) NOT NULL,
                     finalidade TEXT NOT NULL,
                     data_consentimento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -549,13 +553,13 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS logs_exclusao_lgpd (
-                    id SERIAL PRIMARY KEY,
-                    usuario_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    usuario_id UUID NOT NULL,
                     email_original VARCHAR(255),
                     nome_original VARCHAR(255),
                     motivo TEXT NOT NULL,
                     data_exclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    executado_por INTEGER,
+                    executado_por UUID,
                     status VARCHAR(20) DEFAULT 'INICIADO',
                     dados_backup JSONB,
                     ip_solicitacao INET,
@@ -577,7 +581,7 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS procedimentos_config (
-                    id SERIAL PRIMARY KEY,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                     nome VARCHAR(255) NOT NULL UNIQUE,
                     tipo VARCHAR(50) NOT NULL, -- 'cirurgico' ou 'estetico'
                     area_corpo VARCHAR(100),
@@ -604,7 +608,7 @@ async function initializeDatabase() {
                     -- Auditoria
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
                 )
@@ -623,8 +627,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS procedimentos_adicionais (
-                    id SERIAL PRIMARY KEY,
-                    procedimento_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    procedimento_id UUID NOT NULL,
                     nome VARCHAR(255) NOT NULL,
                     tipo VARCHAR(50) NOT NULL, -- 'protese', 'laser', 'medicamento', 'material', 'outros'
                     valor DECIMAL(10,2) NOT NULL,
@@ -633,7 +637,7 @@ async function initializeDatabase() {
                     observacoes TEXT,
                     
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     
                     FOREIGN KEY (procedimento_id) REFERENCES procedimentos_config(id) ON DELETE CASCADE,
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
@@ -647,8 +651,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS procedimentos_acessorios (
-                    id SERIAL PRIMARY KEY,
-                    procedimento_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    procedimento_id UUID NOT NULL,
                     nome VARCHAR(255) NOT NULL,
                     sem_custo BOOLEAN DEFAULT true,
                     valor DECIMAL(10,2) DEFAULT 0,
@@ -657,7 +661,7 @@ async function initializeDatabase() {
                     observacoes TEXT,
                     
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     
                     FOREIGN KEY (procedimento_id) REFERENCES procedimentos_config(id) ON DELETE CASCADE,
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
@@ -671,9 +675,9 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS contas_receber (
-                    id SERIAL PRIMARY KEY,
-                    paciente_id INTEGER NOT NULL,
-                    orcamento_id INTEGER,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    paciente_id UUID NOT NULL,
+                    orcamento_id UUID,
                     procedimento VARCHAR(255),
                     valor_total DECIMAL(10,2) NOT NULL,
                     valor_pago DECIMAL(10,2) DEFAULT 0,
@@ -686,7 +690,7 @@ async function initializeDatabase() {
                     
                     observacoes TEXT,
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     
                     FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
                     FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id),
@@ -707,8 +711,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS contas_pagar (
-                    id SERIAL PRIMARY KEY,
-                    funcionario_id INTEGER,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    funcionario_id UUID,
                     tipo VARCHAR(50) NOT NULL, -- 'salario', 'comissao', 'bonus', 'reembolso', 'outros'
                     descricao VARCHAR(255) NOT NULL,
                     valor DECIMAL(10,2) NOT NULL,
@@ -718,11 +722,11 @@ async function initializeDatabase() {
                     forma_pagamento VARCHAR(50),
                     status VARCHAR(30) DEFAULT 'pendente', -- 'pendente', 'pago', 'atrasado', 'cancelado'
                     
-                    orcamento_relacionado INTEGER, -- Referência ao orçamento se for comissão
+                    orcamento_relacionado UUID, -- Referência ao orçamento se for comissão
                     observacoes TEXT,
                     
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     
                     FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id),
                     FOREIGN KEY (orcamento_relacionado) REFERENCES orcamentos(id),
@@ -744,8 +748,8 @@ async function initializeDatabase() {
             
             await client.query(`
                 CREATE TABLE IF NOT EXISTS pagamentos (
-                    id SERIAL PRIMARY KEY,
-                    orcamento_id INTEGER NOT NULL,
+                    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+                    orcamento_id UUID NOT NULL,
                     valor DECIMAL(10,2) NOT NULL,
                     tipo_pagamento VARCHAR(50) NOT NULL,
                     status VARCHAR(30) DEFAULT 'pendente',
@@ -758,7 +762,7 @@ async function initializeDatabase() {
                     observacoes TEXT,
                     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    criado_por INTEGER,
+                    criado_por UUID,
                     FOREIGN KEY (orcamento_id) REFERENCES orcamentos(id) ON DELETE CASCADE,
                     FOREIGN KEY (criado_por) REFERENCES funcionarios(id)
                 )
