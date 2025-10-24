@@ -2,21 +2,18 @@
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    
-    { "src": "/login", "dest": "/login.html" },
-    { "src": "/cadastro", "dest": "/cadastro.html" },
-    { "src": "/dashboard", "dest": "/dashboard.html" },
-    { "src": "/dashboard-admin", "dest": "/dashboard-admin.html" },
-    { "src": "/dashboard-funcionario", "dest": "/dashboard-funcionario.html" },
-    { "src": "/verificar-email", "dest": "/verificar-email.html" },
-    { "src": "/criar-senha", "dest": "/criar-senha.html" },
-    { "src": "/esqueci-senha", "dest": "/esqueci-senha.html" },
-    
-    { "src": "/app(.*)", "dest": "/src/index.jsx" },
-    { "src": "/", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/cadastro", "destination": "/cadastro.html" },
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/dashboard-admin", "destination": "/dashboard-admin.html" },
+    { "source": "/dashboard-funcionario", "destination": "/dashboard-funcionario.html" },
+    { "source": "/verificar-email", "destination": "/verificar-email.html" },
+    { "source": "/criar-senha", "destination": "/criar-senha.html" },
+    { "source": "/esqueci-senha", "destination": "/esqueci-senha.html" },
+    { "source": "/app/(.*)", "destination": "/src/index.jsx" },
+    { "source": "/", "destination": "/index.html" }
   ],
   "headers": [
     {
