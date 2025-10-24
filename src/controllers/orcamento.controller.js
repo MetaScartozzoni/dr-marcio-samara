@@ -1,6 +1,7 @@
 // src/controllers/orcamento.controller.js
 const { validationResult } = require('express-validator');
 const Logger = require('../utils/logger');
+const orcamentoService = require('../services/orcamento.service');
 
 class OrcamentoController {
     constructor(db) {
@@ -103,9 +104,17 @@ class OrcamentoController {
                 }
             );
 
-            res.status(201).json({
+            // Enqueue PDF generation job
+            try {
+                await orcamentoService.enqueuePDFGeneration(orcamento.id);
+            } catch (queueError) {
+                console.error('Failed to enqueue PDF generation:', queueError);
+                // Don't fail the request if queue fails
+            }
+
+            res.status(202).json({
                 success: true,
-                message: 'Orçamento criado com sucesso!',
+                message: 'Orçamento criado com sucesso! PDF será gerado em breve.',
                 data: {
                     orcamento: {
                         id: orcamento.id,
@@ -246,6 +255,48 @@ class OrcamentoController {
 
         const sequencial = result.rows[0].proximo_numero.toString().padStart(4, '0');
         return `ORC${ano}${mes}${sequencial}`;
+    }
+
+    // ==========================================
+    // GERAR PDF PARA ORÇAMENTO EXISTENTE
+    // ==========================================
+    async gerarPDF(req, res) {
+        try {
+            const { id } = req.params;
+
+            // Verificar se orçamento existe
+            const orcamentoResult = await this.db.query(
+                'SELECT * FROM orcamentos WHERE id = $1',
+                [id]
+            );
+
+            if (orcamentoResult.rows.length === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Orçamento não encontrado'
+                });
+            }
+
+            // Enqueue PDF generation job
+            await orcamentoService.enqueuePDFGeneration(id);
+
+            res.status(202).json({
+                success: true,
+                message: 'Geração de PDF enfileirada com sucesso',
+                data: {
+                    orcamento_id: id,
+                    status: 'processing'
+                }
+            });
+
+        } catch (error) {
+            console.error('Erro ao enfileirar geração de PDF:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Erro interno do servidor',
+                error: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
     }
 }
 

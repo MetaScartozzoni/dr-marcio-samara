@@ -40,6 +40,10 @@ tmp/
 temp/
 supabase/.temp/
 
+# Uploads (PDFs should not be committed)
+uploads/
+*.pdf
+
 # System files
 .DS_Store
 Thumbs.db
