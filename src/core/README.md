@@ -60,6 +60,95 @@ Este módulo utiliza e organiza os arquivos já existentes do projeto para garan
 - Elimine arquivos duplicados e desatualizados.
 - Atualize este README sempre que houver mudanças relevantes.
 
+## API Endpoints
+
+### Prontuários
+
+#### GET /api/prontuarios/:id
+Busca um prontuário completo por UUID com dados relacionados paginados.
+
+**Autenticação:** Requer token JWT via header `Authorization: Bearer <token>`
+
+**Parâmetros de URL:**
+- `id` (UUID): ID do prontuário
+
+**Query Parameters (opcionais):**
+- `fichas_limit` (number, 1-50): Número de fichas a retornar (padrão: 5)
+- `orcamentos_limit` (number, 1-50): Número de orçamentos a retornar (padrão: 5)
+- `exames_limit` (number, 1-50): Número de exames a retornar (padrão: 5)
+- `agendamentos_limit` (number, 1-50): Número de agendamentos a retornar (padrão: 5)
+- `show_sensitive` (boolean): Exibir dados sensíveis sem mascaramento (padrão: false)
+- `fichas_cursor` (timestamp): Cursor de paginação para fichas
+- `orcamentos_cursor` (timestamp): Cursor de paginação para orçamentos
+- `exames_cursor` (timestamp): Cursor de paginação para exames
+- `agendamentos_cursor` (timestamp): Cursor de paginação para agendamentos
+
+**Resposta de Sucesso (200):**
+```json
+{
+  "success": true,
+  "data": {
+    "prontuario": {
+      "id": "uuid",
+      "numeroProntuario": "string",
+      "dataCriacao": "timestamp",
+      "ativo": true,
+      "observacoes": "string"
+    },
+    "paciente": {
+      "id": "uuid",
+      "nomeCompleto": "string",
+      "cpf": "***.***.***-12" (mascarado por padrão),
+      "telefone": "***-***-1234" (mascarado por padrão),
+      "email": "ab***@example.com" (mascarado por padrão),
+      "dataNascimento": "date"
+    },
+    "fichasAtendimento": [...],
+    "orcamentos": [...],
+    "exames": [...],
+    "agendamentos": [...],
+    "pagination": {
+      "fichas": { "hasNext": false, "nextCursor": null },
+      "orcamentos": { "hasNext": false, "nextCursor": null },
+      "exames": { "hasNext": false, "nextCursor": null },
+      "agendamentos": { "hasNext": false, "nextCursor": null }
+    }
+  }
+}
+```
+
+**Exemplo de uso com cURL:**
+```bash
+# Buscar prontuário com dados padrão
+curl -X GET "https://your-domain.com/api/prontuarios/550e8400-e29b-41d4-a716-446655440000" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Buscar com paginação customizada
+curl -X GET "https://your-domain.com/api/prontuarios/550e8400-e29b-41d4-a716-446655440000?fichas_limit=10&show_sensitive=true" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Buscar próxima página de fichas
+curl -X GET "https://your-domain.com/api/prontuarios/550e8400-e29b-41d4-a716-446655440000?fichas_cursor=2024-10-23T10:00:00Z" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Códigos de Erro:**
+- `400`: ID inválido ou parâmetros incorretos
+- `401`: Token não fornecido, inválido ou expirado
+- `404`: Prontuário não encontrado
+- `500`: Erro interno do servidor
+
+**Segurança:**
+- Dados sensíveis do paciente (CPF, telefone, email) são mascarados por padrão
+- Use `show_sensitive=true` apenas quando necessário e com permissões adequadas
+- TODO: Implementar verificações de permissão específicas do Caderno Digital em PR subsequente
+
+**Notas de Implementação:**
+- Utiliza uuid-ossp para casting de UUIDs em queries SQL
+- Queries parametrizadas previnem SQL injection
+- Paginação baseada em cursores para melhor performance
+- Joins otimizados para evitar problemas N+1
+
 ## Observação
 Todos os arquivos essenciais já estão organizados nas pastas correspondentes. Consulte este README para referência rápida.
 
